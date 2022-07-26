@@ -45,14 +45,9 @@
 		arg matrix, limit = 0;
 		var pitches = matrix.flatten[1..];
 		if (limit > 0) {
-			pitches = pitches.sort;
-			pitches[..limit];
+			pitches.sort[..limit]
 		} {
-			pitches.sort;
+			pitches.sort
 		}
 	};
-
-	var matrix = get_matrix.value(60, 80);
-	display_matrix.value(matrix);
-	get_sorted_pitches.value(matrix);
 )
