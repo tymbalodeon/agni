@@ -137,4 +137,4 @@
 	post_sum_and_difference_tones.value(
 		modulator, carrier, modulator_harmonics, carrier_harmonics
 	);
-);
+)
