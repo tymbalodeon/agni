@@ -41,7 +41,7 @@
 		matrix.do(post_row)
 	};
 
-	var get_sorted_pitches = {
+	var sort_pitches = {
 		arg matrix, limit = 0;
 		var pitches = matrix.flatten[1..];
 		if (limit > 0) {
