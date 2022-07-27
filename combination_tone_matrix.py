@@ -38,12 +38,8 @@ def sort_frequencies(
     return frequencies[:limit]
 
 
-def get_named_pitch(frequency: float) -> NamedPitch:
-    return NamedPitch.from_hertz(frequency)
-
-
 def get_note(frequency: float) -> Note:
-    pitch = get_named_pitch(frequency)
+    pitch = NamedPitch.from_hertz(frequency)
     duration = Duration(1, 4)
     return Note(pitch, duration)
 
