@@ -1,6 +1,15 @@
 from typing import Optional
 
-from abjad import Chord, Duration, NamedPitch, Note, Voice, show
+from abjad import (
+    Chord,
+    Duration,
+    LilyPondFile,
+    NamedPitch,
+    Note,
+    Voice,
+    show,
+    Container,
+)
 
 
 def get_pitch(multiplier: int, bass_multiple: float, melody: float) -> float:
@@ -50,13 +59,29 @@ def get_pitch_names(notes: list[Note]) -> str:
     return f"<{pitch_names}>"
 
 
+def show_with_preamble(preamble: str, container) -> None:
+    lilypond_file = LilyPondFile([preamble, container])
+    show(lilypond_file)
+
+
 def notate_sorted_matrix(matrix: list[list[float]], as_chord=False) -> None:
     sorted_frequencies = sort_frequencies(matrix)
     notes = [get_note(frequency) for frequency in sorted_frequencies]
+    preamble = r"""
+                    \layout {
+                        \context {
+                            \Score
+                            \override BarLine.stencil = ##f
+                            \override SystemStartBar.stencil = ##f
+                            \override Stem.stencil = ##f
+                            \override TimeSignature.transparent = ##t
+                        }
+                    }
+                """
     if as_chord:
         pitch_names = get_pitch_names(notes)
         chord = Chord(pitch_names)
-        show(chord)
+        show_with_preamble(preamble, chord)
     else:
         voice = Voice(notes)
-        show(voice)
+        show_with_preamble(preamble, voice)
