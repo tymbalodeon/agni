@@ -27,7 +27,7 @@ def display_matrix(matrix: list[list[float]]) -> None:
         print(row)
 
 
-def get_sorted_frequencies(
+def sort_frequencies(
     matrix: list[list[float]], limit: Optional[int] = None
 ) -> list[float]:
     frequencies = [frequency for row in matrix for frequency in row]
@@ -45,7 +45,7 @@ def get_note(frequency: float) -> Note:
 
 
 def notate_sorted_matrix(matrix: list[list[float]]) -> None:
-    sorted_frequencies = get_sorted_frequencies(matrix)
+    sorted_frequencies = sort_frequencies(matrix)
     notes = [get_note(frequency) for frequency in sorted_frequencies]
     notes = Container(notes)
     show(notes)
