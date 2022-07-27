@@ -1,6 +1,6 @@
 from typing import Optional
 
-from abjad import Container, Duration, NamedPitch, Note, show
+from abjad import Chord, Duration, NamedPitch, Note, Voice, show
 
 
 def get_pitch(multiplier: int, bass_multiple: float, melody: float) -> float:
@@ -38,14 +38,29 @@ def sort_frequencies(
     return frequencies[:limit]
 
 
+def get_named_pitch(frequency: float) -> NamedPitch:
+    return NamedPitch.from_hertz(frequency)
+
+
 def get_note(frequency: float) -> Note:
+    pitch = get_named_pitch(frequency)
     duration = Duration(1, 4)
-    pitch = NamedPitch.from_hertz(frequency)
     return Note(pitch, duration)
 
 
-def notate_sorted_matrix(matrix: list[list[float]]) -> None:
+def get_pitch_names(notes: list[Note]) -> str:
+    pitch_names = (note.written_pitch.name for note in notes if note.written_pitch)
+    pitch_names = " ".join(pitch_names)
+    return f"<{pitch_names}>"
+
+
+def notate_sorted_matrix(matrix: list[list[float]], as_chord=False) -> None:
     sorted_frequencies = sort_frequencies(matrix)
     notes = [get_note(frequency) for frequency in sorted_frequencies]
-    notes = Container(notes)
-    show(notes)
+    if as_chord:
+        pitch_names = get_pitch_names(notes)
+        chord = Chord(pitch_names)
+        show(chord)
+    else:
+        voice = Voice(notes)
+        show(voice)
