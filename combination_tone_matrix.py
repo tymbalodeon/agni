@@ -76,7 +76,7 @@ def show_with_preamble(preamble: str, container: Component) -> None:
     show(lilypond_file)
 
 
-def notate_sorted_matrix(matrix: list[list[float]], as_chord=False) -> None:
+def notate_matrix(matrix: list[list[float]], as_chord=False) -> None:
     frequencies = sort_frequencies(matrix)
     notes = [get_note(frequency) for frequency in frequencies]
     preamble = r"""

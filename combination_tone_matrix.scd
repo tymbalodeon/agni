@@ -51,7 +51,7 @@
 		}
 	};
 
-	var play_frequencies = {
+	var play_matrix = {
 		arg matrix, as_chord = false;
 		var frequencies = sort_frequencies.value(matrix);
 		var amplitude = 0.1;
