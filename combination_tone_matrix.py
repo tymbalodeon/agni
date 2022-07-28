@@ -7,8 +7,8 @@ from abjad import (
     NamedPitch,
     Note,
     Voice,
+    Component,
     show,
-    Container,
 )
 
 
@@ -28,7 +28,9 @@ def get_matrix(bass: str, melody: str, count=5) -> list[list[float]]:
     bass_pitch = NamedPitch(bass).hertz
     melody_pitch = NamedPitch(melody).hertz
     rows = range(count)
-    return [get_melody_column(row, rows, bass_pitch, melody_pitch) for row in rows]
+    return [
+        get_melody_column(row, rows, bass_pitch, melody_pitch) for row in rows
+    ]
 
 
 def display_matrix(matrix: list[list[float]]) -> None:
@@ -53,13 +55,20 @@ def get_note(frequency: float) -> Note:
     return Note(pitch, duration)
 
 
+def get_note_name(note: Note) -> Optional[str]:
+    if not note.written_pitch:
+        return None
+    return note.written_pitch.name
+
+
 def get_pitch_names(notes: list[Note]) -> str:
-    pitch_names = (note.written_pitch.name for note in notes if note.written_pitch)
+    pitch_names = (get_note_name(note) for note in notes)
+    pitch_names = (note for note in pitch_names if note)
     pitch_names = " ".join(pitch_names)
     return f"<{pitch_names}>"
 
 
-def show_with_preamble(preamble: str, container) -> None:
+def show_with_preamble(preamble: str, container: Component) -> None:
     lilypond_file = LilyPondFile([preamble, container])
     show(lilypond_file)
 
