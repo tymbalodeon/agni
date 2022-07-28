@@ -74,8 +74,8 @@ def show_with_preamble(preamble: str, container: Component) -> None:
 
 
 def notate_sorted_matrix(matrix: list[list[float]], as_chord=False) -> None:
-    sorted_frequencies = sort_frequencies(matrix)
-    notes = [get_note(frequency) for frequency in sorted_frequencies]
+    frequencies = sort_frequencies(matrix)
+    notes = [get_note(frequency) for frequency in frequencies]
     preamble = r"""
                     \layout {
                         \context {
