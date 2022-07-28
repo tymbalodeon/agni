@@ -43,11 +43,11 @@
 
 	var sort_frequencies = {
 		arg matrix, limit = 0;
-		var frequencies = matrix.flatten[1..];
+		var frequencies = matrix.flatten[1..].sort;
 		if (limit > 0) {
-			frequencies.sort[..limit]
+			frequencies[..limit]
 		} {
-			frequencies.sort
+			frequencies
 		}
 	};
 
