@@ -1,5 +1,5 @@
 (
-	var get_pitch = {
+	var get_frequency = {
 		arg multiplier, bass_multiple, melody;
 		var melody_multiple = melody * multiplier;
 		bass_multiple + melody_multiple
@@ -9,12 +9,12 @@
 		arg multiplier, columns, bass, melody;
 		var bass_multiple = bass * multiplier;
 		var melody_column = Array.newClear(columns);
-		var add_pitch = {
+		var add_frequency = {
 			arg column;
-			var pitch = get_pitch.value(column, bass_multiple, melody);
-			melody_column.put(column, pitch);
+			var frequency = get_frequency.value(column, bass_multiple, melody);
+			melody_column.put(column, frequency);
 		};
-		columns.do(add_pitch);
+		columns.do(add_frequency);
 		melody_column
 	};
 
@@ -41,13 +41,28 @@
 		matrix.do(post_row)
 	};
 
-	var sort_pitches = {
+	var sort_frequencies = {
 		arg matrix, limit = 0;
-		var pitches = matrix.flatten[1..];
+		var frequencies = matrix.flatten[1..];
 		if (limit > 0) {
-			pitches.sort[..limit]
+			frequencies.sort[..limit]
 		} {
-			pitches.sort
+			frequencies.sort
 		}
+	};
+
+	var play_frequencies = {
+		arg matrix, as_chord = false;
+		var frequencies = sort_frequencies.value(matrix);
+		var amplitude = 0.1;
+		if (as_chord) {
+			amplitude = amplitude / frequencies.size;
+			frequencies = [frequencies];
+		};
+		Pbind(
+			\freq, Pseq(frequencies),
+			\dur, 0.2,
+			\amp, amplitude
+		).play;
 	};
 )

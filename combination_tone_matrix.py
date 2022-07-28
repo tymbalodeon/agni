@@ -12,7 +12,9 @@ from abjad import (
 )
 
 
-def get_pitch(multiplier: int, bass_multiple: float, melody: float) -> float:
+def get_frequency(
+    multiplier: int, bass_multiple: float, melody: float
+) -> float:
     melody_multiple = melody * multiplier
     return bass_multiple + melody_multiple
 
@@ -21,15 +23,16 @@ def get_melody_column(
     multiplier: int, columns: range, bass: float, melody: float
 ) -> list[float]:
     bass_multiple = bass * multiplier
-    return [get_pitch(column, bass_multiple, melody) for column in columns]
+    return [get_frequency(column, bass_multiple, melody) for column in columns]
 
 
 def get_matrix(bass: str, melody: str, count=5) -> list[list[float]]:
-    bass_pitch = NamedPitch(bass).hertz
-    melody_pitch = NamedPitch(melody).hertz
+    bass_frequency = NamedPitch(bass).hertz
+    melody_frequency = NamedPitch(melody).hertz
     rows = range(count)
     return [
-        get_melody_column(row, rows, bass_pitch, melody_pitch) for row in rows
+        get_melody_column(row, rows, bass_frequency, melody_frequency)
+        for row in rows
     ]
 
 
