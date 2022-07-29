@@ -14,7 +14,7 @@ from abjad import (
 Matrix = list[list[float]]
 
 
-def get_frequency(
+def get_sum_frequency(
     multiplier: int, bass_multiple: float, melody: float
 ) -> float:
     melody_multiple = melody * multiplier
@@ -25,12 +25,20 @@ def get_melody_column(
     multiplier: int, columns: range, bass: float, melody: float
 ) -> list[float]:
     bass_multiple = bass * multiplier
-    return [get_frequency(column, bass_multiple, melody) for column in columns]
+    return [
+        get_sum_frequency(column, bass_multiple, melody) for column in columns
+    ]
 
 
-def get_matrix(bass: str, melody: str, count=5) -> Matrix:
-    bass_frequency = NamedPitch(bass).hertz
-    melody_frequency = NamedPitch(melody).hertz
+def get_frequency(pitch: str | float) -> float:
+    if not isinstance(pitch, str):
+        return pitch
+    return NamedPitch(pitch).hertz
+
+
+def get_matrix(bass: str | float, melody: str | float, count=5) -> Matrix:
+    bass_frequency = get_frequency(bass)
+    melody_frequency = get_frequency(melody)
     rows = range(count)
     return [
         get_melody_column(row, rows, bass_frequency, melody_frequency)
@@ -86,10 +94,10 @@ def notate_matrix(matrix: Matrix, as_chord=False):
                     \layout {
                         \context {
                             \Score
-                            \override BarLine.stencil = ##f
                             \override SystemStartBar.stencil = ##f
-                            \override Stem.stencil = ##f
                             \override TimeSignature.stencil = ##f
+                            \override BarLine.stencil = ##f
+                            \override Stem.stencil = ##f
                         }
                     }
                 """
