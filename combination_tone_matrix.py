@@ -11,6 +11,8 @@ from abjad import (
     show,
 )
 
+Matrix = list[list[float]]
+
 
 def get_frequency(
     multiplier: int, bass_multiple: float, melody: float
@@ -26,7 +28,7 @@ def get_melody_column(
     return [get_frequency(column, bass_multiple, melody) for column in columns]
 
 
-def get_matrix(bass: str, melody: str, count=5) -> list[list[float]]:
+def get_matrix(bass: str, melody: str, count=5) -> Matrix:
     bass_frequency = NamedPitch(bass).hertz
     melody_frequency = NamedPitch(melody).hertz
     rows = range(count)
@@ -36,13 +38,13 @@ def get_matrix(bass: str, melody: str, count=5) -> list[list[float]]:
     ]
 
 
-def display_matrix(matrix: list[list[float]]):
+def display_matrix(matrix: Matrix):
     for row in matrix:
         print(row)
 
 
 def sort_frequencies(
-    matrix: list[list[float]], limit: Optional[int] = None
+    matrix: Matrix, limit: Optional[int] = None
 ) -> list[float]:
     frequencies = [frequency for row in matrix for frequency in row]
     frequencies.sort()
@@ -76,7 +78,7 @@ def show_with_preamble(preamble: str, container: Component):
     show(lilypond_file)
 
 
-def notate_matrix(matrix: list[list[float]], as_chord=False):
+def notate_matrix(matrix: Matrix, as_chord=False):
     frequencies = sort_frequencies(matrix)
     notes = [get_note(frequency) for frequency in frequencies]
     preamble = r"""
@@ -98,7 +100,3 @@ def notate_matrix(matrix: list[list[float]], as_chord=False):
     else:
         voice = Voice(notes)
         show_with_preamble(preamble, voice)
-
-
-matrix = get_matrix("g,", "a'")
-notate_matrix(matrix)
