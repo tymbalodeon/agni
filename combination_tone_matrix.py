@@ -2,12 +2,12 @@ from typing import Optional
 
 from abjad import (
     Chord,
+    Component,
     Duration,
     LilyPondFile,
     NamedPitch,
     Note,
     Voice,
-    Component,
     show,
 )
 
@@ -36,7 +36,7 @@ def get_matrix(bass: str, melody: str, count=5) -> list[list[float]]:
     ]
 
 
-def display_matrix(matrix: list[list[float]]) -> None:
+def display_matrix(matrix: list[list[float]]):
     for row in matrix:
         print(row)
 
@@ -71,22 +71,23 @@ def get_pitch_names(notes: list[Note]) -> str:
     return f"<{pitch_names}>"
 
 
-def show_with_preamble(preamble: str, container: Component) -> None:
+def show_with_preamble(preamble: str, container: Component):
     lilypond_file = LilyPondFile([preamble, container])
     show(lilypond_file)
 
 
-def notate_matrix(matrix: list[list[float]], as_chord=False) -> None:
+def notate_matrix(matrix: list[list[float]], as_chord=False):
     frequencies = sort_frequencies(matrix)
     notes = [get_note(frequency) for frequency in frequencies]
     preamble = r"""
+                    \header { tagline = ##f }
                     \layout {
                         \context {
                             \Score
                             \override BarLine.stencil = ##f
                             \override SystemStartBar.stencil = ##f
                             \override Stem.stencil = ##f
-                            \override TimeSignature.transparent = ##t
+                            \override TimeSignature.stencil = ##f
                         }
                     }
                 """
@@ -97,3 +98,7 @@ def notate_matrix(matrix: list[list[float]], as_chord=False) -> None:
     else:
         voice = Voice(notes)
         show_with_preamble(preamble, voice)
+
+
+matrix = get_matrix("g,", "a'")
+notate_matrix(matrix)
