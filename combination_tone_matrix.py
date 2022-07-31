@@ -7,11 +7,16 @@ from abjad import (
     LilyPondFile,
     NamedPitch,
     Note,
+    Staff,
+    StaffGroup,
     Voice,
     show,
 )
+from abjad.get import pitches
+from abjad.select import leaves
 
 Matrix = list[list[float]]
+Pitch = str | float
 
 
 def get_sum_frequency(
@@ -30,13 +35,13 @@ def get_melody_column(
     ]
 
 
-def get_frequency(pitch: str | float) -> float:
+def get_frequency(pitch: Pitch) -> float:
     if not isinstance(pitch, str):
         return pitch
     return NamedPitch(pitch).hertz
 
 
-def get_matrix(bass: str | float, melody: str | float, count=5) -> Matrix:
+def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
     bass_frequency = get_frequency(bass)
     melody_frequency = get_frequency(melody)
     rows = range(count)
@@ -108,3 +113,42 @@ def notate_matrix(matrix: Matrix, as_chord=False):
     else:
         voice = Voice(notes)
         show_with_preamble(preamble, voice)
+
+
+def get_pitch(note):
+    return next(iter(pitches(note)))
+
+
+def get_pitch_and_duration(staff):
+    notes = leaves(staff)
+    return [(get_pitch(note), note.written_duration) for note in notes]
+
+
+def get_pitches(current):
+    return [note.written_pitch for note in current.values()]
+
+
+def get_simultaneous_pitches():
+    staff_one = Staff("c,1 d", name="bass")
+    staff_two = Staff("e'2 ef g a", name="melody")
+    staff_group = StaffGroup([staff_one, staff_two])
+    staves = {staff.name: staff for staff in staff_group.components}
+    index = 0
+    pitches = []
+    simultaneity: dict[str, Note] = {
+        key: value[index] for key, value in staves.items()
+    }
+    pitches.append(get_pitches(simultaneity))
+    lowest = None
+    staff_name = ""
+    for staff, note in simultaneity.items():
+        duration = note.written_duration
+        if not lowest or duration < lowest:
+            lowest = duration
+            staff_name = staff
+    simultaneity[staff_name] = staves[staff_name][index + 1]
+    pitches.append(get_pitches(simultaneity))
+    print(pitches)
+
+
+get_simultaneous_pitches()
