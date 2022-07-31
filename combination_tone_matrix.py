@@ -125,11 +125,11 @@ def get_pitch_and_duration(staff):
 
 
 def get_pitches(simultaneity):
-    return [note["current"].written_pitch for note in simultaneity.values()]
-
-
-def get_simultaneity(staves, index):
-    return {key: value[index] for key, value in staves.items()}
+    return [
+        note["current"].written_pitch
+        for note in simultaneity.values()
+        if isinstance(note["current"], Note)
+    ]
 
 
 def is_end_of_passage(staff, index):
@@ -143,59 +143,96 @@ def is_end_of_passage(staff, index):
         return False
 
 
+def make_first_time(simultaneity):
+    for value in simultaneity.values():
+        value["first_time"] = True
+    return simultaneity
+
+
 def get_shortest_note(simultaneity):
     durations = [
         note["current"].written_duration for note in simultaneity.values()
     ]
     shortest = min(durations)
     small = [
-        simultaneity[key]
+        {key: simultaneity[key]}
         for key, note in simultaneity.items()
-        if note["current"].written_duration == shortest
+        if note["current"] and note["current"].written_duration == shortest
     ]
+    small = [get_next_simultaneity(note) for note in small]
+    small = [make_first_time(simultaneity) for simultaneity in small]
+    for note in small:
+        key = next(iter(note.keys()), None)
+        simultaneity[key] = note[key]
     other = [
-        simultaneity[key]
+        {key: simultaneity[key]}
         for key, note in simultaneity.items()
-        if note["current"].written_duration != shortest
+        if note["current"] and note["current"].written_duration != shortest
     ]
-    return small, other
+    other = [shorten_notes(note, float(shortest)) for note in other]
+    for note in other:
+        key = next(iter(note.keys()), None)
+        simultaneity[key] = note[key]
+    return simultaneity
+
+
+def get_next(thing):
+    thing = next(thing, None)
+    print("THING: ", thing)
+    return thing
+
+
+def get_next_simultaneity(simultaneity):
+    return {
+        key: {
+            "current": get_next(simultaneity[key]["generator"]),
+            "generator": simultaneity[key]["generator"],
+            "first_time": True,
+        }
+        for key in simultaneity.keys()
+    }
+
+
+def shorten(note: Note, difference: float):
+    new_duration = Duration.from_float(
+        float(note.written_duration) - difference
+    )
+    new_note = Note(note)
+    new_note.written_duration = new_duration
+    return new_note
+
+
+def shorten_notes(simultaneity, difference):
+    return {
+        key: {
+            "current": shorten(simultaneity[key]["current"], difference),
+            "generator": simultaneity[key]["generator"],
+            "first_time": False,
+        }
+        for key in simultaneity.keys()
+    }
 
 
 def get_simultaneous_pitches(staff_group: StaffGroup):
     staves = {staff.name: staff for staff in staff_group.components}
     simultaneity: dict = {
-        key: {"current": None, "generator": iter(value)}
+        key: {"current": None, "generator": iter(value), "first_time": True}
         for key, value in staves.items()
     }
-    simultaneity = {
-        key: {
-            "current": next(simultaneity[key]["generator"], None),
-            "generator": simultaneity[key]["generator"],
-        }
-        for key in simultaneity.keys()
-    }
     pitches = []
-    pitches.append(get_pitches(simultaneity))
-    small, other = get_shortest_note(simultaneity)
-    print(small, other)
+    simultaneity = get_next_simultaneity(simultaneity)
+    new_pitches = get_pitches(simultaneity)
+    pitches.append(new_pitches)
+    simultaneity = get_shortest_note(simultaneity)
+    new_pitches = get_pitches(simultaneity)
+    pitches.append(new_pitches)
+    simultaneity = get_shortest_note(simultaneity)
+    new_pitches = get_pitches(simultaneity)
+    pitches.append(new_pitches)
+    # simultaneity = get_shortest_note(simultaneity)
+    # new_pitches = get_pitches(simultaneity)
+    # pitches.append(new_pitches)
     return
-    index = 0
-    lowest = None
-    staff_name = ""
-    end_of_passage = is_end_of_passage(staff_name, index)
-    while not end_of_passage:
-        for staff, note in simultaneity.items():
-            duration = note.written_duration
-            if not lowest or duration < lowest:
-                lowest = duration
-                staff_name = staff
-        simultaneity[staff_name] = staves[staff_name][index + 1]
-        pitches.append(get_pitches(simultaneity))
-        end_of_passage = is_end_of_passage(
-            get_simultaneity(staves, index), index
-        )
-        index += 1
-    print(pitches)
 
 
 staff_one = Staff("c,2 r4", name="bass")
