@@ -81,7 +81,7 @@ def get_note_name(note: Note) -> Optional[str]:
     return note.written_pitch.name
 
 
-def get_pitch_names(notes: list[Note]) -> str:
+def get_note_names(notes: list[Note]) -> str:
     pitch_names = (get_note_name(note) for note in notes)
     pitch_names = (note for note in pitch_names if note)
     pitch_names = " ".join(pitch_names)
@@ -109,7 +109,7 @@ def notate_matrix(matrix: Matrix, as_chord=False):
                     }
                 """
     if as_chord:
-        pitch_names = get_pitch_names(notes)
+        pitch_names = get_note_names(notes)
         chord = Chord(pitch_names)
         voice = Voice(chord)
         show_with_preamble(preamble, voice)
@@ -217,8 +217,34 @@ def get_next_pitches(voices: list[NewVoice]) -> list[NamedPitch]:
     return get_current_pitches(voices)
 
 
+def get_pitch_names(pitches: list[NamedPitch]) -> list[str]:
+    return [pitch.name for pitch in pitches]
+
+
+def are_same_pitches(
+    new_pitches: list[NamedPitch], old_pitches: list[list[NamedPitch]]
+) -> bool:
+    new_pitch_names = get_pitch_names(new_pitches)
+    old_pitch_names = get_pitch_names(old_pitches[-1])
+    return new_pitch_names == old_pitch_names
+
+
+def should_add_pitches(
+    show_adjacent_duplicates: bool,
+    new_pitches: list[NamedPitch],
+    old_pitches: list[list[NamedPitch]],
+) -> bool:
+    if not new_pitches:
+        return False
+    if show_adjacent_duplicates:
+        return True
+    is_duplicate = are_same_pitches(new_pitches, old_pitches)
+    should_add = not is_duplicate
+    return should_add
+
+
 def get_simultaneous_pitches(
-    staff_group: StaffGroup,
+    staff_group: StaffGroup, show_adjacent_duplicates=False
 ) -> list[list[NamedPitch]]:
     staves = {staff.name: staff for staff in staff_group.components}
     voices = [NewVoice(name, notes) for name, notes in staves.items()]
@@ -226,7 +252,10 @@ def get_simultaneous_pitches(
     end_of_passage = is_end_of_passage(voices)
     while not end_of_passage:
         new_pitches = get_next_pitches(voices)
-        if new_pitches:
+        should_add = should_add_pitches(
+            show_adjacent_duplicates, new_pitches, pitches
+        )
+        if should_add:
             pitches.append(new_pitches)
         end_of_passage = is_end_of_passage(voices)
     return pitches
