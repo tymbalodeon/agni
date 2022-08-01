@@ -15,7 +15,7 @@ from abjad import (
 )
 
 Matrix = list[list[float]]
-Pitch = str | float
+Pitch = str | float | NamedPitch
 
 
 def get_sum_frequency(
@@ -35,9 +35,12 @@ def get_melody_column(
 
 
 def get_frequency(pitch: Pitch) -> float:
-    if not isinstance(pitch, str):
+    if isinstance(pitch, float):
         return pitch
-    return NamedPitch(pitch).hertz
+    elif isinstance(pitch, str):
+        return NamedPitch(pitch).hertz
+    else:
+        return pitch.hertz
 
 
 def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
@@ -108,7 +111,8 @@ def notate_matrix(matrix: Matrix, as_chord=False):
     if as_chord:
         pitch_names = get_pitch_names(notes)
         chord = Chord(pitch_names)
-        show_with_preamble(preamble, chord)
+        voice = Voice(chord)
+        show_with_preamble(preamble, voice)
     else:
         voice = Voice(notes)
         show_with_preamble(preamble, voice)
@@ -160,6 +164,11 @@ class NewVoice:
         return current_duration == duration
 
 
+def is_end_of_passage(voices: list[NewVoice]) -> bool:
+    current_notes = [voice.current_note for voice in voices]
+    return not any(current_notes)
+
+
 def remove_none_values(collection: list) -> list:
     return [item for item in collection if item]
 
@@ -208,12 +217,9 @@ def get_next_pitches(voices: list[NewVoice]) -> list[Optional[NamedPitch]]:
     return get_current_pitches(voices)
 
 
-def is_end_of_passage(voices: list[NewVoice]) -> bool:
-    current_notes = [voice.current_note for voice in voices]
-    return not any(current_notes)
-
-
-def get_simultaneous_pitches(staff_group: StaffGroup) -> list[NamedPitch]:
+def get_simultaneous_pitches(
+    staff_group: StaffGroup,
+) -> list[list[NamedPitch]]:
     staves = {staff.name: staff for staff in staff_group.components}
     voices = [NewVoice(name, notes) for name, notes in staves.items()]
     pitches = list()
@@ -226,8 +232,21 @@ def get_simultaneous_pitches(staff_group: StaffGroup) -> list[NamedPitch]:
     return pitches
 
 
-staff_one = Staff("c,2 r4", name="bass")
-staff_two = Staff("e'4 ef2", name="melody")
+def get_passage_matrices(passage: StaffGroup) -> list[Matrix]:
+    matrices = list()
+    simultaneous_pitches = get_simultaneous_pitches(passage)
+    for pitches in simultaneous_pitches:
+        if not len(pitches) == 2:
+            continue
+        bass, melody = pitches
+        matrix = get_matrix(bass, melody)
+        matrices.append(matrix)
+    return matrices
+
+
+staff_one = Staff("c,2 r4 bf,", name="bass")
+staff_two = Staff("e'4 ef2 a4", name="melody")
 staff_group = StaffGroup([staff_one, staff_two])
-verticalities = get_simultaneous_pitches(staff_group)
-print(verticalities)
+matrices = get_passage_matrices(staff_group)
+for matrix in matrices:
+    notate_matrix(matrix, as_chord=True)
