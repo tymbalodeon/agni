@@ -233,8 +233,8 @@ def get_simultaneous_pitches(
 
 
 def get_passage_matrices(passage: StaffGroup) -> list[Matrix]:
-    matrices = list()
     simultaneous_pitches = get_simultaneous_pitches(passage)
+    matrices = list()
     for pitches in simultaneous_pitches:
         if not len(pitches) == 2:
             continue
