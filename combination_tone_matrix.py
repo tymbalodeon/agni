@@ -173,7 +173,7 @@ def remove_none_values(collection: list) -> list:
     return [item for item in collection if item]
 
 
-def get_current_pitches(voices: list[NewVoice]) -> list[Optional[NamedPitch]]:
+def get_current_pitches(voices: list[NewVoice]) -> list[NamedPitch]:
     current_pitches = [voice.get_current_pitch() for voice in voices]
     return remove_none_values(current_pitches)
 
@@ -202,7 +202,7 @@ def get_voices_with_longer_durations(
     ]
 
 
-def get_next_pitches(voices: list[NewVoice]) -> list[Optional[NamedPitch]]:
+def get_next_pitches(voices: list[NewVoice]) -> list[NamedPitch]:
     shortest_duration = get_smallest_rhythmic_value(voices)
     voices_matching_shortest_duration = get_voices_matching_shortest_duration(
         voices, shortest_duration
@@ -222,7 +222,7 @@ def get_simultaneous_pitches(
 ) -> list[list[NamedPitch]]:
     staves = {staff.name: staff for staff in staff_group.components}
     voices = [NewVoice(name, notes) for name, notes in staves.items()]
-    pitches = list()
+    pitches = [get_current_pitches(voices)]
     end_of_passage = is_end_of_passage(voices)
     while not end_of_passage:
         new_pitches = get_next_pitches(voices)
@@ -242,11 +242,3 @@ def get_passage_matrices(passage: StaffGroup) -> list[Matrix]:
         matrix = get_matrix(bass, melody)
         matrices.append(matrix)
     return matrices
-
-
-staff_one = Staff("c,2 r4 bf,", name="bass")
-staff_two = Staff("e'4 ef2 a4", name="melody")
-staff_group = StaffGroup([staff_one, staff_two])
-matrices = get_passage_matrices(staff_group)
-for matrix in matrices:
-    notate_matrix(matrix, as_chord=True)
