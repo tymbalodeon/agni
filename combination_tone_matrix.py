@@ -150,6 +150,7 @@ def make_first_time(simultaneity):
 
 
 def get_shortest_note(simultaneity):
+    new_simultaneity = dict()
     durations = [
         note["current"].written_duration for note in simultaneity.values()
     ]
@@ -163,7 +164,7 @@ def get_shortest_note(simultaneity):
     small = [make_first_time(simultaneity) for simultaneity in small]
     for note in small:
         key = next(iter(note.keys()), None)
-        simultaneity[key] = note[key]
+        new_simultaneity[key] = note[key]
     other = [
         {key: simultaneity[key]}
         for key, note in simultaneity.items()
@@ -172,13 +173,12 @@ def get_shortest_note(simultaneity):
     other = [shorten_notes(note, float(shortest)) for note in other]
     for note in other:
         key = next(iter(note.keys()), None)
-        simultaneity[key] = note[key]
-    return simultaneity
+        new_simultaneity[key] = note[key]
+    return new_simultaneity
 
 
 def get_next(thing):
     thing = next(thing, None)
-    print("THING: ", thing)
     return thing
 
 
