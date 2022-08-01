@@ -1,5 +1,3 @@
-from functools import reduce
-from os import name
 from typing import Iterator, Optional
 
 from abjad import (
