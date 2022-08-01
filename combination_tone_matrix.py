@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Iterator, Optional
 
 from abjad import (
     Chord,
@@ -213,21 +213,35 @@ def shorten_notes(simultaneity, difference):
     }
 
 
+class Simultaneity:
+    def __init__(
+        self,
+        current: Optional[Note],
+        generator: Iterator[Note],
+        first_time=True,
+    ) -> None:
+        self.current = current
+        self.generator = generator
+        self.first_time = first_time
+
+
 def get_simultaneous_pitches(staff_group: StaffGroup):
     staves = {staff.name: staff for staff in staff_group.components}
-    simultaneity: dict = {
-        key: {"current": None, "generator": iter(value), "first_time": True}
-        for key, value in staves.items()
+    voices = {
+        key: Simultaneity(None, iter(value)) for key, value in staves.items()
     }
+    for key, value in voices.items():
+        print(key, value)
+    return
     pitches = []
-    simultaneity = get_next_simultaneity(simultaneity)
-    new_pitches = get_pitches(simultaneity)
+    voices = get_next_simultaneity(voices)
+    new_pitches = get_pitches(voices)
     pitches.append(new_pitches)
-    simultaneity = get_shortest_note(simultaneity)
-    new_pitches = get_pitches(simultaneity)
+    voices = get_shortest_note(voices)
+    new_pitches = get_pitches(voices)
     pitches.append(new_pitches)
-    simultaneity = get_shortest_note(simultaneity)
-    new_pitches = get_pitches(simultaneity)
+    voices = get_shortest_note(voices)
+    new_pitches = get_pitches(voices)
     pitches.append(new_pitches)
     # simultaneity = get_shortest_note(simultaneity)
     # new_pitches = get_pitches(simultaneity)
