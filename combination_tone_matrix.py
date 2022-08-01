@@ -1,3 +1,5 @@
+from functools import reduce
+from os import name
 from typing import Iterator, Optional
 
 from abjad import (
@@ -243,8 +245,16 @@ def should_add_pitches(
     return should_add
 
 
+def get_ordered_unique_pitch_sets(
+    pitches: list[list[NamedPitch]],
+) -> list[list[NamedPitch]]:
+    pitch_sets = [tuple(pitch_set) for pitch_set in pitches]
+    pitch_sets = list(dict.fromkeys(pitch_sets))
+    return [list(pitch_set) for pitch_set in pitch_sets]
+
+
 def get_simultaneous_pitches(
-    staff_group: StaffGroup, show_adjacent_duplicates=False
+    staff_group: StaffGroup, as_set=True, show_adjacent_duplicates=False
 ) -> list[list[NamedPitch]]:
     staves = {staff.name: staff for staff in staff_group.components}
     voices = [NewVoice(name, notes) for name, notes in staves.items()]
@@ -258,6 +268,8 @@ def get_simultaneous_pitches(
         if should_add:
             pitches.append(new_pitches)
         end_of_passage = is_end_of_passage(voices)
+    if as_set:
+        return get_ordered_unique_pitch_sets(pitches)
     return pitches
 
 
