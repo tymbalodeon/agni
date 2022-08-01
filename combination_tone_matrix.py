@@ -6,15 +6,13 @@ from abjad import (
     Duration,
     LilyPondFile,
     NamedPitch,
-    Rest,
     Note,
+    Rest,
     Staff,
     StaffGroup,
     Voice,
     show,
 )
-from abjad.get import pitches
-from abjad.select import leaves
 
 Matrix = list[list[float]]
 Pitch = str | float
@@ -146,7 +144,7 @@ class NewVoice:
         self.first_time = False
 
     def get_current_pitch(self) -> Optional[NamedPitch]:
-        if not self.current_note:
+        if not self.current_note or isinstance(self.current_note, Rest):
             return None
         return self.current_note.written_pitch
 
@@ -210,17 +208,26 @@ def get_next_pitches(voices: list[NewVoice]) -> list[Optional[NamedPitch]]:
     return get_current_pitches(voices)
 
 
-def get_simultaneous_pitches(staff_group: StaffGroup):
+def is_end_of_passage(voices: list[NewVoice]) -> bool:
+    current_notes = [voice.current_note for voice in voices]
+    return not any(current_notes)
+
+
+def get_simultaneous_pitches(staff_group: StaffGroup) -> list[NamedPitch]:
     staves = {staff.name: staff for staff in staff_group.components}
     voices = [NewVoice(name, notes) for name, notes in staves.items()]
     pitches = list()
-    new_pitches = get_next_pitches(voices)
-    pitches.append(new_pitches)
-    print(pitches)
-    return
+    end_of_passage = is_end_of_passage(voices)
+    while not end_of_passage:
+        new_pitches = get_next_pitches(voices)
+        if new_pitches:
+            pitches.append(new_pitches)
+        end_of_passage = is_end_of_passage(voices)
+    return pitches
 
 
 staff_one = Staff("c,2 r4", name="bass")
 staff_two = Staff("e'4 ef2", name="melody")
 staff_group = StaffGroup([staff_one, staff_two])
-get_simultaneous_pitches(staff_group)
+verticalities = get_simultaneous_pitches(staff_group)
+print(verticalities)
