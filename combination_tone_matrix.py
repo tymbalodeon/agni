@@ -6,6 +6,7 @@ from abjad import (
     Duration,
     LilyPondFile,
     NamedPitch,
+    Rest,
     Note,
     Staff,
     StaffGroup,
@@ -115,137 +116,107 @@ def notate_matrix(matrix: Matrix, as_chord=False):
         show_with_preamble(preamble, voice)
 
 
-def get_pitch(note):
-    return next(iter(pitches(note)))
-
-
-def get_pitch_and_duration(staff):
-    notes = leaves(staff)
-    return [(get_pitch(note), note.written_duration) for note in notes]
-
-
-def get_pitches(simultaneity):
-    return [
-        note["current"].written_pitch
-        for note in simultaneity.values()
-        if isinstance(note["current"], Note)
-    ]
-
-
-def is_end_of_passage(staff, index):
-    print(staff)
-    try:
-        if not staff:
-            return False
-        staff[index + 1]
-        return True
-    except Exception:
-        return False
-
-
-def make_first_time(simultaneity):
-    for value in simultaneity.values():
-        value["first_time"] = True
-    return simultaneity
-
-
-def get_shortest_note(simultaneity):
-    new_simultaneity = dict()
-    durations = [
-        note["current"].written_duration for note in simultaneity.values()
-    ]
-    shortest = min(durations)
-    small = [
-        {key: simultaneity[key]}
-        for key, note in simultaneity.items()
-        if note["current"] and note["current"].written_duration == shortest
-    ]
-    small = [get_next_simultaneity(note) for note in small]
-    small = [make_first_time(simultaneity) for simultaneity in small]
-    for note in small:
-        key = next(iter(note.keys()), None)
-        new_simultaneity[key] = note[key]
-    other = [
-        {key: simultaneity[key]}
-        for key, note in simultaneity.items()
-        if note["current"] and note["current"].written_duration != shortest
-    ]
-    other = [shorten_notes(note, float(shortest)) for note in other]
-    for note in other:
-        key = next(iter(note.keys()), None)
-        new_simultaneity[key] = note[key]
-    return new_simultaneity
-
-
-def get_next(thing):
-    thing = next(thing, None)
-    return thing
-
-
-def get_next_simultaneity(simultaneity):
-    return {
-        key: {
-            "current": get_next(simultaneity[key]["generator"]),
-            "generator": simultaneity[key]["generator"],
-            "first_time": True,
-        }
-        for key in simultaneity.keys()
-    }
-
-
-def shorten(note: Note, difference: float):
-    new_duration = Duration.from_float(
-        float(note.written_duration) - difference
-    )
-    new_note = Note(note)
-    new_note.written_duration = new_duration
-    return new_note
-
-
-def shorten_notes(simultaneity, difference):
-    return {
-        key: {
-            "current": shorten(simultaneity[key]["current"], difference),
-            "generator": simultaneity[key]["generator"],
-            "first_time": False,
-        }
-        for key in simultaneity.keys()
-    }
-
-
-class Simultaneity:
+class NewVoice:
     def __init__(
         self,
-        current: Optional[Note],
-        generator: Iterator[Note],
-        first_time=True,
+        name: str,
+        notes: list[Note],
     ) -> None:
-        self.current = current
-        self.generator = generator
-        self.first_time = first_time
+        self.name = name
+        self.notes = iter(notes)
+        self.current_note = self.get_next_note(self.notes)
+
+    def get_next_note(
+        self, notes: Optional[Iterator[Note]] = None
+    ) -> Optional[Note]:
+        if not notes:
+            notes = self.notes
+        self.first_time = True
+        self.current_note = next(notes, None)
+        return self.current_note
+
+    def shorten_current_note(self, duration: float):
+        if not self.current_note:
+            return
+        current_duration = self.get_current_duration()
+        if not current_duration:
+            return
+        shorter_duration = current_duration - duration
+        self.current_note.written_duration = shorter_duration
+        self.first_time = False
+
+    def get_current_pitch(self) -> Optional[NamedPitch]:
+        if not self.current_note:
+            return None
+        return self.current_note.written_pitch
+
+    def get_current_duration(self) -> Optional[Duration]:
+        if not self.current_note:
+            return None
+        return self.current_note.written_duration
+
+    def matches_duration(self, duration: float) -> bool:
+        if not self.current_note:
+            return False
+        current_duration = self.get_current_duration()
+        return current_duration == duration
+
+
+def remove_none_values(collection: list) -> list:
+    return [item for item in collection if item]
+
+
+def get_current_pitches(voices: list[NewVoice]) -> list[Optional[NamedPitch]]:
+    current_pitches = [voice.get_current_pitch() for voice in voices]
+    return remove_none_values(current_pitches)
+
+
+def get_smallest_rhythmic_value(voices: list[NewVoice]) -> float:
+    durations = [voice.get_current_duration() for voice in voices]
+    durations = remove_none_values(durations)
+    return float(min(durations))
+
+
+def get_voices_matching_shortest_duration(
+    voices, shortest_duration
+) -> list[NewVoice]:
+    return [
+        voice for voice in voices if voice.matches_duration(shortest_duration)
+    ]
+
+
+def get_voices_with_longer_durations(
+    voices, shortest_duration
+) -> list[NewVoice]:
+    return [
+        voice
+        for voice in voices
+        if not voice.matches_duration(shortest_duration)
+    ]
+
+
+def get_next_pitches(voices: list[NewVoice]) -> list[Optional[NamedPitch]]:
+    shortest_duration = get_smallest_rhythmic_value(voices)
+    voices_matching_shortest_duration = get_voices_matching_shortest_duration(
+        voices, shortest_duration
+    )
+    voices_with_longer_durations = get_voices_with_longer_durations(
+        voices, shortest_duration
+    )
+    for voice in voices_matching_shortest_duration:
+        voice.get_next_note()
+    for voice in voices_with_longer_durations:
+        voice.shorten_current_note(shortest_duration)
+    return get_current_pitches(voices)
 
 
 def get_simultaneous_pitches(staff_group: StaffGroup):
     staves = {staff.name: staff for staff in staff_group.components}
-    voices = {
-        key: Simultaneity(None, iter(value)) for key, value in staves.items()
-    }
-    for key, value in voices.items():
-        print(key, value)
-    return
-    pitches = []
-    voices = get_next_simultaneity(voices)
-    new_pitches = get_pitches(voices)
+    voices = [NewVoice(name, notes) for name, notes in staves.items()]
+    pitches = list()
+    new_pitches = get_next_pitches(voices)
     pitches.append(new_pitches)
-    voices = get_shortest_note(voices)
-    new_pitches = get_pitches(voices)
-    pitches.append(new_pitches)
-    voices = get_shortest_note(voices)
-    new_pitches = get_pitches(voices)
-    pitches.append(new_pitches)
-    # simultaneity = get_shortest_note(simultaneity)
-    # new_pitches = get_pitches(simultaneity)
-    # pitches.append(new_pitches)
+    print(pitches)
     return
 
 
