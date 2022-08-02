@@ -8,7 +8,6 @@ from abjad import (
     NamedPitch,
     Note,
     Rest,
-    Staff,
     StaffGroup,
     Voice,
     show,
