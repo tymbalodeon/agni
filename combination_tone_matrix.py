@@ -1,4 +1,4 @@
-from typing import Iterator, Optional
+from typing import Iterator, Optional, TypeAlias
 
 from abjad import (
     Chord,
@@ -14,7 +14,7 @@ from abjad import (
 )
 
 Matrix = list[list[float]]
-Pitch = str | float | NamedPitch
+Pitch: TypeAlias = str | float | NamedPitch
 
 
 def get_sum_frequency(
@@ -80,11 +80,15 @@ def get_note_name(note: Note) -> Optional[str]:
     return note.written_pitch.name
 
 
-def get_note_names(notes: list[Note]) -> str:
-    pitch_names = (get_note_name(note) for note in notes)
-    pitch_names = (note for note in pitch_names if note)
-    pitch_names = " ".join(pitch_names)
-    return f"<{pitch_names}>"
+def remove_none_values(collection: list) -> list:
+    return [item for item in collection if item]
+
+
+def get_chord_notes(notes: list[Note]) -> str:
+    note_names = [get_note_name(note) for note in notes]
+    pitched_note_names = remove_none_values(note_names)
+    chord_notes = " ".join(pitched_note_names)
+    return f"<{chord_notes}>"
 
 
 def show_with_preamble(preamble: str, container: Component):
@@ -108,8 +112,8 @@ def notate_matrix(matrix: Matrix, as_chord=False):
                     }
                 """
     if as_chord:
-        pitch_names = get_note_names(notes)
-        chord = Chord(pitch_names)
+        chord_notes = get_chord_notes(notes)
+        chord = Chord(chord_notes)
         voice = Voice(chord)
         show_with_preamble(preamble, voice)
     else:
@@ -168,19 +172,15 @@ def is_end_of_passage(voices: list[NewVoice]) -> bool:
     return not any(current_notes)
 
 
-def remove_none_values(collection: list) -> list:
-    return [item for item in collection if item]
-
-
 def get_current_pitches(voices: list[NewVoice]) -> list[NamedPitch]:
     current_pitches = [voice.get_current_pitch() for voice in voices]
     return remove_none_values(current_pitches)
 
 
-def get_smallest_rhythmic_value(voices: list[NewVoice]) -> float:
-    durations = [voice.get_current_duration() for voice in voices]
-    durations = remove_none_values(durations)
-    return float(min(durations))
+def get_shortest_duration(voices: list[NewVoice]) -> float:
+    current_durations = [voice.get_current_duration() for voice in voices]
+    durations = remove_none_values(current_durations)
+    return min(durations)
 
 
 def get_voices_matching_shortest_duration(
@@ -202,7 +202,7 @@ def get_voices_with_longer_durations(
 
 
 def get_next_pitches(voices: list[NewVoice]) -> list[NamedPitch]:
-    shortest_duration = get_smallest_rhythmic_value(voices)
+    shortest_duration = get_shortest_duration(voices)
     voices_matching_shortest_duration = get_voices_matching_shortest_duration(
         voices, shortest_duration
     )
