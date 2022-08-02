@@ -9,17 +9,21 @@ bpython==0.22.1
 cachetools==5.2.0
 certifi==2022.6.15
 cffi==1.15.1
+cfgv==3.3.1
 charset-normalizer==2.1.0
 click==8.1.3
 coverage==6.4.2
 curtsies==0.3.10
 cwcwidth==0.1.6
+distlib==0.3.5
 docutils==0.17.1
+filelock==3.7.1
 flake8==4.0.1
 future==0.17.1
 google-auth==2.9.1
 greenlet==1.1.2
 grpcio==1.47.0
+identify==2.5.2
 idna==3.3
 imageio==2.20.0
 imagesize==1.4.1
@@ -33,6 +37,7 @@ mccabe==0.6.1
 mypy==0.971
 mypy-extensions==0.4.3
 networkx==2.8.5
+nodeenv==1.7.0
 numpy==1.23.1
 oauthlib==3.2.0
 opencv-python-headless==4.6.0.66
@@ -43,6 +48,7 @@ Pillow==9.2.0
 platformdirs==2.5.2
 pluggy==1.0.0
 ply==3.11
+pre-commit==2.20.0
 protobuf==3.19.4
 py==1.11.0
 pyasn1==0.4.8
@@ -80,6 +86,7 @@ sphinxcontrib-serializinghtml==1.1.5
 tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.1
 tifffile==2022.5.4
+toml==0.10.2
 tomli==2.0.1
 torch==1.12.0
 torchvision==0.13.0
@@ -88,4 +95,5 @@ typing_extensions==4.3.0
 Unidecode==1.3.4
 uqbar==0.5.9
 urllib3==1.26.11
+virtualenv==20.16.2
 Werkzeug==2.2.1

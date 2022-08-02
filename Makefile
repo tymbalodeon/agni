@@ -4,6 +4,9 @@ all: help
 
 add: package freeze ## pip install package and freeze requirements [arg: "package"]
 
+check: ## Check for problems
+	pre-commit run -a
+
 freeze: ## Freeze the dependencies to the requirements.txt file
 	pip freeze > $(REQUIREMENTS)
 
