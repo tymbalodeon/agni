@@ -14,7 +14,7 @@ from abjad import (
 )
 
 Matrix = list[list[float]]
-Pitch: TypeAlias = str | float | NamedPitch
+Pitch: TypeAlias = NamedPitch | str | float
 
 
 def get_sum_frequency(
@@ -34,12 +34,11 @@ def get_melody_column(
 
 
 def get_frequency(pitch: Pitch) -> float:
-    if isinstance(pitch, float):
-        return pitch
+    if isinstance(pitch, NamedPitch):
+        return pitch.hertz
     elif isinstance(pitch, str):
         return NamedPitch(pitch).hertz
-    else:
-        return pitch.hertz
+    return pitch
 
 
 def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
@@ -54,7 +53,8 @@ def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
 
 def display_matrix(matrix: Matrix):
     for row in matrix:
-        row_display = " ".join(str(int(frequency)) for frequency in row)
+        row_frequencies = [str(int(frequency)) for frequency in row]
+        row_display = " ".join(row_frequencies)
         print(row_display)
 
 
