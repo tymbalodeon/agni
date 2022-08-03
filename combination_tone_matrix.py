@@ -54,7 +54,8 @@ def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
 
 def display_matrix(matrix: Matrix):
     for row in matrix:
-        print(row)
+        row_display = " ".join(str(int(frequency)) for frequency in row)
+        print(row_display)
 
 
 def sort_frequencies(
