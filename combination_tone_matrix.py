@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Iterator, Optional, TypeAlias
 
 from abjad import (
@@ -122,24 +123,42 @@ def notate_matrix(matrix: Matrix, as_chord=False):
         show_with_preamble(preamble, voice)
 
 
-class NewVoice:
+@dataclass
+class PitchAndDuration:
+    named_pitch: Optional[NamedPitch]
+    duration: Duration
+
+    @staticmethod
+    def from_note(note: Note):
+        named_pitch = note.written_pitch
+        duration = note.written_duration
+        return PitchAndDuration(named_pitch, duration)
+
+
+class Part:
     def __init__(
         self,
         name: str,
         notes: list[Note],
     ) -> None:
         self.name = name
-        self.notes = iter(notes)
+        note_durations = [PitchAndDuration.from_note(note) for note in notes]
+        self.notes = iter(note_durations)
         self.current_note = self.get_next_note(self.notes)
 
     def get_next_note(
-        self, notes: Optional[Iterator[Note]] = None
-    ) -> Optional[Note]:
+        self, notes: Optional[Iterator[PitchAndDuration]] = None
+    ) -> Optional[PitchAndDuration]:
         if not notes:
             notes = self.notes
         self.first_time = True
         self.current_note = next(notes, None)
         return self.current_note
+
+    def get_current_duration(self) -> Optional[Duration]:
+        if not self.current_note:
+            return None
+        return self.current_note.duration
 
     def shorten_current_note(self, duration: float):
         if not self.current_note:
@@ -148,18 +167,13 @@ class NewVoice:
         if not current_duration:
             return
         shorter_duration = current_duration - duration
-        self.current_note.written_duration = shorter_duration
+        self.current_note.duration = shorter_duration
         self.first_time = False
 
     def get_current_pitch(self) -> Optional[NamedPitch]:
         if not self.current_note or isinstance(self.current_note, Rest):
             return None
-        return self.current_note.written_pitch
-
-    def get_current_duration(self) -> Optional[Duration]:
-        if not self.current_note:
-            return None
-        return self.current_note.written_duration
+        return self.current_note.named_pitch
 
     def matches_duration(self, duration: float) -> bool:
         if not self.current_note:
@@ -168,17 +182,17 @@ class NewVoice:
         return current_duration == duration
 
 
-def is_end_of_passage(voices: list[NewVoice]) -> bool:
+def is_end_of_passage(voices: list[Part]) -> bool:
     current_notes = [voice.current_note for voice in voices]
     return not any(current_notes)
 
 
-def get_current_pitches(voices: list[NewVoice]) -> list[NamedPitch]:
+def get_current_pitches(voices: list[Part]) -> list[NamedPitch]:
     current_pitches = [voice.get_current_pitch() for voice in voices]
     return remove_none_values(current_pitches)
 
 
-def get_shortest_duration(voices: list[NewVoice]) -> float:
+def get_shortest_duration(voices: list[Part]) -> float:
     current_durations = [voice.get_current_duration() for voice in voices]
     durations = remove_none_values(current_durations)
     return min(durations)
@@ -186,15 +200,13 @@ def get_shortest_duration(voices: list[NewVoice]) -> float:
 
 def get_voices_matching_shortest_duration(
     voices, shortest_duration
-) -> list[NewVoice]:
+) -> list[Part]:
     return [
         voice for voice in voices if voice.matches_duration(shortest_duration)
     ]
 
 
-def get_voices_with_longer_durations(
-    voices, shortest_duration
-) -> list[NewVoice]:
+def get_voices_with_longer_durations(voices, shortest_duration) -> list[Part]:
     return [
         voice
         for voice in voices
@@ -202,7 +214,7 @@ def get_voices_with_longer_durations(
     ]
 
 
-def get_next_pitches(voices: list[NewVoice]) -> list[NamedPitch]:
+def get_next_pitches(voices: list[Part]) -> list[NamedPitch]:
     shortest_duration = get_shortest_duration(voices)
     voices_matching_shortest_duration = get_voices_matching_shortest_duration(
         voices, shortest_duration
@@ -255,7 +267,7 @@ def get_simultaneous_pitches(
     staff_group: StaffGroup, as_set=True, show_adjacent_duplicates=False
 ) -> list[list[NamedPitch]]:
     staves = {staff.name: staff for staff in staff_group.components}
-    voices = [NewVoice(name, notes) for name, notes in staves.items()]
+    voices = [Part(name, notes) for name, notes in staves.items()]
     pitches = [get_current_pitches(voices)]
     end_of_passage = is_end_of_passage(voices)
     while not end_of_passage:
