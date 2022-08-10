@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Iterator, Optional, TypeAlias
 
 from abjad import (
+    Staff,
     Chord,
     Component,
     Duration,
@@ -263,21 +264,38 @@ def get_ordered_unique_pitch_sets(
     return [list(pitch_set) for pitch_set in pitch_sets]
 
 
+def get_staves(staves: tuple[Staff]) -> tuple[Staff]:
+    staff_number = 0
+    for staff in staves:
+        if not staff.name:
+            staff.name = staff_number
+            staff_number += 1
+    return staves
+
+
+def get_part(staff: Staff, staff_number: int) -> Part:
+    if not staff.name:
+        staff.name = str(staff_number)
+    name = staff.name
+    notes: list[Note] = list(staff.components)
+    return Part(name, notes)
+
+
 def get_simultaneous_pitches(
     staff_group: StaffGroup, as_set=True, show_adjacent_duplicates=False
 ) -> list[list[NamedPitch]]:
-    staves = {staff.name: staff for staff in staff_group.components}
-    voices = [Part(name, notes) for name, notes in staves.items()]
-    pitches = [get_current_pitches(voices)]
-    end_of_passage = is_end_of_passage(voices)
+    staves = staff_group.components
+    parts = [get_part(staff, index) for index, staff in enumerate(staves)]
+    pitches = [get_current_pitches(parts)]
+    end_of_passage = is_end_of_passage(parts)
     while not end_of_passage:
-        new_pitches = get_next_pitches(voices)
+        new_pitches = get_next_pitches(parts)
         should_add = should_add_pitches(
             show_adjacent_duplicates, new_pitches, pitches
         )
         if should_add:
             pitches.append(new_pitches)
-        end_of_passage = is_end_of_passage(voices)
+        end_of_passage = is_end_of_passage(parts)
     if as_set:
         return get_ordered_unique_pitch_sets(pitches)
     return pitches
