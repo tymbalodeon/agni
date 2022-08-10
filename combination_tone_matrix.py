@@ -1,19 +1,21 @@
 from dataclasses import dataclass
-from typing import Iterator, Optional, TypeAlias
+from typing import Iterator, Optional, TypeAlias, cast
 
 from abjad import (
-    Staff,
     Chord,
     Component,
+    Container,
     Duration,
     LilyPondFile,
     NamedPitch,
     Note,
     Rest,
+    Staff,
     StaffGroup,
     Voice,
     show,
 )
+from abjad.select import leaves
 
 Matrix = list[list[float]]
 Pitch: TypeAlias = NamedPitch | str | float
@@ -273,11 +275,11 @@ def get_staves(staves: tuple[Staff]) -> tuple[Staff]:
     return staves
 
 
-def get_part(staff: Staff, staff_number: int) -> Part:
-    if not staff.name:
-        staff.name = str(staff_number)
-    name = staff.name
-    notes: list[Note] = list(staff.components)
+def get_part(container: Container, container_number: int) -> Part:
+    if not container.name:
+        container.name = str(container_number)
+    name = container.name
+    notes = cast(list[Note], leaves(container))
     return Part(name, notes)
 
 
@@ -311,3 +313,10 @@ def get_passage_matrices(passage: StaffGroup) -> list[Matrix]:
         matrix = get_matrix(bass, melody)
         matrices.append(matrix)
     return matrices
+
+
+def get_lilypond_part(notes: str, relative: Optional[str] = None):
+    if not relative:
+        return notes
+    relative_notes = f"\\relative {relative} {{ {notes} }}"
+    return relative_notes
