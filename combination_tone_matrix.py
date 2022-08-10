@@ -10,8 +10,6 @@ from abjad import (
     NamedPitch,
     Note,
     Rest,
-    Staff,
-    StaffGroup,
     Voice,
     show,
 )
@@ -266,28 +264,21 @@ def get_ordered_unique_pitch_sets(
     return [list(pitch_set) for pitch_set in pitch_sets]
 
 
-def get_staves(staves: tuple[Staff]) -> tuple[Staff]:
-    staff_number = 0
-    for staff in staves:
-        if not staff.name:
-            staff.name = staff_number
-            staff_number += 1
-    return staves
-
-
-def get_part(container: Container, container_number: int) -> Part:
-    if not container.name:
-        container.name = str(container_number)
-    name = container.name
-    notes = cast(list[Note], leaves(container))
-    return Part(name, notes)
+def get_parts(containers: list[Container]) -> list[Part]:
+    parts = []
+    for count, container in enumerate(containers):
+        container.name = str(count)
+        name = container.name
+        notes = cast(list[Note], leaves(container))
+        part = Part(name, notes)
+        parts.append(part)
+    return parts
 
 
 def get_simultaneous_pitches(
-    staff_group: StaffGroup, as_set=True, show_adjacent_duplicates=False
+    containers: list[Container], as_set=True, show_adjacent_duplicates=False
 ) -> list[list[NamedPitch]]:
-    staves = staff_group.components
-    parts = [get_part(staff, index) for index, staff in enumerate(staves)]
+    parts = get_parts(containers)
     pitches = [get_current_pitches(parts)]
     end_of_passage = is_end_of_passage(parts)
     while not end_of_passage:
@@ -303,7 +294,22 @@ def get_simultaneous_pitches(
     return pitches
 
 
-def get_passage_matrices(passage: StaffGroup) -> list[Matrix]:
+def get_lilypond_part(notes: str, relative: Optional[str] = None) -> str:
+    if not relative:
+        return notes
+    relative_notes = f"\\relative {relative} {{ {notes} }}"
+    return relative_notes
+
+
+def get_part_containers(
+    parts: list[str], relative: Optional[str] = None
+) -> list[Container]:
+    lilypond_parts = [get_lilypond_part(part, relative) for part in parts]
+    return [Container(part) for part in lilypond_parts]
+
+
+def get_passage_matrices(parts: list[str]) -> list[Matrix]:
+    passage = get_part_containers(parts)
     simultaneous_pitches = get_simultaneous_pitches(passage)
     matrices = list()
     for pitches in simultaneous_pitches:
@@ -313,10 +319,3 @@ def get_passage_matrices(passage: StaffGroup) -> list[Matrix]:
         matrix = get_matrix(bass, melody)
         matrices.append(matrix)
     return matrices
-
-
-def get_lilypond_part(notes: str, relative: Optional[str] = None):
-    if not relative:
-        return notes
-    relative_notes = f"\\relative {relative} {{ {notes} }}"
-    return relative_notes
