@@ -11,7 +11,6 @@ from abjad import (
     Note,
     Rest,
     Score,
-    Voice,
     show,
 )
 from abjad.select import leaves
