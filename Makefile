@@ -4,10 +4,13 @@ all: help
 
 add: package freeze ## pip install package and freeze requirements [arg: "package"]
 
-freeze: ## Freeze the dependencies to the requirements.txt file
+check: ## Check for problems
+	pre-commit run -a
+
+freeze:
 	pip freeze > $(REQUIREMENTS)
 
-help: ## Display the help menu
+help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 	sort | \
 	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
