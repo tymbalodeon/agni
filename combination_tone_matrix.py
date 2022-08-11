@@ -119,8 +119,7 @@ def notate_matrices(matrices: list[Matrix], as_chord=False):
         if as_chord:
             chord_notes = get_chord_notes(notes)
             chord = Chord(chord_notes)
-            container = Container(chord)
-            score.append(container)
+            score.append(chord)
         else:
             container = Container(notes)
             score.append(container)
