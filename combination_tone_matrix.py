@@ -215,51 +215,49 @@ def get_parts(containers: list[Container]) -> list[Part]:
     return parts
 
 
-def get_current_pitches(voices: list[Part]) -> list[NamedPitch]:
-    current_pitches = [voice.get_current_pitch() for voice in voices]
+def get_current_pitches(parts: list[Part]) -> list[NamedPitch]:
+    current_pitches = [part.get_current_pitch() for part in parts]
     return remove_none_values(current_pitches)
 
 
-def is_end_of_passage(voices: list[Part]) -> bool:
-    current_notes = [voice.current_note for voice in voices]
+def is_end_of_passage(parts: list[Part]) -> bool:
+    current_notes = [part.current_note for part in parts]
     return not any(current_notes)
 
 
-def get_shortest_duration(voices: list[Part]) -> float:
-    current_durations = [voice.get_current_duration() for voice in voices]
+def get_shortest_duration(parts: list[Part]) -> float:
+    current_durations = [part.get_current_duration() for part in parts]
     durations = remove_none_values(current_durations)
     return min(durations)
 
 
-def get_voices_matching_shortest_duration(
-    voices, shortest_duration
+def get_parts_matching_shortest_duration(
+    parts, shortest_duration
+) -> list[Part]:
+    return [part for part in parts if part.matches_duration(shortest_duration)]
+
+
+def get_parts_with_longer_durations(
+    parts: list[Part], shortest_duration
 ) -> list[Part]:
     return [
-        voice for voice in voices if voice.matches_duration(shortest_duration)
+        part for part in parts if not part.matches_duration(shortest_duration)
     ]
 
 
-def get_voices_with_longer_durations(voices, shortest_duration) -> list[Part]:
-    return [
-        voice
-        for voice in voices
-        if not voice.matches_duration(shortest_duration)
-    ]
-
-
-def get_next_pitches(voices: list[Part]) -> list[NamedPitch]:
-    shortest_duration = get_shortest_duration(voices)
-    voices_matching_shortest_duration = get_voices_matching_shortest_duration(
-        voices, shortest_duration
+def get_next_pitches(parts: list[Part]) -> list[NamedPitch]:
+    shortest_duration = get_shortest_duration(parts)
+    parts_matching_shortest_duration = get_parts_matching_shortest_duration(
+        parts, shortest_duration
     )
-    voices_with_longer_durations = get_voices_with_longer_durations(
-        voices, shortest_duration
+    parts_with_longer_durations = get_parts_with_longer_durations(
+        parts, shortest_duration
     )
-    for voice in voices_matching_shortest_duration:
-        voice.get_next_note()
-    for voice in voices_with_longer_durations:
-        voice.shorten_current_note(shortest_duration)
-    return get_current_pitches(voices)
+    for part in parts_matching_shortest_duration:
+        part.get_next_note()
+    for part in parts_with_longer_durations:
+        part.shorten_current_note(shortest_duration)
+    return get_current_pitches(parts)
 
 
 def get_pitch_names(pitches: list[NamedPitch]) -> list[str]:
