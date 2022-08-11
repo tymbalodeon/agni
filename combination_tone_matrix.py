@@ -17,6 +17,7 @@ from abjad.select import leaves
 
 Matrix = list[list[float]]
 Pitch: TypeAlias = NamedPitch | str | float
+RelativeMode = str | bool
 
 
 def get_sum_frequency(
@@ -301,22 +302,30 @@ def get_simultaneous_pitches(
     return pitches
 
 
-def get_lilypond_part(notes: str, relative: Optional[str] = None) -> str:
+def get_lilypond_part(
+    notes: str, relative: Optional[RelativeMode] = None
+) -> str:
     if not relative:
         return notes
-    relative_notes = f"\\relative {relative} {{ {notes} }}"
+    if relative is True:
+        relative = "\relative"
+    else:
+        relative = f"\\relative {relative}"
+    relative_notes = f"{relative} {{ {notes} }}"
     return relative_notes
 
 
 def get_part_containers(
-    parts: list[str], relative: Optional[str] = None
+    parts: list[str], relative: Optional[RelativeMode] = None
 ) -> list[Container]:
     lilypond_parts = [get_lilypond_part(part, relative) for part in parts]
     return [Container(part) for part in lilypond_parts]
 
 
-def get_passage_matrices(parts: list[str]) -> list[Matrix]:
-    passage = get_part_containers(parts)
+def get_passage_matrices(
+    parts: list[str], relative: Optional[RelativeMode] = None
+) -> list[Matrix]:
+    passage = get_part_containers(parts, relative)
     simultaneous_pitches = get_simultaneous_pitches(passage)
     matrices = list()
     for pitches in simultaneous_pitches:
