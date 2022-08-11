@@ -10,6 +10,7 @@ from abjad import (
     NamedPitch,
     Note,
     Rest,
+    Score,
     Voice,
     show,
 )
@@ -99,9 +100,7 @@ def show_with_preamble(preamble: str, container: Component):
     show(lilypond_file)
 
 
-def notate_matrix(matrix: Matrix, as_chord=False):
-    frequencies = sort_frequencies(matrix)
-    notes = [get_note(frequency) for frequency in frequencies]
+def notate_matrices(matrices: list[Matrix], as_chord=False):
     preamble = r"""
                     \header { tagline = ##f }
                     \layout {
@@ -114,14 +113,23 @@ def notate_matrix(matrix: Matrix, as_chord=False):
                         }
                     }
                 """
-    if as_chord:
-        chord_notes = get_chord_notes(notes)
-        chord = Chord(chord_notes)
-        voice = Voice(chord)
-        show_with_preamble(preamble, voice)
-    else:
-        voice = Voice(notes)
-        show_with_preamble(preamble, voice)
+    score = Score()
+    for matrix in matrices:
+        frequencies = sort_frequencies(matrix)
+        notes = [get_note(frequency) for frequency in frequencies]
+        if as_chord:
+            chord_notes = get_chord_notes(notes)
+            chord = Chord(chord_notes)
+            container = Container(chord)
+            score.append(container)
+        else:
+            container = Container(notes)
+            score.append(container)
+    show_with_preamble(preamble, score)
+
+
+def notate_matrix(matrix: Matrix):
+    notate_matrices([matrix])
 
 
 @dataclass
