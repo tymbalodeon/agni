@@ -149,8 +149,10 @@ class Part:
         notes: list[Note],
     ) -> None:
         self.name = name
-        note_durations = [PitchAndDuration.from_note(note) for note in notes]
-        self.notes = iter(note_durations)
+        pitch_and_durations = [
+            PitchAndDuration.from_note(note) for note in notes
+        ]
+        self.notes = iter(pitch_and_durations)
         self.current_note = self.get_next_note(self.notes)
 
     def get_next_note(
