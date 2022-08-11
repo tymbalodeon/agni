@@ -19,6 +19,14 @@ Matrix = list[list[float]]
 Pitch: TypeAlias = NamedPitch | str | float
 
 
+def get_frequency(pitch: Pitch) -> float:
+    if isinstance(pitch, NamedPitch):
+        return pitch.hertz
+    elif isinstance(pitch, str):
+        return NamedPitch(pitch).hertz
+    return pitch
+
+
 def get_sum_frequency(
     multiplier: int, bass_multiple: float, melody: float
 ) -> float:
@@ -33,14 +41,6 @@ def get_melody_column(
     return [
         get_sum_frequency(column, bass_multiple, melody) for column in columns
     ]
-
-
-def get_frequency(pitch: Pitch) -> float:
-    if isinstance(pitch, NamedPitch):
-        return pitch.hertz
-    elif isinstance(pitch, str):
-        return NamedPitch(pitch).hertz
-    return pitch
 
 
 def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
@@ -189,14 +189,40 @@ class Part:
         return current_duration == duration
 
 
-def is_end_of_passage(voices: list[Part]) -> bool:
-    current_notes = [voice.current_note for voice in voices]
-    return not any(current_notes)
+def get_lilypond_part(notes: str, relative: Optional[str] = None) -> str:
+    if not relative:
+        return notes
+    relative = f"\\relative {relative}"
+    relative_notes = f"{relative} {{ {notes} }}"
+    return relative_notes
+
+
+def get_part_containers(
+    parts: list[str], relative: Optional[str] = None
+) -> list[Container]:
+    lilypond_parts = [get_lilypond_part(part, relative) for part in parts]
+    return [Container(part) for part in lilypond_parts]
+
+
+def get_parts(containers: list[Container]) -> list[Part]:
+    parts = []
+    for count, container in enumerate(containers):
+        container.name = str(count)
+        name = container.name
+        notes = cast(list[Note], leaves(container))
+        part = Part(name, notes)
+        parts.append(part)
+    return parts
 
 
 def get_current_pitches(voices: list[Part]) -> list[NamedPitch]:
     current_pitches = [voice.get_current_pitch() for voice in voices]
     return remove_none_values(current_pitches)
+
+
+def is_end_of_passage(voices: list[Part]) -> bool:
+    current_notes = [voice.current_note for voice in voices]
+    return not any(current_notes)
 
 
 def get_shortest_duration(voices: list[Part]) -> float:
@@ -270,17 +296,6 @@ def get_ordered_unique_pitch_sets(
     return [list(pitch_set) for pitch_set in pitch_sets]
 
 
-def get_parts(containers: list[Container]) -> list[Part]:
-    parts = []
-    for count, container in enumerate(containers):
-        container.name = str(count)
-        name = container.name
-        notes = cast(list[Note], leaves(container))
-        part = Part(name, notes)
-        parts.append(part)
-    return parts
-
-
 def get_simultaneous_pitches(
     containers: list[Container], as_set=True, show_adjacent_duplicates=False
 ) -> list[list[NamedPitch]]:
@@ -298,21 +313,6 @@ def get_simultaneous_pitches(
     if as_set:
         return get_ordered_unique_pitch_sets(pitches)
     return pitches
-
-
-def get_lilypond_part(notes: str, relative: Optional[str] = None) -> str:
-    if not relative:
-        return notes
-    relative = f"\\relative {relative}"
-    relative_notes = f"{relative} {{ {notes} }}"
-    return relative_notes
-
-
-def get_part_containers(
-    parts: list[str], relative: Optional[str] = None
-) -> list[Container]:
-    lilypond_parts = [get_lilypond_part(part, relative) for part in parts]
-    return [Container(part) for part in lilypond_parts]
 
 
 def get_passage_matrices(
