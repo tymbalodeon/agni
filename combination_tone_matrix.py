@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from typing import Iterator, Optional, TypeAlias, cast
+from rich.table import Table
+from rich.console import Console
 
 from abjad import (
     Chord,
@@ -53,11 +55,31 @@ def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
     ]
 
 
+def get_header_multipler(multiplier: int, pitch: str) -> str:
+    return f"{multiplier} * {pitch}"
+
+
+def get_melody_header(matrix: Matrix) -> list[str]:
+    count = len(matrix)
+    header = [
+        get_header_multipler(multiplier, "melody")
+        for multiplier in range(count)
+    ]
+    return [""] + header
+
+
 def display_matrix(matrix: Matrix):
-    for row in matrix:
-        row_frequencies = [str(int(frequency)) for frequency in row]
-        row_display = " ".join(row_frequencies)
-        print(row_display)
+    title = "Combination-Tone Matrix"
+    table = Table(title=title, show_header=False, show_lines=True)
+    melody_header = get_melody_header(matrix)
+    table.add_row(*melody_header)
+    for multiplier, row in enumerate(matrix):
+        row_frequencies = [str(round(frequency, 2)) for frequency in row]
+        bass_header = [get_header_multipler(multiplier, "bass")]
+        row_frequencies = bass_header + row_frequencies
+        table.add_row(*row_frequencies)
+    console = Console()
+    console.print(table)
 
 
 def sort_frequencies(
@@ -99,7 +121,7 @@ def show_with_preamble(preamble: str, container: Component):
     show(lilypond_file)
 
 
-def notate_matrices(matrices: list[Matrix], as_chord=False):
+def notate_matrix(*matrices: Matrix, as_chord=False):
     preamble = r"""
                     \header { tagline = ##f }
                     \layout {
@@ -124,10 +146,6 @@ def notate_matrices(matrices: list[Matrix], as_chord=False):
             container = Container(notes)
             score.append(container)
     show_with_preamble(preamble, score)
-
-
-def notate_matrix(matrix: Matrix):
-    notate_matrices([matrix])
 
 
 @dataclass
