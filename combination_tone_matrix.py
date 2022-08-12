@@ -99,10 +99,10 @@ def get_midi_number(frequency: float, microtonal: bool) -> Optional[str]:
     frequency = frequency / 440
     logarithm = log(frequency, 2)
     midi_number = 12 * logarithm + 69
-    decimals = None
     if microtonal:
-        decimals = 2
-    midi_number = round(midi_number, decimals)
+        midi_number = round(midi_number * 2) / 2
+    else:
+        midi_number = round(midi_number)
     return str(midi_number)
 
 
