@@ -57,7 +57,7 @@ def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
 
 
 def get_header_multipler(multiplier: int, pitch: str) -> str:
-    return f"[bold blue]{multiplier} * {pitch}[/bold blue]"
+    return f"[bold cyan]{multiplier} * {pitch}[/bold cyan]"
 
 
 def get_melody_header(matrix: Matrix) -> list[str]:
