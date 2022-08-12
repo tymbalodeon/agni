@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from math import log
 from typing import Iterator, Optional, TypeAlias, cast
-from rich.table import Table
-from rich.console import Console
 
 from abjad import (
     Chord,
@@ -12,11 +10,14 @@ from abjad import (
     LilyPondFile,
     NamedPitch,
     Note,
+    NumberedPitch,
     Rest,
     Score,
     show,
 )
 from abjad.select import leaves
+from rich.console import Console
+from rich.table import Table
 
 Matrix = list[list[float]]
 Pitch: TypeAlias = NamedPitch | str | float
@@ -69,50 +70,69 @@ def get_melody_header(matrix: Matrix) -> list[str]:
     return [""] + header
 
 
-def get_hertz(frequency: float) -> Optional[str]:
+def get_hertz(frequency: float, microtonal: bool) -> Optional[str]:
     if not frequency:
         return None
-    return f"{round(frequency, 2):,}"
+    decimals = None
+    if microtonal:
+        decimals = 2
+    frequency = round(frequency, decimals)
+    return f"{frequency:,}"
 
 
-def get_named_pitch(frequency: float) -> Optional[str]:
+def get_named_pitch(frequency: float, microtonal: bool) -> Optional[str]:
     if not frequency:
         return None
     named_pitch = NamedPitch.from_hertz(frequency)
+    if not microtonal:
+        pitch_number = named_pitch.number
+        if isinstance(pitch_number, float):
+            pitch_number = int(pitch_number)
+            pitch_name = NumberedPitch(pitch_number).name
+            named_pitch = NamedPitch(pitch_name)
     return named_pitch.name
 
 
-def get_midi_number(frequency: float) -> Optional[str]:
+def get_midi_number(frequency: float, microtonal: bool) -> Optional[str]:
     if not frequency:
         return None
     frequency = frequency / 440
     logarithm = log(frequency, 2)
     midi_number = 12 * logarithm + 69
-    midi_number = round(midi_number, 2)
+    decimals = None
+    if microtonal:
+        decimals = 2
+    midi_number = round(midi_number, decimals)
     return str(midi_number)
 
 
-def display_matrix(matrix: Matrix, pitch_type="hertz"):
+def display_matrix(matrix: Matrix, pitch_type="hertz", microtonal=True):
     title = f"Combination-Tone Matrix ({pitch_type.title()})"
     table = Table(title=title, show_header=False, show_lines=True)
     melody_header = get_melody_header(matrix)
     table.add_row(*melody_header)
     for multiplier, row in enumerate(matrix):
         if pitch_type == "name":
-            row_frequencies = [get_named_pitch(frequency) for frequency in row]
+            row_frequencies = [
+                get_named_pitch(frequency, microtonal) for frequency in row
+            ]
         elif pitch_type == "midi":
-            row_frequencies = [get_midi_number(frequency) for frequency in row]
+            row_frequencies = [
+                get_midi_number(frequency, microtonal) for frequency in row
+            ]
         else:
-            row_frequencies = [get_hertz(frequency) for frequency in row]
+            row_frequencies = [
+                get_hertz(frequency, microtonal) for frequency in row
+            ]
         if not multiplier:
             melody = row_frequencies[1]
             row_frequencies[1] = f"[bold yellow]{melody}[/bold yellow]"
         elif multiplier == 1:
             bass = row_frequencies[0]
             row_frequencies[0] = f"[bold yellow]{bass}[/bold yellow]"
-        bass_header = [get_header_multipler(multiplier, "bass")]
-        row_frequencies = bass_header + row_frequencies
-        table.add_row(*row_frequencies)
+        bass_header: list = [get_header_multipler(multiplier, "bass")]
+        row = bass_header + row_frequencies
+        table.add_row(*row)
     console = Console()
     console.print("\n", table)
 
