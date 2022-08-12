@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from math import log
 from typing import Iterator, Optional, TypeAlias, cast
 
 from abjad import (
@@ -9,11 +10,14 @@ from abjad import (
     LilyPondFile,
     NamedPitch,
     Note,
+    NumberedPitch,
     Rest,
     Score,
     show,
 )
 from abjad.select import leaves
+from rich.console import Console
+from rich.table import Table
 
 Matrix = list[list[float]]
 Pitch: TypeAlias = NamedPitch | str | float
@@ -53,11 +57,84 @@ def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
     ]
 
 
-def display_matrix(matrix: Matrix):
-    for row in matrix:
-        row_frequencies = [str(int(frequency)) for frequency in row]
-        row_display = " ".join(row_frequencies)
-        print(row_display)
+def get_header_multipler(multiplier: int, pitch: str) -> str:
+    return f"[bold cyan]{multiplier} * {pitch}[/bold cyan]"
+
+
+def get_melody_header(matrix: Matrix) -> list[str]:
+    count = len(matrix)
+    header = [
+        get_header_multipler(multiplier, "melody")
+        for multiplier in range(count)
+    ]
+    return [""] + header
+
+
+def get_hertz(frequency: float, microtonal: bool) -> Optional[str]:
+    if not frequency:
+        return None
+    decimals = None
+    if microtonal:
+        decimals = 2
+    frequency = round(frequency, decimals)
+    return f"{frequency:,}"
+
+
+def get_named_pitch(frequency: float, microtonal: bool) -> Optional[str]:
+    if not frequency:
+        return None
+    named_pitch = NamedPitch.from_hertz(frequency)
+    if not microtonal:
+        pitch_number = named_pitch.number
+        if isinstance(pitch_number, float):
+            pitch_number = int(pitch_number)
+            pitch_name = NumberedPitch(pitch_number).name
+            named_pitch = NamedPitch(pitch_name)
+    return named_pitch.name
+
+
+def get_midi_number(frequency: float, microtonal: bool) -> Optional[str]:
+    if not frequency:
+        return None
+    frequency = frequency / 440
+    logarithm = log(frequency, 2)
+    midi_number = 12 * logarithm + 69
+    if microtonal:
+        midi_number = round(midi_number * 2) / 2
+    else:
+        midi_number = round(midi_number)
+    return str(midi_number)
+
+
+def display_matrix(matrix: Matrix, pitch_type="hertz", microtonal=True):
+    title = f"Combination-Tone Matrix ({pitch_type.title()})"
+    table = Table(title=title, show_header=False, show_lines=True)
+    melody_header = get_melody_header(matrix)
+    table.add_row(*melody_header)
+    for multiplier, row in enumerate(matrix):
+        if pitch_type == "name":
+            row_frequencies = [
+                get_named_pitch(frequency, microtonal) for frequency in row
+            ]
+        elif pitch_type == "midi":
+            row_frequencies = [
+                get_midi_number(frequency, microtonal) for frequency in row
+            ]
+        else:
+            row_frequencies = [
+                get_hertz(frequency, microtonal) for frequency in row
+            ]
+        if not multiplier:
+            melody = row_frequencies[1]
+            row_frequencies[1] = f"[bold yellow]{melody}[/bold yellow]"
+        elif multiplier == 1:
+            bass = row_frequencies[0]
+            row_frequencies[0] = f"[bold yellow]{bass}[/bold yellow]"
+        bass_header: list = [get_header_multipler(multiplier, "bass")]
+        row = bass_header + row_frequencies
+        table.add_row(*row)
+    console = Console()
+    console.print("\n", table)
 
 
 def sort_frequencies(
@@ -99,7 +176,7 @@ def show_with_preamble(preamble: str, container: Component):
     show(lilypond_file)
 
 
-def notate_matrices(matrices: list[Matrix], as_chord=False):
+def notate_matrix(*matrices: Matrix, as_chord=False):
     preamble = r"""
                     \header { tagline = ##f }
                     \layout {
@@ -124,10 +201,6 @@ def notate_matrices(matrices: list[Matrix], as_chord=False):
             container = Container(notes)
             score.append(container)
     show_with_preamble(preamble, score)
-
-
-def notate_matrix(matrix: Matrix):
-    notate_matrices([matrix])
 
 
 @dataclass
