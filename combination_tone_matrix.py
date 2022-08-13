@@ -106,24 +106,38 @@ def get_midi_number(frequency: float, microtonal: bool) -> Optional[str]:
     return str(midi_number)
 
 
+def get_pitch_displays(frequency: float, microtonal: bool) -> Optional[str]:
+    if not frequency:
+        return None
+    hertz = get_hertz(frequency, microtonal)
+    named_pitch = get_named_pitch(frequency, microtonal)
+    midi = get_midi_number(frequency, microtonal)
+    return f"{hertz}\n{named_pitch}\n{midi}"
+
+
+def get_row_frequencies(
+    row: list[float], microtonal: bool, pitch_type: str
+) -> list[Optional[str]]:
+    if pitch_type == "name":
+        return [get_named_pitch(frequency, microtonal) for frequency in row]
+
+    elif pitch_type == "midi":
+        return [get_midi_number(frequency, microtonal) for frequency in row]
+    elif pitch_type == "hertz":
+        return [get_hertz(frequency, microtonal) for frequency in row]
+    else:
+        return [get_pitch_displays(frequency, microtonal) for frequency in row]
+
+
 def display_matrix(matrix: Matrix, pitch_type="hertz", microtonal=True):
     title = f"Combination-Tone Matrix ({pitch_type.title()})"
     table = Table(title=title, show_header=False, show_lines=True)
     melody_header = get_melody_header(matrix)
     table.add_row(*melody_header)
     for multiplier, row in enumerate(matrix):
-        if pitch_type == "name":
-            row_frequencies = [
-                get_named_pitch(frequency, microtonal) for frequency in row
-            ]
-        elif pitch_type == "midi":
-            row_frequencies = [
-                get_midi_number(frequency, microtonal) for frequency in row
-            ]
-        else:
-            row_frequencies = [
-                get_hertz(frequency, microtonal) for frequency in row
-            ]
+        row_frequencies = get_row_frequencies(
+            row, microtonal=microtonal, pitch_type=pitch_type
+        )
         if not multiplier:
             melody = row_frequencies[1]
             row_frequencies[1] = f"[bold yellow]{melody}[/bold yellow]"
@@ -131,8 +145,8 @@ def display_matrix(matrix: Matrix, pitch_type="hertz", microtonal=True):
             bass = row_frequencies[0]
             row_frequencies[0] = f"[bold yellow]{bass}[/bold yellow]"
         bass_header: list = [get_header_multipler(multiplier, "bass")]
-        row = bass_header + row_frequencies
-        table.add_row(*row)
+        formatted_row = bass_header + row_frequencies
+        table.add_row(*formatted_row)
     console = Console()
     console.print("\n", table)
 
