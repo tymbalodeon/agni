@@ -31,9 +31,7 @@ def get_frequency(pitch: Pitch) -> float:
     return pitch
 
 
-def get_sum_frequency(
-    multiplier: int, bass_multiple: float, melody: float
-) -> float:
+def get_sum_frequency(multiplier: int, bass_multiple: float, melody: float) -> float:
     melody_multiple = melody * multiplier
     return bass_multiple + melody_multiple
 
@@ -42,9 +40,7 @@ def get_melody_column(
     multiplier: int, columns: range, bass: float, melody: float
 ) -> list[float]:
     bass_multiple = bass * multiplier
-    return [
-        get_sum_frequency(column, bass_multiple, melody) for column in columns
-    ]
+    return [get_sum_frequency(column, bass_multiple, melody) for column in columns]
 
 
 def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
@@ -52,8 +48,7 @@ def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
     melody_frequency = get_frequency(melody)
     rows = range(count)
     return [
-        get_melody_column(row, rows, bass_frequency, melody_frequency)
-        for row in rows
+        get_melody_column(row, rows, bass_frequency, melody_frequency) for row in rows
     ]
 
 
@@ -63,10 +58,7 @@ def get_header_multipler(multiplier: int, pitch: str) -> str:
 
 def get_melody_header(matrix: Matrix) -> list[str]:
     count = len(matrix)
-    header = [
-        get_header_multipler(multiplier, "melody")
-        for multiplier in range(count)
-    ]
+    header = [get_header_multipler(multiplier, "melody") for multiplier in range(count)]
     return [""] + header
 
 
@@ -120,7 +112,6 @@ def get_row_frequencies(
 ) -> list[Optional[str]]:
     if pitch_type == "name":
         return [get_named_pitch(frequency, microtonal) for frequency in row]
-
     elif pitch_type == "midi":
         return [get_midi_number(frequency, microtonal) for frequency in row]
     elif pitch_type == "hertz":
@@ -151,9 +142,7 @@ def display_matrix(matrix: Matrix, pitch_type="hertz", microtonal=True):
     console.print("\n", table)
 
 
-def sort_frequencies(
-    matrix: Matrix, limit: Optional[int] = None
-) -> list[float]:
+def sort_frequencies(matrix: Matrix, limit: Optional[int] = None) -> list[float]:
     frequencies = [frequency for row in matrix for frequency in row]
     frequencies.sort()
     frequencies = frequencies[1:]
@@ -236,9 +225,7 @@ class Part:
         notes: list[Note],
     ) -> None:
         self.name = name
-        pitch_and_durations = [
-            PitchAndDuration.from_note(note) for note in notes
-        ]
+        pitch_and_durations = [PitchAndDuration.from_note(note) for note in notes]
         self.notes = iter(pitch_and_durations)
         self.current_note = self.get_next_note(self.notes)
 
@@ -320,18 +307,12 @@ def get_shortest_duration(parts: list[Part]) -> float:
     return min(durations)
 
 
-def get_parts_matching_shortest_duration(
-    parts, shortest_duration
-) -> list[Part]:
+def get_parts_matching_shortest_duration(parts, shortest_duration) -> list[Part]:
     return [part for part in parts if part.matches_duration(shortest_duration)]
 
 
-def get_parts_with_longer_durations(
-    parts: list[Part], shortest_duration
-) -> list[Part]:
-    return [
-        part for part in parts if not part.matches_duration(shortest_duration)
-    ]
+def get_parts_with_longer_durations(parts: list[Part], shortest_duration) -> list[Part]:
+    return [part for part in parts if not part.matches_duration(shortest_duration)]
 
 
 def get_next_pitches(parts: list[Part]) -> list[NamedPitch]:
@@ -391,9 +372,7 @@ def get_simultaneous_pitches(
     end_of_passage = is_end_of_passage(parts)
     while not end_of_passage:
         new_pitches = get_next_pitches(parts)
-        should_add = should_add_pitches(
-            show_adjacent_duplicates, new_pitches, pitches
-        )
+        should_add = should_add_pitches(show_adjacent_duplicates, new_pitches, pitches)
         if should_add:
             pitches.append(new_pitches)
         end_of_passage = is_end_of_passage(parts)
