@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from math import log
+from pathlib import Path
 from typing import Iterator, Optional, TypeAlias, cast
 
 from abjad import (
@@ -15,6 +16,7 @@ from abjad import (
     Score,
     show,
 )
+from abjad.persist import as_pdf
 from abjad.select import leaves
 from rich.console import Console
 from rich.table import Table
@@ -174,12 +176,16 @@ def get_chord_notes(notes: list[Note]) -> str:
     return f"<{chord_notes}>"
 
 
-def show_with_preamble(preamble: str, container: Component):
+def show_with_preamble(preamble: str, container: Component, persist: bool):
     lilypond_file = LilyPondFile([preamble, container])
-    show(lilypond_file)
+    if persist:
+        pdf_file_path = Path.home() / "Desktop" / "matrix.pdf"
+        as_pdf(lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True)
+    else:
+        show(lilypond_file)
 
 
-def notate_matrix(*matrices: Matrix, as_chord=False):
+def notate_matrix(*matrices: Matrix, as_chord=False, persist=False):
     preamble = r"""
                     \header { tagline = ##f }
                     \layout {
@@ -203,7 +209,7 @@ def notate_matrix(*matrices: Matrix, as_chord=False):
         else:
             container = Container(notes)
             score.append(container)
-    show_with_preamble(preamble, score)
+    show_with_preamble(preamble, score, persist=persist)
 
 
 @dataclass
