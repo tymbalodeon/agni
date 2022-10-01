@@ -33,7 +33,7 @@ imagesize==1.4.1
 iniconfig==1.1.1
 isort==5.10.1
 Jinja2==3.1.2
-joblib==1.1.0
+joblib==1.2.0
 Markdown==3.4.1
 MarkupSafe==2.1.1
 mccabe==0.6.1
