@@ -1,5 +1,6 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
+from enum import Enum
 from math import log
 from pathlib import Path
 from typing import TypeAlias, cast
@@ -111,20 +112,27 @@ def get_pitch_displays(frequency: float, microtonal: bool) -> str | None:
     return f"{hertz}\n{named_pitch}\n{midi}"
 
 
+class PitchType(Enum):
+    NAME = "name"
+    MIDI = "midi"
+    HERTZ = "hertz"
+    ALL = "all"
+
+
 def get_row_frequencies(
-    row: list[float], microtonal: bool, pitch_type: str
+    row: list[float], microtonal: bool, pitch_type: PitchType
 ) -> list[str | None]:
-    if pitch_type == "name":
+    if pitch_type == PitchType.NAME:
         return [get_named_pitch(frequency, microtonal) for frequency in row]
-    if pitch_type == "midi":
+    if pitch_type == PitchType.MIDI:
         return [get_midi_number(frequency, microtonal) for frequency in row]
-    if pitch_type == "hertz":
+    if pitch_type == PitchType.HERTZ:
         return [get_hertz(frequency, microtonal) for frequency in row]
     return [get_pitch_displays(frequency, microtonal) for frequency in row]
 
 
-def display_matrix(matrix: Matrix, pitch_type="hertz", microtonal=True):
-    title = f"Combination-Tone Matrix ({pitch_type.title()})"
+def display_matrix(matrix: Matrix, pitch_type=PitchType.HERTZ, microtonal=True):
+    title = f"Combination-Tone Matrix ({pitch_type.value.title()})"
     table = Table(title=title, show_header=False, box=SIMPLE)
     melody_header = get_melody_header(matrix)
     table.add_row(*melody_header)
