@@ -21,6 +21,7 @@ agni = "agni.main:agni"
 [tool.poetry.dependencies]
 python = "^3.10"
 typer = {extras = ["all"], version = "^0.6.1"}
+abjad = "^3.13"
 
 [build-system]
 requires = ["poetry-core"]
