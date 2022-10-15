@@ -1,2 +1,27 @@
 [tool.black]
 preview = true
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = "E203"
+
+[tool.isort]
+profile = "black"
+
+[tool.poetry]
+name = "agni"
+version = "0.1.0"
+description = "Create combination-tone matrices."
+authors = ["Ben Rosen <benjamin.j.rosen@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+agni = "agni.main:agni"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+typer = {extras = ["all"], version = "^0.6.1"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,7 +1,8 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
 from math import log
 from pathlib import Path
-from typing import Iterator, Optional, TypeAlias, cast
+from typing import TypeAlias, cast
 
 from abjad import (
     Chord,
@@ -18,6 +19,7 @@ from abjad import (
 )
 from abjad.persist import as_pdf
 from abjad.select import leaves
+from rich.box import SIMPLE
 from rich.console import Console
 from rich.table import Table
 
@@ -64,7 +66,7 @@ def get_melody_header(matrix: Matrix) -> list[str]:
     return [""] + header
 
 
-def get_hertz(frequency: float, microtonal: bool) -> Optional[str]:
+def get_hertz(frequency: float, microtonal: bool) -> str | None:
     if not frequency:
         return None
     decimals = None
@@ -74,7 +76,7 @@ def get_hertz(frequency: float, microtonal: bool) -> Optional[str]:
     return f"{frequency:,}"
 
 
-def get_named_pitch(frequency: float, microtonal: bool) -> Optional[str]:
+def get_named_pitch(frequency: float, microtonal: bool) -> str | None:
     if not frequency:
         return None
     named_pitch = NamedPitch.from_hertz(frequency)
@@ -87,7 +89,7 @@ def get_named_pitch(frequency: float, microtonal: bool) -> Optional[str]:
     return named_pitch.name
 
 
-def get_midi_number(frequency: float, microtonal: bool) -> Optional[str]:
+def get_midi_number(frequency: float, microtonal: bool) -> str | None:
     if not frequency:
         return None
     frequency = frequency / 440
@@ -100,7 +102,7 @@ def get_midi_number(frequency: float, microtonal: bool) -> Optional[str]:
     return str(midi_number)
 
 
-def get_pitch_displays(frequency: float, microtonal: bool) -> Optional[str]:
+def get_pitch_displays(frequency: float, microtonal: bool) -> str | None:
     if not frequency:
         return None
     hertz = get_hertz(frequency, microtonal)
@@ -111,20 +113,19 @@ def get_pitch_displays(frequency: float, microtonal: bool) -> Optional[str]:
 
 def get_row_frequencies(
     row: list[float], microtonal: bool, pitch_type: str
-) -> list[Optional[str]]:
+) -> list[str | None]:
     if pitch_type == "name":
         return [get_named_pitch(frequency, microtonal) for frequency in row]
-    elif pitch_type == "midi":
+    if pitch_type == "midi":
         return [get_midi_number(frequency, microtonal) for frequency in row]
-    elif pitch_type == "hertz":
+    if pitch_type == "hertz":
         return [get_hertz(frequency, microtonal) for frequency in row]
-    else:
-        return [get_pitch_displays(frequency, microtonal) for frequency in row]
+    return [get_pitch_displays(frequency, microtonal) for frequency in row]
 
 
 def display_matrix(matrix: Matrix, pitch_type="hertz", microtonal=True):
     title = f"Combination-Tone Matrix ({pitch_type.title()})"
-    table = Table(title=title, show_header=False, show_lines=True)
+    table = Table(title=title, show_header=False, box=SIMPLE)
     melody_header = get_melody_header(matrix)
     table.add_row(*melody_header)
     for multiplier, row in enumerate(matrix):
@@ -137,14 +138,13 @@ def display_matrix(matrix: Matrix, pitch_type="hertz", microtonal=True):
         elif multiplier == 1:
             bass = row_frequencies[0]
             row_frequencies[0] = f"[bold yellow]{bass}[/bold yellow]"
-        bass_header: list = [get_header_multipler(multiplier, "bass")]
+        bass_header: list[str | None] = [get_header_multipler(multiplier, "bass")]
         formatted_row = bass_header + row_frequencies
         table.add_row(*formatted_row)
-    console = Console()
-    console.print("\n", table)
+    Console().print(table)
 
 
-def sort_frequencies(matrix: Matrix, limit: Optional[int] = None) -> list[float]:
+def sort_frequencies(matrix: Matrix, limit: int | None = None) -> list[float]:
     frequencies = [frequency for row in matrix for frequency in row]
     frequencies.sort()
     frequencies = frequencies[1:]
@@ -159,7 +159,7 @@ def get_note(frequency: float) -> Note:
     return Note(pitch, duration)
 
 
-def get_note_name(note: Note) -> Optional[str]:
+def get_note_name(note: Note) -> str | None:
     if not note.written_pitch:
         return None
     return note.written_pitch.name
@@ -214,7 +214,7 @@ def notate_matrix(*matrices: Matrix, as_chord=False, persist=False):
 
 @dataclass
 class PitchAndDuration:
-    named_pitch: Optional[NamedPitch]
+    named_pitch: NamedPitch | None
     duration: Duration
 
     @staticmethod
@@ -236,15 +236,15 @@ class Part:
         self.current_note = self.get_next_note(self.notes)
 
     def get_next_note(
-        self, notes: Optional[Iterator[PitchAndDuration]] = None
-    ) -> Optional[PitchAndDuration]:
+        self, notes: Iterator[PitchAndDuration] | None = None
+    ) -> PitchAndDuration | None:
         if not notes:
             notes = self.notes
         self.first_time = True
         self.current_note = next(notes, None)
         return self.current_note
 
-    def get_current_duration(self) -> Optional[Duration]:
+    def get_current_duration(self) -> Duration | None:
         if not self.current_note:
             return None
         return self.current_note.duration
@@ -259,7 +259,7 @@ class Part:
         self.current_note.duration = shorter_duration
         self.first_time = False
 
-    def get_current_pitch(self) -> Optional[NamedPitch]:
+    def get_current_pitch(self) -> NamedPitch | None:
         if not self.current_note or isinstance(self.current_note, Rest):
             return None
         return self.current_note.named_pitch
@@ -271,7 +271,7 @@ class Part:
         return current_duration == duration
 
 
-def get_lilypond_part(notes: str, relative: Optional[str] = None) -> str:
+def get_lilypond_part(notes: str, relative: str | None = None) -> str:
     if not relative:
         return notes
     relative = f"\\relative {relative}"
@@ -280,7 +280,7 @@ def get_lilypond_part(notes: str, relative: Optional[str] = None) -> str:
 
 
 def get_part_containers(
-    parts: list[str], relative: Optional[str] = None
+    parts: list[str], relative: str | None = None
 ) -> list[Container]:
     lilypond_parts = [get_lilypond_part(part, relative) for part in parts]
     return [Container(part) for part in lilypond_parts]
@@ -387,12 +387,10 @@ def get_simultaneous_pitches(
     return pitches
 
 
-def get_passage_matrices(
-    parts: list[str], relative: Optional[str] = None
-) -> list[Matrix]:
+def get_passage_matrices(parts: list[str], relative: str | None = None) -> list[Matrix]:
     passage = get_part_containers(parts, relative)
     simultaneous_pitches = get_simultaneous_pitches(passage)
-    matrices = list()
+    matrices = []
     for pitches in simultaneous_pitches:
         if not len(pitches) == 2:
             continue
