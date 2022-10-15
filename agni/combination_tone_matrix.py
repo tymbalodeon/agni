@@ -31,7 +31,9 @@ Pitch: TypeAlias = NamedPitch | str | float
 def get_frequency(pitch: Pitch) -> float:
     if isinstance(pitch, NamedPitch):
         return pitch.hertz
-    elif isinstance(pitch, str):
+    if isinstance(pitch, str):
+        if pitch.isnumeric():
+            return float(pitch)
         return NamedPitch(pitch).hertz
     return pitch
 
