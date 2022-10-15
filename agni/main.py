@@ -1,5 +1,6 @@
-from agni.combination_tone_matrix import display_matrix, get_matrix
 from typer import Typer
+
+from agni.combination_tone_matrix import display_matrix, get_matrix
 
 agni = Typer(
     help="Create combination-tone matrices.",
