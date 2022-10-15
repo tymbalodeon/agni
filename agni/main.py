@@ -1,12 +1,8 @@
-from typer import Argument, Typer
-from typer.params import Option
+from typer import Argument, Option, Typer
 
-from .combination_tone_matrix import (
-    PitchType,
-    display_matrix,
-    get_matrix,
-    notate_matrix,
-)
+from .combination_tone_matrix import PitchType, get_matrix
+from .display_matrix import display_matrix
+from .notate_matrix import notate_matrix
 
 agni = Typer(
     help="Create combination-tone matrices.",
@@ -17,26 +13,20 @@ agni = Typer(
 
 
 @agni.command(name="display-matrix")
-def display(
+def matrix(
     bass: str = Argument(..., help="LilyPond pitch or frequency"),
     melody: str = Argument(..., help="LilyPond pitch or frequency"),
+    notate: bool = Option(
+        False, "--notate/--display", help="Notate the matrix and save file."
+    ),
     count: int = Option(5, help="Number of calculations to make."),
     pitch_type: PitchType = Option(PitchType.HERTZ.value),
     microtonal: bool = Option(True, "--microtonal/--equal-tempered"),
-):
-    """Display matrix"""
-    matrix = get_matrix(bass, melody, count=count)
-    display_matrix(matrix, pitch_type=pitch_type, microtonal=microtonal)
-
-
-@agni.command(name="notate-matrix")
-def notate(
-    bass: str = Argument(..., help="LilyPond pitch or frequency"),
-    melody: str = Argument(..., help="LilyPond pitch or frequency"),
-    count: int = Option(5, help="Number of calculations to make."),
     as_chord: bool = Option(False, "--as-chord", help="Notate as chords"),
     persist: bool = Option(False, "--persist", help="Save to Desktop"),
 ):
-    """Notate matrix"""
+    """Display matrix"""
     matrix = get_matrix(bass, melody, count=count)
-    notate_matrix(matrix, as_chord=as_chord, persist=persist)
+    if notate:
+        notate_matrix(matrix, as_chord=as_chord, persist=persist)
+    display_matrix(matrix, pitch_type=pitch_type, microtonal=microtonal)

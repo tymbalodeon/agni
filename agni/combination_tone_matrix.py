@@ -2,27 +2,10 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
 from math import log
-from pathlib import Path
 from typing import TypeAlias, cast
 
-from abjad import (
-    Chord,
-    Component,
-    Container,
-    Duration,
-    LilyPondFile,
-    NamedPitch,
-    Note,
-    NumberedPitch,
-    Rest,
-    Score,
-    show,
-)
-from abjad.persist import as_pdf
+from abjad import Container, Duration, NamedPitch, Note, NumberedPitch, Rest
 from abjad.select import leaves
-from rich.box import SIMPLE
-from rich.console import Console
-from rich.table import Table
 
 Matrix = list[list[float]]
 Pitch: TypeAlias = NamedPitch | str | float
@@ -57,16 +40,6 @@ def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
     return [
         get_melody_column(row, rows, bass_frequency, melody_frequency) for row in rows
     ]
-
-
-def get_header_multipler(multiplier: int, pitch: str) -> str:
-    return f"[bold cyan]{multiplier} * {pitch}[/bold cyan]"
-
-
-def get_melody_header(matrix: Matrix) -> list[str]:
-    count = len(matrix)
-    header = [get_header_multipler(multiplier, "melody") for multiplier in range(count)]
-    return [""] + header
 
 
 def get_hertz(frequency: float, microtonal: bool) -> str | None:
@@ -131,95 +104,6 @@ def get_row_frequencies(
     if pitch_type == PitchType.HERTZ:
         return [get_hertz(frequency, microtonal) for frequency in row]
     return [get_pitch_displays(frequency, microtonal) for frequency in row]
-
-
-def display_matrix(matrix: Matrix, pitch_type=PitchType.HERTZ, microtonal=True):
-    title = f"Combination-Tone Matrix ({pitch_type.value.title()})"
-    table = Table(title=title, show_header=False, box=SIMPLE)
-    melody_header = get_melody_header(matrix)
-    table.add_row(*melody_header)
-    for multiplier, row in enumerate(matrix):
-        row_frequencies = get_row_frequencies(
-            row, microtonal=microtonal, pitch_type=pitch_type
-        )
-        if not multiplier:
-            melody = row_frequencies[1]
-            row_frequencies[1] = f"[bold yellow]{melody}[/bold yellow]"
-        elif multiplier == 1:
-            bass = row_frequencies[0]
-            row_frequencies[0] = f"[bold yellow]{bass}[/bold yellow]"
-        bass_header: list[str | None] = [get_header_multipler(multiplier, "bass")]
-        formatted_row = bass_header + row_frequencies
-        table.add_row(*formatted_row)
-    Console().print(table)
-
-
-def sort_frequencies(matrix: Matrix, limit: int | None = None) -> list[float]:
-    frequencies = [frequency for row in matrix for frequency in row]
-    frequencies.sort()
-    frequencies = frequencies[1:]
-    if not limit:
-        return frequencies
-    return frequencies[:limit]
-
-
-def get_note(frequency: float) -> Note:
-    pitch = NamedPitch.from_hertz(frequency)
-    duration = Duration(1, 4)
-    return Note(pitch, duration)
-
-
-def get_note_name(note: Note) -> str | None:
-    if not note.written_pitch:
-        return None
-    return note.written_pitch.name
-
-
-def remove_none_values(collection: list) -> list:
-    return [item for item in collection if item]
-
-
-def get_chord_notes(notes: list[Note]) -> str:
-    note_names = [get_note_name(note) for note in notes]
-    pitched_note_names = remove_none_values(note_names)
-    chord_notes = " ".join(pitched_note_names)
-    return f"<{chord_notes}>"
-
-
-def show_with_preamble(preamble: str, container: Component, persist: bool):
-    lilypond_file = LilyPondFile([preamble, container])
-    if persist:
-        pdf_file_path = Path.home() / "Desktop" / "matrix.pdf"
-        as_pdf(lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True)
-    else:
-        show(lilypond_file)
-
-
-def notate_matrix(*matrices: Matrix, as_chord=False, persist=False):
-    preamble = r"""
-                    \header { tagline = ##f }
-                    \layout {
-                        \context {
-                            \Score
-                            \override SystemStartBar.stencil = ##f
-                            \override TimeSignature.stencil = ##f
-                            \override BarLine.stencil = ##f
-                            \override Stem.stencil = ##f
-                        }
-                    }
-                """
-    score = Score()
-    for matrix in matrices:
-        frequencies = sort_frequencies(matrix)
-        notes = [get_note(frequency) for frequency in frequencies]
-        if as_chord:
-            chord_notes = get_chord_notes(notes)
-            chord = Chord(chord_notes)
-            score.append(chord)
-        else:
-            container = Container(notes)
-            score.append(container)
-    show_with_preamble(preamble, score, persist=persist)
 
 
 @dataclass
@@ -305,6 +189,10 @@ def get_parts(containers: list[Container]) -> list[Part]:
         part = Part(name, notes)
         parts.append(part)
     return parts
+
+
+def remove_none_values(collection: list) -> list:
+    return [item for item in collection if item]
 
 
 def get_current_pitches(parts: list[Part]) -> list[NamedPitch]:
