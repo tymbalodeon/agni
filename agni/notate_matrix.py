@@ -13,7 +13,8 @@ from abjad import (
 )
 from abjad.persist import as_pdf
 
-from .combination_tone_matrix import Matrix, remove_none_values
+from .matrix import Matrix
+from .passage import remove_none_values
 
 
 def sort_frequencies(matrix: Matrix, limit: int | None = None) -> list[float]:

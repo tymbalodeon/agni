@@ -1,8 +1,9 @@
-from agni.play_matrix import play_matrix
 from typer import Argument, Option, Typer
 
-from .combination_tone_matrix import PitchType, get_matrix
+from agni.play_matrix import play_matrix
+
 from .display_matrix import display_matrix
+from .matrix import PitchType, Tuning, get_matrix
 from .notate_matrix import notate_matrix
 
 agni = Typer(
@@ -21,7 +22,7 @@ def matrix(
     play: bool = Option(False, "--play", help="Play the matrix."),
     count: int = Option(5, help="Number of calculations to make."),
     pitch_type: PitchType = Option(PitchType.HERTZ.value),
-    microtonal: bool = Option(True, "--microtonal/--equal-tempered"),
+    tuning: Tuning = Option(Tuning.MICROTONAL.value, "--tuning"),
     as_chord: bool = Option(False, "--as-chord", help="Notate as chords"),
     persist: bool = Option(False, "--persist", help="Save to Desktop"),
 ):
@@ -29,6 +30,6 @@ def matrix(
     matrix = get_matrix(bass, melody, count=count)
     if notate:
         notate_matrix(matrix, as_chord=as_chord, persist=persist)
-    display_matrix(matrix, pitch_type=pitch_type, microtonal=microtonal)
+    display_matrix(matrix, pitch_type=pitch_type, tuning=tuning)
     if play:
         play_matrix(matrix)

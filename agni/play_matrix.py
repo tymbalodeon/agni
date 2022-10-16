@@ -1,9 +1,9 @@
-from agni.combination_tone_matrix import Matrix
-from agni.notate_matrix import sort_frequencies
-from supriya.patterns import EventPattern
 from time import sleep
 
-from supriya.patterns.patterns import SequencePattern
+from supriya.patterns import EventPattern, SequencePattern
+
+from .matrix import Matrix
+from .notate_matrix import sort_frequencies
 
 
 def play_matrix(matrix: Matrix):
