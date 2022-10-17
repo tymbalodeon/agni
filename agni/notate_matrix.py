@@ -54,28 +54,36 @@ def show_with_preamble(preamble: str, container: Component, persist: bool):
         show(lilypond_file)
 
 
-def notate_matrix(*matrices: Matrix, as_chord=False, persist=False):
-    preamble = r"""
-                    \header { tagline = ##f }
-                    \layout {
-                        \context {
-                            \Score
-                            \override SystemStartBar.stencil = ##f
-                            \override TimeSignature.stencil = ##f
-                            \override BarLine.stencil = ##f
-                            \override Stem.stencil = ##f
-                        }
+def get_lilypond_preamble() -> str:
+    return r"""
+                \header { tagline = ##f }
+                \layout {
+                    \context {
+                        \Score
+                        \override SystemStartBar.stencil = ##f
+                        \override TimeSignature.stencil = ##f
+                        \override BarLine.stencil = ##f
+                        \override Stem.stencil = ##f
                     }
-                """
+                }
+            """
+
+
+def add_notes_to_score(notes: list[Note], score: Score, as_chord: bool):
+    if as_chord:
+        chord_notes = get_chord_notes(notes)
+        chord = Chord(chord_notes)
+        score.append(chord)
+    else:
+        container = Container(notes)
+        score.append(container)
+
+
+def notate_matrix(*matrices: Matrix, as_chord=False, persist=False):
+    preamble = get_lilypond_preamble()
     score = Score()
     for matrix in matrices:
         frequencies = sort_frequencies(matrix)
         notes = [get_note(frequency) for frequency in frequencies]
-        if as_chord:
-            chord_notes = get_chord_notes(notes)
-            chord = Chord(chord_notes)
-            score.append(chord)
-        else:
-            container = Container(notes)
-            score.append(container)
+        add_notes_to_score(notes, score, as_chord=as_chord)
     show_with_preamble(preamble, score, persist=persist)

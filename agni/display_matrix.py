@@ -15,22 +15,42 @@ def get_melody_header(matrix: Matrix) -> list[str]:
     return [""] + header
 
 
-def display_matrix(
-    matrix: Matrix, pitch_type=PitchType.HERTZ, tuning=Tuning.MICROTONAL
-):
+def get_matrix_table(pitch_type: PitchType) -> Table:
     title = f"Combination-Tone Matrix ({pitch_type.value.title()})"
-    table = Table(title=title, show_header=False, box=SIMPLE)
+    return Table(title=title, show_header=False, box=SIMPLE)
+
+
+def add_melody_header(table: Table, matrix: Matrix):
     melody_header = get_melody_header(matrix)
     table.add_row(*melody_header)
+
+
+def bolden_frequency(index: int, row_frequencies: list[str | None]):
+    frequency = row_frequencies[index]
+    row_frequencies[index] = f"[bold yellow]{frequency}[/bold yellow]"
+
+
+def bolden_base_frequency(multiplier: int, row_frequencies: list[str | None]):
+    if multiplier == 1:
+        index = 0
+    elif not multiplier:
+        index = 1
+    else:
+        return
+    bolden_frequency(index, row_frequencies)
+
+
+def get_bass_header(multiplier: int) -> list[str | None]:
+    return [get_header_multipler(multiplier, "bass")]
+
+
+def display_matrix(matrix: Matrix, pitch_type: PitchType, tuning: Tuning):
+    table = get_matrix_table(pitch_type)
+    add_melody_header(table, matrix)
     for multiplier, row in enumerate(matrix):
         row_frequencies = get_row_frequencies(row, tuning=tuning, pitch_type=pitch_type)
-        if not multiplier:
-            melody = row_frequencies[1]
-            row_frequencies[1] = f"[bold yellow]{melody}[/bold yellow]"
-        elif multiplier == 1:
-            bass = row_frequencies[0]
-            row_frequencies[0] = f"[bold yellow]{bass}[/bold yellow]"
-        bass_header: list[str | None] = [get_header_multipler(multiplier, "bass")]
+        bolden_base_frequency(multiplier, row_frequencies)
+        bass_header = get_bass_header(multiplier)
         formatted_row = bass_header + row_frequencies
         table.add_row(*formatted_row)
     Console().print(table)

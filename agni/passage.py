@@ -1,5 +1,6 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator, cast
+from typing import cast
 
 from abjad import Container, Duration, NamedPitch, Note, Rest
 from abjad.select import leaves

@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from enum import Enum
 from math import log
 from typing import TypeAlias
@@ -80,9 +81,10 @@ def get_midi_number(frequency: float, tuning: Tuning) -> str | None:
 def get_hertz(frequency: float, tuning: Tuning) -> str | None:
     if not frequency:
         return None
-    decimals = None
     if tuning == Tuning.MICROTONAL:
         decimals = 2
+    else:
+        decimals = None
     frequency = round(frequency, decimals)
     return f"{frequency:,}"
 
@@ -96,13 +98,20 @@ def get_pitch_displays(frequency: float, tuning: Tuning) -> str | None:
     return f"{hertz}\n{named_pitch}\n{midi}"
 
 
+def get_pitch_type_getter(
+    pitch_type: PitchType,
+) -> Callable[[float, Tuning], str | None]:
+    pitch_type_getters: dict[PitchType, Callable[[float, Tuning], str | None]] = {
+        PitchType.NAME: get_named_pitch,
+        PitchType.MIDI: get_midi_number,
+        PitchType.HERTZ: get_hertz,
+        PitchType.ALL: get_pitch_displays,
+    }
+    return pitch_type_getters.get(pitch_type, get_hertz)
+
+
 def get_row_frequencies(
     row: list[float], tuning: Tuning, pitch_type: PitchType
 ) -> list[str | None]:
-    if pitch_type == PitchType.NAME:
-        return [get_named_pitch(frequency, tuning) for frequency in row]
-    if pitch_type == PitchType.MIDI:
-        return [get_midi_number(frequency, tuning) for frequency in row]
-    if pitch_type == PitchType.HERTZ:
-        return [get_hertz(frequency, tuning) for frequency in row]
-    return [get_pitch_displays(frequency, tuning) for frequency in row]
+    pitch_type_getter = get_pitch_type_getter(pitch_type)
+    return [pitch_type_getter(frequency, tuning) for frequency in row]
