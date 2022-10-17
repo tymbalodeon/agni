@@ -1,5 +1,6 @@
 from typer import Argument, Option, Typer
 
+from agni.passage import get_passage_matrices
 from agni.play_matrix import play_matrix
 
 from .display_matrix import display_matrix
@@ -16,7 +17,7 @@ agni = Typer(
 pitch_help = "LilyPond pitch, midi note number, frequency"
 
 
-@agni.command(name="display-matrix")
+@agni.command()
 def matrix(
     bass: str = Argument(..., help=pitch_help),
     melody: str = Argument(..., help=pitch_help),
@@ -41,3 +42,17 @@ def matrix(
     display_matrix(matrix, pitch_type=pitch_type, tuning=tuning)
     if play:
         play_matrix(matrix)
+
+
+@agni.command()
+def passage(
+    voices: list[str] = Option([], "--voice", help="LilyPond input."),
+    tuning: Tuning = Option(
+        Tuning.MICROTONAL.value, "--tuning", help="Type of tuning quantization."
+    ),
+    pitch_type: PitchType = Option(PitchType.HERTZ.value, help="Pitch display format."),
+):
+    """Create combination-tone matrices for a two-voice passage."""
+    matrices = get_passage_matrices(voices)
+    for matrix in matrices:
+        display_matrix(matrix, pitch_type=pitch_type, tuning=tuning)

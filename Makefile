@@ -10,5 +10,8 @@ help:
 	sort | \
 	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+shell: ## Open bpython interpreter in the project's virtual environment.
+	poetry run bpython
+
 try: ## Try a command using the current state of the files without building. [options: "args=<args>"]
 	poetry run $(COMMAND) $(args)
