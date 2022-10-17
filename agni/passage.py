@@ -25,7 +25,7 @@ class Part:
         self,
         name: str,
         notes: list[Note],
-    ) -> None:
+    ):
         self.name = name
         pitch_and_durations = [PitchAndDuration.from_note(note) for note in notes]
         self.notes = iter(pitch_and_durations)

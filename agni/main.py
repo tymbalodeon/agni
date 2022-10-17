@@ -13,20 +13,28 @@ agni = Typer(
     rich_markup_mode="rich",
 )
 
+pitch_help = "LilyPond pitch, midi note number, frequency"
+
 
 @agni.command(name="display-matrix")
 def matrix(
-    bass: str = Argument(..., help="LilyPond pitch or frequency"),
-    melody: str = Argument(..., help="LilyPond pitch or frequency"),
-    notate: bool = Option(False, "--notate", help="Notate the matrix and save file."),
+    bass: str = Argument(..., help=pitch_help),
+    melody: str = Argument(..., help=pitch_help),
+    count: int = Option(5, help="Number of multiples to calculate."),
+    tuning: Tuning = Option(
+        Tuning.MICROTONAL.value, "--tuning", help="Type of tuning quantization."
+    ),
+    pitch_type: PitchType = Option(PitchType.HERTZ.value, help="Pitch display format."),
+    notate: bool = Option(
+        False, "--notate", help="Generate notated score of the matrix."
+    ),
+    persist: bool = Option(False, "--persist", help="Persist the notated score."),
     play: bool = Option(False, "--play", help="Play the matrix."),
-    count: int = Option(5, help="Number of calculations to make."),
-    pitch_type: PitchType = Option(PitchType.HERTZ.value),
-    tuning: Tuning = Option(Tuning.MICROTONAL.value, "--tuning"),
-    as_chord: bool = Option(False, "--as-chord", help="Notate as chords"),
-    persist: bool = Option(False, "--persist", help="Save to Desktop"),
+    as_chord: bool = Option(
+        False, "--as-chord", help="Play and notate matrix as chords."
+    ),
 ):
-    """Display matrix"""
+    """Create combination-tone matrix from a bass and melody pitch."""
     matrix = get_matrix(bass, melody, count=count)
     if notate:
         notate_matrix(matrix, as_chord=as_chord, persist=persist)
