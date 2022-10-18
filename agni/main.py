@@ -15,24 +15,26 @@ agni = Typer(
 )
 
 pitch_help = "LilyPond pitch, midi note number, frequency"
+pitch_input = Option(
+    PitchInput.FREQUENCY.value,
+    "--pitch-input",
+    help="Input bass and melody as midi note numbers.",
+)
+tuning = Option(
+    Tuning.MICROTONAL.value, "--tuning", help="Type of tuning quantization."
+)
+count = Option(5, help="Number of multiples to calculate.")
+pitch_display = Option(PitchDisplay.HERTZ.value, help="Pitch display format.")
 
 
 @agni.command()
 def matrix(
     bass: str = Argument(..., help=pitch_help),
     melody: str = Argument(..., help=pitch_help),
-    pitch_input: PitchInput = Option(
-        PitchInput.FREQUENCY.value,
-        "--pitch-input",
-        help="Input bass and melody as midi note numbers.",
-    ),
-    tuning: Tuning = Option(
-        Tuning.MICROTONAL.value, "--tuning", help="Type of tuning quantization."
-    ),
-    count: int = Option(5, help="Number of multiples to calculate."),
-    pitch_display: PitchDisplay = Option(
-        PitchDisplay.HERTZ.value, help="Pitch display format."
-    ),
+    pitch_input: PitchInput = pitch_input,
+    tuning: Tuning = tuning,
+    count: int = count,
+    pitch_display: PitchDisplay = pitch_display,
     as_chord: bool = Option(
         False, "--as-chord", help="Play and notate matrix as chords."
     ),
@@ -43,7 +45,7 @@ def matrix(
     play: bool = Option(False, "--play", help="Play the matrix."),
 ):
     """Create combination-tone matrix from a bass and melody pitch."""
-    matrix = get_matrix(bass, melody, count=count, pitch_input=pitch_input)
+    matrix = get_matrix(bass, melody, pitch_input=pitch_input, count=count)
     if notate:
         notate_matrix(matrix, as_chord=as_chord, persist=persist)
     display_matrix(matrix, pitch_display=pitch_display, tuning=tuning)
@@ -54,14 +56,12 @@ def matrix(
 @agni.command()
 def passage(
     voices: list[str] = Option([], "--voice", help="LilyPond input."),
-    tuning: Tuning = Option(
-        Tuning.MICROTONAL.value, "--tuning", help="Type of tuning quantization."
-    ),
-    pitch_display: PitchDisplay = Option(
-        PitchDisplay.HERTZ.value, help="Pitch display format."
-    ),
+    pitch_input: PitchInput = pitch_input,
+    tuning: Tuning = tuning,
+    count: int = count,
+    pitch_display: PitchDisplay = pitch_display,
 ):
     """Create combination-tone matrices for a two-voice passage."""
-    matrices = get_passage_matrices(voices)
+    matrices = get_passage_matrices(voices, pitch_input=pitch_input, count=count)
     for matrix in matrices:
         display_matrix(matrix, pitch_display=pitch_display, tuning=tuning)

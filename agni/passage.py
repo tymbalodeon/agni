@@ -187,7 +187,9 @@ def get_simultaneous_pitches(
     return pitches
 
 
-def get_passage_matrices(parts: list[str], relative: str | None = None) -> list[Matrix]:
+def get_passage_matrices(
+    parts: list[str], pitch_input: PitchInput, count: int, relative: str | None = None
+) -> list[Matrix]:
     passage = get_part_containers(parts, relative)
     simultaneous_pitches = get_simultaneous_pitches(passage)
     matrices = []
@@ -195,6 +197,6 @@ def get_passage_matrices(parts: list[str], relative: str | None = None) -> list[
         if not len(pitches) == 2:
             continue
         bass, melody = pitches
-        matrix = get_matrix(bass, melody, pitch_input=PitchInput.FREQUENCY, count=5)
+        matrix = get_matrix(bass, melody, pitch_input=pitch_input, count=count)
         matrices.append(matrix)
     return matrices
