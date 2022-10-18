@@ -9,13 +9,13 @@ Matrix = list[list[float]]
 Pitch: TypeAlias = NamedPitch | str | float
 
 
+def convert_midi_to_frequency(midi_number: float) -> float:
+    return (2 ** ((midi_number - 69) / 12)) * 440
+
+
 class PitchInput(Enum):
     MIDI = "midi"
     FREQUENCY = "frequency"
-
-
-def convert_midi_to_frequency(midi_number: float) -> float:
-    return (2 ** ((midi_number - 69) / 12)) * 440
 
 
 def get_frequency(pitch: Pitch, pitch_input: PitchInput) -> float:
