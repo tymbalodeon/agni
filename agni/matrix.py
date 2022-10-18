@@ -9,11 +9,22 @@ Matrix = list[list[float]]
 Pitch: TypeAlias = NamedPitch | str | float
 
 
-def get_frequency(pitch: Pitch) -> float:
+class PitchInput(Enum):
+    MIDI = "midi"
+    FREQUENCY = "frequency"
+
+
+def convert_midi_to_frequency(midi_number: float) -> float:
+    return (2 ** ((midi_number - 69) / 12)) * 440
+
+
+def get_frequency(pitch: Pitch, pitch_input: PitchInput) -> float:
     if isinstance(pitch, NamedPitch):
         return pitch.hertz
     if isinstance(pitch, str):
         if pitch.isnumeric():
+            if pitch_input == PitchInput.MIDI:
+                return convert_midi_to_frequency(float(pitch))
             return float(pitch)
         return NamedPitch(pitch).hertz
     return pitch
@@ -31,16 +42,18 @@ def get_melody_column(
     return [get_sum_frequency(column, bass_multiple, melody) for column in columns]
 
 
-def get_matrix(bass: Pitch, melody: Pitch, count=5) -> Matrix:
-    bass_frequency = get_frequency(bass)
-    melody_frequency = get_frequency(melody)
+def get_matrix(
+    bass: Pitch, melody: Pitch, pitch_input: PitchInput, count: int
+) -> Matrix:
+    bass_frequency = get_frequency(bass, pitch_input=pitch_input)
+    melody_frequency = get_frequency(melody, pitch_input=pitch_input)
     rows = range(count)
     return [
         get_melody_column(row, rows, bass_frequency, melody_frequency) for row in rows
     ]
 
 
-class PitchType(Enum):
+class PitchDisplay(Enum):
     NAME = "name"
     MIDI = "midi"
     HERTZ = "hertz"
@@ -98,20 +111,20 @@ def get_pitch_displays(frequency: float, tuning: Tuning) -> str | None:
     return f"{hertz}\n{named_pitch}\n{midi}"
 
 
-def get_pitch_type_getter(
-    pitch_type: PitchType,
+def get_pitch_display_getter(
+    pitch_display: PitchDisplay,
 ) -> Callable[[float, Tuning], str | None]:
-    pitch_type_getters: dict[PitchType, Callable[[float, Tuning], str | None]] = {
-        PitchType.NAME: get_named_pitch,
-        PitchType.MIDI: get_midi_number,
-        PitchType.HERTZ: get_hertz,
-        PitchType.ALL: get_pitch_displays,
+    pitch_display_getters: dict[PitchDisplay, Callable[[float, Tuning], str | None]] = {
+        PitchDisplay.NAME: get_named_pitch,
+        PitchDisplay.MIDI: get_midi_number,
+        PitchDisplay.HERTZ: get_hertz,
+        PitchDisplay.ALL: get_pitch_displays,
     }
-    return pitch_type_getters.get(pitch_type, get_hertz)
+    return pitch_display_getters.get(pitch_display, get_hertz)
 
 
 def get_row_frequencies(
-    row: list[float], tuning: Tuning, pitch_type: PitchType
+    row: list[float], tuning: Tuning, pitch_display: PitchDisplay
 ) -> list[str | None]:
-    pitch_type_getter = get_pitch_type_getter(pitch_type)
-    return [pitch_type_getter(frequency, tuning) for frequency in row]
+    pitch_display_getter = get_pitch_display_getter(pitch_display)
+    return [pitch_display_getter(frequency, tuning) for frequency in row]

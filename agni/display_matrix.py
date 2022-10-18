@@ -2,7 +2,7 @@ from rich.box import SIMPLE
 from rich.console import Console
 from rich.table import Table
 
-from .matrix import Matrix, PitchType, Tuning, get_row_frequencies
+from .matrix import Matrix, PitchDisplay, Tuning, get_row_frequencies
 
 
 def get_header_multipler(multiplier: int, pitch: str) -> str:
@@ -15,8 +15,8 @@ def get_melody_header(matrix: Matrix) -> list[str]:
     return [""] + header
 
 
-def get_matrix_table(pitch_type: PitchType) -> Table:
-    title = f"Combination-Tone Matrix ({pitch_type.value.title()})"
+def get_matrix_table(pitch_display: PitchDisplay) -> Table:
+    title = f"Combination-Tone Matrix ({pitch_display.value.title()})"
     return Table(title=title, show_header=False, box=SIMPLE)
 
 
@@ -44,11 +44,13 @@ def get_bass_header(multiplier: int) -> list[str | None]:
     return [get_header_multipler(multiplier, "bass")]
 
 
-def display_matrix(matrix: Matrix, pitch_type: PitchType, tuning: Tuning):
-    table = get_matrix_table(pitch_type)
+def display_matrix(matrix: Matrix, pitch_display: PitchDisplay, tuning: Tuning):
+    table = get_matrix_table(pitch_display)
     add_melody_header(table, matrix)
     for multiplier, row in enumerate(matrix):
-        row_frequencies = get_row_frequencies(row, tuning=tuning, pitch_type=pitch_type)
+        row_frequencies = get_row_frequencies(
+            row, tuning=tuning, pitch_display=pitch_display
+        )
         bolden_base_frequency(multiplier, row_frequencies)
         bass_header = get_bass_header(multiplier)
         formatted_row = bass_header + row_frequencies

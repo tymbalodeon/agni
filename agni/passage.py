@@ -5,7 +5,7 @@ from typing import cast
 from abjad import Container, Duration, NamedPitch, Note, Rest
 from abjad.select import leaves
 
-from .matrix import Matrix, get_matrix
+from .matrix import Matrix, PitchInput, get_matrix
 
 
 @dataclass
@@ -195,6 +195,6 @@ def get_passage_matrices(parts: list[str], relative: str | None = None) -> list[
         if not len(pitches) == 2:
             continue
         bass, melody = pitches
-        matrix = get_matrix(bass, melody)
+        matrix = get_matrix(bass, melody, pitch_input=PitchInput.FREQUENCY, count=5)
         matrices.append(matrix)
     return matrices
