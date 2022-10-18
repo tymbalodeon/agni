@@ -53,13 +53,6 @@ def get_matrix(
     ]
 
 
-class PitchDisplay(Enum):
-    NAME = "name"
-    MIDI = "midi"
-    HERTZ = "hertz"
-    ALL = "all"
-
-
 class Tuning(Enum):
     MICROTONAL = "microtonal"
     EQUAL_TEMPERED = "equal-tempered"
@@ -109,6 +102,13 @@ def get_pitch_displays(frequency: float, tuning: Tuning) -> str | None:
     named_pitch = get_named_pitch(frequency, tuning)
     midi = get_midi_number(frequency, tuning)
     return f"{hertz}\n{named_pitch}\n{midi}"
+
+
+class PitchDisplay(Enum):
+    NAME = "name"
+    MIDI = "midi"
+    HERTZ = "hertz"
+    ALL = "all"
 
 
 def get_pitch_display_getter(
