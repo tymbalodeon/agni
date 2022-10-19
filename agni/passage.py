@@ -21,11 +21,7 @@ class PitchAndDuration:
 
 
 class Part:
-    def __init__(
-        self,
-        name: str,
-        notes: list[Note],
-    ):
+    def __init__(self, name: str, notes: list[Note]):
         self.name = name
         pitch_and_durations = [PitchAndDuration.from_note(note) for note in notes]
         self.notes = iter(pitch_and_durations)
