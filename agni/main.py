@@ -44,7 +44,7 @@ def matrix(
     matrix = get_matrix(bass, melody, pitch_input=pitch_input, count=count)
     if notate:
         notate_matrix(matrix, as_chord=as_chord, persist=persist)
-    display_matrix(matrix, pitch_display=output_type, tuning=tuning)
+    display_matrix(matrix, output_type=output_type, tuning=tuning)
     if play:
         play_matrix(matrix)
 
@@ -60,4 +60,4 @@ def passage(
     """Create combination-tone matrices for a two-voice passage."""
     matrices = get_passage_matrices(voices, pitch_input=input_type, count=count)
     for matrix in matrices:
-        display_matrix(matrix, pitch_display=output_type, tuning=tuning)
+        display_matrix(matrix, output_type=output_type, tuning=tuning)

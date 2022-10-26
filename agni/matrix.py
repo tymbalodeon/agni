@@ -95,7 +95,7 @@ def get_hertz(frequency: float, tuning: Tuning) -> str | None:
     return f"{frequency:,}"
 
 
-def get_pitch_displays(frequency: float, tuning: Tuning) -> str | None:
+def get_output_types(frequency: float, tuning: Tuning) -> str | None:
     if not frequency:
         return None
     hertz = get_hertz(frequency, tuning)
@@ -111,20 +111,20 @@ class OutputType(Enum):
     ALL = "all"
 
 
-def get_pitch_display_getter(
-    pitch_display: OutputType,
+def get_output_type_getter(
+    output_type: OutputType,
 ) -> Callable[[float, Tuning], str | None]:
-    pitch_display_getters: dict[OutputType, Callable[[float, Tuning], str | None]] = {
+    output_type_getters: dict[OutputType, Callable[[float, Tuning], str | None]] = {
         OutputType.LILYPOND: get_named_pitch,
         OutputType.MIDI: get_midi_number,
         OutputType.HERTZ: get_hertz,
-        OutputType.ALL: get_pitch_displays,
+        OutputType.ALL: get_output_types,
     }
-    return pitch_display_getters.get(pitch_display, get_hertz)
+    return output_type_getters.get(output_type, get_hertz)
 
 
 def get_row_frequencies(
-    row: list[float], tuning: Tuning, pitch_display: OutputType
+    row: list[float], tuning: Tuning, output_type: OutputType
 ) -> list[str | None]:
-    pitch_display_getter = get_pitch_display_getter(pitch_display)
-    return [pitch_display_getter(frequency, tuning) for frequency in row]
+    output_type_getter = get_output_type_getter(output_type)
+    return [output_type_getter(frequency, tuning) for frequency in row]

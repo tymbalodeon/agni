@@ -15,8 +15,8 @@ def get_melody_header(matrix: Matrix) -> list[str]:
     return [""] + header
 
 
-def get_matrix_table(pitch_display: OutputType) -> Table:
-    title = f"Combination-Tone Matrix ({pitch_display.value.title()})"
+def get_matrix_table(output_type: OutputType) -> Table:
+    title = f"Combination-Tone Matrix ({output_type.value.title()})"
     return Table(title=title, show_header=False, box=SIMPLE)
 
 
@@ -44,12 +44,12 @@ def get_bass_header(multiplier: int) -> list[str | None]:
     return [get_header_multipler(multiplier, "bass")]
 
 
-def display_matrix(matrix: Matrix, pitch_display: OutputType, tuning: Tuning):
-    table = get_matrix_table(pitch_display)
+def display_matrix(matrix: Matrix, output_type: OutputType, tuning: Tuning):
+    table = get_matrix_table(output_type)
     add_melody_header(table, matrix)
     for multiplier, row in enumerate(matrix):
         row_frequencies = get_row_frequencies(
-            row, tuning=tuning, pitch_display=pitch_display
+            row, tuning=tuning, output_type=output_type
         )
         bolden_base_frequency(multiplier, row_frequencies)
         bass_header = get_bass_header(multiplier)

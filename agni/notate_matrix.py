@@ -13,12 +13,18 @@ from abjad import (
 )
 from abjad.persist import as_pdf
 
-from .matrix import Matrix
+from .matrix import Matrix, OutputType, get_row_frequencies
 from .passage import remove_none_values
 
 
 def sort_frequencies(matrix: Matrix, limit: int | None = None) -> list[float]:
-    frequencies = [frequency for row in matrix for frequency in row]
+    frequencies = [
+        frequency
+        for row in matrix
+        for frequency in get_row_frequencies(
+            row, tuning=tuning, output_type=OutputType.HERTZ
+        )
+    ]
     frequencies.sort()
     frequencies = frequencies[1:]
     if not limit:
