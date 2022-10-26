@@ -23,7 +23,7 @@ input_type = Option(
 tuning = Option(
     Tuning.MICROTONAL.value, "--tuning", help="Set the tuning to quantize to."
 )
-count = Option(5, help="Number of multiples to calculate.")
+multiples = Option(5, help="Number of multiples to calculate.")
 output_type = Option(OutputType.HERTZ.value, help="Set the output type for pitches.")
 
 
@@ -33,7 +33,7 @@ def matrix(
     melody: str = Argument(..., help=pitch_help),
     input_type: InputType = input_type,
     tuning: Tuning = tuning,
-    count: int = count,
+    multiples: int = multiples,
     output_type: OutputType = output_type,
     as_chord: bool = Option(False, "--as-chord", help="Output matrix as chord."),
     notate: bool = Option(False, "--notate", help="Notated matrix."),
@@ -41,7 +41,7 @@ def matrix(
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from a bass and melody pitch."""
-    matrix = get_matrix(bass, melody, input_type=input_type, count=count)
+    matrix = get_matrix(bass, melody, input_type=input_type, multiples=multiples)
     if notate:
         notate_matrix(matrix, as_chord=as_chord, persist=persist)
     display_matrix(matrix, output_type=output_type, tuning=tuning)
@@ -51,13 +51,13 @@ def matrix(
 
 @agni.command()
 def passage(
-    voices: list[str] = Option([], "--voice", help="LilyPond input."),
+    parts: list[str] = Option([], "--part", help="LilyPond input."),
     input_type: InputType = input_type,
     tuning: Tuning = tuning,
-    count: int = count,
+    multiples: int = multiples,
     output_type: OutputType = output_type,
 ):
     """Create combination-tone matrices for a two-voice passage."""
-    matrices = get_passage_matrices(voices, input_type=input_type, count=count)
+    matrices = get_passage_matrices(parts, input_type=input_type, multiples=multiples)
     for matrix in matrices:
         display_matrix(matrix, output_type=output_type, tuning=tuning)

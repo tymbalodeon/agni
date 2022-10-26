@@ -42,10 +42,12 @@ def get_melody_column(
     return [get_sum_frequency(column, bass_multiple, melody) for column in columns]
 
 
-def get_matrix(bass: Pitch, melody: Pitch, input_type: InputType, count: int) -> Matrix:
+def get_matrix(
+    bass: Pitch, melody: Pitch, input_type: InputType, multiples: int
+) -> Matrix:
     bass_frequency = get_frequency(bass, input_type=input_type)
     melody_frequency = get_frequency(melody, input_type=input_type)
-    rows = range(count)
+    rows = range(multiples)
     return [
         get_melody_column(row, rows, bass_frequency, melody_frequency) for row in rows
     ]

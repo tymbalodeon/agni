@@ -10,8 +10,10 @@ def get_header_multipler(multiplier: int, pitch: str) -> str:
 
 
 def get_melody_header(matrix: Matrix) -> list[str]:
-    count = len(matrix)
-    header = [get_header_multipler(multiplier, "melody") for multiplier in range(count)]
+    multiples = len(matrix)
+    header = [
+        get_header_multipler(multiplier, "melody") for multiplier in range(multiples)
+    ]
     return [""] + header
 
 
