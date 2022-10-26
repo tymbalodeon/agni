@@ -5,7 +5,7 @@ from typing import cast
 from abjad import Container, Duration, NamedPitch, Note, Rest
 from abjad.select import leaves
 
-from .matrix import Matrix, PitchInput, get_matrix
+from .matrix import InputType, Matrix, get_matrix
 
 
 @dataclass
@@ -184,7 +184,7 @@ def get_simultaneous_pitches(
 
 
 def get_passage_matrices(
-    parts: list[str], pitch_input: PitchInput, count: int, relative: str | None = None
+    parts: list[str], pitch_input: InputType, count: int, relative: str | None = None
 ) -> list[Matrix]:
     passage = get_part_containers(parts, relative)
     simultaneous_pitches = get_simultaneous_pitches(passage)
