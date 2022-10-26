@@ -31,7 +31,7 @@ output_type = Option(OutputType.HERTZ.value, help="Set the output type for pitch
 def matrix(
     bass: str = Argument(..., help=pitch_help),
     melody: str = Argument(..., help=pitch_help),
-    pitch_input: InputType = input_type,
+    input_type: InputType = input_type,
     tuning: Tuning = tuning,
     count: int = count,
     output_type: OutputType = output_type,
@@ -41,7 +41,7 @@ def matrix(
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from a bass and melody pitch."""
-    matrix = get_matrix(bass, melody, pitch_input=pitch_input, count=count)
+    matrix = get_matrix(bass, melody, input_type=input_type, count=count)
     if notate:
         notate_matrix(matrix, as_chord=as_chord, persist=persist)
     display_matrix(matrix, output_type=output_type, tuning=tuning)
@@ -58,6 +58,6 @@ def passage(
     output_type: OutputType = output_type,
 ):
     """Create combination-tone matrices for a two-voice passage."""
-    matrices = get_passage_matrices(voices, pitch_input=input_type, count=count)
+    matrices = get_passage_matrices(voices, input_type=input_type, count=count)
     for matrix in matrices:
         display_matrix(matrix, output_type=output_type, tuning=tuning)

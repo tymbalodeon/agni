@@ -18,12 +18,12 @@ class InputType(Enum):
     MIDI = "midi"
 
 
-def get_frequency(pitch: Pitch, pitch_input: InputType) -> float:
+def get_frequency(pitch: Pitch, input_type: InputType) -> float:
     if isinstance(pitch, NamedPitch):
         return pitch.hertz
     if isinstance(pitch, str):
         if pitch.isnumeric():
-            if pitch_input == InputType.MIDI:
+            if input_type == InputType.MIDI:
                 return convert_midi_to_frequency(float(pitch))
             return float(pitch)
         return NamedPitch(pitch).hertz
@@ -42,11 +42,9 @@ def get_melody_column(
     return [get_sum_frequency(column, bass_multiple, melody) for column in columns]
 
 
-def get_matrix(
-    bass: Pitch, melody: Pitch, pitch_input: InputType, count: int
-) -> Matrix:
-    bass_frequency = get_frequency(bass, pitch_input=pitch_input)
-    melody_frequency = get_frequency(melody, pitch_input=pitch_input)
+def get_matrix(bass: Pitch, melody: Pitch, input_type: InputType, count: int) -> Matrix:
+    bass_frequency = get_frequency(bass, input_type=input_type)
+    melody_frequency = get_frequency(melody, input_type=input_type)
     rows = range(count)
     return [
         get_melody_column(row, rows, bass_frequency, melody_frequency) for row in rows
