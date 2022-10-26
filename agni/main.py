@@ -40,7 +40,7 @@ def matrix(
     persist: bool = Option(False, "--persist", help="Persist the notated score."),
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
-    """Create combination-tone matrix from a bass and melody pitch."""
+    """Create combination-tone matrix from two pitches."""
     matrix = get_matrix(bass, melody, input_type=input_type, multiples=multiples)
     if notate:
         notate_matrix(matrix, as_chord=as_chord, persist=persist)
