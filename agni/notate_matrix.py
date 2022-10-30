@@ -56,7 +56,10 @@ def show_with_preamble(preamble: str, container: Component, persist: bool):
 
 def get_lilypond_preamble() -> str:
     return r"""
-                \header { tagline = ##f }
+                \header {
+                    tagline = ##f
+                    title = "Combination-Tone Matrix"
+                }
                 \layout {
                     \context {
                         \Score
