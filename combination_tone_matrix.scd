@@ -2,7 +2,7 @@
     ~get_frequency = {
         arg multiplier, bass_multiple, melody;
         var melody_multiple = melody * multiplier;
-        bass_multiple + melody_multiple
+        bass_multiple + melody_multiple;
     };
 
     ~get_melody_column = {
@@ -15,7 +15,7 @@
             melody_column.put(column, frequency);
         };
         columns.do(add_frequency);
-        melody_column
+        melody_column;
     };
 
     ~get_matrix = {
@@ -29,7 +29,7 @@
         bass = bass.midicps;
         melody = melody.midicps;
         count.do(add_column);
-        bass_rows
+        bass_rows;
     };
 
     ~display_matrix = {
@@ -38,7 +38,7 @@
             arg item;
             item.postln;
         };
-        matrix.do(post_row)
+        matrix.do(post_row);
     };
 
     ~sort_frequencies = {
@@ -48,7 +48,7 @@
             frequencies[..limit]
         } {
             frequencies
-        }
+        };
     };
 
     ~play_matrix = {
