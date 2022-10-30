@@ -46,15 +46,17 @@ def get_bass_header(multiplier: int) -> list[str | None]:
     return [get_header_multipler(multiplier, "bass")]
 
 
-def display_matrix(matrix: Matrix, output_type: OutputType, tuning: Tuning):
-    table = get_matrix_table(output_type)
-    add_melody_header(table, matrix)
-    for multiplier, row in enumerate(matrix):
-        row_frequencies = get_row_frequencies(
-            row, tuning=tuning, output_type=output_type
-        )
-        bolden_base_frequency(multiplier, row_frequencies)
-        bass_header = get_bass_header(multiplier)
-        formatted_row = bass_header + row_frequencies
-        table.add_row(*formatted_row)
-    Console().print(table)
+def display_matrix(*matrices: Matrix, output_type: OutputType, tuning: Tuning):
+    console = Console()
+    for matrix in matrices:
+        table = get_matrix_table(output_type)
+        add_melody_header(table, matrix)
+        for multiplier, row in enumerate(matrix):
+            row_frequencies = get_row_frequencies(
+                row, tuning=tuning, output_type=output_type
+            )
+            bolden_base_frequency(multiplier, row_frequencies)
+            bass_header = get_bass_header(multiplier)
+            formatted_row = bass_header + row_frequencies
+            table.add_row(*formatted_row)
+        console.print(table)

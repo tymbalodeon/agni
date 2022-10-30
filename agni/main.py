@@ -25,6 +25,9 @@ tuning = Option(
 )
 multiples = Option(5, help="Number of multiples to calculate.")
 output_type = Option(OutputType.HERTZ.value, help="Set the output type for pitches.")
+as_chord = Option(False, "--as-chord", help="Output matrix as chord.")
+notate = Option(False, "--notate", help="Notated matrix.")
+persist = Option(False, "--persist", help="Persist the notated score.")
 
 
 @agni.command()
@@ -35,9 +38,9 @@ def matrix(
     tuning: Tuning = tuning,
     multiples: int = multiples,
     output_type: OutputType = output_type,
-    as_chord: bool = Option(False, "--as-chord", help="Output matrix as chord."),
-    notate: bool = Option(False, "--notate", help="Notated matrix."),
-    persist: bool = Option(False, "--persist", help="Persist the notated score."),
+    as_chord: bool = as_chord,
+    notate: bool = notate,
+    persist: bool = persist,
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from two pitches."""
@@ -56,8 +59,12 @@ def passage(
     tuning: Tuning = tuning,
     multiples: int = multiples,
     output_type: OutputType = output_type,
+    as_chord: bool = as_chord,
+    notate: bool = notate,
+    persist: bool = persist,
 ):
     """Create combination-tone matrices for a two-voice passage."""
     matrices = get_passage_matrices(parts, input_type=input_type, multiples=multiples)
-    for matrix in matrices:
-        display_matrix(matrix, output_type=output_type, tuning=tuning)
+    if notate:
+        notate_matrix(*matrices, as_chord=as_chord, persist=persist)
+    display_matrix(*matrices, output_type=output_type, tuning=tuning)
