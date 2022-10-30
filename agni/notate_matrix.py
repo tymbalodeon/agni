@@ -81,7 +81,14 @@ def get_lilypond_preamble(*matrices) -> str:
             """
 
 
+def set_bass_and_melody_noteheads(notes: list[Note]) -> list[Note]:
+    for note in notes[:2]:
+        note.written_duration = Duration(1, 1)
+    return notes
+
+
 def add_notes_to_score(notes: list[Note], score: Score, as_chord: bool):
+    notes = set_bass_and_melody_noteheads(notes)
     if as_chord:
         chord_notes = get_chord_notes(notes)
         components = Chord(chord_notes)
