@@ -58,21 +58,26 @@ def show_with_preamble(preamble: str, container: Component, persist: bool):
         show(lilypond_file)
 
 
-def get_lilypond_preamble() -> str:
-    return r"""
-                \header {
+def get_lilypond_preamble(*matrices) -> str:
+    if len(matrices) > 1:
+        matrix_display = "Matrices"
+    else:
+        matrix_display = "Matrix"
+    title = f"Combination-Tone {matrix_display}"
+    return f"""
+                \\header {{
                     tagline = ##f
-                    title = "Combination-Tone Matrix"
-                }
-                \layout {
-                    \context {
-                        \Score
-                        \override SystemStartBar.stencil = ##f
-                        \override TimeSignature.stencil = ##f
-                        \override BarLine.stencil = ##f
-                        \override Stem.stencil = ##f
-                    }
-                }
+                    title = "{title}"
+                }}
+                \\layout {{
+                    \\context {{
+                        \\Score
+                        \\override SystemStartBar.stencil = ##f
+                        \\override TimeSignature.stencil = ##f
+                        \\override BarLine.stencil = ##f
+                        \\override Stem.stencil = ##f
+                    }}
+                }}
             """
 
 
@@ -87,7 +92,7 @@ def add_notes_to_score(notes: list[Note], score: Score, as_chord: bool):
 
 
 def notate_matrix(*matrices: Matrix, as_chord=False, persist=False):
-    preamble = get_lilypond_preamble()
+    preamble = get_lilypond_preamble(*matrices)
     score = Score()
     for matrix in matrices:
         frequencies = sort_frequencies(matrix)
