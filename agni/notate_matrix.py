@@ -64,6 +64,7 @@ def get_lilypond_preamble(*matrices) -> str:
         matrix_display = "Matrix"
     title = f"Combination-Tone {matrix_display}"
     return f"""
+                #(set-default-paper-size "letter")
                 \\header {{
                     tagline = ##f
                     title = "{title}"
@@ -143,6 +144,7 @@ def notate_matrix(*matrices: Matrix, as_chord=False, persist=False, as_ensemble=
             frequencies.reverse()
             for frequency in frequencies:
                 note = get_note(frequency)
+                set_clefs([note])
                 staff = Staff([note])
                 staff_group.append(staff)
         score = Score([staff_group])

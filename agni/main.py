@@ -26,6 +26,7 @@ tuning = Option(
 multiples = Option(5, help="Number of multiples to calculate.")
 output_type = Option(OutputType.HERTZ.value, help="Set the output type for pitches.")
 as_chord = Option(False, "--as-chord", help="Output matrix as chord.")
+as_ensebmle = Option(False, "--as-ensemble", help="Notate each note on its own staff.")
 notate = Option(False, "--notate", help="Notated matrix.")
 persist = Option(False, "--persist", help="Persist the notated score.")
 
@@ -41,12 +42,15 @@ def matrix(
     as_chord: bool = as_chord,
     notate: bool = notate,
     persist: bool = persist,
+    as_ensebmle: bool = as_ensebmle,
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from two pitches."""
     matrix = get_matrix(bass, melody, input_type=input_type, multiples=multiples)
     if notate:
-        notate_matrix(matrix, as_chord=as_chord, persist=persist)
+        notate_matrix(
+            matrix, as_chord=as_chord, persist=persist, as_ensemble=as_ensebmle
+        )
     display_matrix(matrix, output_type=output_type, tuning=tuning)
     if play:
         play_matrix(matrix)
@@ -62,9 +66,12 @@ def passage(
     as_chord: bool = as_chord,
     notate: bool = notate,
     persist: bool = persist,
+    as_ensebmle: bool = as_ensebmle,
 ):
     """Create combination-tone matrices for a two-voice passage."""
     matrices = get_passage_matrices(parts, input_type=input_type, multiples=multiples)
     if notate:
-        notate_matrix(*matrices, as_chord=as_chord, persist=persist)
+        notate_matrix(
+            *matrices, as_chord=as_chord, persist=persist, as_ensemble=as_ensebmle
+        )
     display_matrix(*matrices, output_type=output_type, tuning=tuning)
