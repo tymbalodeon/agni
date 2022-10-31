@@ -9,6 +9,7 @@ from abjad import (
     Note,
     Score,
     Staff,
+    StaffGroup,
     show,
 )
 from abjad.persist import as_pdf
@@ -94,11 +95,22 @@ def add_notes_to_score(notes: list[Note], score: Score, as_chord: bool):
     score.append(staff)
 
 
-def notate_matrix(*matrices: Matrix, as_chord=False, persist=False):
+def notate_matrix(*matrices: Matrix, as_chord=False, persist=False, as_ensemble=False):
     preamble = get_lilypond_preamble(*matrices)
-    score = Score()
-    for matrix in matrices:
-        frequencies = sort_frequencies(matrix)
-        notes = [get_note(frequency) for frequency in frequencies]
-        add_notes_to_score(notes, score, as_chord=as_chord)
+    if as_ensemble:
+        staff_group = StaffGroup()
+        for matrix in matrices:
+            frequencies = sort_frequencies(matrix)
+            frequencies.reverse()
+            for frequency in frequencies:
+                note = get_note(frequency)
+                staff = Staff([note])
+                staff_group.append(staff)
+        score = Score([staff_group])
+    else:
+        score = Score()
+        for matrix in matrices:
+            frequencies = sort_frequencies(matrix)
+            notes = [get_note(frequency) for frequency in frequencies]
+            add_notes_to_score(notes, score, as_chord=as_chord)
     show_with_preamble(preamble, score, persist=persist)
