@@ -3,16 +3,15 @@ from pathlib import Path
 from abjad import (
     Chord,
     Component,
-    Container,
     Duration,
     LilyPondFile,
     NamedPitch,
     Note,
     Score,
+    Staff,
     show,
 )
 from abjad.persist import as_pdf
-from abjad import attach, Markup, InstrumentName
 
 from .matrix import Matrix
 from .passage import remove_none_values
@@ -48,9 +47,6 @@ def get_chord_notes(notes: list[Note]) -> str:
 
 def show_with_preamble(preamble: str, container: Component, persist: bool):
     lilypond_file = LilyPondFile([preamble, container])
-    from abjad import lilypond
-
-    print(lilypond(lilypond_file))
     if persist:
         pdf_file_path = Path.home() / "Desktop" / "matrix.pdf"
         as_pdf(lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True)
@@ -83,7 +79,7 @@ def get_lilypond_preamble(*matrices) -> str:
 
 def set_bass_and_melody_noteheads(notes: list[Note]) -> list[Note]:
     for note in notes[:2]:
-        note.written_duration = Duration(1, 1)
+        note.written_duration = Duration(1, 2)
     return notes
 
 
@@ -94,8 +90,8 @@ def add_notes_to_score(notes: list[Note], score: Score, as_chord: bool):
         components = Chord(chord_notes)
     else:
         components = notes
-    container = Container(components)
-    score.append(container)
+    staff = Staff(components)
+    score.append(staff)
 
 
 def notate_matrix(*matrices: Matrix, as_chord=False, persist=False):
