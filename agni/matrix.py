@@ -58,16 +58,21 @@ class Tuning(Enum):
     EQUAL_TEMPERED = "equal-tempered"
 
 
+def quantize_pitch(pitch: NamedPitch) -> NamedPitch:
+    pitch_number = pitch.number
+    if not isinstance(pitch_number, float):
+        return pitch
+    pitch_number = int(pitch_number)
+    pitch_name = NumberedPitch(pitch_number).name
+    return NamedPitch(pitch_name)
+
+
 def get_named_pitch(frequency: float, tuning: Tuning) -> str | None:
     if not frequency:
         return None
     named_pitch = NamedPitch.from_hertz(frequency)
     if tuning == Tuning.EQUAL_TEMPERED:
-        pitch_number = named_pitch.number
-        if isinstance(pitch_number, float):
-            pitch_number = int(pitch_number)
-            pitch_name = NumberedPitch(pitch_number).name
-            named_pitch = NamedPitch(pitch_name)
+        named_pitch = quantize_pitch(named_pitch)
     return named_pitch.name
 
 

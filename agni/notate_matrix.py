@@ -16,7 +16,7 @@ from abjad import (
 )
 from abjad.persist import as_pdf
 
-from .matrix import Matrix
+from .matrix import Matrix, Tuning, quantize_pitch
 from .passage import remove_none_values
 
 
@@ -29,8 +29,10 @@ def sort_frequencies(matrix: Matrix, limit: int | None = None) -> list[float]:
     return frequencies[:limit]
 
 
-def get_note(frequency: float) -> Note:
+def get_note(frequency: float, tuning: Tuning) -> Note:
     pitch = NamedPitch.from_hertz(frequency)
+    if tuning == Tuning.EQUAL_TEMPERED:
+        pitch = quantize_pitch(pitch)
     duration = Duration(1, 4)
     return Note(pitch, duration)
 
@@ -135,7 +137,9 @@ def set_clefs(notes: list[Note]):
             set_clef(note)
 
 
-def notate_matrix(*matrices: Matrix, as_chord=False, persist=False, as_ensemble=False):
+def notate_matrix(
+    *matrices: Matrix, tuning: Tuning, as_chord=False, persist=False, as_ensemble=False
+):
     preamble = get_lilypond_preamble(*matrices)
     if as_ensemble:
         staff_group = StaffGroup()
@@ -143,7 +147,7 @@ def notate_matrix(*matrices: Matrix, as_chord=False, persist=False, as_ensemble=
             frequencies = sort_frequencies(matrix)
             frequencies.reverse()
             for frequency in frequencies:
-                note = get_note(frequency)
+                note = get_note(frequency, tuning)
                 set_clefs([note])
                 staff = Staff([note])
                 staff_group.append(staff)
@@ -152,7 +156,7 @@ def notate_matrix(*matrices: Matrix, as_chord=False, persist=False, as_ensemble=
         score = Score()
         for matrix in matrices:
             frequencies = sort_frequencies(matrix)
-            notes = [get_note(frequency) for frequency in frequencies]
+            notes = [get_note(frequency, tuning) for frequency in frequencies]
             set_clefs(notes)
             add_notes_to_score(notes, score, as_chord=as_chord)
     show_with_preamble(preamble, score, persist=persist)
