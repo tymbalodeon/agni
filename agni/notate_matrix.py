@@ -87,7 +87,7 @@ def add_notes_to_score(notes: list[Note], score: Score, as_chord: bool):
     notes = set_bass_and_melody_noteheads(notes)
     if as_chord:
         chord_notes = get_chord_notes(notes)
-        components = Chord(chord_notes)
+        components = [Chord(chord_notes)]
     else:
         components = notes
     staff = Staff(components)
