@@ -97,22 +97,41 @@ def add_notes_to_score(notes: list[Note], score: Score, as_chord: bool):
     score.append(staff)
 
 
+def get_clef_by_octave(octave: int) -> Clef:
+    if octave < 1:
+        return Clef("bass_15")
+    if octave < 2:
+        return Clef("bass_8")
+    if octave < 4:
+        return Clef("bass")
+    if octave < 5:
+        return Clef("treble")
+    if octave < 6:
+        return Clef("treble^8")
+    return Clef("treble^15")
+
+
+def set_clef(note: Note) -> Clef | None:
+    written_pitch = note.written_pitch
+    if not written_pitch:
+        return None
+    octave = written_pitch.octave.number
+    clef = get_clef_by_octave(octave)
+    attach(clef, note)
+    return clef
+
+
 def set_clefs(notes: list[Note]):
-    clef_change_octave = 4
     first_note = notes[0]
-    written_pitch = first_note.written_pitch
-    if written_pitch:
-        octave = written_pitch.octave.number
-        if octave < clef_change_octave:
-            clef = Clef("bass")
-            attach(clef, first_note)
+    current_clef = set_clef(first_note)
     for note in notes[1:]:
-        if not note.written_pitch:
+        written_pitch = note.written_pitch
+        if not written_pitch:
             continue
-        if note.written_pitch.octave.number >= clef_change_octave:
-            clef = Clef("treble")
-            attach(clef, note)
-            return
+        octave = written_pitch.octave.number
+        new_clef = get_clef_by_octave(octave)
+        if new_clef != current_clef:
+            set_clef(note)
 
 
 def notate_matrix(*matrices: Matrix, as_chord=False, persist=False, as_ensemble=False):
