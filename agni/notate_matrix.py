@@ -11,6 +11,8 @@ from abjad import (
     Staff,
     StaffGroup,
     show,
+    attach,
+    Clef,
 )
 from abjad.persist import as_pdf
 
@@ -95,6 +97,24 @@ def add_notes_to_score(notes: list[Note], score: Score, as_chord: bool):
     score.append(staff)
 
 
+def set_clefs(notes: list[Note]):
+    clef_change_octave = 4
+    first_note = notes[0]
+    written_pitch = first_note.written_pitch
+    if written_pitch:
+        octave = written_pitch.octave.number
+        if octave < clef_change_octave:
+            clef = Clef("bass")
+            attach(clef, first_note)
+    for note in notes[1:]:
+        if not note.written_pitch:
+            continue
+        if note.written_pitch.octave.number >= clef_change_octave:
+            clef = Clef("treble")
+            attach(clef, note)
+            return
+
+
 def notate_matrix(*matrices: Matrix, as_chord=False, persist=False, as_ensemble=False):
     preamble = get_lilypond_preamble(*matrices)
     if as_ensemble:
@@ -112,5 +132,6 @@ def notate_matrix(*matrices: Matrix, as_chord=False, persist=False, as_ensemble=
         for matrix in matrices:
             frequencies = sort_frequencies(matrix)
             notes = [get_note(frequency) for frequency in frequencies]
+            set_clefs(notes)
             add_notes_to_score(notes, score, as_chord=as_chord)
     show_with_preamble(preamble, score, persist=persist)
