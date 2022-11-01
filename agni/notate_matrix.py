@@ -2,6 +2,7 @@ from pathlib import Path
 
 from abjad import (
     Chord,
+    Clef,
     Component,
     Duration,
     LilyPondFile,
@@ -10,9 +11,8 @@ from abjad import (
     Score,
     Staff,
     StaffGroup,
-    show,
     attach,
-    Clef,
+    show,
 )
 from abjad.persist import as_pdf
 
@@ -146,12 +146,12 @@ def notate_matrix(
         for matrix in matrices:
             frequencies = sort_frequencies(matrix)
             frequencies.reverse()
-            for frequency in frequencies:
+            for index, frequency in enumerate(frequencies):
                 note = get_note(frequency, tuning)
                 set_clefs([note])
                 staff_names = [staff.name for staff in staff_group]
-                index = str(index)
-                if index in staff_names:
+                staff_name = str(index)
+                if staff_name in staff_names:
                     staff = next(staff for staff in staff_group if staff.name == index)
                     staff.append(note)
                 else:
