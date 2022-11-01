@@ -49,7 +49,11 @@ def matrix(
     matrix = get_matrix(bass, melody, input_type=input_type, multiples=multiples)
     if notate:
         notate_matrix(
-            matrix, as_chord=as_chord, persist=persist, as_ensemble=as_ensebmle
+            matrix,
+            tuning=tuning,
+            as_chord=as_chord,
+            persist=persist,
+            as_ensemble=as_ensebmle,
         )
     display_matrix(matrix, output_type=output_type, tuning=tuning)
     if play:
@@ -72,6 +76,10 @@ def passage(
     matrices = get_passage_matrices(parts, input_type=input_type, multiples=multiples)
     if notate:
         notate_matrix(
-            *matrices, as_chord=as_chord, persist=persist, as_ensemble=as_ensebmle
+            *matrices,
+            tuning=tuning,
+            as_chord=as_chord,
+            persist=persist,
+            as_ensemble=as_ensebmle,
         )
     display_matrix(*matrices, output_type=output_type, tuning=tuning)
