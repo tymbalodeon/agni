@@ -142,11 +142,17 @@ def notate_matrix(*matrices: Matrix, as_chord=False, persist=False, as_ensemble=
         for matrix in matrices:
             frequencies = sort_frequencies(matrix)
             frequencies.reverse()
-            for frequency in frequencies:
+            for index, frequency in enumerate(frequencies):
                 note = get_note(frequency)
                 set_clefs([note])
-                staff = Staff([note])
-                staff_group.append(staff)
+                staff_names = [staff.name for staff in staff_group]
+                index = str(index)
+                if index in staff_names:
+                    staff = next(staff for staff in staff_group if staff.name == index)
+                    staff.append(note)
+                else:
+                    staff = Staff([note], name=str(index))
+                    staff_group.append(staff)
         score = Score([staff_group])
     else:
         score = Score()
