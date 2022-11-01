@@ -152,7 +152,9 @@ def notate_matrix(
                 staff_names = [staff.name for staff in staff_group]
                 staff_name = str(index)
                 if staff_name in staff_names:
-                    staff = next(staff for staff in staff_group if staff.name == index)
+                    staff = next(
+                        staff for staff in staff_group if staff.name == staff_name
+                    )
                     staff.append(note)
                 else:
                     staff = Staff([note], name=str(index))
