@@ -74,9 +74,9 @@ def get_lilypond_preamble(*matrices) -> str:
                 \\layout {{
                     \\context {{
                         \\Score
-                        \\override SystemStartBar.stencil = ##f
                         \\override TimeSignature.stencil = ##f
                         \\override BarLine.stencil = ##f
+                        \\override SpanBar.stencil = ##f
                         \\override Stem.stencil = ##f
                     }}
                 }}
