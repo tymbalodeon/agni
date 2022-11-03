@@ -32,9 +32,7 @@ def get_staff_notes(staves: list[Staff], part: str) -> list[Note]:
     return notes
 
 
-def get_bass_and_melody_from_input_file(
-    input_file: Path,
-) -> tuple[list[Note], list[Note]]:
+def get_passage_from_input_file(input_file: Path) -> tuple[list[Note], list[Note]]:
     lilypond_input = input_file.read_text()
     staves = get_staves_from_lilypond_input(lilypond_input)
     melody = get_staff_notes(staves, "melody")

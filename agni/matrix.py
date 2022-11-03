@@ -43,7 +43,7 @@ def get_melody_column(
 
 
 def get_matrix(
-    bass: Pitch, melody: Pitch, input_type: InputType, multiples: int
+    bass: Pitch, melody: Pitch, input_type=InputType.HERTZ, multiples: int = 4
 ) -> Matrix:
     bass_frequency = get_frequency(bass, input_type=input_type)
     melody_frequency = get_frequency(melody, input_type=input_type)

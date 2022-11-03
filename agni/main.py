@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from rich.markup import escape
 from typer import Argument, Option, Typer
 
@@ -17,13 +19,10 @@ agni = Typer(
 
 pitch_choices = escape("[hertz|midi|lilypond]")
 pitch_help = f"[bold yellow]{pitch_choices}[/bold yellow]"
-input_type = Option(
-    InputType.HERTZ.value, "--input-type", help="Set the input type for numeric input."
-)
 tuning = Option(
     Tuning.MICROTONAL.value, "--tuning", help="Set the tuning to quantize to."
 )
-multiples = Option(5, help="Number of multiples to calculate.")
+multiples = Option(4, help="Number of multiples to calculate.")
 output_type = Option(OutputType.HERTZ.value, help="Set the output type for pitches.")
 as_chord = Option(False, "--as-chord", help="Output matrix as chord.")
 as_ensebmle = Option(False, "--as-ensemble", help="Notate each note on its own staff.")
@@ -35,7 +34,11 @@ persist = Option(False, "--persist", help="Persist the notated score.")
 def matrix(
     bass: str = Argument(..., help=pitch_help),
     melody: str = Argument(..., help=pitch_help),
-    input_type: InputType = input_type,
+    input_type: InputType = Option(
+        InputType.HERTZ.value,
+        "--input-type",
+        help="Set the input type for numeric input.",
+    ),
     tuning: Tuning = tuning,
     multiples: int = multiples,
     output_type: OutputType = output_type,
@@ -62,8 +65,9 @@ def matrix(
 
 @agni.command()
 def passage(
-    parts: list[str] = Option([], "--part", help="LilyPond input."),
-    input_type: InputType = input_type,
+    input_file: Path = Argument(
+        Path("examples/lonely-child.ly"), help="LilyPond input file."
+    ),
     tuning: Tuning = tuning,
     multiples: int = multiples,
     output_type: OutputType = output_type,
@@ -73,7 +77,7 @@ def passage(
     as_ensebmle: bool = as_ensebmle,
 ):
     """Create combination-tone matrices for a two-voice passage."""
-    matrices = get_passage_matrices(parts, input_type=input_type, multiples=multiples)
+    matrices = get_passage_matrices(input_file, multiples=multiples)
     if notate:
         notate_matrix(
             *matrices,

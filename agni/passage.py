@@ -1,11 +1,12 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import cast
+from pathlib import Path
 
 from abjad import Container, Duration, NamedPitch, Note, Rest
-from abjad.select import leaves
 
-from .matrix import InputType, Matrix, get_matrix
+from agni.read_passage import get_passage_from_input_file
+
+from .matrix import Matrix, get_matrix
 
 
 @dataclass
@@ -78,15 +79,8 @@ def get_part_containers(
     return [Container(part) for part in lilypond_parts]
 
 
-def get_parts(containers: list[Container]) -> list[Part]:
-    parts = []
-    for count, container in enumerate(containers):
-        container.name = str(count)
-        name = container.name
-        notes = cast(list[Note], leaves(container))
-        part = Part(name, notes)
-        parts.append(part)
-    return parts
+def get_parts(passage: tuple[list[Note], list[Note]]) -> list[Part]:
+    return [Part(str(index), part) for index, part in enumerate(passage)]
 
 
 def remove_none_values(collection: list) -> list:
@@ -167,9 +161,9 @@ def get_ordered_unique_pitch_sets(
 
 
 def get_simultaneous_pitches(
-    containers: list[Container], as_set=True, show_adjacent_duplicates=False
+    passage: tuple[list[Note], list[Note]], as_set=True, show_adjacent_duplicates=False
 ) -> list[list[NamedPitch]]:
-    parts = get_parts(containers)
+    parts = get_parts(passage)
     pitches = [get_current_pitches(parts)]
     end_of_passage = is_end_of_passage(parts)
     while not end_of_passage:
@@ -183,16 +177,14 @@ def get_simultaneous_pitches(
     return pitches
 
 
-def get_passage_matrices(
-    parts: list[str], input_type: InputType, multiples: int, relative: str | None = None
-) -> list[Matrix]:
-    passage = get_part_containers(parts, relative)
+def get_passage_matrices(input_file: Path, multiples: int) -> list[Matrix]:
+    passage = get_passage_from_input_file(input_file)
     simultaneous_pitches = get_simultaneous_pitches(passage)
     matrices = []
     for pitches in simultaneous_pitches:
         if not len(pitches) == 2:
             continue
         bass, melody = pitches
-        matrix = get_matrix(bass, melody, input_type=input_type, multiples=multiples)
+        matrix = get_matrix(bass, melody, multiples=multiples)
         matrices.append(matrix)
     return matrices
