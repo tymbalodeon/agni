@@ -21,13 +21,13 @@ class InputType(Enum):
 def get_frequency(pitch: Pitch, input_type: InputType) -> float:
     if isinstance(pitch, NamedPitch):
         return pitch.hertz
-    if isinstance(pitch, str):
-        if pitch.isnumeric():
-            if input_type == InputType.MIDI:
-                return convert_midi_to_frequency(float(pitch))
-            return float(pitch)
-        return NamedPitch(pitch).hertz
-    return pitch
+    if input_type == InputType.MIDI:
+        return convert_midi_to_frequency(float(pitch))
+    if isinstance(pitch, float):
+        return pitch
+    if pitch.isnumeric():
+        return float(pitch)
+    return NamedPitch(pitch).hertz
 
 
 def get_sum_frequency(multiplier: int, bass_multiple: float, melody: float) -> float:
