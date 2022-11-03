@@ -3,12 +3,11 @@ from pathlib import Path
 from rich.markup import escape
 from typer import Argument, Option, Typer
 
-from agni.passage import get_passage_matrices
-from agni.play_matrix import play_matrix
-
 from .display_matrix import display_matrix
 from .matrix import InputType, OutputType, Tuning, get_matrix
 from .notate_matrix import notate_matrix
+from .passage.passage import get_passage_matrices
+from .play_matrix import play_matrix
 
 agni = Typer(
     help="Create combination-tone matrices.",

@@ -4,9 +4,9 @@ from pathlib import Path
 
 from abjad import Container, Duration, NamedPitch, Note, Rest
 
-from agni.read_passage import get_passage_from_input_file
+from agni.matrix import Matrix, get_matrix
 
-from .matrix import Matrix, get_matrix
+from .read_passage import get_passage_from_input_file
 
 
 @dataclass

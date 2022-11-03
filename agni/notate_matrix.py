@@ -17,7 +17,7 @@ from abjad import (
 from abjad.persist import as_pdf
 
 from .matrix import Matrix, Tuning, quantize_pitch
-from .passage import remove_none_values
+from .passage.passage import remove_none_values
 
 
 def sort_frequencies(matrix: Matrix, limit: int | None = None) -> list[float]:
