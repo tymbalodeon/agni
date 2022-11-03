@@ -1,8 +1,9 @@
-from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterator
 
-from abjad import Container, Duration, NamedPitch, Note, Rest
+from abjad import Container, Duration, NamedPitch, Note, Rest, Tuplet
+from abjad.get import lineage as get_linege
 
 from agni.matrix import Matrix, get_matrix
 
@@ -15,17 +16,26 @@ class PitchAndDuration:
     duration: Duration
 
     @staticmethod
-    def from_note(note: Note):
+    def _get_parent_tuplet(note: Note) -> Tuplet | None:
+        lineage = get_linege(note)
+        return next(
+            (component for component in lineage if isinstance(component, Tuplet)), None
+        )
+
+    @classmethod
+    def from_note(cls, note: Note):
         named_pitch = note.written_pitch
         duration = note.written_duration
+        tuplet = cls._get_parent_tuplet(note)
+        if tuplet:
+            duration = duration * tuplet.multiplier
         return PitchAndDuration(named_pitch, duration)
 
 
 class Part:
     def __init__(self, name: str, notes: list[Note]):
         self.name = name
-        pitch_and_durations = [PitchAndDuration.from_note(note) for note in notes]
-        self.notes = iter(pitch_and_durations)
+        self.notes = (PitchAndDuration.from_note(note) for note in notes)
         self.current_note = self.get_next_note(self.notes)
 
     def get_next_note(

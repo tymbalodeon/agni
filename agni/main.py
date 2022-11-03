@@ -22,7 +22,7 @@ tuning = Option(
     Tuning.MICROTONAL.value, "--tuning", help="Set the tuning to quantize to."
 )
 multiples = Option(4, help="Number of multiples to calculate.")
-output_type = Option(OutputType.HERTZ.value, help="Set the output type for pitches.")
+output_type = Option(OutputType.LILYPOND.value, help="Set the output type for pitches.")
 as_chord = Option(False, "--as-chord", help="Output matrix as chord.")
 as_ensebmle = Option(False, "--as-ensemble", help="Notate each note on its own staff.")
 notate = Option(False, "--notate", help="Notated matrix.")
