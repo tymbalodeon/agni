@@ -1,9 +1,17 @@
 from pathlib import Path
 from typing import cast
 
-from abjad import Block, Duration, LilyPondFile, Note, Staff, StaffGroup, parse
+from abjad import (
+    Block,
+    Duration,
+    LilyPondFile,
+    Note,
+    Staff,
+    StaffGroup,
+    Tie,
+    parse,
+)
 from abjad.get import indicators as get_indicators
-from abjad.indicators import Tie
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 
