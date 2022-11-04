@@ -157,13 +157,13 @@ def are_same_pitches(
 
 
 def should_add_pitches(
-    show_adjacent_duplicates: bool,
+    adjacent_duplicates: bool,
     new_pitches: list[NamedPitch],
     old_pitches: list[list[NamedPitch]],
 ) -> bool:
     if not new_pitches:
         return False
-    if show_adjacent_duplicates:
+    if adjacent_duplicates:
         return True
     is_duplicate = are_same_pitches(new_pitches, old_pitches)
     should_add = not is_duplicate
@@ -181,7 +181,7 @@ def get_ordered_unique_pitch_sets(
 def get_simultaneous_pitches(
     passage: tuple[list[Note], list[Note]],
     as_set=True,
-    show_adjacent_duplicates=False,
+    adjacent_duplicates=False,
 ) -> list[list[NamedPitch]]:
     parts = get_parts(passage)
     pitches = [get_current_pitches(parts)]
@@ -189,7 +189,7 @@ def get_simultaneous_pitches(
     while not end_of_passage:
         new_pitches = get_next_pitches(parts)
         should_add = should_add_pitches(
-            show_adjacent_duplicates, new_pitches, pitches
+            adjacent_duplicates, new_pitches, pitches
         )
         if should_add:
             pitches.append(new_pitches)
@@ -200,9 +200,16 @@ def get_simultaneous_pitches(
 
 
 def get_passage_matrices(
-    passage: tuple[list[Note], list[Note]], multiples: int
+    passage: tuple[list[Note], list[Note]],
+    multiples: int,
+    as_set: bool,
+    adjacent_duplicates: bool,
 ) -> list[Matrix]:
-    simultaneous_pitches = get_simultaneous_pitches(passage)
+    simultaneous_pitches = get_simultaneous_pitches(
+        passage,
+        as_set=as_set,
+        adjacent_duplicates=adjacent_duplicates,
+    )
     matrices = []
     for pitches in simultaneous_pitches:
         if not len(pitches) == 2:

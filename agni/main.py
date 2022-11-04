@@ -1,8 +1,9 @@
 from pathlib import Path
-from agni.passage.read_passage import get_passage_from_input_file
 
 from rich.markup import escape
 from typer import Argument, Option, Typer
+
+from agni.passage.read_passage import get_passage_from_input_file
 
 from .display_matrix import display_matrix
 from .matrix import InputType, OutputType, Tuning, get_matrix
@@ -80,17 +81,30 @@ def passage(
     as_chord: bool = as_chord,
     notate: bool = notate,
     persist: bool = persist,
-    as_ensebmle: bool = as_ensebmle,
+    as_ensemble: bool = as_ensebmle,
+    as_set: bool = Option(
+        False, "--as-set/", help="Output unique matrices only."
+    ),
+    adjacent_duplicates: bool = Option(
+        False,
+        "--adjacent-duplicates/",
+        help="Output adjacent duplicate matrices.",
+    ),
 ):
     """Create combination-tone matrices for a two-voice passage."""
     passage = get_passage_from_input_file(input_file)
-    matrices = get_passage_matrices(passage, multiples=multiples)
+    matrices = get_passage_matrices(
+        passage,
+        multiples=multiples,
+        as_set=as_set,
+        adjacent_duplicates=adjacent_duplicates,
+    )
     if notate:
         notate_matrix(
             *matrices,
             tuning=tuning,
             as_chord=as_chord,
             persist=persist,
-            as_ensemble=as_ensebmle,
+            as_ensemble=as_ensemble,
         )
     display_matrix(*matrices, output_type=output_type, tuning=tuning)
