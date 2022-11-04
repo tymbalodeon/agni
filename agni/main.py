@@ -109,6 +109,7 @@ def passage(
             as_chord=as_chord,
             persist=persist,
             as_ensemble=as_ensemble,
+            as_set=as_set,
             passage=passage,
         )
     display_matrix(*matrices, output_type=output_type, tuning=tuning)

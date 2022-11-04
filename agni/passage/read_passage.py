@@ -6,6 +6,7 @@ from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 
 Passage = tuple[list[Note], list[Note]]
+PassageDurations = tuple[list[Duration], list[Duration]]
 
 
 def get_score_block(lilypond_input: str) -> Block:
@@ -54,7 +55,7 @@ def get_part_durations(part: list[Note]) -> list[Duration]:
 
 def get_passage_durations(
     passage: Passage,
-) -> tuple[list[Duration], list[Duration]]:
+) -> PassageDurations:
     bass_durations = get_part_durations(passage[0])
     melody_durations = get_part_durations(passage[1])
     return bass_durations, melody_durations

@@ -18,6 +18,7 @@ from abjad.persist import as_pdf
 
 from agni.passage.read_passage import (
     Passage,
+    PassageDurations,
     get_passage_durations,
     get_staff_by_name,
 )
@@ -35,11 +36,12 @@ def sort_frequencies(matrix: Matrix, limit: int | None = None) -> list[float]:
     return frequencies[:limit]
 
 
-def get_note(frequency: float, tuning: Tuning) -> Note:
+def get_note(
+    frequency: float, tuning: Tuning, duration=Duration(1, 4)
+) -> Note:
     pitch = NamedPitch.from_hertz(frequency)
     if tuning == Tuning.EQUAL_TEMPERED:
         pitch = quantize_pitch(pitch)
-    duration = Duration(1, 4)
     return Note(pitch, duration)
 
 
@@ -65,12 +67,16 @@ def show_with_preamble(preamble: str, container: Component, persist: bool):
         show(lilypond_file)
 
 
-def get_lilypond_preamble(*matrices) -> str:
+def get_lilypond_preamble(*matrices, disable_stems=True) -> str:
     if len(matrices) > 1:
         matrix_display = "Matrices"
     else:
         matrix_display = "Matrix"
     title = f"Combination-Tone {matrix_display}"
+    if disable_stems:
+        stem_stencil = "\\override Stem.stencil = ##f"
+    else:
+        stem_stencil = ""
     return f"""
                 #(set-default-paper-size "letter")
                 \\header {{
@@ -83,7 +89,7 @@ def get_lilypond_preamble(*matrices) -> str:
                         \\override TimeSignature.stencil = ##f
                         \\override BarLine.stencil = ##f
                         \\override SpanBar.stencil = ##f
-                        \\override Stem.stencil = ##f
+                        {stem_stencil}
                     }}
                 }}
             """
@@ -143,23 +149,42 @@ def set_clefs(notes: list[Note]):
             set_clef(note)
 
 
-def get_ensemble_score(*matrices: Matrix, tuning: Tuning) -> Score:
+def add_matrix_to_staff_group(
+    matrix: Matrix,
+    staff_group: StaffGroup,
+    tuning: Tuning,
+    duration=Duration(1, 4),
+):
+    frequencies = sort_frequencies(matrix)
+    frequencies.reverse()
+    for index, frequency in enumerate(frequencies):
+        note = get_note(frequency, tuning, duration=duration)
+        set_clefs([note])
+        staff_names = [staff.name for staff in staff_group]
+        staff_name = str(index)
+        if staff_name in staff_names:
+            staff = get_staff_by_name(staff_group, staff_name)
+            if staff:
+                staff.append(note)
+        else:
+            staff = Staff([note], name=str(index))
+            staff_group.append(staff)
+
+
+def get_ensemble_score(
+    *matrices: Matrix,
+    tuning: Tuning,
+    durations: PassageDurations | None,
+) -> Score:
     staff_group = StaffGroup()
-    for matrix in matrices:
-        frequencies = sort_frequencies(matrix)
-        frequencies.reverse()
-        for index, frequency in enumerate(frequencies):
-            note = get_note(frequency, tuning)
-            set_clefs([note])
-            staff_names = [staff.name for staff in staff_group]
-            staff_name = str(index)
-            if staff_name in staff_names:
-                staff = get_staff_by_name(staff_group, staff_name)
-                if staff:
-                    staff.append(note)
-            else:
-                staff = Staff([note], name=str(index))
-                staff_group.append(staff)
+    if durations:
+        for matrix, duration in zip(matrices, durations[1]):
+            add_matrix_to_staff_group(
+                matrix, staff_group, tuning=tuning, duration=duration
+            )
+    else:
+        for matrix in matrices:
+            add_matrix_to_staff_group(matrix, staff_group, tuning=tuning)
     return Score([staff_group])
 
 
@@ -181,13 +206,19 @@ def notate_matrix(
     as_chord=False,
     persist=False,
     as_ensemble=False,
+    as_set: bool,
     passage: Passage | None = None,
 ):
-    if passage:
-        durations = get_passage_durations(passage)
-    preamble = get_lilypond_preamble(*matrices)
+    disable_stems = as_set
+    preamble = get_lilypond_preamble(*matrices, disable_stems=disable_stems)
     if as_ensemble:
-        score = get_ensemble_score(*matrices, tuning=tuning)
+        if passage and not as_set:
+            durations = get_passage_durations(passage)
+        else:
+            durations = None
+        score = get_ensemble_score(
+            *matrices, tuning=tuning, durations=durations
+        )
     else:
         score = get_reference_score(
             *matrices, tuning=tuning, as_chord=as_chord
