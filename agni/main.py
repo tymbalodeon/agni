@@ -83,7 +83,7 @@ def passage(
     persist: bool = persist,
     as_ensemble: bool = as_ensebmle,
     as_set: bool = Option(
-        False, "--as-set/", help="Output unique matrices only."
+        True, "--as-set/--all", help="Output unique matrices only."
     ),
     adjacent_duplicates: bool = Option(
         False,
