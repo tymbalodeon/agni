@@ -8,7 +8,7 @@ from agni.matrix import Matrix, get_matrix
 
 
 @dataclass
-class PitchAndDuration:
+class SoundingNote:
     named_pitch: NamedPitch | None
     duration: Duration
 
@@ -31,18 +31,18 @@ class PitchAndDuration:
         tuplet = cls._get_parent_tuplet(note)
         if tuplet:
             duration = duration * tuplet.multiplier
-        return PitchAndDuration(named_pitch, duration)
+        return SoundingNote(named_pitch, duration)
 
 
 class Part:
     def __init__(self, name: str, notes: list[Note]):
         self.name = name
-        self.notes = (PitchAndDuration.from_note(note) for note in notes)
+        self.notes = (SoundingNote.from_note(note) for note in notes)
         self.current_note = self.get_next_note(self.notes)
 
     def get_next_note(
-        self, notes: Iterator[PitchAndDuration] | None = None
-    ) -> PitchAndDuration | None:
+        self, notes: Iterator[SoundingNote] | None = None
+    ) -> SoundingNote | None:
         if not notes:
             notes = self.notes
         self.first_time = True

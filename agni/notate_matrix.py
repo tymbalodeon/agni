@@ -16,6 +16,8 @@ from abjad import (
 )
 from abjad.persist import as_pdf
 
+from agni.passage.read_passage import get_staff_by_name
+
 from .matrix import Matrix, Tuning, quantize_pitch
 from .passage.passage import remove_none_values
 
@@ -137,7 +139,7 @@ def set_clefs(notes: list[Note]):
             set_clef(note)
 
 
-def get_ensebmle_score(*matrices: Matrix, tuning: Tuning) -> Score:
+def get_ensemble_score(*matrices: Matrix, tuning: Tuning) -> Score:
     staff_group = StaffGroup()
     for matrix in matrices:
         frequencies = sort_frequencies(matrix)
@@ -148,10 +150,9 @@ def get_ensebmle_score(*matrices: Matrix, tuning: Tuning) -> Score:
             staff_names = [staff.name for staff in staff_group]
             staff_name = str(index)
             if staff_name in staff_names:
-                staff = next(
-                    staff for staff in staff_group if staff.name == staff_name
-                )
-                staff.append(note)
+                staff = get_staff_by_name(staff_group, staff_name)
+                if staff:
+                    staff.append(note)
             else:
                 staff = Staff([note], name=str(index))
                 staff_group.append(staff)
@@ -179,7 +180,7 @@ def notate_matrix(
 ):
     preamble = get_lilypond_preamble(*matrices)
     if as_ensemble:
-        score = get_ensebmle_score(*matrices, tuning=tuning)
+        score = get_ensemble_score(*matrices, tuning=tuning)
     else:
         score = get_reference_score(
             *matrices, tuning=tuning, as_chord=as_chord

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import cast
 
-from abjad import Block, LilyPondFile, Note, Staff, parse
+from abjad import Block, LilyPondFile, Note, Staff, StaffGroup, parse
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 
@@ -20,8 +20,10 @@ def get_staves_from_lilypond_input(lilypond_input: str) -> list[Staff]:
     )
 
 
-def get_staff_by_name(staves: list[Staff], part: str) -> Staff | None:
-    return next((staff for staff in staves if staff.name == part), None)
+def get_staff_by_name(
+    staves: StaffGroup | list[Staff], name: str
+) -> Staff | None:
+    return next((staff for staff in staves if staff.name == name), None)
 
 
 def get_staff_notes(staves: list[Staff], part: str) -> list[Note]:
