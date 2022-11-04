@@ -206,7 +206,7 @@ def notate_matrix(
     as_chord=False,
     persist=False,
     as_ensemble=False,
-    as_set: bool,
+    as_set=True,
     passage: Passage | None = None,
 ):
     disable_stems = as_set

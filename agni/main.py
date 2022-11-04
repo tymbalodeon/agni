@@ -3,10 +3,7 @@ from pathlib import Path
 from rich.markup import escape
 from typer import Argument, Option, Typer
 
-from agni.passage.read_passage import (
-    get_passage_durations,
-    get_passage_from_input_file,
-)
+from agni.passage.read_passage import get_passage_from_input_file
 
 from .display_matrix import display_matrix
 from .matrix import InputType, OutputType, Tuning, get_matrix
