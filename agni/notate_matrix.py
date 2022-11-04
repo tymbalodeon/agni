@@ -16,7 +16,11 @@ from abjad import (
 )
 from abjad.persist import as_pdf
 
-from agni.passage.read_passage import get_staff_by_name
+from agni.passage.read_passage import (
+    Passage,
+    get_passage_durations,
+    get_staff_by_name,
+)
 
 from .matrix import Matrix, Tuning, quantize_pitch
 from .passage.passage import remove_none_values
@@ -177,7 +181,10 @@ def notate_matrix(
     as_chord=False,
     persist=False,
     as_ensemble=False,
+    passage: Passage | None = None,
 ):
+    if passage:
+        durations = get_passage_durations(passage)
     preamble = get_lilypond_preamble(*matrices)
     if as_ensemble:
         score = get_ensemble_score(*matrices, tuning=tuning)

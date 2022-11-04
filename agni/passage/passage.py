@@ -5,6 +5,7 @@ from abjad import Container, Duration, NamedPitch, Note, Rest, Tuplet
 from abjad.get import lineage as get_linege
 
 from agni.matrix import Matrix, get_matrix
+from agni.passage.read_passage import Passage
 
 
 @dataclass
@@ -91,7 +92,7 @@ def get_part_containers(
     return [Container(part) for part in lilypond_parts]
 
 
-def get_parts(passage: tuple[list[Note], list[Note]]) -> list[Part]:
+def get_parts(passage: Passage) -> list[Part]:
     return [Part(str(index), part) for index, part in enumerate(passage)]
 
 
@@ -179,7 +180,7 @@ def get_ordered_unique_pitch_sets(
 
 
 def get_simultaneous_pitches(
-    passage: tuple[list[Note], list[Note]],
+    passage: Passage,
     as_set=True,
     adjacent_duplicates=False,
 ) -> list[list[NamedPitch]]:
@@ -200,7 +201,7 @@ def get_simultaneous_pitches(
 
 
 def get_passage_matrices(
-    passage: tuple[list[Note], list[Note]],
+    passage: Passage,
     multiples: int,
     as_set: bool,
     adjacent_duplicates: bool,

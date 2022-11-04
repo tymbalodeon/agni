@@ -1,9 +1,11 @@
 from pathlib import Path
 from typing import cast
 
-from abjad import Block, LilyPondFile, Note, Staff, StaffGroup, parse
+from abjad import Block, Duration, LilyPondFile, Note, Staff, StaffGroup, parse
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
+
+Passage = tuple[list[Note], list[Note]]
 
 
 def get_score_block(lilypond_input: str) -> Block:
@@ -38,9 +40,21 @@ def get_staff_notes(staves: list[Staff], part: str) -> list[Note]:
 
 def get_passage_from_input_file(
     input_file: Path,
-) -> tuple[list[Note], list[Note]]:
+) -> Passage:
     lilypond_input = input_file.read_text()
     staves = get_staves_from_lilypond_input(lilypond_input)
     melody = get_staff_notes(staves, "melody")
     bass = get_staff_notes(staves, "bass")
     return bass, melody
+
+
+def get_part_durations(part: list[Note]) -> list[Duration]:
+    return [note.written_duration for note in part]
+
+
+def get_passage_durations(
+    passage: Passage,
+) -> tuple[list[Duration], list[Duration]]:
+    bass_durations = get_part_durations(passage[0])
+    melody_durations = get_part_durations(passage[1])
+    return bass_durations, melody_durations
