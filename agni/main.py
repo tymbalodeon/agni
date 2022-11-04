@@ -107,6 +107,7 @@ def passage(
             persist=persist,
             as_ensemble=as_ensemble,
             as_set=as_set,
+            adjacent_duplicates=adjacent_duplicates,
             passage=passage,
         )
     display_matrix(*matrices, output_type=output_type, tuning=tuning)

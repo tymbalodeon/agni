@@ -2,11 +2,14 @@ from pathlib import Path
 from typing import cast
 
 from abjad import Block, Duration, LilyPondFile, Note, Staff, StaffGroup, parse
+from abjad.get import indicators as get_indicators
+from abjad.indicators import Tie
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 
 Passage = tuple[list[Note], list[Note]]
 PassageDurations = tuple[list[Duration], list[Duration]]
+PassageTies = tuple[list[Tie | None], list[Tie | None]]
 
 
 def get_score_block(lilypond_input: str) -> Block:
@@ -51,7 +54,29 @@ def get_part_durations(part: list[Note]) -> list[Duration]:
     return [note.written_duration for note in part]
 
 
-def get_passage_durations(passage: Passage) -> PassageDurations:
+def get_passage_durations(passage: Passage | None) -> PassageDurations | None:
+    if not passage:
+        return None
     bass_durations = get_part_durations(passage[0])
     melody_durations = get_part_durations(passage[1])
     return bass_durations, melody_durations
+
+
+def get_tie(note: Note) -> Tie | None:
+    indicators = get_indicators(note)
+    return next(
+        (indicator for indicator in indicators if isinstance(indicator, Tie)),
+        None,
+    )
+
+
+def get_part_ties(part: list[Note]) -> list[Tie | None]:
+    return [get_tie(note) for note in part]
+
+
+def get_passage_ties(passage: Passage | None) -> PassageTies | None:
+    if not passage:
+        return None
+    bass_ties = get_part_ties(passage[0])
+    melody_ties = get_part_ties(passage[1])
+    return bass_ties, melody_ties

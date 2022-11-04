@@ -14,12 +14,15 @@ from abjad import (
     attach,
     show,
 )
+from abjad.indicators import Tie
 from abjad.persist import as_pdf
 
 from agni.passage.read_passage import (
     Passage,
     PassageDurations,
+    PassageTies,
     get_passage_durations,
+    get_passage_ties,
     get_staff_by_name,
 )
 
@@ -154,12 +157,15 @@ def add_matrix_to_staff_group(
     staff_group: StaffGroup,
     tuning: Tuning,
     duration=Duration(1, 4),
+    tie: Tie | None = None,
 ):
     frequencies = sort_frequencies(matrix)
     frequencies.reverse()
     for index, frequency in enumerate(frequencies):
         note = get_note(frequency, tuning, duration=duration)
         set_clefs([note])
+        if tie:
+            attach(tie, note)
         staff_names = [staff.name for staff in staff_group]
         staff_name = str(index)
         if staff_name in staff_names:
@@ -172,13 +178,16 @@ def add_matrix_to_staff_group(
 
 
 def get_ensemble_score(
-    *matrices: Matrix, tuning: Tuning, durations: PassageDurations | None
+    *matrices: Matrix,
+    tuning: Tuning,
+    durations: PassageDurations | None,
+    ties: PassageTies | None,
 ) -> Score:
     staff_group = StaffGroup()
-    if durations:
-        for matrix, duration in zip(matrices, durations[1]):
+    if durations and ties:
+        for matrix, duration, tie in zip(matrices, durations[1], ties[1]):
             add_matrix_to_staff_group(
-                matrix, staff_group, tuning=tuning, duration=duration
+                matrix, staff_group, tuning=tuning, duration=duration, tie=tie
             )
     else:
         for matrix in matrices:
@@ -205,17 +214,21 @@ def notate_matrix(
     persist=False,
     as_ensemble=False,
     as_set=True,
+    adjacent_duplicates=False,
     passage: Passage | None = None,
 ):
-    disable_stems = as_set
+    full_score = passage and not as_set and adjacent_duplicates
+    disable_stems = not full_score
     preamble = get_lilypond_preamble(*matrices, disable_stems=disable_stems)
     if as_ensemble:
-        if passage and not as_set:
+        if full_score:
             durations = get_passage_durations(passage)
+            ties = get_passage_ties(passage)
         else:
             durations = None
+            ties = None
         score = get_ensemble_score(
-            *matrices, tuning=tuning, durations=durations
+            *matrices, tuning=tuning, durations=durations, ties=ties
         )
     else:
         score = get_reference_score(
