@@ -15,7 +15,9 @@ def get_score_block(lilypond_input: str) -> Block:
 def get_staves_from_lilypond_input(lilypond_input: str) -> list[Staff]:
     score = get_score_block(lilypond_input)
     components = get_components(score.items)
-    return list(component for component in components if isinstance(component, Staff))
+    return list(
+        component for component in components if isinstance(component, Staff)
+    )
 
 
 def get_staff_by_name(staves: list[Staff], part: str) -> Staff | None:
@@ -32,7 +34,9 @@ def get_staff_notes(staves: list[Staff], part: str) -> list[Note]:
     return notes
 
 
-def get_passage_from_input_file(input_file: Path) -> tuple[list[Note], list[Note]]:
+def get_passage_from_input_file(
+    input_file: Path,
+) -> tuple[list[Note], list[Note]]:
     lilypond_input = input_file.read_text()
     staves = get_staves_from_lilypond_input(lilypond_input)
     melody = get_staff_notes(staves, "melody")

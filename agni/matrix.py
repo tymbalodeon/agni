@@ -30,7 +30,9 @@ def get_frequency(pitch: Pitch, input_type: InputType) -> float:
     return NamedPitch(pitch).hertz
 
 
-def get_sum_frequency(multiplier: int, bass_multiple: float, melody: float) -> float:
+def get_sum_frequency(
+    multiplier: int, bass_multiple: float, melody: float
+) -> float:
     melody_multiple = melody * multiplier
     return bass_multiple + melody_multiple
 
@@ -39,7 +41,9 @@ def get_melody_column(
     multiplier: int, columns: range, bass: float, melody: float
 ) -> list[float]:
     bass_multiple = bass * multiplier
-    return [get_sum_frequency(column, bass_multiple, melody) for column in columns]
+    return [
+        get_sum_frequency(column, bass_multiple, melody) for column in columns
+    ]
 
 
 def get_matrix(
@@ -49,7 +53,8 @@ def get_matrix(
     melody_frequency = get_frequency(melody, input_type=input_type)
     rows = range(multiples)
     return [
-        get_melody_column(row, rows, bass_frequency, melody_frequency) for row in rows
+        get_melody_column(row, rows, bass_frequency, melody_frequency)
+        for row in rows
     ]
 
 
@@ -119,7 +124,9 @@ class OutputType(Enum):
 def get_output_type_getter(
     output_type: OutputType,
 ) -> Callable[[float, Tuning], str | None]:
-    output_type_getters: dict[OutputType, Callable[[float, Tuning], str | None]] = {
+    output_type_getters: dict[
+        OutputType, Callable[[float, Tuning], str | None]
+    ] = {
         OutputType.LILYPOND: get_named_pitch,
         OutputType.MIDI: get_midi_number,
         OutputType.HERTZ: get_hertz,

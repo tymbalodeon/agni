@@ -1,13 +1,10 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Iterator
 
 from abjad import Container, Duration, NamedPitch, Note, Rest, Tuplet
 from abjad.get import lineage as get_linege
 
 from agni.matrix import Matrix, get_matrix
-
-from .read_passage import get_passage_from_input_file
 
 
 @dataclass
@@ -19,7 +16,12 @@ class PitchAndDuration:
     def _get_parent_tuplet(note: Note) -> Tuplet | None:
         lineage = get_linege(note)
         return next(
-            (component for component in lineage if isinstance(component, Tuplet)), None
+            (
+                component
+                for component in lineage
+                if isinstance(component, Tuplet)
+            ),
+            None,
         )
 
     @classmethod
@@ -113,12 +115,18 @@ def get_shortest_duration(parts: list[Part]) -> float:
     return min(durations)
 
 
-def get_parts_matching_shortest_duration(parts, shortest_duration) -> list[Part]:
+def get_parts_matching_shortest_duration(
+    parts, shortest_duration
+) -> list[Part]:
     return [part for part in parts if part.matches_duration(shortest_duration)]
 
 
-def get_parts_with_longer_durations(parts: list[Part], shortest_duration) -> list[Part]:
-    return [part for part in parts if not part.matches_duration(shortest_duration)]
+def get_parts_with_longer_durations(
+    parts: list[Part], shortest_duration
+) -> list[Part]:
+    return [
+        part for part in parts if not part.matches_duration(shortest_duration)
+    ]
 
 
 def get_next_pitches(parts: list[Part]) -> list[NamedPitch]:
@@ -171,14 +179,18 @@ def get_ordered_unique_pitch_sets(
 
 
 def get_simultaneous_pitches(
-    passage: tuple[list[Note], list[Note]], as_set=True, show_adjacent_duplicates=False
+    passage: tuple[list[Note], list[Note]],
+    as_set=True,
+    show_adjacent_duplicates=False,
 ) -> list[list[NamedPitch]]:
     parts = get_parts(passage)
     pitches = [get_current_pitches(parts)]
     end_of_passage = is_end_of_passage(parts)
     while not end_of_passage:
         new_pitches = get_next_pitches(parts)
-        should_add = should_add_pitches(show_adjacent_duplicates, new_pitches, pitches)
+        should_add = should_add_pitches(
+            show_adjacent_duplicates, new_pitches, pitches
+        )
         if should_add:
             pitches.append(new_pitches)
         end_of_passage = is_end_of_passage(parts)
@@ -187,8 +199,9 @@ def get_simultaneous_pitches(
     return pitches
 
 
-def get_passage_matrices(input_file: Path, multiples: int) -> list[Matrix]:
-    passage = get_passage_from_input_file(input_file)
+def get_passage_matrices(
+    passage: tuple[list[Note], list[Note]], multiples: int
+) -> list[Matrix]:
     simultaneous_pitches = get_simultaneous_pitches(passage)
     matrices = []
     for pitches in simultaneous_pitches:

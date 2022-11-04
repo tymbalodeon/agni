@@ -137,34 +137,51 @@ def set_clefs(notes: list[Note]):
             set_clef(note)
 
 
+def get_ensebmle_score(*matrices: Matrix, tuning: Tuning) -> Score:
+    staff_group = StaffGroup()
+    for matrix in matrices:
+        frequencies = sort_frequencies(matrix)
+        frequencies.reverse()
+        for index, frequency in enumerate(frequencies):
+            note = get_note(frequency, tuning)
+            set_clefs([note])
+            staff_names = [staff.name for staff in staff_group]
+            staff_name = str(index)
+            if staff_name in staff_names:
+                staff = next(
+                    staff for staff in staff_group if staff.name == staff_name
+                )
+                staff.append(note)
+            else:
+                staff = Staff([note], name=str(index))
+                staff_group.append(staff)
+    return Score([staff_group])
+
+
+def get_reference_score(
+    *matrices: Matrix, tuning: Tuning, as_chord: bool
+) -> Score:
+    score = Score()
+    for matrix in matrices:
+        frequencies = sort_frequencies(matrix)
+        notes = [get_note(frequency, tuning) for frequency in frequencies]
+        set_clefs(notes)
+        add_notes_to_score(notes, score, as_chord=as_chord)
+    return score
+
+
 def notate_matrix(
-    *matrices: Matrix, tuning: Tuning, as_chord=False, persist=False, as_ensemble=False
+    *matrices: Matrix,
+    tuning: Tuning,
+    as_chord=False,
+    persist=False,
+    as_ensemble=False,
 ):
     preamble = get_lilypond_preamble(*matrices)
     if as_ensemble:
-        staff_group = StaffGroup()
-        for matrix in matrices:
-            frequencies = sort_frequencies(matrix)
-            frequencies.reverse()
-            for index, frequency in enumerate(frequencies):
-                note = get_note(frequency, tuning)
-                set_clefs([note])
-                staff_names = [staff.name for staff in staff_group]
-                staff_name = str(index)
-                if staff_name in staff_names:
-                    staff = next(
-                        staff for staff in staff_group if staff.name == staff_name
-                    )
-                    staff.append(note)
-                else:
-                    staff = Staff([note], name=str(index))
-                    staff_group.append(staff)
-        score = Score([staff_group])
+        score = get_ensebmle_score(*matrices, tuning=tuning)
     else:
-        score = Score()
-        for matrix in matrices:
-            frequencies = sort_frequencies(matrix)
-            notes = [get_note(frequency, tuning) for frequency in frequencies]
-            set_clefs(notes)
-            add_notes_to_score(notes, score, as_chord=as_chord)
+        score = get_reference_score(
+            *matrices, tuning=tuning, as_chord=as_chord
+        )
     show_with_preamble(preamble, score, persist=persist)

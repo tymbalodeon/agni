@@ -1,4 +1,5 @@
 from pathlib import Path
+from agni.passage.read_passage import get_passage_from_input_file
 
 from rich.markup import escape
 from typer import Argument, Option, Typer
@@ -22,9 +23,13 @@ tuning = Option(
     Tuning.MICROTONAL.value, "--tuning", help="Set the tuning to quantize to."
 )
 multiples = Option(4, help="Number of multiples to calculate.")
-output_type = Option(OutputType.LILYPOND.value, help="Set the output type for pitches.")
+output_type = Option(
+    OutputType.LILYPOND.value, help="Set the output type for pitches."
+)
 as_chord = Option(False, "--as-chord", help="Output matrix as chord.")
-as_ensebmle = Option(False, "--as-ensemble", help="Notate each note on its own staff.")
+as_ensebmle = Option(
+    False, "--as-ensemble", help="Notate each note on its own staff."
+)
 notate = Option(False, "--notate", help="Notated matrix.")
 persist = Option(False, "--persist", help="Persist the notated score.")
 
@@ -48,7 +53,9 @@ def matrix(
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from two pitches."""
-    matrix = get_matrix(bass, melody, input_type=input_type, multiples=multiples)
+    matrix = get_matrix(
+        bass, melody, input_type=input_type, multiples=multiples
+    )
     if notate:
         notate_matrix(
             matrix,
@@ -76,7 +83,8 @@ def passage(
     as_ensebmle: bool = as_ensebmle,
 ):
     """Create combination-tone matrices for a two-voice passage."""
-    matrices = get_passage_matrices(input_file, multiples=multiples)
+    passage = get_passage_from_input_file(input_file)
+    matrices = get_passage_matrices(passage, multiples=multiples)
     if notate:
         notate_matrix(
             *matrices,
