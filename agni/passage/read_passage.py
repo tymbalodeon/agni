@@ -32,7 +32,6 @@ def get_staff_notes(staves: list[Staff], part: str) -> list[Note]:
         return []
     components = staff.components
     leaves = get_leaves(components)
-    print(leaves)
     notes = [leaf for leaf in leaves if isinstance(leaf, Note)]
     return notes
 
