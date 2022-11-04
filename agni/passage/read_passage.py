@@ -39,9 +39,7 @@ def get_staff_notes(staves: list[Staff], part: str) -> list[Note]:
     return notes
 
 
-def get_passage_from_input_file(
-    input_file: Path,
-) -> Passage:
+def get_passage_from_input_file(input_file: Path) -> Passage:
     lilypond_input = input_file.read_text()
     staves = get_staves_from_lilypond_input(lilypond_input)
     melody = get_staff_notes(staves, "melody")
@@ -53,9 +51,7 @@ def get_part_durations(part: list[Note]) -> list[Duration]:
     return [note.written_duration for note in part]
 
 
-def get_passage_durations(
-    passage: Passage,
-) -> PassageDurations:
+def get_passage_durations(passage: Passage) -> PassageDurations:
     bass_durations = get_part_durations(passage[0])
     melody_durations = get_part_durations(passage[1])
     return bass_durations, melody_durations

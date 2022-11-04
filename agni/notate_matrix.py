@@ -172,9 +172,7 @@ def add_matrix_to_staff_group(
 
 
 def get_ensemble_score(
-    *matrices: Matrix,
-    tuning: Tuning,
-    durations: PassageDurations | None,
+    *matrices: Matrix, tuning: Tuning, durations: PassageDurations | None
 ) -> Score:
     staff_group = StaffGroup()
     if durations:
