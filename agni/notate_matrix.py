@@ -63,15 +63,6 @@ def get_chord_notes(notes: list[Note]) -> str:
     return f"<{chord_notes}>"
 
 
-def show_with_preamble(preamble: str, container: Component, persist: bool):
-    lilypond_file = LilyPondFile([preamble, container])
-    if persist:
-        pdf_file_path = Path.home() / "Desktop" / "matrix.pdf"
-        as_pdf(lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True)
-    else:
-        show(lilypond_file)
-
-
 def get_lilypond_preamble(
     *matrices,
     disable_stems=True,
@@ -104,14 +95,22 @@ def get_lilypond_preamble(
                 \\layout {{
                     \\context {{
                         \\Score
-                        {time_signature_stencil}
                         \\numericTimeSignature
+                        {time_signature_stencil}
                         {bar_lines_stencil}
-                        \\override SpanBar.stencil = ##f
                         {stem_stencil}
                     }}
                 }}
             """
+
+
+def show_with_preamble(preamble: str, container: Component, persist: bool):
+    lilypond_file = LilyPondFile([preamble, container])
+    if persist:
+        pdf_file_path = Path.home() / "Desktop" / "matrix.pdf"
+        as_pdf(lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True)
+    else:
+        show(lilypond_file)
 
 
 def set_bass_and_melody_noteheads(notes: list[Note]) -> list[Note]:
@@ -187,9 +186,6 @@ def add_matrix_to_staff_group(
         if staff_name in staff_names:
             staff = get_staff_by_name(staff_group, staff_name)
             if staff:
-                # current_time_signature = get_effective(staff, TimeSignature)
-                # if not time_signature == current_time_signature:
-                #     attach(time_signature, note)
                 staff.append(note)
         else:
             set_clefs([note])

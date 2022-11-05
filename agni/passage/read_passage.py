@@ -16,7 +16,6 @@ from abjad.get import indicators as get_indicators
 from abjad.indicators import TimeSignature
 from abjad.score import Skip
 from abjad.select import components as get_components
-from abjad.select import leaves as get_leaves
 from abjad.select import notes as get_notes
 
 Passage = tuple[list[Note], list[Note], list[Skip]]
@@ -33,20 +32,12 @@ def get_score_block(lilypond_input: str) -> Block:
     return next(block for block in items if block.name == "score")
 
 
-def get_skips(staves: list[Staff]) -> list[Skip]:
-    leaves = get_leaves(staves)
-    return [leaf for leaf in leaves if isinstance(leaf, Skip)]
-
-
 def get_staves_and_structure(
     lilypond_input: str,
 ) -> tuple[list[Staff], list[Skip]]:
     score = get_score_block(lilypond_input)
-    components = get_components(score.items)
-    staves = list(
-        component for component in components if isinstance(component, Staff)
-    )
-    structure = get_skips(staves)
+    staves = cast(list[Staff], get_components(score.items, prototype=Staff))
+    structure = cast(list[Skip], get_components(staves, prototype=Skip))
     return staves, structure
 
 
@@ -79,17 +70,14 @@ def get_part_durations(part: list[Note]) -> list[Duration]:
 def get_passage_durations(passage: Passage | None) -> PassageDurations | None:
     if not passage:
         return None
-    bass_durations = get_part_durations(passage[0])
-    melody_durations = get_part_durations(passage[1])
+    bass, melody = passage[:2]
+    bass_durations = get_part_durations(bass)
+    melody_durations = get_part_durations(melody)
     return bass_durations, melody_durations
 
 
 def get_tie(note: Note) -> Tie | None:
-    indicators = get_indicators(note)
-    return next(
-        (indicator for indicator in indicators if isinstance(indicator, Tie)),
-        None,
-    )
+    return next((tie for tie in get_indicators(note, prototype=Tie)), None)
 
 
 def get_part_ties(part: list[Note]) -> list[Tie | None]:
@@ -99,8 +87,9 @@ def get_part_ties(part: list[Note]) -> list[Tie | None]:
 def get_passage_ties(passage: Passage | None) -> PassageTies | None:
     if not passage:
         return None
-    bass_ties = get_part_ties(passage[0])
-    melody_ties = get_part_ties(passage[1])
+    bass, melody = passage[:2]
+    bass_ties = get_part_ties(bass)
+    melody_ties = get_part_ties(melody)
     return bass_ties, melody_ties
 
 
@@ -113,6 +102,7 @@ def get_passage_time_signatures(
 ) -> PassageTimeSignatures | None:
     if not passage:
         return None
-    bass_time_signatures = get_part_time_signatures(passage[0])
-    melody_time_signatures = get_part_time_signatures(passage[1])
+    bass, melody = passage[:2]
+    bass_time_signatures = get_part_time_signatures(bass)
+    melody_time_signatures = get_part_time_signatures(melody)
     return bass_time_signatures, melody_time_signatures

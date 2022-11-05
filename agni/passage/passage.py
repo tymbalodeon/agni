@@ -93,7 +93,7 @@ def get_part_containers(
 
 
 def get_parts(passage: Passage) -> list[Part]:
-    return [Part(str(index), part) for index, part in enumerate(passage)]
+    return [Part(str(index), part) for index, part in enumerate(passage[:2])]
 
 
 def remove_none_values(collection: list) -> list:
