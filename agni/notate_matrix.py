@@ -14,9 +14,11 @@ from abjad import (
     attach,
     show,
 )
-from abjad.get import effective as get_effective
+from abjad.get import effective as get_effective, indicators
 from abjad.indicators import Tie, TimeSignature
 from abjad.persist import as_pdf
+from abjad.score import Tuplet
+from abjad.select import tuplets
 
 from agni.passage.read_passage import (
     Passage,
@@ -189,8 +191,9 @@ def add_matrix_to_staff_group(
             staff = get_staff_by_name(staff_group, staff_name)
             if staff:
                 staff.append(note)
+                current_note = staff[matrix_number]
                 current_time_signature = get_effective(
-                    staff[matrix_number], TimeSignature
+                    current_note, TimeSignature
                 )
                 if not current_time_signature == time_signature:
                     attach(time_signature, staff[matrix_number])
