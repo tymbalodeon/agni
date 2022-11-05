@@ -14,15 +14,19 @@ from abjad import (
     attach,
     show,
 )
-from abjad.indicators import Tie
+from abjad.get import effective as get_effective
+from abjad.indicators import Tie, TimeSignature
 from abjad.persist import as_pdf
+from abjad.score import Voice
 
 from agni.passage.read_passage import (
     Passage,
     PassageDurations,
     PassageTies,
+    PassageTimeSignatures,
     get_passage_durations,
     get_passage_ties,
+    get_passage_time_signatures,
     get_staff_by_name,
 )
 
@@ -70,7 +74,12 @@ def show_with_preamble(preamble: str, container: Component, persist: bool):
         show(lilypond_file)
 
 
-def get_lilypond_preamble(*matrices, disable_stems=True) -> str:
+def get_lilypond_preamble(
+    *matrices,
+    disable_stems=True,
+    disable_time_signatures=True,
+    disable_bar_lines=True,
+) -> str:
     if len(matrices) > 1:
         matrix_display = "Matrices"
     else:
@@ -80,6 +89,14 @@ def get_lilypond_preamble(*matrices, disable_stems=True) -> str:
         stem_stencil = "\\override Stem.stencil = ##f"
     else:
         stem_stencil = ""
+    if disable_time_signatures:
+        time_signature_stencil = "\\override TimeSignature.stencil = ##f"
+    else:
+        time_signature_stencil = ""
+    if disable_bar_lines:
+        bar_lines_stencil = "\\override BarLine.stencil = ##f"
+    else:
+        bar_lines_stencil = ""
     return f"""
                 #(set-default-paper-size "letter")
                 \\header {{
@@ -89,8 +106,9 @@ def get_lilypond_preamble(*matrices, disable_stems=True) -> str:
                 \\layout {{
                     \\context {{
                         \\Score
-                        \\override TimeSignature.stencil = ##f
-                        \\override BarLine.stencil = ##f
+                        {time_signature_stencil}
+                        \\numericTimeSignature
+                        {bar_lines_stencil}
                         \\override SpanBar.stencil = ##f
                         {stem_stencil}
                     }}
@@ -158,12 +176,12 @@ def add_matrix_to_staff_group(
     tuning: Tuning,
     duration=Duration(1, 4),
     tie: Tie | None = None,
+    time_signature: TimeSignature | None = None,
 ):
     frequencies = sort_frequencies(matrix)
     frequencies.reverse()
     for index, frequency in enumerate(frequencies):
         note = get_note(frequency, tuning, duration=duration)
-        set_clefs([note])
         if tie:
             attach(tie, note)
         staff_names = [staff.name for staff in staff_group]
@@ -171,9 +189,14 @@ def add_matrix_to_staff_group(
         if staff_name in staff_names:
             staff = get_staff_by_name(staff_group, staff_name)
             if staff:
+                # current_time_signature = get_effective(staff, TimeSignature)
+                # if not time_signature == current_time_signature:
+                #     attach(time_signature, note)
                 staff.append(note)
         else:
+            set_clefs([note])
             staff = Staff([note], name=str(index))
+            attach(time_signature, staff[0])
             staff_group.append(staff)
 
 
@@ -182,12 +205,20 @@ def get_ensemble_score(
     tuning: Tuning,
     durations: PassageDurations | None,
     ties: PassageTies | None,
+    time_signatures: PassageTimeSignatures | None,
 ) -> Score:
     staff_group = StaffGroup()
-    if durations and ties:
-        for matrix, duration, tie in zip(matrices, durations[1], ties[1]):
+    if durations and ties and time_signatures:
+        for matrix, duration, tie, time_signature in zip(
+            matrices, durations[1], ties[1], time_signatures[1]
+        ):
             add_matrix_to_staff_group(
-                matrix, staff_group, tuning=tuning, duration=duration, tie=tie
+                matrix,
+                staff_group,
+                tuning=tuning,
+                duration=duration,
+                tie=tie,
+                time_signature=time_signature,
             )
     else:
         for matrix in matrices:
@@ -217,18 +248,26 @@ def notate_matrix(
     adjacent_duplicates=False,
     passage: Passage | None = None,
 ):
-    full_score = passage and not as_set and adjacent_duplicates
-    disable_stems = not full_score
-    preamble = get_lilypond_preamble(*matrices, disable_stems=disable_stems)
+    full_score = not as_set and adjacent_duplicates
+    if not full_score:
+        passage = None
+    disable_stencils = not full_score
+    preamble = get_lilypond_preamble(
+        *matrices,
+        disable_stems=disable_stencils,
+        disable_time_signatures=disable_stencils,
+        disable_bar_lines=disable_stencils,
+    )
     if as_ensemble:
-        if full_score:
-            durations = get_passage_durations(passage)
-            ties = get_passage_ties(passage)
-        else:
-            durations = None
-            ties = None
+        durations = get_passage_durations(passage)
+        ties = get_passage_ties(passage)
+        time_signatures = get_passage_time_signatures(passage)
         score = get_ensemble_score(
-            *matrices, tuning=tuning, durations=durations, ties=ties
+            *matrices,
+            tuning=tuning,
+            durations=durations,
+            ties=ties,
+            time_signatures=time_signatures,
         )
     else:
         score = get_reference_score(

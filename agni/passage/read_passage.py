@@ -11,13 +11,18 @@ from abjad import (
     Tie,
     parse,
 )
+from abjad.get import effective as get_effective
 from abjad.get import indicators as get_indicators
+from abjad.indicators import TimeSignature
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 
 Passage = tuple[list[Note], list[Note]]
 PassageDurations = tuple[list[Duration], list[Duration]]
 PassageTies = tuple[list[Tie | None], list[Tie | None]]
+PassageTimeSignatures = tuple[
+    list[TimeSignature | None], list[TimeSignature | None]
+]
 
 
 def get_score_block(lilypond_input: str) -> Block:
@@ -88,3 +93,17 @@ def get_passage_ties(passage: Passage | None) -> PassageTies | None:
     bass_ties = get_part_ties(passage[0])
     melody_ties = get_part_ties(passage[1])
     return bass_ties, melody_ties
+
+
+def get_part_time_signatures(part: list[Note]) -> list[TimeSignature | None]:
+    return [get_effective(note, TimeSignature) for note in part]
+
+
+def get_passage_time_signatures(
+    passage: Passage | None,
+) -> PassageTimeSignatures | None:
+    if not passage:
+        return None
+    bass_time_signatures = get_part_time_signatures(passage[0])
+    melody_time_signatures = get_part_time_signatures(passage[1])
+    return bass_time_signatures, melody_time_signatures
