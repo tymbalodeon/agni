@@ -14,10 +14,8 @@ from abjad import (
     attach,
     show,
 )
-from abjad.get import effective as get_effective
 from abjad.indicators import Tie, TimeSignature
 from abjad.persist import as_pdf
-from abjad.score import Voice
 
 from agni.passage.read_passage import (
     Passage,
