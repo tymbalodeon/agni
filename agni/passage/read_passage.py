@@ -14,8 +14,10 @@ from abjad import (
 from abjad.get import effective as get_effective
 from abjad.get import indicators as get_indicators
 from abjad.indicators import TimeSignature
+from abjad.score import Skip
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
+from abjad.select import notes as get_notes
 
 Passage = tuple[list[Note], list[Note]]
 PassageDurations = tuple[list[Duration], list[Duration]]
@@ -31,12 +33,17 @@ def get_score_block(lilypond_input: str) -> Block:
     return next(block for block in items if block.name == "score")
 
 
-def get_staves_from_lilypond_input(lilypond_input: str) -> list[Staff]:
+def get_staves_and_structure(
+    lilypond_input: str,
+) -> tuple[list[Staff], list[Skip]]:
     score = get_score_block(lilypond_input)
     components = get_components(score.items)
-    return list(
+    staves = list(
         component for component in components if isinstance(component, Staff)
     )
+    leaves = get_leaves(components)
+    structure = [leaf for leaf in leaves if isinstance(leaf, Skip)]
+    return staves, structure
 
 
 def get_staff_by_name(
@@ -50,14 +57,12 @@ def get_staff_notes(staves: list[Staff], part: str) -> list[Note]:
     if not staff:
         return []
     components = staff.components
-    leaves = get_leaves(components)
-    notes = [leaf for leaf in leaves if isinstance(leaf, Note)]
-    return notes
+    return get_notes(components)
 
 
 def get_passage_from_input_file(input_file: Path) -> Passage:
     lilypond_input = input_file.read_text()
-    staves = get_staves_from_lilypond_input(lilypond_input)
+    staves, structure = get_staves_and_structure(lilypond_input)
     melody = get_staff_notes(staves, "melody")
     bass = get_staff_notes(staves, "bass")
     return bass, melody
