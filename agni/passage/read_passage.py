@@ -19,7 +19,7 @@ from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 from abjad.select import notes as get_notes
 
-Passage = tuple[list[Note], list[Note]]
+Passage = tuple[list[Note], list[Note], list[Skip]]
 PassageDurations = tuple[list[Duration], list[Duration]]
 PassageTies = tuple[list[Tie | None], list[Tie | None]]
 PassageTimeSignatures = tuple[
@@ -33,6 +33,11 @@ def get_score_block(lilypond_input: str) -> Block:
     return next(block for block in items if block.name == "score")
 
 
+def get_skips(staves: list[Staff]) -> list[Skip]:
+    leaves = get_leaves(staves)
+    return [leaf for leaf in leaves if isinstance(leaf, Skip)]
+
+
 def get_staves_and_structure(
     lilypond_input: str,
 ) -> tuple[list[Staff], list[Skip]]:
@@ -41,8 +46,7 @@ def get_staves_and_structure(
     staves = list(
         component for component in components if isinstance(component, Staff)
     )
-    leaves = get_leaves(components)
-    structure = [leaf for leaf in leaves if isinstance(leaf, Skip)]
+    structure = get_skips(staves)
     return staves, structure
 
 
@@ -65,7 +69,7 @@ def get_passage_from_input_file(input_file: Path) -> Passage:
     staves, structure = get_staves_and_structure(lilypond_input)
     melody = get_staff_notes(staves, "melody")
     bass = get_staff_notes(staves, "bass")
-    return bass, melody
+    return bass, melody, structure
 
 
 def get_part_durations(part: list[Note]) -> list[Duration]:
