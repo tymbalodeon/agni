@@ -14,6 +14,7 @@ from abjad import (
     attach,
     show,
 )
+from abjad.get import effective as get_effective
 from abjad.indicators import Tie, TimeSignature
 from abjad.persist import as_pdf
 
@@ -174,6 +175,7 @@ def add_matrix_to_staff_group(
     duration=Duration(1, 4),
     tie: Tie | None = None,
     time_signature: TimeSignature | None = None,
+    matrix_number: int = 0,
 ):
     frequencies = sort_frequencies(matrix)
     frequencies.reverse()
@@ -187,6 +189,11 @@ def add_matrix_to_staff_group(
             staff = get_staff_by_name(staff_group, staff_name)
             if staff:
                 staff.append(note)
+                current_time_signature = get_effective(
+                    staff[matrix_number], TimeSignature
+                )
+                if not current_time_signature == time_signature:
+                    attach(time_signature, staff[matrix_number])
         else:
             set_clefs([note])
             staff = Staff([note], name=str(index))
@@ -203,8 +210,13 @@ def get_ensemble_score(
 ) -> Score:
     staff_group = StaffGroup()
     if durations and ties and time_signatures:
-        for matrix, duration, tie, time_signature in zip(
-            matrices, durations[1], ties[1], time_signatures[1]
+        for matrix_number, (
+            matrix,
+            duration,
+            tie,
+            time_signature,
+        ) in enumerate(
+            zip(matrices, durations[1], ties[1], time_signatures[1])
         ):
             add_matrix_to_staff_group(
                 matrix,
@@ -213,6 +225,7 @@ def get_ensemble_score(
                 duration=duration,
                 tie=tie,
                 time_signature=time_signature,
+                matrix_number=matrix_number,
             )
     else:
         for matrix in matrices:
