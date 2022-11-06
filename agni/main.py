@@ -90,8 +90,16 @@ def passage(
         "--adjacent-duplicates/",
         help="Output adjacent duplicate matrices.",
     ),
+    full_score: bool = Option(
+        False,
+        help="Output matrices as an ensemble score using the input rhythms.",
+    ),
 ):
     """Create combination-tone matrices for a two-voice passage."""
+    if full_score:
+        as_ensemble = True
+        as_set = False
+        adjacent_duplicates = True
     passage = get_passage_from_input_file(input_file)
     matrices = get_passage_matrices(
         passage,
@@ -100,14 +108,15 @@ def passage(
         adjacent_duplicates=adjacent_duplicates,
     )
     if notate:
+        if not full_score:
+            passage = None
         notate_matrix(
             *matrices,
             tuning=tuning,
             as_chord=as_chord,
             persist=persist,
             as_ensemble=as_ensemble,
-            as_set=as_set,
-            adjacent_duplicates=adjacent_duplicates,
+            full_score=full_score,
             passage=passage,
         )
     display_matrix(*matrices, output_type=output_type, tuning=tuning)

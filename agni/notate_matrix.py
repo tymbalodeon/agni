@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import cast
 
 from abjad import (
     Chord,
@@ -16,6 +15,7 @@ from abjad import (
     attach,
     show,
 )
+from abjad.get import duration as get_duration
 from abjad.get import effective as get_effective
 from abjad.indicators import TimeSignature
 from abjad.persist import as_pdf
@@ -64,41 +64,38 @@ def get_chord_notes(notes: list[Note]) -> str:
 
 
 def get_lilypond_preamble(
-    *matrices,
-    disable_stems=True,
-    disable_time_signatures=True,
-    disable_bar_lines=True,
+    *matrices, full_score=False, passage: Passage | None = None
 ) -> str:
-    if len(matrices) > 1:
-        matrix_display = "Matrices"
+    if not passage:
+        if len(matrices) > 1:
+            matrix_display = "Matrices"
+        else:
+            matrix_display = "Matrix"
+        title = f"Combination-Tone {matrix_display}"
+        composer = None
     else:
-        matrix_display = "Matrix"
-    title = f"Combination-Tone {matrix_display}"
-    if disable_stems:
-        stem_stencil = "\\override Stem.stencil = ##f"
+        title = passage.title
+        composer = passage.composer
+    if not full_score:
+        stencils = """
+            \\override TimeSignature.stencil = ##f
+            \\override BarLine.stencil = ##f
+            \\override Stem.stencil = ##f
+        """
     else:
-        stem_stencil = ""
-    if disable_time_signatures:
-        time_signature_stencil = "\\override TimeSignature.stencil = ##f"
-    else:
-        time_signature_stencil = ""
-    if disable_bar_lines:
-        bar_lines_stencil = "\\override BarLine.stencil = ##f"
-    else:
-        bar_lines_stencil = ""
+        stencils = ""
     return f"""
                 #(set-default-paper-size "letter")
                 \\header {{
                     tagline = ##f
                     title = "{title}"
+                    composer = "{composer}"
                 }}
                 \\layout {{
                     \\context {{
                         \\Score
                         \\numericTimeSignature
-                        {time_signature_stencil}
-                        {bar_lines_stencil}
-                        {stem_stencil}
+                        {stencils}
                     }}
                 }}
             """
@@ -172,14 +169,13 @@ def add_matrix_to_staff_group(
     staff_group: StaffGroup,
     tuning: Tuning,
     melody_note: Note | None = None,
-    matrix_number: int = 0,
 ):
     frequencies = sort_frequencies(matrix)
     frequencies.reverse()
     for frequency_number, frequency in enumerate(frequencies):
         if melody_note:
-            tuplet = get_tuplet(melody_note)
             duration = melody_note.written_duration
+            tuplet = get_tuplet(melody_note)
             time_signature = get_effective(melody_note, TimeSignature)
             tie = get_tie(melody_note)
         else:
@@ -204,11 +200,18 @@ def add_matrix_to_staff_group(
                 if not previous_time_signature == time_signature:
                     attach(time_signature, note)
                 if tuplet:
-                    previous_tuplet = get_tuplet(previous_note)
-                    if previous_tuplet:
-                        previous_tuplet.append(note)
-                        continue
-                    multiplier = cast(str, tuplet.multiplier)
+                    in_progress_tuplet = get_tuplet(previous_note)
+                    if in_progress_tuplet:
+                        in_progress_tuplet_duration = get_duration(
+                            in_progress_tuplet
+                        )
+                        is_complete_tuplet = (
+                            in_progress_tuplet_duration.is_assignable
+                        )
+                        if not is_complete_tuplet:
+                            in_progress_tuplet.append(note)
+                            continue
+                    multiplier = tuplet.colon_string
                     note = Tuplet(multiplier, [note])
             staff.append(note)
         else:
@@ -223,16 +226,12 @@ def get_ensemble_score(
 ) -> Score:
     staff_group = StaffGroup()
     if passage:
-        melody = passage[1]
-        for matrix_number, (matrix, melody_note) in enumerate(
-            zip(matrices, melody)
-        ):
+        for matrix, melody_note in zip(matrices, passage.melody):
             add_matrix_to_staff_group(
                 matrix,
                 staff_group,
                 tuning=tuning,
                 melody_note=melody_note,
-                matrix_number=matrix_number,
             )
     else:
         for matrix in matrices:
@@ -258,19 +257,11 @@ def notate_matrix(
     as_chord=False,
     persist=False,
     as_ensemble=False,
-    as_set=True,
-    adjacent_duplicates=False,
+    full_score=False,
     passage: Passage | None = None,
 ):
-    full_score = not as_set and adjacent_duplicates
-    if not full_score:
-        passage = None
-    disable_stencils = not full_score
     preamble = get_lilypond_preamble(
-        *matrices,
-        disable_stems=disable_stencils,
-        disable_time_signatures=disable_stencils,
-        disable_bar_lines=disable_stencils,
+        *matrices, full_score=full_score, passage=passage
     )
     if as_ensemble:
         score = get_ensemble_score(*matrices, tuning=tuning, passage=passage)

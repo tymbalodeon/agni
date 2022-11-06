@@ -78,7 +78,10 @@ def get_part_containers(
 
 
 def get_parts(passage: Passage) -> list[Part]:
-    return [Part(str(index), part) for index, part in enumerate(passage[:2])]
+    bass = passage.bass
+    melody = passage.melody
+    parts = bass, melody
+    return [Part(str(index), part) for index, part in enumerate(parts)]
 
 
 def remove_none_values(collection: list) -> list:
