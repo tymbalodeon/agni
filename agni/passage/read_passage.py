@@ -11,6 +11,7 @@ from abjad import (
     Tie,
     parse,
 )
+from abjad.get import duration as get_duration
 from abjad.get import effective as get_effective
 from abjad.get import indicators as get_indicators
 from abjad.indicators import TimeSignature
@@ -64,7 +65,7 @@ def get_passage_from_input_file(input_file: Path) -> Passage:
 
 
 def get_part_durations(part: list[Note]) -> list[Duration]:
-    return [note.written_duration for note in part]
+    return [get_duration(note) for note in part]
 
 
 def get_passage_durations(passage: Passage | None) -> PassageDurations | None:

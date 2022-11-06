@@ -1,8 +1,8 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from abjad import Container, Duration, NamedPitch, Note, Rest, Tuplet
-from abjad.get import lineage as get_linege
+from abjad import Container, Duration, NamedPitch, Note, Rest
+from abjad.get import duration as get_duration
 
 from agni.matrix import Matrix, get_matrix
 from agni.passage.read_passage import Passage
@@ -13,25 +13,10 @@ class SoundingNote:
     named_pitch: NamedPitch | None
     duration: Duration
 
-    @staticmethod
-    def _get_parent_tuplet(note: Note) -> Tuplet | None:
-        lineage = get_linege(note)
-        return next(
-            (
-                component
-                for component in lineage
-                if isinstance(component, Tuplet)
-            ),
-            None,
-        )
-
     @classmethod
     def from_note(cls, note: Note):
         named_pitch = note.written_pitch
-        duration = note.written_duration
-        tuplet = cls._get_parent_tuplet(note)
-        if tuplet:
-            duration = duration * tuplet.multiplier
+        duration = get_duration(note)
         return SoundingNote(named_pitch, duration)
 
 
