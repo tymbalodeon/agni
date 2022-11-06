@@ -211,14 +211,13 @@ def get_ensemble_score(
 ) -> Score:
     staff_group = StaffGroup()
     if durations and ties and time_signatures:
+        score_data = zip(matrices, durations[1], ties[1], time_signatures[1])
         for matrix_number, (
             matrix,
             duration,
             tie,
             time_signature,
-        ) in enumerate(
-            zip(matrices, durations[1], ties[1], time_signatures[1])
-        ):
+        ) in enumerate(score_data):
             add_matrix_to_staff_group(
                 matrix,
                 staff_group,
