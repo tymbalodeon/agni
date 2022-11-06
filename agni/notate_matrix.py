@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 
 from abjad import (
     Chord,
@@ -11,22 +12,20 @@ from abjad import (
     Score,
     Staff,
     StaffGroup,
+    Tuplet,
     attach,
     show,
 )
 from abjad.get import effective as get_effective
-from abjad.indicators import Tie, TimeSignature
+from abjad.indicators import TimeSignature
 from abjad.persist import as_pdf
+from abjad.select import notes as get_notes
 
 from agni.passage.read_passage import (
     Passage,
-    PassageDurations,
-    PassageTies,
-    PassageTimeSignatures,
-    get_passage_durations,
-    get_passage_ties,
-    get_passage_time_signatures,
     get_staff_by_name,
+    get_tie,
+    get_tuplet,
 )
 
 from .matrix import Matrix, Tuning, quantize_pitch
@@ -172,59 +171,67 @@ def add_matrix_to_staff_group(
     matrix: Matrix,
     staff_group: StaffGroup,
     tuning: Tuning,
-    duration=Duration(1, 4),
-    tie: Tie | None = None,
-    time_signature: TimeSignature | None = None,
+    melody_note: Note | None = None,
     matrix_number: int = 0,
 ):
     frequencies = sort_frequencies(matrix)
     frequencies.reverse()
-    for index, frequency in enumerate(frequencies):
+    for frequency_number, frequency in enumerate(frequencies):
+        if melody_note:
+            tuplet = get_tuplet(melody_note)
+            duration = melody_note.written_duration
+            time_signature = get_effective(melody_note, TimeSignature)
+            tie = get_tie(melody_note)
+        else:
+            tuplet = None
+            duration = Duration(1, 4)
+            time_signature = None
+            tie = None
         note = get_note(frequency, tuning, duration=duration)
         if tie:
             attach(tie, note)
         staff_names = [staff.name for staff in staff_group]
-        staff_name = str(index)
+        staff_name = str(frequency_number)
         if staff_name in staff_names:
             staff = get_staff_by_name(staff_group, staff_name)
-            if staff:
-                staff.append(note)
-                current_note = staff[matrix_number]
-                current_time_signature = get_effective(
-                    current_note, TimeSignature
+            if not staff:
+                continue
+            if melody_note:
+                previous_note = get_notes(staff)[-1]
+                previous_time_signature = get_effective(
+                    previous_note, TimeSignature
                 )
-                if not current_time_signature == time_signature:
-                    attach(time_signature, staff[matrix_number])
+                if not previous_time_signature == time_signature:
+                    attach(time_signature, note)
+                if tuplet:
+                    previous_tuplet = get_tuplet(previous_note)
+                    if previous_tuplet:
+                        previous_tuplet.append(note)
+                        continue
+                    multiplier = cast(str, tuplet.multiplier)
+                    note = Tuplet(multiplier, [note])
+            staff.append(note)
         else:
             set_clefs([note])
-            staff = Staff([note], name=str(index))
+            staff = Staff([note], name=str(frequency_number))
             attach(time_signature, staff[0])
             staff_group.append(staff)
 
 
 def get_ensemble_score(
-    *matrices: Matrix,
-    tuning: Tuning,
-    durations: PassageDurations | None,
-    ties: PassageTies | None,
-    time_signatures: PassageTimeSignatures | None,
+    *matrices: Matrix, tuning: Tuning, passage: Passage | None
 ) -> Score:
     staff_group = StaffGroup()
-    if durations and ties and time_signatures:
-        score_data = zip(matrices, durations[1], ties[1], time_signatures[1])
-        for matrix_number, (
-            matrix,
-            duration,
-            tie,
-            time_signature,
-        ) in enumerate(score_data):
+    if passage:
+        melody = passage[1]
+        for matrix_number, (matrix, melody_note) in enumerate(
+            zip(matrices, melody)
+        ):
             add_matrix_to_staff_group(
                 matrix,
                 staff_group,
                 tuning=tuning,
-                duration=duration,
-                tie=tie,
-                time_signature=time_signature,
+                melody_note=melody_note,
                 matrix_number=matrix_number,
             )
     else:
@@ -266,16 +273,7 @@ def notate_matrix(
         disable_bar_lines=disable_stencils,
     )
     if as_ensemble:
-        durations = get_passage_durations(passage)
-        ties = get_passage_ties(passage)
-        time_signatures = get_passage_time_signatures(passage)
-        score = get_ensemble_score(
-            *matrices,
-            tuning=tuning,
-            durations=durations,
-            ties=ties,
-            time_signatures=time_signatures,
-        )
+        score = get_ensemble_score(*matrices, tuning=tuning, passage=passage)
     else:
         score = get_reference_score(
             *matrices, tuning=tuning, as_chord=as_chord

@@ -3,17 +3,20 @@ from typing import cast
 
 from abjad import (
     Block,
+    Component,
     Duration,
     LilyPondFile,
     Note,
     Staff,
     StaffGroup,
     Tie,
+    Tuplet,
     parse,
 )
 from abjad.get import duration as get_duration
 from abjad.get import effective as get_effective
 from abjad.get import indicators as get_indicators
+from abjad.get import lineage as get_lineage
 from abjad.indicators import TimeSignature
 from abjad.score import Skip
 from abjad.select import components as get_components
@@ -77,8 +80,23 @@ def get_passage_durations(passage: Passage | None) -> PassageDurations | None:
     return bass_durations, melody_durations
 
 
-def get_tie(note: Note) -> Tie | None:
+def get_tie(note: Note | None) -> Tie | None:
+    if not note:
+        return None
     return next((tie for tie in get_indicators(note, prototype=Tie)), None)
+
+
+def get_tuplet(component: Component | None) -> Tuplet | None:
+    if not component:
+        return None
+    return next(
+        (
+            parent
+            for parent in get_lineage(component)
+            if isinstance(parent, Tuplet)
+        ),
+        None,
+    )
 
 
 def get_part_ties(part: list[Note]) -> list[Tie | None]:
