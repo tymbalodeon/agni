@@ -86,8 +86,6 @@ def get_lilypond_preamble(
     else:
         stencils = ""
     return f"""
-                \\pointAndClickOff
-
                 \\header {{
                     tagline = ##f
                     title = "{title}"
