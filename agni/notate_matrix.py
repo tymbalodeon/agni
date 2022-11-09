@@ -227,7 +227,11 @@ def get_ensemble_score(
 ) -> Score:
     staff_group = StaffGroup()
     if passage:
-        for matrix, melody_note in track(zip(matrices, passage.melody)):
+        for matrix, melody_note in track(
+            zip(matrices, passage.melody),
+            description="Notating matrices...",
+            total=len(matrices),
+        ):
             add_matrix_to_staff_group(
                 matrix,
                 staff_group,
