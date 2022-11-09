@@ -20,6 +20,7 @@ from abjad.get import effective as get_effective
 from abjad.indicators import TimeSignature
 from abjad.persist import as_pdf
 from abjad.select import notes as get_notes
+from rich.progress import track
 
 from agni.passage.read_passage import (
     Passage,
@@ -226,7 +227,7 @@ def get_ensemble_score(
 ) -> Score:
     staff_group = StaffGroup()
     if passage:
-        for matrix, melody_note in zip(matrices, passage.melody):
+        for matrix, melody_note in track(zip(matrices, passage.melody)):
             add_matrix_to_staff_group(
                 matrix,
                 staff_group,
@@ -234,7 +235,7 @@ def get_ensemble_score(
                 melody_note=melody_note,
             )
     else:
-        for matrix in matrices:
+        for matrix in track(matrices):
             add_matrix_to_staff_group(matrix, staff_group, tuning=tuning)
     return Score([staff_group])
 
@@ -243,7 +244,7 @@ def get_reference_score(
     *matrices: Matrix, tuning: Tuning, as_chord: bool
 ) -> Score:
     score = Score()
-    for matrix in matrices:
+    for matrix in track(matrices):
         frequencies = sort_frequencies(matrix)
         notes = [get_note(frequency, tuning) for frequency in frequencies]
         set_clefs(notes)
