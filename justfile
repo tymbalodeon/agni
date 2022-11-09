@@ -27,3 +27,10 @@ build:
     poetry build
     wheel="$(just _get_wheel)"
     pipx install "${wheel}" --force --pip-args="--force-reinstall"
+
+# Run an example passage and open the input and output scores
+example:
+    #!/usr/bin/env zsh
+    lilypond -o examples examples/lonely-child.ly
+    just try passage --notate --persist --full-score
+    open examples/lonely-child.pdf "${HOME}"/Desktop/matrix.pdf
