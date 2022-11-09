@@ -86,12 +86,22 @@ def get_lilypond_preamble(
     else:
         stencils = ""
     return f"""
-                #(set-default-paper-size "letter")
+                \\pointAndClickOff
+
                 \\header {{
                     tagline = ##f
                     title = "{title}"
                     composer = "{composer}"
                 }}
+
+                \\paper {{
+                    #(set-paper-size "letter")
+                    left-margin = 0.75\\in
+                    right-margin = 0.75\\in
+                    top-margin = 0.5\\in
+                    bottom-margin = 0.5\\in
+                }}
+
                 \\layout {{
                     \\context {{
                         \\Score
