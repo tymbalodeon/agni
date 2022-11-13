@@ -32,7 +32,7 @@ build:
 example:
     #!/usr/bin/env zsh
     input_pdf=examples/lonely-child.pdf
-    output_pdf="${HOME}"/Desktop/matrix.pdf
+    output_pdf=examples/matrix.pdf
     checkexec "${input_pdf}" -- lilypond -o examples examples/lonely-child.ly
     checkexec "${output_pdf}" -- just try passage --notate --persist --full-score
     open "${input_pdf}" "${output_pdf}"

@@ -113,7 +113,7 @@ def get_lilypond_preamble(
 def show_with_preamble(preamble: str, container: Component, persist: bool):
     lilypond_file = LilyPondFile([preamble, container])
     if persist:
-        pdf_file_path = Path.home() / "Desktop" / "matrix.pdf"
+        pdf_file_path = Path("examples") / "matrix.pdf"
         as_pdf(lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True)
     else:
         show(lilypond_file)
