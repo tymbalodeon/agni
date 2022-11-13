@@ -31,6 +31,8 @@ build:
 # Run an example passage and open the input and output scores
 example:
     #!/usr/bin/env zsh
-    lilypond -o examples examples/lonely-child.ly
-    just try passage --notate --persist --full-score
-    open examples/lonely-child.pdf "${HOME}"/Desktop/matrix.pdf
+    input_pdf=examples/lonely-child.pdf
+    output_pdf="${HOME}"/Desktop/matrix.pdf
+    checkexec "${input_pdf}" -- lilypond -o examples examples/lonely-child.ly
+    checkexec "${output_pdf}" -- just try passage --notate --persist --full-score
+    open "${input_pdf}" "${output_pdf}"
