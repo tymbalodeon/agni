@@ -38,3 +38,7 @@ example:
     checkexec "${output_pdf}" \
         -- just try passage --notate --persist --full-score
     open "${input_pdf}" "${output_pdf}"
+
+# Install dependencies.
+@install:
+    ./install_dependencies
