@@ -41,8 +41,38 @@ structure = {
   s1 s2
   \time 7/8
   s2. s8
-  \time 5/8
-  s2 s8
+
+  \bar "||"
+
+  \time 4/4
+  s1
+  \time 8/4
+  s1 * 2
+
+  \bar "||"
+
+  \time 4/4
+  s1
+  \time 3/4
+  s2.
+  \time 4/4
+  s1
+  \time 5/4
+  s1 s4
+  \time 6/4
+  s1 s2
+  \time 3/4
+  s2.
+  \time 6/4
+  s1 s2
+  \time 4/4
+  s1
+  \time 5/4
+  s1 s4
+  \time 6/4
+  s1 s2
+
+  \bar "||"
 }
 
 melody = \relative c'' {
@@ -69,7 +99,22 @@ melody = \relative c'' {
 
   b4 a8 b4. a4 b
   a8 e'4 ds8 b4 a b a
-  e8 ds2.
+  e'8 ds2.
+
+  b2. a4
+  e'2 ds1.
+
+  f4 gf8 bf, gf'16 bf,8.~ bf4
+  gf'8. gf16 bf,2
+
+  cf1
+  bf8 cf4 bf8~ bf4 cf2
+  g'1.
+  bf,8 bf4 bf4.
+  f'4 gf2 bf,2.
+  cf1
+  bf8 cf4 bf8~ bf4 cf2
+  g'1.
 }
 
 bass = \relative c {
