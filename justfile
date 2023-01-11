@@ -36,9 +36,10 @@ example:
     output_pdf=examples/matrix.pdf
     checkexec "${input_file}.pdf" "${input_file}.ly" \
         -- lilypond -o examples examples/lonely-child.ly
-    checkexec "${output_pdf}" "${input_file}.ly" \
-        -- just try passage --notate --persist --full-score
-    open "${input_file}.pdf" "${output_pdf}"
+    # checkexec "${output_pdf}" "${input_file}.ly" \
+    #     -- just try passage --notate --persist --full-score
+    # open "${input_file}.pdf" "${output_pdf}"
+    open "${input_file}.pdf"
 
 # Install dependencies.
 @install:

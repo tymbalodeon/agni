@@ -73,6 +73,101 @@ structure = {
   s1 s2
 
   \bar "||"
+
+  \time 4/4
+  s1 |
+
+  \time 3/4
+  s2. * 2|
+
+  \time 5/4
+  s1 s4
+
+  \time 4/4
+  s1
+
+  \time 3/4
+  s2.
+
+  \time 7/16
+  s4 s16 * 3
+
+  \time 5/8
+  s2 s8
+
+  \time 3/8
+  s4 s8
+
+  \time 9/16
+  s2 s16
+
+  \time 3/4
+  s2 s4
+
+  \time 4/4
+  s1 * 2
+
+  \time 3/4
+  s2 s4
+
+  \time 2/4
+  s2
+
+  \time 5/16
+  s4 s16
+
+  \time 5/8
+  s2 s8
+
+  \time 11/16
+  s2 s16 * 3
+
+  \time 5/16
+  s4 s16
+
+  \time 5/8
+  s2 s8
+
+  \time 9/16
+  s2 s16
+
+  \time 3/8
+  s4 s8
+
+  \time 3/4
+  s2 s4
+
+  \time 5/4
+  s1 s4
+
+  \time 3/8
+  s4 s8
+
+  \time 9/16
+  s2 s16
+
+  \time 15/16
+  s2. s16 * 3
+
+  \time 11/16
+  s2 s16 * 3
+  \time 7/8
+  s2. s8
+
+  \time 3/8
+  s4 s8
+
+  \time 9/16
+  s2 s16
+
+  \time 7/8
+  s2. s8
+
+  \time 5/4
+  s1 s4
+
+  \time 4/4
+  s1
 }
 
 melody = \relative c'' {
@@ -158,7 +253,7 @@ bass = \relative c {
   d2 ~ d8 e ~
   e2. b2 ~
   b16 ef8. ~ ef f16 ~ f2
-  f8. b16 ~ b2 ~
+  f8. b,16 ~ b2 ~
   b8 d ~ d8. ~
   d4 d4.
   c4.
