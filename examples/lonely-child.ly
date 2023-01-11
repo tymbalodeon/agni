@@ -159,7 +159,34 @@ bass = \relative c {
   e2. b2 ~
   b16 ef8. ~ ef f16 ~ f2
   f8. b16 ~ b2 ~
-  b8
+  b8 d ~ d8. ~
+  d4 d4.
+  c4.
+  d16 ~ d2
+  df2. ~
+  d16 e8. ~ e2 ~ e8 ef ~
+  ef4 ef8. df16 ~ df2 ~
+  df8. a16 ~ a4 ~ a16 g8. ~
+  g2
+  af4 ~ af16 ~
+  af4 ~ af4.
+  df8. ~ df2
+  ef4 ~ ef16 ~
+  ef4 ef4.
+  cs8.~ cs ~ cs
+  fs4.
+  af2.
+  g2 ~ g8. df16 ~ df2
+  fs4.
+  bf4. ~ bf8.
+  f2. ~ f8.
+  b2 ~ b8.
+  g2. ~ g8
+  a4.
+  e4. ~ e8.
+  f2. ~ f8
+  bf2 ~ bf8. b16 ~ b2
+  g1
 }
 
 melody = {
