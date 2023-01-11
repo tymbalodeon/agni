@@ -164,7 +164,7 @@ bass = \relative c {
   c4.
   d16 ~ d2
   df2. ~
-  d16 e8. ~ e2 ~ e8 ef ~
+  df16 e8. ~ e2 ~ e8 ef ~
   ef4 ef8. df16 ~ df2 ~
   df8. a16 ~ a4 ~ a16 g8. ~
   g2

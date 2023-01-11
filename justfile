@@ -32,12 +32,13 @@ build:
 # Run an example passage and open the input and output scores
 example:
     #!/usr/bin/env zsh
-    input_pdf=examples/lonely-child.pdf
+    input_file=examples/lonely-child
     output_pdf=examples/matrix.pdf
-    checkexec "${input_pdf}" -- lilypond -o examples examples/lonely-child.ly
-    checkexec "${output_pdf}" \
+    checkexec "${input_file}.pdf" "${input_file}.ly" \
+        -- lilypond -o examples examples/lonely-child.ly
+    checkexec "${output_pdf}" "${input_file}.ly" \
         -- just try passage --notate --persist --full-score
-    open "${input_pdf}" "${output_pdf}"
+    open "${input_file}.pdf" "${output_pdf}"
 
 # Install dependencies.
 @install:
