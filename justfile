@@ -29,16 +29,20 @@ build:
     wheel="$(just _get_wheel)"
     pipx install "${wheel}" --force --pip-args="--force-reinstall"
 
-# Run an example passage and open the input and output scores
-example:
+# Run an example passage and open just the input score ("--input") or input and output scores
+example *type:
     #!/usr/bin/env zsh
     input_file=examples/lonely-child
-    output_pdf=examples/matrix.pdf
     checkexec "${input_file}.pdf" "${input_file}.ly" \
         -- lilypond -o examples examples/lonely-child.ly
-    checkexec "${output_pdf}" "${input_file}.ly" \
-        -- just try passage --notate --persist --full-score
-    open "${input_file}.pdf" "${output_pdf}"
+    pdf_files=("${input_file}.pdf")
+    if [ "{{type}}" != "--input" ]; then
+        output_pdf=examples/matrix.pdf
+        checkexec "${output_pdf}" "${input_file}.ly" \
+            -- just try passage --notate --persist --full-score
+        pdf_files+="${output_pdf}"
+    fi
+    open "${pdf_files[@]}"
 
 # Install dependencies.
 @install:
