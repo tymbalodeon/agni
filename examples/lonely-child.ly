@@ -336,6 +336,20 @@ melody = \relative c'' {
   d16 ef g d ~ d4
   d16 g af8 ~ af4 bf16 a8.
   e4 d16 e8 g16 ~ g8 cs, ~ cs4 d
+
+  d16 ef8 g16 ~ g8 d ~ d a ~ a4 bf
+  fs2 g16 a8 c16
+  e2.
+  d8. cs16 e8 d16 g ~ g8. ef16 \tuplet 3/2 { d16 ef8 d16 ef8 }
+  f2 gf4 af16 gf af8
+  af16 gf8. ~ gf f16 ~ \tuplet 3/2 { f8 gf16 gf f8 }
+  d4. ef8 \tuplet 3/2 { f af16 af f8 }
+  ds2. e8 fs ~
+  fs e ~ e4 ds16 e ds e ds4 ~
+  ds16 e a fs ~ fs cs8.
+  f4 gf ~ gf8 f16 gf
+  b,8 gs b16 gs8. b gs16
+  f'4 gf2
 }
 
 bass = \relative c {
