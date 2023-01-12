@@ -1,4 +1,4 @@
-\version "2.23.80"
+\version "2.24.0"
 \language "english"
 
 \header {
@@ -160,9 +160,8 @@ structure = {
   \time 3/4
   s2. * 2
   \time 5/4
-  \repeat unfold 2 {
-    s1 s4
-  }
+  s1 s4
+  s1 s4
   \time 3/4
   s2. * 2
   \time 4/4
@@ -199,9 +198,8 @@ structure = {
   \time 4/4
   s1
   \time 5/4
-  \repeat unfold 2 {
-    s1 s4
-  }
+  s1 s4
+  s1 s4
   \time 4/4
   s1 * 2
   \time 5/4
@@ -253,12 +251,9 @@ structure = {
 melody = \relative c'' {
   a1~ a4
   bf8 a bf1
-  \tuplet 3/2 { a8 a4 }
-  \tuplet 3/2 { bf8 bf4 }
-  a8 bf4.~
-  bf2.
-  \tuplet 3/2 { a8 a a }
-  bf1~ bf4
+  \tuplet 3/2 { a8 a4 } \tuplet 3/2 { bf8 bf4 } a8 bf4.~
+  bf2. \tuplet 3/2 { a8 a a }
+  bf1 ~ bf4
 
   bf2. c2
   \tuplet 3/2 { bf8 c4 } df2.
@@ -281,7 +276,6 @@ melody = \relative c'' {
 
   f4 gf8 bf, gf'16 bf,8.~ bf4
   gf'8. gf16 bf,2
-
   cf1
   bf8 cf4 bf8~ bf4 cf2
   g'1.
@@ -290,17 +284,55 @@ melody = \relative c'' {
   cf1
   bf8 cf4 bf8~ bf4 cf2
   g'1.
+
+  bf16 b8 bf16 ~ bf8 bf ~ bf bf ~ bf8. r16
+  g2.
+  bf2. ~
+  bf16 g8. ~ g2. bf4 ~
+  bf4 ~ bf8 a ~ a2
+  a2 ~ a8. a16 ~
+  a4 ~ a16 a8 ~
+  a8. a16 ~ a8. a
+  a8 fs4 ~
+  fs16 cs'2
+  cs2. ~
+  cs16 cs8. ~ cs2. ~
+  cs4 d f,2 ~
+  f2 ef'32 ef ef ef ef16 f, ~
+  f2 ~
+  f4 ef'16 ~
+  ef16 ef8. ~ ef8 ef8. ef16 ~
+  ef8. c2 ~
+  c4 af32 c ~
+  c4 ~ c16 af c af8. ~
+  af8. af32 c16. ~ c16 ~ c8. ~
+  c4 af32 c16. ~
+  c2. ~
+  c8 af32 c16. ~ c8 ef ~ ef4 ~ ef16 c8. ~ c4 ~
+  c4 ~ c16 c ~
+  c4 c8 ~ c8. ~
+  c16 c c8 c16 c8. c16 c4 c8 ~
+  c8. d16 ~ d4 ~ d8. ~
+  d4 ~ d8 ef ~ ef4 ~ ef8 ~
+  ef4 ~ ef16 ef ~
+  ef4 ef8 ~ ef8. ~
+  ef8. cs16 ~ cs2 ~ cs8 ~
+  cs8 cs ~ cs2 cs
+  d1
+
+
 }
 
 bass = \relative c {
   \clef "bass_8"
+
   g1~ g4~
   g~ g1
   g2 g~
   g1
   fs~ fs4
 
-  fs2.~ fs2~
+  fs2. ~ fs2 ~
   fs4 fs2.
   fs~
   fs1.
@@ -312,13 +344,14 @@ bass = \relative c {
   f8~ f1~
   f
 
-  f1~ f4
+  f1 ~ f4
   f2 f1
-  f8~ f2.
+  f8 ~ f2.
+  f1 ~
+  f2 f1.
 
-  f1 ~ f2 f1.
-
-  ef1 ~ ef2.
+  ef1 ~
+  ef2.
   ef1
   ef1 ~ ef4
   ef1.
