@@ -1,4 +1,5 @@
 \version "2.24.0"
+
 \language "english"
 
 \header {
@@ -7,64 +8,64 @@
   tagline = ##f
 }
 
-intro_rests = {
-  R1 * 13/4
-  R2. * 3
-  R1
-  R2.
-  R1
-  R2.
-  R2
-  R1 * 2
-  R2. * 3
-  R1 * 2
-  R1.
-  R8
-  R1
-  R1 * 5/4
-  R2
-  R1 * 5/4
-  R \breve
-}
+% intro_rests = {
+%   R1 * 13/4
+%   R2. * 3
+%   R1
+%   R2.
+%   R1
+%   R2.
+%   R2
+%   R1 * 2
+%   R2. * 3
+%   R1 * 2
+%   R1.
+%   R8
+%   R1
+%   R1 * 5/4
+%   R2
+%   R1 * 5/4
+%   R \breve
+% }
 
-intro_space = {
-  \time 13/4
-  s \breve s1 s4
-  \time 3/4
-  s2. * 3
-  \time 4/4
-  s1
-  \time 3/4
-  s2.
-  \time 4/4
-  s1
-  \time 3/4
-  s2.
-  \time 2/4
-  s2
-  \time 4/4
-  s1 * 2
-  \time 3/4
-  s2. * 3
-  \time 4/4
-  s1 * 2
-  \time 6/4
-  s1.
-  \time 1/8
-  s8
-  \time 4/4
-  s1
-  \time 5/4
-  s1 s4
-  \time 2/4
-  s2
-  \time 5/4
-  s1 s4
-  \time 8/4
-  s \breve
+% intro_space = {
+%   \time 13/4
+%   s \breve s1 s4
+%   \time 3/4
+%   s2. * 3
+%   \time 4/4
+%   s1
+%   \time 3/4
+%   s2.
+%   \time 4/4
+%   s1
+%   \time 3/4
+%   s2.
+%   \time 2/4
+%   s2
+%   \time 4/4
+%   s1 * 2
+%   \time 3/4
+%   s2. * 3
+%   \time 4/4
+%   s1 * 2
+%   \time 6/4
+%   s1.
+%   \time 1/8
+%   s8
+%   \time 4/4
+%   s1
+%   \time 5/4
+%   s1 s4
+%   \time 2/4
+%   s2
+%   \time 5/4
+%   s1 s4
+%   \time 8/4
+%   s \breve
 
-  \bar "||"
-}
+%   \bar "||"
+% }
 
 structure = {
   \time 5/4
@@ -304,7 +305,7 @@ structure = {
   \time 3/4
   s2.
 
-  \bar "||"
+  \bar "|."
 }
 
 melody = \relative a' {
