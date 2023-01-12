@@ -7,6 +7,65 @@
   tagline = ##f
 }
 
+intro_rests = {
+  R1 * 13/4
+  R2. * 3
+  R1
+  R2.
+  R1
+  R2.
+  R2
+  R1 * 2
+  R2. * 3
+  R1 * 2
+  R1.
+  R8
+  R1
+  R1 * 5/4
+  R2
+  R1 * 5/4
+  R \breve
+}
+
+intro_space = {
+  \time 13/4
+  s \breve s1 s4
+  \time 3/4
+  s2. * 3
+  \time 4/4
+  s1
+  \time 3/4
+  s2.
+  \time 4/4
+  s1
+  \time 3/4
+  s2.
+  \time 2/4
+  s2
+  \time 4/4
+  s1 * 2
+  \time 3/4
+  s2. * 3
+  \time 4/4
+  s1 * 2
+  \time 6/4
+  s1.
+  \time 1/8
+  s8
+  \time 4/4
+  s1
+  \time 5/4
+  s1 s4
+  \time 2/4
+  s2
+  \time 5/4
+  s1 s4
+  \time 8/4
+  s \breve
+
+  \bar "||"
+}
+
 structure = {
   \time 5/4
   s1 s4
@@ -248,7 +307,7 @@ structure = {
   \bar "||"
 }
 
-melody = \relative c'' {
+melody = \relative a' {
   a1~ a4
   bf8 a bf1
   \tuplet 3/2 { a8 a4 } \tuplet 3/2 { bf8 bf4 } a8 bf4.~
@@ -352,7 +411,7 @@ melody = \relative c'' {
   f'4 gf2
 }
 
-bass = \relative c {
+bass = \relative g, {
   \clef "bass_8"
 
   g1~ g4~
