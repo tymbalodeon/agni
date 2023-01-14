@@ -441,9 +441,9 @@ melody = \relative a' {
   R4.
   b,16 c8 ds16 ~ ds e g8 r4
   af2. g4
-  e16 g af8 \tuplet 3/2 { b c ds } e g
+  e,16 g af8 \tuplet 3/2 { b c ds } e g
 
-  e,1
+  e1
   ds2.
 
   e8 ds4 e4. ds2
