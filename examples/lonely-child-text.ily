@@ -18,8 +18,18 @@ text = \lyricmode {
   jo -- yeu -- se t'en -- i -- vre -- ra
   a -- mi
 
-  Dors, mon enfant, ouvrez-vous portes de diamant, palais sompteux
-  Mon  enfant, les hirondelles guideront tes pas
+  Dors mon
+  en -- fant
+
+  Ou -- vrez- -- vous por -- tes
+  de di -- a --
+  mant
+  pa -- lais somp -- tu --
+  eux
+  Mon  en -- fant
+  les hi -- ron --
+  delles
+  gui -- de -- ront __ tes pas
   Kuré  nouyazo na-oudè waki nannoni eudou-a
   Dors, mon enfant
   Dadodi  yo rrr-zu-i yo a-e-i dage dage da è-i-ou dage dage ou-a-è dagè dadoudè dagè dagè dagè
