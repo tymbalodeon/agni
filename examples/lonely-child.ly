@@ -280,8 +280,9 @@ structure = {
   s1.
   \time 3/4
   s2. * 2
-  \time 3/8
-  s4.
+
+  \bar "||"
+
   \time 3/4
   s2.
   \time 4/4
@@ -300,8 +301,9 @@ structure = {
 
   \time 5/4
   s1 s4
-  \time 4/4
-  s1
+
+  \bar "||"
+
   \time 3/4
   s2.
 
@@ -438,7 +440,7 @@ melody = \relative a' {
   g4 af2 g2.
   \tuplet 3/2 { ds8 e g } af2
   g4. af8 ~ af g
-  R4.
+
   b,16 c8 ds16 ~ ds e g8 r4
   af2. g4
   e,16 g af8 \tuplet 3/2 { b c ds } e g
@@ -447,7 +449,7 @@ melody = \relative a' {
   ds2.
 
   e8 ds4 e4. ds2
-  R1
+
   e4. ds4 e8
 }
 
@@ -584,7 +586,7 @@ bass = \relative g, {
   d4 c2 d2.
   \tuplet 3/2 { bf8 g d' } c2
   d4. c8 ~ c d
-  R4.
+
   d16 f8 bf16 ~ bf c d8 r4
   c2. d4
   c,16 ef ef8 \tuplet 3/2 { d f bf } c d
@@ -593,7 +595,7 @@ bass = \relative g, {
   ds2.
 
   e8 ds4 e4. ds2
-  R1
+
   e4. ds4 e8
 }
 
