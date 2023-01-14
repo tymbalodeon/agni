@@ -69,11 +69,12 @@ def get_staff_notes(staves: list[Staff], part: str) -> list[Note]:
 
 
 def get_header_item(lilypond_input: str, item: str) -> str | None:
-    for line in lilypond_input.splitlines():
-        if item in line:
-            words = line.split('"')
-            return words[1]
-    return None
+    lines = lilypond_input.splitlines()
+    lines = (line for line in lines if item in line)
+    matching_line = next(lines, None)
+    if not matching_line:
+        return None
+    return matching_line.split('"')[1]
 
 
 def get_passage_from_input_file(input_file: Path) -> Passage:

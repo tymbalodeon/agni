@@ -32,15 +32,18 @@ build:
 # Run an example passage and open just the input score ("--input") or input and output scores
 example *type:
     #!/usr/bin/env zsh
-    input_file=examples/lonely-child
-    checkexec "${input_file}.pdf" "${input_file}.ly" \
-        -- lilypond -o examples examples/lonely-child.ly
-    pdf_files=("${input_file}.pdf")
+    input_file_name=examples/lonely-child
+    lilypond_file="${input_file_name}.ly"
+    input_score="${input_file_name}.pdf"
+    checkexec "${input_score}" examples/*.*ly \
+        -- lilypond -o examples "${lilypond_file}"
+    mv "${input_file_name}-formatted.pdf" "${input_score}" 2>/dev/null
+    pdf_files=("${input_score}")
     if [ "{{type}}" != "--input" ]; then
-        output_pdf=examples/matrix.pdf
-        checkexec "${output_pdf}" "${input_file}.ly" \
+        matrix_score=examples/matrix.pdf
+        checkexec "${matrix_score}" "${lilypond_file}" \
             -- just try passage --notate --persist --full-score
-        pdf_files+="${output_pdf}"
+        pdf_files+="${matrix_score}"
     fi
     open "${pdf_files[@]}"
 
