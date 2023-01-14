@@ -12,6 +12,7 @@
   right-margin = 0.75\in
   top-margin = 0.5\in
   bottom-margin = 0.5\in
+  system-system-spacing.minimum-distance = #11
 }
 
 \include "lonely-child-notes.ily"
