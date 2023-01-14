@@ -410,6 +410,45 @@ melody = \relative a' {
   f4 gf ~ gf8 f16 gf
   b,8 gs b16 gs8. b gs16
   f'4 gf2
+
+  e8. g16 g8 e g2.
+  e16 g e32 g16. af2
+  g4 \tuplet 3/2 { af16 g8 } \tuplet 3/2 { af16 g8 ~ } g \tuplet 3/2 { af16 g8 ~ } g4
+  e1
+  g2
+  e4 ~ e16 g8. ~ g4. af8 ~ af2
+  af8. g16 ~ g e e g ~ g af8.
+  af16 g8 af16 ~ af8 g ~ g e ~ e g ~ g16 af8 g16
+  e8 g ~ g4. af8 ~ af4
+  b,4 b 2 b2.
+  b1
+  b1 ~ b4
+  c8 c4. ~ c8 c ~ c c ~ c4
+  c16 d8. ~ d16 c c d ~ d4 ~ d8 c16 c
+  c16 d8. ~ d c16 ~ c c8 d16 ~ d4
+  c1 ~ c4
+  d2.
+  c16 d ef8 d16 ef8 d16 ~
+  d8 c d16 ef d ef d c8. d16 ef d ef
+  d8. d16 ef d c8 ~ c16 d ef d ~ d8. ef16
+  e16 e8 ef16 ~ ef8 d16 c ~ c c c8 d16 ef8 e16 ~
+  e8 e ~ e4
+  d16 d ef8 ~ ef16 e e8 r e16 ef
+  e8 ef4. e8 ef e4
+  g4 af2 g2.
+  \tuplet 3/2 { ds8 e g } af2
+  g4. af8 ~ af g
+  R4.
+  b,16 c8 ds16 ~ ds e g8 r4
+  af2. g4
+  e16 g af8 \tuplet 3/2 { b c ds } e g
+
+  e,1
+  ds2.
+
+  e8 ds4 e4. ds2
+  R1
+  e4. ds4 e8
 }
 
 bass = \relative g, {
