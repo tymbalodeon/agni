@@ -15,9 +15,11 @@
 }
 
 \include "lonely-child-notes.ily"
+\include "lonely-child-text.ily"
 
 \book {
   \bookOutputSuffix "formatted"
+
   \score {
     \new StaffGroup {
       \numericTimeSignature
@@ -26,7 +28,7 @@
           instrumentName = "Melody"
           shortInstrumentName = "M."
         } {
-          \melody
+          \melody \addlyrics \text
         }
         \new Staff = "bass" \with {
           instrumentName = "Bass"
