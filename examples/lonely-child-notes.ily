@@ -7,7 +7,7 @@
   composer = "Claude Vivier"
 }
 
-structure = {
+structure_one = {
   \time 5/4
   s1 s4
   s1 s4
@@ -15,7 +15,6 @@ structure = {
   s1 * 2
   \time 5/4
   s1 s4
-
   s1 s4
   \time 4/4
   s1
@@ -24,7 +23,6 @@ structure = {
   \time 6/4
   s1 s2
   s1 s2
-
   \time 3/4
   s2.
   \time 6/4
@@ -34,23 +32,24 @@ structure = {
   s1 s8
   \time 4/4
   s1
-
   \time 5/4
   s1 s4
   \time 6/4
   s1 s2
   \time 7/8
   s2. s8
+}
 
-  \bar "||"
-
+structure_two = {
   \time 4/4
   s1
   \time 8/4
   s1 * 2
 
   \bar "||"
+}
 
+structure_three = {
   \time 4/4
   s1
   \time 3/4
@@ -73,7 +72,9 @@ structure = {
   s1 s2
 
   \bar "||"
+}
 
+structure_four = {
   \time 4/4
   s1 |
   \time 3/4
@@ -140,7 +141,9 @@ structure = {
   s1
 
   \bar "||"
+}
 
+structure_five = {
   \time 3/4
   s2.
   \time 4/4
@@ -176,7 +179,9 @@ structure = {
   s2. * 3
 
   \bar "||"
+}
 
+structure_six = {
   \time 5/4
   s1 s4
   \time 3/4
@@ -222,7 +227,9 @@ structure = {
   s2. * 2
 
   \bar "||"
+}
 
+structure_seven = {
   \time 3/4
   s2.
   \time 4/4
@@ -231,51 +238,55 @@ structure = {
   s2.
 
   \bar "||"
+}
 
+structure_eight = {
   \time 4/4
   s1
   \time 3/4
   s2.
 
   \bar "||"
+}
 
+structure_nine = {
   \time 5/4
   s1 s4
 
   \bar "||"
+}
 
+structure_ten = {
   \time 3/4
   s2.
 
   \bar "|."
 }
 
-melody = \relative a' {
-  a1~ a4
+melody_one = \relative a' {
+  a1 ~ a4
   bf8 a bf1
-  \tuplet 3/2 { a8 a4 } \tuplet 3/2 { bf8 bf4 } a8 bf4.~
+  \tuplet 3/2 { a8 a4 } \tuplet 3/2 { bf8 bf4 } a8 bf4. ~
   bf2. \tuplet 3/2 { a8 a a }
   bf1 ~ bf4
-
   bf2. c2
   \tuplet 3/2 { bf8 c4 } df2.
   \tuplet 3/2 { df8 bf4 } c2
   df1.
-  \tuplet 3/2 { df8 bf4~ } bf \tuplet 3/2 { df8 c bf~ } bf2 c4
-
+  \tuplet 3/2 { df8 bf4 ~ } bf \tuplet 3/2 { df8 c bf ~ } bf2 c4
   df2.
   d!2 d1
   d1.
   e8 b4 a b8 a4.
   b4. a8 e' ds4 e8
-
   b4 a8 b4. a4 b
   a8 e'4 ds8 b4 a b a
   e'8 ds2.
+}
 
+melody_two = {
   b2. a4
   e'2 ds1.
-
   f4 gf8 bf, gf'16 bf,8.~ bf4
   gf'8. gf16 bf,2
   cf1
@@ -286,7 +297,9 @@ melody = \relative a' {
   cf1
   bf8 cf4 bf8~ bf4 cf2
   g'1.
+}
 
+melody_three = {
   bf,16 b8 bf16 ~ bf8 bf ~ bf bf ~ bf8. r16
   g2.
   bf2. ~
@@ -321,7 +334,9 @@ melody = \relative a' {
   ef8. cs16 ~ cs2 ~ cs8 ~
   cs8 cs ~ cs2 cs
   d1
+}
 
+melody_four = {
   as8 cs4 b8 ~ b16 ds e8
   gs8. a16 ~ a8. d,16 ef8 d ~ d16 ef8. ~
   ef16 d bf d ~ d d8. bf4 a16 bf8 c16
@@ -338,7 +353,9 @@ melody = \relative a' {
   d16 ef g d ~ d4
   d16 g af8 ~ af4 bf16 a8.
   e4 d16 e8 g16 ~ g8 cs, ~ cs4 d
+}
 
+melody_five = {
   d16 ef8 g16 ~ g8 d ~ d a ~ a4 bf
   fs2 g16 a8 c16
   e2.
@@ -352,7 +369,9 @@ melody = \relative a' {
   f4 gf ~ gf8 f16 gf
   b,8 gs b16 gs8. b gs16
   f'4 gf2
+}
 
+melody_six = {
   e8. g16 g8 e g2.
   e16 g e32 g16. af2
   g4 \tuplet 3/2 { af16 g8 } \tuplet 3/2 { af16 g8 ~ } g \tuplet 3/2 { af16 g8 ~ } g4
@@ -380,20 +399,28 @@ melody = \relative a' {
   g4 af2 g2.
   \tuplet 3/2 { ds8 e g } af2
   g4. af8 ~ af g
+}
 
+melody_seven = {
   b,16 c8 ds16 ~ ds e g8 r4
   af2. g4
   e,16 g af8 \tuplet 3/2 { b c ds } e g
+}
 
+melody_eight = {
   e1
   ds2.
+}
 
+melody_nine = {
   e8 ds4 e4. ds2
+}
 
+melody_ten = {
   e4. ds4 e8
 }
 
-bass = \relative g, {
+bass_one = \relative g, {
   \clef "bass_8"
 
   g1~ g4~
@@ -401,25 +428,25 @@ bass = \relative g, {
   g2 g~
   g1
   fs~ fs4
-
   fs2. ~ fs2 ~
   fs4 fs2.
   fs~
   fs1.
   fs1.
-
   fs2.
   e2 e1
   e1.
   f8~ f1~
   f
-
   f1 ~ f4
   f2 f1
   f8 ~ f2.
+}
+
+
+bass_two = {
   f1 ~
   f2 f1.
-
   ef1 ~
   ef2.
   ef1
@@ -430,7 +457,9 @@ bass = \relative g, {
   ef1
   ef1 ~ ef4
   ef1.
+}
 
+bass_three = {
   ef2. ~ ef8. f16 ~
   f2 ~ f8 d ~
   d2 ~ d8 e ~
@@ -465,7 +494,9 @@ bass = \relative g, {
   f2. ~ f8
   bf2 ~ bf8. b16 ~ b2
   g1
+}
 
+bass_four = {
   ef2. ~
   ef1 ~
   ef2. f4 ~
@@ -494,7 +525,9 @@ bass = \relative g, {
   g2. ~
   g2. ~
   g2.
+}
 
+bass_five = {
   c,8. ef16 ef8 c ef2.
   c16 ef c32 ef16. ef2
   ef4
@@ -526,17 +559,64 @@ bass = \relative g, {
   d4 c2 d2.
   \tuplet 3/2 { bf8 g d' } c2
   d4. c8 ~ c d
+}
 
+bass_six = {
   d16 f8 bf16 ~ bf c d8 r4
   c2. d4
   c,16 ef ef8 \tuplet 3/2 { d f bf } c d
+}
 
+bass_seven = {
   e,,1
   ds2.
+}
 
+bass_eight = {
   e8 ds4 e4. ds2
+}
 
+bass_nine = {
   e4. ds4 e8
+}
+
+structure = {
+  \structure_one
+  \structure_two
+  \structure_three
+  \structure_four
+  \structure_five
+  \structure_six
+  \structure_seven
+  \structure_eight
+  \structure_nine
+  \structure_ten
+}
+
+melody = {
+  \melody_one
+  \melody_two
+  \melody_three
+  \melody_four
+  \melody_five
+  \melody_six
+  \melody_seven
+  \melody_eight
+  \melody_nine
+  \melody_ten
+}
+
+bass = {
+  \bass_one
+  \bass_two
+  \bass_three
+  \bass_four
+  \bass_five
+  \bass_six
+  \bass_seven
+  \bass_eight
+  \bass_nine
+  \bass_ten
 }
 
 melody = {

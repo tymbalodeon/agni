@@ -18,80 +18,85 @@
 \include "lonely-child-notes.ily"
 \include "lonely-child-text.ily"
 
-intro_rests = {
+rests_one = {
+  \time 13/4
   R1 * 13/4
+  \time 3/4
   R2. * 3
+  \time 4/4
   R1
+  \time 3/4
   R2.
+  \time 4/4
   R1
+  \time 3/4
   R2.
+  \time 2/4
   R2
+  \time 4/4
   R1 * 2
+  \time 3/4
   R2. * 3
+  \time 4/4
   R1 * 2
+  \time 6/4
   R1.
+  \time 1/8
   R8
+  \time 4/4
   R1
+  \time 5/4
   R1 * 5/4
+  \time 2/4
   R2
+  \time 5/4
   R1 * 5/4
+  \time 8/4
   R \breve
 }
 
-intro_spaces = {
-  \time 13/4
-  s \breve s1 s4
+rests_two = {
+  \time 5/8
+  R1 * 10/8
   \time 3/4
-  s2. * 3
+  R2.
+  \time 5/8
+  R1 * 5/8
   \time 4/4
-  s1
-  \time 3/4
-  s2.
-  \time 4/4
-  s1
-  \time 3/4
-  s2.
+  R1
+  \time 3/8
+  R8 * 3
   \time 2/4
-  s2
-  \time 4/4
-  s1 * 2
-  \time 3/4
-  s2. * 3
-  \time 4/4
-  s1 * 2
-  \time 6/4
-  s1.
-  \time 1/8
-  s8
-  \time 4/4
-  s1
-  \time 5/4
-  s1 s4
+  R2
+  \time 5/8
+  R1 * 5/8
   \time 2/4
-  s2
-  \time 5/4
-  s1 s4
-  \time 8/4
-  s \breve
-
-  \bar "||"
+  R2
+  \time 3/4
+  R2.
+  \time 5/8
+  R1 * 5/8
+  \time 2/4
+  R2
 }
 
 melody = {
+  \rests_one
   <<
-    \intro_rests
-    \intro_spaces
+    \melody_one
+    \structure_one
   >>
-  \melody
+  \rests_two
 }
 
 bass = {
   \clef "bass_8"
+  \rests_one
   <<
-    \intro_rests
-    \intro_spaces
+    \bass_one
+    \structure_one
   >>
-  \bass
+  \rests_two
 }
 
 \book {
