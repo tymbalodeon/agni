@@ -45,8 +45,6 @@ structure_two = {
   s1
   \time 8/4
   s1 * 2
-
-  \bar "||"
 }
 
 structure_three = {
@@ -70,8 +68,6 @@ structure_three = {
   s1 s4
   \time 6/4
   s1 s2
-
-  \bar "||"
 }
 
 structure_four = {
@@ -284,9 +280,12 @@ melody_one = \relative a' {
   e'8 ds2.
 }
 
-melody_two = {
+melody_two = \relative b' {
   b2. a4
   e'2 ds1.
+}
+
+melody_three = \relative f'' {
   f4 gf8 bf, gf'16 bf,8.~ bf4
   gf'8. gf16 bf,2
   cf1
@@ -299,7 +298,7 @@ melody_two = {
   g'1.
 }
 
-melody_three = {
+melody_four = {
   bf,16 b8 bf16 ~ bf8 bf ~ bf bf ~ bf8. r16
   g2.
   bf2. ~
@@ -334,9 +333,7 @@ melody_three = {
   ef8. cs16 ~ cs2 ~ cs8 ~
   cs8 cs ~ cs2 cs
   d1
-}
 
-melody_four = {
   as8 cs4 b8 ~ b16 ds e8
   gs8. a16 ~ a8. d,16 ef8 d ~ d16 ef8. ~
   ef16 d bf d ~ d d8. bf4 a16 bf8 c16
@@ -421,8 +418,6 @@ melody_ten = {
 }
 
 bass_one = \relative g, {
-  \clef "bass_8"
-
   g1~ g4~
   g~ g1
   g2 g~
@@ -444,9 +439,12 @@ bass_one = \relative g, {
 }
 
 
-bass_two = {
+bass_two = \relative f, {
   f1 ~
   f2 f1.
+}
+
+bass_three = \relative ef, {
   ef1 ~
   ef2.
   ef1
@@ -459,7 +457,7 @@ bass_two = {
   ef1.
 }
 
-bass_three = {
+bass_four = {
   ef2. ~ ef8. f16 ~
   f2 ~ f8 d ~
   d2 ~ d8 e ~
@@ -494,9 +492,7 @@ bass_three = {
   f2. ~ f8
   bf2 ~ bf8. b16 ~ b2
   g1
-}
 
-bass_four = {
   ef2. ~
   ef1 ~
   ef2. f4 ~
@@ -627,6 +623,7 @@ melody = {
 }
 
 bass = {
+  \clef "bass_8"
   <<
     \bass
     \structure

@@ -80,6 +80,11 @@ rests_two = {
   R2
 }
 
+rests_three = {
+  \time 1/4
+  R4
+}
+
 melody = {
   \rests_one
   <<
@@ -87,6 +92,15 @@ melody = {
     \structure_one
   >>
   \rests_two
+  <<
+    \melody_two
+    \structure_two
+  >>
+  \rests_three
+  <<
+    \melody_three
+    \structure_three
+  >>
 }
 
 bass = {
@@ -97,6 +111,15 @@ bass = {
     \structure_one
   >>
   \rests_two
+  <<
+    \bass_two
+    \structure_two
+  >>
+  \rests_three
+  <<
+    \bass_three
+    \structure_three
+  >>
 }
 
 \book {
