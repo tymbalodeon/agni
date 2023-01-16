@@ -21,13 +21,17 @@ _get_wheel:
     version="$(just _get_pyproject_value "version")"
     printf "%s" ./dist/"${command}"-"${version}"-py3-none-any.whl
 
-# Build the project and pipx install it.
-build:
+# Build the project and install it, optionally using pipx ("--pipx").
+build *pipx:
     #!/usr/bin/env zsh
     poetry install
     poetry build
     wheel="$(just _get_wheel)"
-    pipx install "${wheel}" --force --pip-args="--force-reinstall"
+    if [ "{{pipx}}" = "--pipx" ]; then
+        pipx install "${wheel}" --force --pip-args="--force-reinstall"
+    else
+        pip install --user "${wheel}" --force-reinstall
+    fi
 
 # Run an example passage and open just the input score ("--input") or input and output scores
 example *type:

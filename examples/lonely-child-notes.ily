@@ -3,7 +3,7 @@
 \language "english"
 
 \header {
-  title = "LOnely Child"
+  title = "Lonely Child"
   composer = "Claude Vivier"
 }
 
