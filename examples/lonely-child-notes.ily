@@ -72,9 +72,9 @@ structure_three = {
 
 structure_four = {
   \time 4/4
-  s1 |
+  s1
   \time 3/4
-  s2. * 2|
+  s2. * 2
   \time 5/4
   s1 s4
   \time 4/4

@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from enum import Enum
+from functools import lru_cache
 from math import log
 from typing import TypeAlias
 
@@ -46,6 +47,7 @@ def get_melody_column(
     ]
 
 
+@lru_cache
 def get_matrix(
     bass: Pitch, melody: Pitch, input_type=InputType.HERTZ, multiples: int = 4
 ) -> Matrix:

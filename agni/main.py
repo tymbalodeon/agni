@@ -73,7 +73,7 @@ def matrix(
 @agni.command()
 def passage(
     input_file: Path = Argument(
-        Path("examples/lonely-child.ly"), help="LilyPond input file."
+        Path("examples/lonely-child-notes.ily"), help="LilyPond input file."
     ),
     tuning: Tuning = tuning,
     multiples: int = multiples,
