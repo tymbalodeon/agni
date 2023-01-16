@@ -39,13 +39,12 @@ example *type:
         -- lilypond -o examples "${lilypond_file}"
     mv "${input_file_name}-formatted.pdf" "${input_score}" 2>/dev/null
     pdf_files=("${input_score}")
-    if [ "{{type}}" = "--input" ]; then
-        exit
+    if [ "{{type}}" != "--input" ]; then
+        matrix_score=examples/matrix.pdf
+        checkexec "${matrix_score}" "${input_file_name}-notes.ily" \
+            -- just try passage --notate --persist --full-score
+        pdf_files+="${matrix_score}"
     fi
-    matrix_score=examples/matrix.pdf
-    checkexec "${matrix_score}" "${input_file_name}-notes.ily" \
-        -- just try passage --notate --persist --full-score
-    pdf_files+="${matrix_score}"
     open "${pdf_files[@]}"
 
 # Install dependencies.

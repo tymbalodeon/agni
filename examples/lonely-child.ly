@@ -17,7 +17,7 @@
 \include "lonely-child-notes.ily"
 \include "lonely-child-text.ily"
 
-rests_one = {
+restsOne = {
   \time 13/4
   R1 * 13/4
   \time 3/4
@@ -54,7 +54,7 @@ rests_one = {
   R \breve
 }
 
-rests_two = {
+restsTwo = {
   \time 5/8
   R1 * 10/8
   \time 3/4
@@ -79,12 +79,12 @@ rests_two = {
   R2
 }
 
-rests_three = {
+restsThree = {
   \time 1/4
   R4
 }
 
-rests_four = {
+restsFour = {
  \time 5/8
  R8 * 5
  \time 5/16
@@ -109,12 +109,12 @@ rests_four = {
  R2
 }
 
-rests_five = {
+restsFive = {
   \time 3/4
   R2.
 }
 
-rests_six = {
+restsSix = {
   \time 10/4
   R4 * 10
   \time 9/4
@@ -133,12 +133,12 @@ rests_six = {
   R4 * 10
 }
 
-rests_seven = {
+restsSeven = {
   \time 3/8
   R8 * 3
 }
 
-rests_eight = {
+restsEight = {
   \time 1/8
   R8
   \time 8/4
@@ -149,12 +149,12 @@ rests_eight = {
   R2.
 }
 
-rests_nine = {
+restsNine = {
   \time 3/4
   R2. * 2
 }
 
-rests_ten = {
+restsTen = {
   \time 4/4
   R1
 }
@@ -185,55 +185,55 @@ rests_eleven = {
 }
 
 melody = {
-  \rests_one
+  \restsOne
   <<
-    \melody_one
-    \structure_one
+    \melodyOne
+    \structureOne
   >>
-  \rests_two
+  \restsTwo
   <<
-    \melody_two
-    \structure_two
+    \melodyTwo
+    \structureTwo
   >>
-  \rests_three
+  \restsThree
   <<
-    \melody_three
-    \structure_three
+    \melodyThree
+    \structureThree
   >>
-  \rests_four
+  \restsFour
   <<
-    \melody_four
-    \structure_four
+    \melodyFour
+    \structureFour
   >>
-  \rests_five
+  \restsFive
   <<
-    \melody_five
-    \structure_five
+    \melodyFive
+    \structureFive
   >>
-  \rests_six
+  \restsSix
   <<
-    \melody_six
-    \structure_six
+    \melodySix
+    \structureSix
   >>
-  \rests_seven
+  \restsSeven
   <<
-    \melody_seven
-    \structure_seven
+    \melodySeven
+    \structureSeven
   >>
-  \rests_eight
+  \restsEight
   <<
-    \melody_eight
-    \structure_eight
+    \melodyEight
+    \structureEight
   >>
-  \rests_nine
+  \restsNine
   <<
-    \melody_nine
-    \structure_nine
+    \melodyNine
+    \structureNine
   >>
-  \rests_ten
+  \restsTen
   <<
-    \melody_ten
-    \structure_ten
+    \melodyTen
+    \structureTen
   >>
   \rests_eleven
 
@@ -242,55 +242,55 @@ melody = {
 
 bass = {
   \clef "bass_8"
-  \rests_one
+  \restsOne
   <<
-    \bass_one
-    \structure_one
+    \bassOne
+    \structureOne
   >>
-  \rests_two
+  \restsTwo
   <<
-    \bass_two
-    \structure_two
+    \bassTwo
+    \structureTwo
   >>
-  \rests_three
+  \restsThree
   <<
-    \bass_three
-    \structure_three
+    \bassThree
+    \structureThree
   >>
-  \rests_four
+  \restsFour
   <<
-    \bass_four
-    \structure_four
+    \bassFour
+    \structureFour
   >>
-  \rests_five
+  \restsFive
   <<
-    \bass_five
-    \structure_five
+    \bassFive
+    \structureFive
   >>
-  \rests_six
+  \restsSix
   <<
-    \bass_six
-    \structure_six
+    \bassSix
+    \structureSix
   >>
-  \rests_seven
+  \restsSeven
   <<
-    \bass_seven
-    \structure_seven
+    \bassSeven
+    \structureSeven
   >>
-  \rests_eight
+  \restsEight
   <<
-    \bass_eight
-    \structure_eight
+    \bassEight
+    \structureEight
   >>
-  \rests_nine
+  \restsNine
   <<
-    \bass_nine
-    \structure_nine
+    \bassNine
+    \structureNine
   >>
-  \rests_ten
+  \restsTen
   <<
-    \bass_ten
-    \structure_ten
+    \bassTen
+    \structureTen
   >>
   \rests_eleven
 
