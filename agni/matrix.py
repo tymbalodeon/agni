@@ -10,6 +10,7 @@ Matrix = list[list[float]]
 Pitch: TypeAlias = NamedPitch | str | float
 
 
+@lru_cache
 def convert_midi_to_frequency(midi_number: float) -> float:
     return (2 ** ((midi_number - 69) / 12)) * 440
 
@@ -68,6 +69,7 @@ class Tuning(Enum):
     EQUAL_TEMPERED = "equal-tempered"
 
 
+@lru_cache
 def quantize_pitch(pitch: NamedPitch) -> NamedPitch:
     pitch_number = pitch.number
     if not isinstance(pitch_number, float):
@@ -77,6 +79,7 @@ def quantize_pitch(pitch: NamedPitch) -> NamedPitch:
     return NamedPitch(pitch_name)
 
 
+@lru_cache
 def get_named_pitch(frequency: float, tuning: Tuning) -> str | None:
     if not frequency:
         return None
@@ -86,6 +89,7 @@ def get_named_pitch(frequency: float, tuning: Tuning) -> str | None:
     return named_pitch.name
 
 
+@lru_cache
 def get_midi_number(frequency: float, tuning: Tuning) -> str | None:
     if not frequency:
         return None
@@ -99,6 +103,7 @@ def get_midi_number(frequency: float, tuning: Tuning) -> str | None:
     return str(midi_number)
 
 
+@lru_cache
 def get_hertz(frequency: float, tuning: Tuning) -> str | None:
     if not frequency:
         return None
@@ -110,6 +115,7 @@ def get_hertz(frequency: float, tuning: Tuning) -> str | None:
     return f"{frequency:,}"
 
 
+@lru_cache
 def get_output_types(frequency: float, tuning: Tuning) -> str | None:
     if not frequency:
         return None
