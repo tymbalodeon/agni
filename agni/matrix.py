@@ -19,6 +19,7 @@ class InputType(Enum):
     MIDI = "midi"
 
 
+@lru_cache
 def get_frequency(pitch: Pitch, input_type: InputType) -> float:
     if isinstance(pitch, NamedPitch):
         return pitch.hertz
@@ -31,6 +32,7 @@ def get_frequency(pitch: Pitch, input_type: InputType) -> float:
     return NamedPitch(pitch).hertz
 
 
+@lru_cache
 def get_sum_frequency(
     multiplier: int, bass_multiple: float, melody: float
 ) -> float:
@@ -38,6 +40,7 @@ def get_sum_frequency(
     return bass_multiple + melody_multiple
 
 
+@lru_cache
 def get_melody_column(
     multiplier: int, columns: range, bass: float, melody: float
 ) -> list[float]:

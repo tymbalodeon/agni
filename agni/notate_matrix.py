@@ -234,10 +234,11 @@ def get_ensemble_score(
     *matrices: Matrix, tuning: Tuning, passage: Passage | None
 ) -> Score:
     staff_group = StaffGroup()
+    description = "Notating matrices..."
     if passage:
         for matrix, melody_note in track(
             zip(matrices, passage.melody),
-            description="Notating matrices...",
+            description=description,
             total=len(matrices),
         ):
             add_matrix_to_staff_group(
@@ -247,7 +248,7 @@ def get_ensemble_score(
                 melody_note=melody_note,
             )
     else:
-        for matrix in track(matrices):
+        for matrix in track(matrices, description=description):
             add_matrix_to_staff_group(matrix, staff_group, tuning=tuning)
     return Score([staff_group])
 
@@ -256,7 +257,7 @@ def get_reference_score(
     *matrices: Matrix, tuning: Tuning, as_chord: bool
 ) -> Score:
     score = Score()
-    for matrix in track(matrices):
+    for matrix in track(matrices, description="Notating matrices..."):
         frequencies = sort_frequencies(matrix)
         notes = [get_note(frequency, tuning) for frequency in frequencies]
         set_clefs(notes)
