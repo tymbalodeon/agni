@@ -246,23 +246,70 @@ structureTen = {
 }
 
 melodyOne = \relative a' {
+  \time 5/4
+
   a1 ~ a4
   bf8 a bf1
-  \tuplet 3/2 { a8 a4 } \tuplet 3/2 { bf8 bf4 } a8 bf4. ~
+
+
+  \tuplet 3/2 {
+    \time 4/4
+
+    a8 a4
+  } \tuplet 3/2 { bf8 bf4 } a8 bf4. ~
   bf2. \tuplet 3/2 { a8 a a }
+
+  \time 5/4
+
   bf1 ~ bf4
   bf2. c2
-  \tuplet 3/2 { bf8 c4 } df2.
-  \tuplet 3/2 { df8 bf4 } c2
+
+
+  \tuplet 3/2 {
+    \time 4/4
+
+    bf8 c4
+  } df2.
+
+
+  \tuplet 3/2 {
+    \time 3/4
+
+    df8 bf4
+  } c2
+
+  \time 6/4
+
   df1.
   \tuplet 3/2 { df8 bf4 ~ } bf \tuplet 3/2 { df8 c bf ~ } bf2 c4
+
+  \time 3/4
+
   df2.
+
+  \time 6/4
+
   d!2 d1
   d1.
+
+  \time 9/8
+
   e8 b4 a b8 a4.
+
+  \time 4/4
+
   b4. a8 e' ds4 e8
+
+  \time 5/4
+
   b4 a8 b4. a4 b
+
+  \time 6/4
+
   a8 e'4 ds8 b4 a b a
+
+  \time 7/8
+
   e'8 ds2.
 }
 
