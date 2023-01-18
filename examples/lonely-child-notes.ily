@@ -253,6 +253,7 @@ melodyOne = \relative a' {
 
 
   \tuplet 3/2 {
+
     \time 4/4
 
     a8 a4
@@ -266,6 +267,7 @@ melodyOne = \relative a' {
 
 
   \tuplet 3/2 {
+
     \time 4/4
 
     bf8 c4
@@ -273,6 +275,7 @@ melodyOne = \relative a' {
 
 
   \tuplet 3/2 {
+
     \time 3/4
 
     df8 bf4
@@ -314,20 +317,54 @@ melodyOne = \relative a' {
 }
 
 melodyTwo = \relative b' {
+  \time 4/4
+
   b2. a4
+
+  \time 8/4
+
   e'2 ds1.
 }
 
 melodyThree = \relative f'' {
+  \time 4/4
+
   f4 gf8 bf, gf'16 bf,8.~ bf4
+
+  \time 3/4
+
   gf'8. gf16 bf,2
+
+  \time 4/4
+
   cf1
+
+  \time 5/4
+
   bf8 cf4 bf8~ bf4 cf2
+
+  \time 6/4
+
   g'1.
+
+  \time 3/4
+
   bf,8 bf4 bf4.
+
+  \time 6/4
+
   f'4 gf2 bf,2.
+
+  \time 4/4
+
   cf1
+
+  \time 5/4
+
   bf8 cf4 bf8~ bf4 cf2
+
+  \time 6/4
+
   g'1.
 }
 
@@ -451,10 +488,19 @@ melodyTen = \relative e'' {
 
 bassOne = \relative g, {
   \clef "bass_8"
+
+  \time 5/4
+
   g1 ~ g4 ~
   g ~ g1
+
+  \time 4/4
+
   g2 g ~
   g1
+
+  \time 5/4
+
   fs ~ fs4
   fs2. ~ fs2 ~
   fs4 fs2.
