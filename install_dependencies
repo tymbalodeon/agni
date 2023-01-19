@@ -5,6 +5,10 @@ dependencies=(
     "just"
     "cargo"
     "checkexec"
+    "pipx"
+    "py-spy"
+    "pnpm"
+    "speedscope"
 )
 
 install_dependency() {
@@ -20,6 +24,18 @@ install_dependency() {
             ;;
         "checkexec")
             cargo install checkexec
+            ;;
+        "pipx")
+            brew install pipx; pipx ensurepath
+            ;;
+        "py-spy")
+            pipx install py-spy
+            ;;
+        "pnpm")
+            curl -fsSL https://get.pnpm.io/install.sh | sh -
+            ;;
+        "speedscope")
+            pnpm add -g speedscope
             ;;
     esac
 }
