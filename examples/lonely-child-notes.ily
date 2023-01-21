@@ -369,39 +369,134 @@ melodyThree = \relative f'' {
 }
 
 melodyFour = \relative bf' {
+  \time 4/4
+
   bf16 b8 bf16 ~ bf8 bf ~ bf bf ~ bf8. r16
+
+  \time 3/4
   g2.
   bf2. ~
+
+  \time 5/4
+
   bf16 g8. ~ g2. bf4 ~
+
+  \time 4/4
+
   bf4 ~ bf8 a ~ a2
+
+  \time 3/4
+
   a2 ~ a8. a16 ~
+
+  \time 7/16
+
   a4 ~ a16 a8 ~
+
+  \time 5/8
+
   a8. a16 ~ a8. a
+
+  \time 3/8
+
   a8 fs4 ~
+
+  \time 9/16
+
   fs16 cs'2
+
+  \time 3/4
+
   cs2. ~
+
+  \time 4/4
+
   cs16 cs8. ~ cs2. ~
+
   cs4 d f,2 ~
+
+  \time 3/4
+
   f2 ef'32 ef ef ef ef16 f, ~
+
+  \time 2/4
+
   f2 ~
+
+  \time 5/16
+
   f4 ef'16 ~
+
+  \time 5/8
+
   ef16 ef8. ~ ef8 ef8. ef16 ~
+
+  \time 11/16
+
   ef8. c2 ~
+
+  \time 5/16
+
   c4 af32 c ~
+
+  \time 5/8
+
   c4 ~ c16 af c af8. ~
+
+  \time 9/16
+
   af8. af32 c16. ~ c16 ~ c8. ~
+
+  \time 3/8
+
   c4 af32 c16. ~
+
+  \time 3/4
+
   c2. ~
+
+  \time 5/4
+
   c8 af32 c16. ~ c8 ef ~ ef4 ~ ef16 c8. ~ c4 ~
+
+  \time 3/8
+
   c4 ~ c16 c ~
+
+  \time 9/16
+
   c4 c8 ~ c8. ~
+
+  \time 15/16
+
   c16 c c8 c16 c8. c16 c4 c8 ~
+
+  \time 11/16
+
   c8. d16 ~ d4 ~ d8. ~
+
+  \time 7/8
+
   d4 ~ d8 ef ~ ef4 ~ ef8 ~
+
+  \time 3/8
+
   ef4 ~ ef16 ef ~
+
+  \time 9/16
+
   ef4 ef8 ~ ef8. ~
+
+  \time 7/8
+
   ef8. cs16 ~ cs2 ~ cs8 ~
+
+  \time 5/4
+
   cs8 cs ~ cs2 cs
+
+  \time 4/4
+
   d1
 }
 
