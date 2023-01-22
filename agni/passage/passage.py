@@ -1,27 +1,29 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from abjad import Container, Duration, NamedPitch, Note, Rest
+from abjad import Duration, NamedPitch, Rest, TimeSignature
 from abjad.get import duration as get_duration
 
 from agni.matrix import Matrix, get_matrix
-from agni.passage.read_passage import Passage
+from agni.passage.read_passage import NoteInMeasure, Passage
 
 
 @dataclass
 class SoundingNote:
     named_pitch: NamedPitch | None
     duration: Duration
+    time_signature: TimeSignature
 
     @classmethod
-    def from_note(cls, note: Note):
-        named_pitch = note.written_pitch
-        duration = get_duration(note)
-        return SoundingNote(named_pitch, duration)
+    def from_note(cls, note: NoteInMeasure):
+        named_pitch = note.note.written_pitch
+        duration = get_duration(note.note)
+        time_signature = note.time_signature
+        return SoundingNote(named_pitch, duration, time_signature)
 
 
 class Part:
-    def __init__(self, name: str, notes: list[Note]):
+    def __init__(self, name: str, notes: list[NoteInMeasure]):
         self.name = name
         self.notes = (SoundingNote.from_note(note) for note in notes)
         self.current_note = self.get_next_note(self.notes)
@@ -31,7 +33,6 @@ class Part:
     ) -> SoundingNote | None:
         if not notes:
             notes = self.notes
-        self.first_time = True
         self.current_note = next(notes, None)
         return self.current_note
 
@@ -48,7 +49,6 @@ class Part:
             return
         shorter_duration = current_duration - duration
         self.current_note.duration = shorter_duration
-        self.first_time = False
 
     def get_current_pitch(self) -> NamedPitch | None:
         if not self.current_note or isinstance(self.current_note, Rest):
@@ -60,21 +60,6 @@ class Part:
             return False
         current_duration = self.get_current_duration()
         return current_duration == duration
-
-
-def get_lilypond_part(notes: str, relative: str | None = None) -> str:
-    if not relative:
-        return notes
-    relative = f"\\relative {relative}"
-    relative_notes = f"{relative} {{ {notes} }}"
-    return relative_notes
-
-
-def get_part_containers(
-    parts: list[str], relative: str | None = None
-) -> list[Container]:
-    lilypond_parts = [get_lilypond_part(part, relative) for part in parts]
-    return [Container(part) for part in lilypond_parts]
 
 
 def get_parts(passage: Passage) -> list[Part]:

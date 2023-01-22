@@ -5,7 +5,6 @@ from typing import cast
 from abjad import (
     Block,
     Component,
-    Duration,
     LilyPondFile,
     Note,
     Staff,
@@ -14,8 +13,6 @@ from abjad import (
     Tuplet,
     parse,
 )
-from abjad.get import duration as get_duration
-from abjad.get import effective as get_effective
 from abjad.get import indicators as get_indicators
 from abjad.get import lineage as get_lineage
 from abjad.indicators import TimeSignature
@@ -23,20 +20,47 @@ from abjad.score import Skip
 from abjad.select import components as get_components
 from abjad.select import notes as get_notes
 
-PassageDurations = tuple[list[Duration], list[Duration]]
-PassageTies = tuple[list[Tie | None], list[Tie | None]]
-PassageTimeSignatures = tuple[
-    list[TimeSignature | None], list[TimeSignature | None]
-]
+
+@dataclass
+class NoteInMeasure:
+    note: Note
+    time_signature: TimeSignature
 
 
 @dataclass
 class Passage:
     title: str | None
     composer: str | None
-    bass: list[Note]
-    melody: list[Note]
+    bass: list[NoteInMeasure]
+    melody: list[NoteInMeasure]
     structure: list[Skip]
+
+
+def get_time_signature(note: Note) -> TimeSignature | None:
+    indicators = note._get_indicators()
+    return next(
+        (
+            indicator
+            for indicator in indicators
+            if isinstance(indicator, TimeSignature)
+        ),
+        None,
+    )
+
+
+def get_notes_in_measure(notes: list[Note]) -> list[NoteInMeasure]:
+    notes_in_measure = []
+    current_time_signature = TimeSignature((4, 4))
+    for note in notes:
+        time_signature = get_time_signature(note)
+        if time_signature:
+            notes_in_measure.append(NoteInMeasure(note, time_signature))
+            current_time_signature = time_signature
+        else:
+            notes_in_measure.append(
+                NoteInMeasure(note, current_time_signature)
+            )
+    return notes_in_measure
 
 
 def get_score_block(lilypond_input: str) -> Block:
@@ -60,12 +84,13 @@ def get_staff_by_name(
     return next((staff for staff in staves if staff.name == name), None)
 
 
-def get_staff_notes(staves: list[Staff], part: str) -> list[Note]:
+def get_staff_notes(staves: list[Staff], part: str) -> list[NoteInMeasure]:
     staff = get_staff_by_name(staves, part)
     if not staff:
         return []
     components = staff.components
-    return get_notes(components)
+    notes = get_notes(components)
+    return get_notes_in_measure(notes)
 
 
 def get_header_item(lilypond_input: str, item: str) -> str | None:
@@ -87,18 +112,6 @@ def get_passage_from_input_file(input_file: Path) -> Passage:
     return Passage(title, composer, bass, melody, structure)
 
 
-def get_part_durations(part: list[Note]) -> list[Duration]:
-    return [get_duration(note) for note in part]
-
-
-def get_passage_durations(passage: Passage | None) -> PassageDurations | None:
-    if not passage:
-        return None
-    bass_durations = get_part_durations(passage.bass)
-    melody_durations = get_part_durations(passage.melody)
-    return bass_durations, melody_durations
-
-
 def get_tie(note: Note | None) -> Tie | None:
     if not note:
         return None
@@ -116,29 +129,3 @@ def get_tuplet(component: Component | None) -> Tuplet | None:
         ),
         None,
     )
-
-
-def get_part_ties(part: list[Note]) -> list[Tie | None]:
-    return [get_tie(note) for note in part]
-
-
-def get_passage_ties(passage: Passage | None) -> PassageTies | None:
-    if not passage:
-        return None
-    bass_ties = get_part_ties(passage.bass)
-    melody_ties = get_part_ties(passage.melody)
-    return bass_ties, melody_ties
-
-
-def get_part_time_signatures(part: list[Note]) -> list[TimeSignature | None]:
-    return [get_effective(note, TimeSignature) for note in part]
-
-
-def get_passage_time_signatures(
-    passage: Passage | None,
-) -> PassageTimeSignatures | None:
-    if not passage:
-        return None
-    bass_time_signatures = get_part_time_signatures(passage.bass)
-    melody_time_signatures = get_part_time_signatures(passage.melody)
-    return bass_time_signatures, melody_time_signatures

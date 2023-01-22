@@ -16,13 +16,11 @@ from abjad import (
     show,
 )
 from abjad.get import duration as get_duration
-from abjad.get import effective as get_effective
-from abjad.indicators import TimeSignature
 from abjad.persist import as_pdf
-from abjad.select import notes as get_notes
 from rich.progress import track
 
 from agni.passage.read_passage import (
+    NoteInMeasure,
     Passage,
     get_staff_by_name,
     get_tie,
@@ -177,16 +175,17 @@ def add_matrix_to_staff_group(
     matrix: Matrix,
     staff_group: StaffGroup,
     tuning: Tuning,
-    melody_note: Note | None = None,
+    melody_note: NoteInMeasure | None = None,
+    previous_note: NoteInMeasure | None = None,
 ):
     frequencies = sort_frequencies(matrix)
     frequencies.reverse()
     for frequency_number, frequency in enumerate(frequencies):
         if melody_note:
-            duration = melody_note.written_duration
-            tuplet = get_tuplet(melody_note)
-            time_signature = get_effective(melody_note, TimeSignature)
-            tie = get_tie(melody_note)
+            duration = melody_note.note.written_duration
+            tuplet = get_tuplet(melody_note.note)
+            time_signature = melody_note.time_signature
+            tie = get_tie(melody_note.note)
         else:
             tuplet = None
             duration = Duration(1, 4)
@@ -202,14 +201,13 @@ def add_matrix_to_staff_group(
             if not staff:
                 continue
             if melody_note:
-                previous_note = get_notes(staff)[-1]
-                previous_time_signature = get_effective(
-                    previous_note, TimeSignature
-                )
-                if not previous_time_signature == time_signature:
+                if (
+                    previous_note
+                    and not previous_note.time_signature == time_signature
+                ):
                     attach(time_signature, note)
-                if tuplet:
-                    in_progress_tuplet = get_tuplet(previous_note)
+                if tuplet and previous_note:
+                    in_progress_tuplet = get_tuplet(previous_note.note)
                     if in_progress_tuplet:
                         in_progress_tuplet_duration = get_duration(
                             in_progress_tuplet
@@ -236,16 +234,22 @@ def get_ensemble_score(
     staff_group = StaffGroup()
     description = "Notating matrices..."
     if passage:
-        for matrix, melody_note in track(
-            zip(matrices, passage.melody),
+        for index, data in track(
+            enumerate(zip(matrices, passage.melody)),
             description=description,
             total=len(matrices),
         ):
+            matrix, melody_note = data
+            try:
+                previous_note = passage.melody[index - 1]
+            except Exception:
+                previous_note = None
             add_matrix_to_staff_group(
                 matrix,
                 staff_group,
                 tuning=tuning,
                 melody_note=melody_note,
+                previous_note=previous_note,
             )
     else:
         for matrix in track(matrices, description=description):
