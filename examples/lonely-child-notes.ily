@@ -499,32 +499,78 @@ melodyFour = \relative bf' {
 }
 
 melodyFive = \relative as' {
+  \time 3/4
+
   as8 cs4 b8 ~ b16 ds e8
+
+  \time 4/4
+
   gs8. a16 ~ a8. d,16 ef8 d ~ d16 ef8. ~
   ef16 d bf d ~ d d8. bf4 a16 bf8 c16
   g4. af8 ~ af g af16 cf bf8 ~
   bf4 ~ bf8 f'16 df ~ df8. c16 df f gf8 ~
+
+  \time 3/4
+
   gf4 a,16 bf c8 ef32 ef16. c8
+
+  \time 4/4
+
   as2 b8. cs16 ds e8 gs16 ~
   gs8 a ~ a16. gs32 ef8 ~ ef \tuplet 3/2 { ds ef16 } df32 cf16. ~ cf16 bf ~
+
+  \time 3/4
+
   bf8 b gs'8. cs,16 ~ cs e e8
+
+  \time 4/4
+
   g,2 gs8. as16 gs8 cs16 as
+
+  \time 3/4
+
   gs4 ~ gs16 f' cs as gs4
+
+  \time 4/4
+
   d'4 cs4. e16 d ~ d8 e16 d
-  a4
-  d16 ef g d ~ d4
+
+  \time 3/4
+
+  a4 d16 ef g d ~ d4
   d16 g af8 ~ af4 bf16 a8.
+
+  \time 5/4
+
   e4 d16 e8 g16 ~ g8 cs, ~ cs4 d
   d16 ef8 g16 ~ g8 d ~ d a ~ a4 bf
+
+  \time 3/4
+
   fs2 g16 a8 c16
   e2.
+
+  \time 4/4
+
   d8. cs16 e8 d16 g ~ g8. ef16 \tuplet 3/2 { d16 ef8 d16 ef8 }
   f2 gf4 af16 gf af8
+
+  \time 3/4
+
   af16 gf8. ~ gf f16 ~ \tuplet 3/2 { f8 gf16 gf f8 }
   d4. ef8 \tuplet 3/2 { f af16 af f8 }
+
+  \time 4/4
+
   ds2. e8 fs ~
   fs e ~ e4 ds16 e ds e ds4 ~
+
+  \time 2/4
+
   ds16 e a fs ~ fs cs8.
+
+  \time 3/4
+
   f4 gf ~ gf8 f16 gf
   b,8 gs b16 gs8. b gs16
   f'4 gf2
@@ -826,31 +872,78 @@ bassFour = \relative ef, {
 }
 
 bassFive = \relative ef, {
+  \time 3/4
+
   ef2. ~
+
+  \time 4/4
+
   ef1 ~
   ef2. f4 ~
   f1 ~
   f1 ~
+
+  \time 3/4
+
   f4 ef2
+
+  \time 4/4
+
   d1 ~
   d1
+
+  \time 3/4
+
   b2.
+
+  \time 4/4
+
   e1 ~
+
+  \time 3/4
+
   e2.
+
+  \time 4/4
+
   as,1
+
+  \time 3/4
+
   b2. ~
   b2. ~
+
+  \time 5/4
+
   b1 ~ b4
   d1 ~ d4
+
+  \time 3/4
+
   c2. ~
   c2.
+
+  \time 4/4
+
   e1
   df1 ~
+
+  \time 3/4
+
   df2.
   ef2.
+
+  \time 4/4
+
   af1 ~
   af1
+
+  \time 2/4
+
   a2
+
+  \time 3/4
+
   g2. ~
   g2. ~
   g2.
