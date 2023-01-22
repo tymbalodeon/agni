@@ -577,51 +577,129 @@ melodyFive = \relative as' {
 }
 
 melodySix = \relative e' {
+  \time 5/4
+
   e8. g16 g8 e g2.
+
+  \time 3/4
+
   e16 g e32 g16. af2
+
+  \time 4/4
   g4 \tuplet 3/2 { af16 g8 } \tuplet 3/2 { af16 g8 ~ } g \tuplet 3/2 { af16 g8 ~ } g4
   e1
+
+  \time 2/4
+
   g2
+
+  \time 6/4
+
   e4 ~ e16 g8. ~ g4. af8 ~ af2
+
+  \time 3/4
+
   af8. g16 ~ g e e g ~ g af8.
+
+  \time 5/4
+
   af16 g8 af16 ~ af8 g ~ g e ~ e g ~ g16 af8 g16
+
+  \time 4/4
+
   e8 g ~ g4. af8 ~ af4
+
+  \time 6/4
+
   b4 b 2 b2.
+
+  \time 4/4
+
   b1
+
+  \time 5/4
+
   b1 ~ b4
   c8 c4. ~ c8 c ~ c c ~ c4
+
+  \time 4/4
+
   c16 d8. ~ d16 c c d ~ d4 ~ d8 c16 c
   c16 d8. ~ d c16 ~ c c8 d16 ~ d4
+
+  \time 5/4
+
   c1 ~ c4
+
+  \time 3/4
+
   d2.
+
+  \time 2/4
+
   c16 d ef8 d16 ef8 d16 ~
+
+  \time 4/4
+
   d8 c d16 ef d ef d c8. d16 ef d ef
   d8. d16 ef d c8 ~ c16 d ef d ~ d8. ef16
   e16 e8 ef16 ~ ef8 d16 c ~ c c c8 d16 ef8 e16 ~
+
+  \time 2/4
+
   e8 e ~ e4
+
+  \time 3/4
+
   d16 d ef8 ~ ef16 e e8 r e16 ef
+
+  \time 4/4
+
   e8 ef4. e8 ef e4
+
+  \time 6/4
+
   g4 af2 g2.
+
+  \time 3/4
+
   \tuplet 3/2 { ds8 e g } af2
   g4. af8 ~ af g
 }
 
 melodySeven = \relative b' {
+  \time 3/4
+
   b16 c8 ds16 ~ ds e g8 r4
+
+  \time 4/4
+
   af2. g4
+
+  \time 3/4
+
   e,16 g af8 \tuplet 3/2 { b c ds } e g
 }
 
 melodyEight = \relative e'' {
+  \time 4/4
+
   e1
+
+  \time 3/4
+
   ds2.
 }
 
 melodyNine = \relative e'' {
+  \time 5/4
+
   e8 ds4 e4. ds2
 }
 
 melodyTen = \relative e'' {
+  \time 3/4
+
   e4. ds4 e8
 }
 
@@ -950,55 +1028,134 @@ bassFive = \relative ef, {
 }
 
 bassSix = \relative c, {
+  \time 5/4
+
   c8. ef16 ef8 c ef2.
+
+  \time 3/4
+
   c16 ef c32 ef16. ef2
+
+  \time 4/4
   ef4
-  \tuplet 3/2 { ef16 ef8 }
-  \tuplet 3/2 { ef16 ef8 ~ }
-  \tuplet 3/2 { ef16 ef8 ~ }
-  ef8 ~ ef4
+    \tuplet 3/2 { ef16 ef8 }
+    \tuplet 3/2 { ef16 ef8 ~ }
+    \tuplet 3/2 { ef16 ef8 ~ }
+    ef8 ~ ef4
   c1
+
+  \time 2/4
+
   ef2
+
+  \time 6/4
+
   c4 ~ c16 ef8. ~ ef4. ef8 ~ ef2
+
+  \time 3/4
+
   ef8. ef16 ~ ef c c ef ~ ef ef8.
+
+  \time 5/4
+
   ef16 ef8 ef16 ~ ef8 ef ~ ef c ~ c ef ~ ef16 ef8 ef16
+
+  \time 4/4
+
   c8 ef ~ ef4. ef8 ~ ef4
+
+  \time 6/4
+
   d4 d2 d2.
+
+  \time 4/4
+
   d1
+
+  \time 5/4
+
   d1 ~ d4
   f8 f4. ~ f8 f ~ f f~ f4
+
+  \time 4/4
+
   f16 gf8. ~ gf16 f f gf ~ gf4 ~ gf8 f16 f
   f gf8. ~ gf f16 ~ f f8 gf16 ~ gf4
+
+  \time 5/4
+
   f1 ~ f4
+
+  \time 3/4
+
   gf2.
+
+  \time 2/4
+
   f16 gf bf8 gf16 bf8 gf16 ~
+
+  \time 4/4
+
   gf8 f gf16 bf gf bf gf f8. gf16 bf gf bf
   gf8. gf16 bf gf f8 ~ f16 gf bf gf ~ gf8. bf16
   g16 c8 bf16 ~ bf8 gf16 f ~ f f f8 gf16 bf8 g16 ~
+
+  \time 2/4
+
+
   g8 c ~ c4
+
+  \time 3/4
+
   gf16 gf bf8 ~ bf16 g c8 r g16 bf
+
+  \time 4/4
+
   g8 bf4. g8 bf g4
+
+  \time 4/4
+
   d4 c2 d2.
+
+  \time 3/4
+
   \tuplet 3/2 { bf8 g d' } c2
   d4. c8 ~ c d
 }
 
 bassSeven = \relative d, {
+  \time 3/4
+
   d16 f8 bf16 ~ bf c d8 r4
+
+  \time 4/4
+
   c2. d4
+
+  \time 3/4
+
   c,16 ef ef8 \tuplet 3/2 { d f bf } c d
 }
 
 bassEight = \relative e,, {
+  \time 4/4
+
   e1
+
+  \time 3/4
+
   ds2.
 }
 
 bassNine = \relative e,, {
+  \time 5/4
+
   e8 ds4 e4. ds2
 }
 
 bassTen = \relative e,, {
+  \time 3/4
+
   e4. ds4 e8
 }
 
