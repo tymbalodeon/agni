@@ -372,6 +372,7 @@ melodyFour = \relative bf' {
   bf16 b8 bf16 ~ bf8 bf ~ bf bf ~ bf8. r16
 
   \time 3/4
+
   g2.
   bf2. ~
 
@@ -410,7 +411,6 @@ melodyFour = \relative bf' {
   \time 4/4
 
   cs16 cs8. ~ cs2. ~
-
   cs4 d f,2 ~
 
   \time 3/4
@@ -642,57 +642,186 @@ bassOne = \relative g, {
 
 
 bassTwo = \relative f, {
+  \time 4/4
+
   f1 ~
+
+  \time 8/4
+
   f2 f1.
 }
 
 bassThree = \relative ef, {
+  \time 4/4
+
   ef1 ~
+
+  \time 3/4
+
   ef2.
+
+  \time 4/4
+
   ef1
+
+  \time 5/4
+
   ef1 ~ ef4
+
+  \time 6/4
+
   ef1.
+
+  \time 3/4
+
   ef2.
+
+  \time 6/4
+
   ef1.
+
+  \time 4/4
+
   ef1
+
+  \time 5/4
+
   ef1 ~ ef4
+
+  \time 6/4
+
   ef1.
 }
 
 bassFour = \relative ef, {
+  \time 4/4
+
   ef2. ~ ef8. f16 ~
+
+  \time 3/4
+
   f2 ~ f8 d ~
   d2 ~ d8 e ~
+
+  \time 5/4
+
   e2. b2 ~
+
+  \time 4/4
+
   b16 ef8. ~ ef f16 ~ f2
+
+  \time 3/4
+
   f8. b,16 ~ b2 ~
+
+  \time 7/16
+
   b8 d ~ d8. ~
+
+  \time 5/8
+
   d4 d4.
+
+  \time 3/8
+
   c4.
+
+  \time 9/16
+
   d16 ~ d2
+
+  \time /3/4
+
   df2. ~
+
+  \time 4/4
+
   df16 e8. ~ e2 ~ e8 ef ~
   ef4 ef8. df16 ~ df2 ~
+
+  \time 3/4
+
   df8. a16 ~ a4 ~ a16 g8. ~
+
+  \time 2/4
+
   g2
+
+  \time 5/16
+
   af4 ~ af16 ~
+
+  \time 5/8
+
   af4 ~ af4.
+
+  \time 11/16
+
   df8. ~ df2
+
+  \time 5/16
+
   ef4 ~ ef16 ~
+
+  \time 5/8
+
   ef4 ef4.
+
+  \time 9/16
+
   cs8.~ cs ~ cs
+
+  \time 3/8
+
   fs4.
+
+  \time 3/4
+
   af2.
+
+  \time 5/4
+
   g2 ~ g8. df16 ~ df2
+
+  \time 3/8
+
   fs4.
+
+  \time 9/16
+
   bf4. ~ bf8.
+
+  \time 15/16
+
   f2. ~ f8.
+
+  \time 11/16
+
   b2 ~ b8.
+
+  \time 7/8
+
   g2. ~ g8
+
+  \time 3/8
+
   a4.
+
+  \time 9/16
+
   e4. ~ e8.
+
+  \time 7/8
+
   f2. ~ f8
+
+  \time 5/4
+
   bf2 ~ bf8. b16 ~ b2
+
+  \time 4/4
+
   g1
 }
 
