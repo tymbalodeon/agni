@@ -661,9 +661,12 @@ melodySix = \relative e' {
 
   g4 af2 g2.
 
-  \time 3/4
+  \tuplet 3/2 {
 
-  \tuplet 3/2 { ds8 e g } af2
+    \time 3/4
+
+    ds8 e g
+  } af2
   g4. af8 ~ af g
 }
 
@@ -1117,9 +1120,12 @@ bassSix = \relative c, {
 
   d4 c2 d2.
 
-  \time 3/4
+  \tuplet 3/2 {
 
-  \tuplet 3/2 { bf8 g d' } c2
+    \time 3/4
+
+    bf8 g d'
+  } c2
   d4. c8 ~ c d
 }
 
