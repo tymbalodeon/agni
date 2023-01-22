@@ -251,7 +251,6 @@ melodyOne = \relative a' {
   a1 ~ a4
   bf8 a bf1
 
-
   \tuplet 3/2 {
 
     \time 4/4
@@ -264,7 +263,6 @@ melodyOne = \relative a' {
 
   bf1 ~ bf4
   bf2. c2
-
 
   \tuplet 3/2 {
 
@@ -598,17 +596,47 @@ bassOne = \relative g, {
 
   fs ~ fs4
   fs2. ~ fs2 ~
+
+  \time 4/4
+
   fs4 fs2.
-  fs ~
+
+  \time 3/4
+
+  fs2. ~
+
+  \time 6/4
+
   fs1.
   fs1.
+
+  \time 3/4
+
   fs2.
+
+  \time 6/4
+
   e2 e1
   e1.
+
+  \time 9/8
+
   f8 ~ f1 ~
-  f
+
+  \time 4/4
+
+  f1
+
+  \time 5/4
+
   f1 ~ f4
+
+  \time 6/4
+
   f2 f1
+
+  \time 7/8
+
   f8 ~ f2.
 }
 
