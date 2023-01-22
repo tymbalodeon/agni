@@ -855,7 +855,7 @@ bassFour = \relative ef, {
 
   d16 ~ d2
 
-  \time /3/4
+  \time 3/4
 
   df2. ~
 
