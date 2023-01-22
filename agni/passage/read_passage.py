@@ -95,8 +95,7 @@ def get_staff_notes(staves: list[Staff], part: str) -> list[NoteInMeasure]:
 
 def get_header_item(lilypond_input: str, item: str) -> str | None:
     lines = lilypond_input.splitlines()
-    lines = (line for line in lines if item in line)
-    matching_line = next(lines, None)
+    matching_line = next((line for line in lines if item in line), None)
     if not matching_line:
         return None
     return matching_line.split('"')[1]
