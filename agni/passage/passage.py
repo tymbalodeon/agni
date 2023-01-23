@@ -139,9 +139,7 @@ def should_add_pitches(
         return False
     if adjacent_duplicates:
         return True
-    is_duplicate = are_same_pitches(new_pitches, old_pitches)
-    should_add = not is_duplicate
-    return should_add
+    return not are_same_pitches(new_pitches, old_pitches)
 
 
 def get_ordered_unique_pitch_sets(
