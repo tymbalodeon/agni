@@ -13,6 +13,7 @@ from abjad import (
     ShortInstrumentName,
     Staff,
     StaffGroup,
+    Tie,
     TimeSignature,
     Tuplet,
     attach,
@@ -50,6 +51,17 @@ def get_note(
     if tuning == Tuning.EQUAL_TEMPERED:
         pitch = quantize_pitch(pitch)
     return Note(pitch, duration)
+
+
+def get_matrix_note_from_melody_note(
+    matrix_frequency: float, melody_note: NoteInMeasure | None, tuning: Tuning
+) -> Note:
+    duration = get_melody_note_duration(melody_note)
+    tie = get_melody_note_tie(melody_note)
+    note = get_note(matrix_frequency, tuning, duration=duration)
+    if tie:
+        attach(tie, note)
+    return note
 
 
 def get_note_name(note: Note) -> str | None:
@@ -183,16 +195,81 @@ def get_staff_name(name: str | None) -> str:
     return f"\\markup {staff_name}"
 
 
+def get_melody_note_duration(note: NoteInMeasure | None) -> Duration:
+    if not note:
+        return Duration(1, 4)
+    return note.note.written_duration
+
+
+def get_melody_note_tuplet(note: NoteInMeasure | None) -> Tuplet | None:
+    if not note:
+        return None
+    return get_tuplet(note.note)
+
+
+def get_melody_note_time_signature(
+    note: NoteInMeasure | None,
+) -> TimeSignature | None:
+    if not note:
+        return None
+    return note.time_signature
+
+
+def get_melody_note_tie(note: NoteInMeasure | None) -> Tie | None:
+    if not note:
+        return None
+    return get_tie(note.note)
+
+
 def get_staff(
-    frequency_number: int, time_signature: TimeSignature | None, note: Note
+    index: int, time_signature: TimeSignature | None, note: Note
 ) -> Staff:
-    staff = Staff([note], name=str(frequency_number))
+    staff = Staff([note], name=str(index))
     staff_name = get_staff_name(staff.name)
     first_leaf = staff[0]
     attach(InstrumentName(staff_name), first_leaf)
     attach(ShortInstrumentName(staff_name), first_leaf)
     attach(time_signature, first_leaf)
     return staff
+
+
+def add_new_staff(
+    staff_group: StaffGroup,
+    index: int,
+    note: Note,
+    time_signature: TimeSignature | None,
+):
+    set_clefs([note])
+    staff = get_staff(index, time_signature, note)
+    staff_group.insert(0, staff)
+
+
+def add_time_signature_to_note(
+    note: Note,
+    time_signature: TimeSignature | None,
+    previous_note: NoteInMeasure | None,
+):
+    if previous_note and previous_note.time_signature != time_signature:
+        attach(time_signature, note)
+
+
+def add_tuplet_to_note(
+    melody_note: NoteInMeasure,
+    note: Note,
+    previous_note: NoteInMeasure | None,
+) -> Tuplet | Note:
+    tuplet = get_melody_note_tuplet(melody_note)
+    if not tuplet or not previous_note:
+        return note
+    in_progress_tuplet = get_tuplet(previous_note.note)
+    if in_progress_tuplet:
+        in_progress_tuplet_duration = get_duration(in_progress_tuplet)
+        is_complete_tuplet = in_progress_tuplet_duration.is_assignable
+        if not is_complete_tuplet:
+            in_progress_tuplet.append(note)
+            return note
+    multiplier = tuplet.colon_string
+    return Tuplet(multiplier, [note])
 
 
 def add_matrix_to_staff_group(
@@ -203,51 +280,21 @@ def add_matrix_to_staff_group(
     previous_note: NoteInMeasure | None = None,
 ):
     frequencies = sort_frequencies(matrix)
-    for frequency_number, frequency in enumerate(frequencies):
-        if melody_note:
-            duration = melody_note.note.written_duration
-            tuplet = get_tuplet(melody_note.note)
-            time_signature = melody_note.time_signature
-            tie = get_tie(melody_note.note)
-        else:
-            tuplet = None
-            duration = Duration(1, 4)
-            time_signature = None
-            tie = None
-        note = get_note(frequency, tuning, duration=duration)
-        if tie:
-            attach(tie, note)
+    for index, frequency in enumerate(frequencies):
+        note = get_matrix_note_from_melody_note(frequency, melody_note, tuning)
         staff_names = [staff.name for staff in staff_group]
-        staff_name = str(frequency_number)
-        if staff_name in staff_names:
-            staff = get_staff_by_name(staff_group, staff_name)
-            if not staff:
-                continue
-            if melody_note:
-                if (
-                    previous_note
-                    and not previous_note.time_signature == time_signature
-                ):
-                    attach(time_signature, note)
-                if tuplet and previous_note:
-                    in_progress_tuplet = get_tuplet(previous_note.note)
-                    if in_progress_tuplet:
-                        in_progress_tuplet_duration = get_duration(
-                            in_progress_tuplet
-                        )
-                        is_complete_tuplet = (
-                            in_progress_tuplet_duration.is_assignable
-                        )
-                        if not is_complete_tuplet:
-                            in_progress_tuplet.append(note)
-                            continue
-                    multiplier = tuplet.colon_string
-                    note = Tuplet(multiplier, [note])
-            staff.append(note)
-        else:
-            set_clefs([note])
-            staff = get_staff(frequency_number, time_signature, note)
-            staff_group.insert(0, staff)
+        staff_name = str(index)
+        time_signature = get_melody_note_time_signature(melody_note)
+        if staff_name not in staff_names:
+            add_new_staff(staff_group, index, note, time_signature)
+            continue
+        staff = get_staff_by_name(staff_group, staff_name)
+        if not staff:
+            continue
+        if melody_note:
+            add_time_signature_to_note(note, time_signature, previous_note)
+            note = add_tuplet_to_note(melody_note, note, previous_note)
+        staff.append(note)
 
 
 def get_ensemble_score(
