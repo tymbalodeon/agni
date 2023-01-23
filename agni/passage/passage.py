@@ -14,8 +14,8 @@ class SoundingNote:
     duration: Duration
     time_signature: TimeSignature
 
-    @classmethod
-    def from_note(cls, note: NoteInMeasure):
+    @staticmethod
+    def from_note(note: NoteInMeasure):
         named_pitch = note.note.written_pitch
         duration = get_duration(note.note)
         time_signature = note.time_signature
