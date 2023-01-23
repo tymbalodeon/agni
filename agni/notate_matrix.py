@@ -13,6 +13,7 @@ from abjad import (
     ShortInstrumentName,
     Staff,
     StaffGroup,
+    TimeSignature,
     Tuplet,
     attach,
     show,
@@ -173,6 +174,27 @@ def set_clefs(notes: list[Note]):
             set_clef(note)
 
 
+def get_staff_name(name: str | None) -> str:
+    staff_name = name or ""
+    if staff_name == "0":
+        staff_name = "bass"
+    elif staff_name == "3":
+        staff_name = "melody"
+    return f"\\markup {staff_name}"
+
+
+def get_staff(
+    frequency_number: int, time_signature: TimeSignature | None, note: Note
+) -> Staff:
+    staff = Staff([note], name=str(frequency_number))
+    staff_name = get_staff_name(staff.name)
+    first_leaf = staff[0]
+    attach(InstrumentName(staff_name), first_leaf)
+    attach(ShortInstrumentName(staff_name), first_leaf)
+    attach(time_signature, first_leaf)
+    return staff
+
+
 def add_matrix_to_staff_group(
     matrix: Matrix,
     staff_group: StaffGroup,
@@ -224,17 +246,7 @@ def add_matrix_to_staff_group(
             staff.append(note)
         else:
             set_clefs([note])
-            staff = Staff([note], name=str(frequency_number))
-            first_leaf = staff[0]
-            staff_name = staff.name or ""
-            if staff_name == "0":
-                staff_name = "bass"
-            elif staff_name == "3":
-                staff_name = "melody"
-            staff_name = f"\\markup {staff_name}"
-            attach(InstrumentName(staff_name), first_leaf)
-            attach(ShortInstrumentName(staff_name), first_leaf)
-            attach(time_signature, first_leaf)
+            staff = get_staff(frequency_number, time_signature, note)
             staff_group.insert(0, staff)
 
 
