@@ -37,30 +37,13 @@ class Passage:
 
 
 def get_time_signature(note: Note) -> TimeSignature | None:
-    indicators = note._get_indicators()
     return next(
         (
-            indicator
-            for indicator in indicators
-            if isinstance(indicator, TimeSignature)
+            time_signature
+            for time_signature in get_indicators(note, prototype=TimeSignature)
         ),
         None,
     )
-
-
-def get_notes_in_measure(notes: list[Note]) -> list[NoteInMeasure]:
-    notes_in_measure = []
-    current_time_signature = TimeSignature((4, 4))
-    for note in notes:
-        time_signature = get_time_signature(note)
-        if time_signature:
-            notes_in_measure.append(NoteInMeasure(note, time_signature))
-            current_time_signature = time_signature
-        else:
-            notes_in_measure.append(
-                NoteInMeasure(note, current_time_signature)
-            )
-    return notes_in_measure
 
 
 def get_score_block(lilypond_input: str) -> Block:
@@ -82,6 +65,21 @@ def get_staff_by_name(
     staves: StaffGroup | list[Staff], name: str
 ) -> Staff | None:
     return next((staff for staff in staves if staff.name == name), None)
+
+
+def get_notes_in_measure(notes: list[Note]) -> list[NoteInMeasure]:
+    notes_in_measure = []
+    current_time_signature = TimeSignature((4, 4))
+    for note in notes:
+        time_signature = get_time_signature(note)
+        if time_signature:
+            notes_in_measure.append(NoteInMeasure(note, time_signature))
+            current_time_signature = time_signature
+        else:
+            notes_in_measure.append(
+                NoteInMeasure(note, current_time_signature)
+            )
+    return notes_in_measure
 
 
 def get_staff_notes(staves: list[Staff], part: str) -> list[NoteInMeasure]:
