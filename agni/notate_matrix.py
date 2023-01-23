@@ -5,10 +5,12 @@ from abjad import (
     Clef,
     Component,
     Duration,
+    InstrumentName,
     LilyPondFile,
     NamedPitch,
     Note,
     Score,
+    ShortInstrumentName,
     Staff,
     StaffGroup,
     Tuplet,
@@ -179,7 +181,6 @@ def add_matrix_to_staff_group(
     previous_note: NoteInMeasure | None = None,
 ):
     frequencies = sort_frequencies(matrix)
-    frequencies.reverse()
     for frequency_number, frequency in enumerate(frequencies):
         if melody_note:
             duration = melody_note.note.written_duration
@@ -224,8 +225,17 @@ def add_matrix_to_staff_group(
         else:
             set_clefs([note])
             staff = Staff([note], name=str(frequency_number))
-            attach(time_signature, staff[0])
-            staff_group.append(staff)
+            first_leaf = staff[0]
+            staff_name = staff.name or ""
+            if staff_name == "0":
+                staff_name = "bass"
+            elif staff_name == "3":
+                staff_name = "melody"
+            staff_name = f"\\markup {staff_name}"
+            attach(InstrumentName(staff_name), first_leaf)
+            attach(ShortInstrumentName(staff_name), first_leaf)
+            attach(time_signature, first_leaf)
+            staff_group.insert(0, staff)
 
 
 def get_ensemble_score(
