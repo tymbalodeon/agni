@@ -255,9 +255,7 @@ def add_time_signature_to_note(
 
 
 def is_incomplete_tuplet(component: Component) -> bool:
-    if not isinstance(component, Tuplet):
-        return False
-    previous_note_duration = get_duration(component[-1])
+    previous_note_duration = get_duration(component)
     return not previous_note_duration.is_assignable
 
 
@@ -269,8 +267,10 @@ def add_note_or_tuplet_to_staff(
         staff.append(matrix_note)
         return
     previous_component = staff[-1]
-    if is_incomplete_tuplet(previous_component):
-        cast(Tuplet, previous_component).append(matrix_note)
+    if isinstance(previous_component, Tuplet) and is_incomplete_tuplet(
+        previous_component
+    ):
+        previous_component.append(matrix_note)
         staff[-1] = previous_component
         return
     multiplier = tuplet.colon_string
