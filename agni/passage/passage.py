@@ -157,15 +157,10 @@ def get_simultaneous_pitches(
 ) -> list[list[NamedPitch]]:
     parts = get_parts(passage)
     pitches = [get_current_pitches(parts)]
-    end_of_passage = is_end_of_passage(parts)
-    while not end_of_passage:
+    while not is_end_of_passage(parts):
         new_pitches = get_next_pitches(parts)
-        should_add = should_add_pitches(
-            adjacent_duplicates, new_pitches, pitches
-        )
-        if should_add:
+        if should_add_pitches(adjacent_duplicates, new_pitches, pitches):
             pitches.append(new_pitches)
-        end_of_passage = is_end_of_passage(parts)
     if as_set:
         return get_ordered_unique_pitch_sets(pitches)
     return pitches
