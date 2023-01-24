@@ -253,23 +253,28 @@ def add_time_signature_to_note(
         attach(time_signature, note)
 
 
-def add_tuplet_to_note(
-    melody_note: NoteInMeasure,
-    note: Note,
-    previous_note: NoteInMeasure | None,
-) -> Tuplet | Note:
+def is_incomplete_tuplet(component: Component) -> bool:
+    previous_note_duration = get_duration(component[-1])
+    return not previous_note_duration.is_assignable
+
+
+def add_note_or_tuplet_to_staff(
+    melody_note: NoteInMeasure, matrix_note: Note, staff: Staff
+):
     tuplet = get_melody_note_tuplet(melody_note)
-    if not tuplet or not previous_note:
-        return note
-    in_progress_tuplet = get_tuplet(previous_note.note)
-    if in_progress_tuplet:
-        in_progress_tuplet_duration = get_duration(in_progress_tuplet)
-        is_complete_tuplet = in_progress_tuplet_duration.is_assignable
-        if not is_complete_tuplet:
-            in_progress_tuplet.append(note)
-            return note
+    if not tuplet:
+        staff.append(matrix_note)
+        return
+    previous_component = staff[-1]
+    if isinstance(previous_component, Tuplet) and is_incomplete_tuplet(
+        previous_component
+    ):
+        previous_component.append(matrix_note)
+        staff[-1] = previous_component
+        return
     multiplier = tuplet.colon_string
-    return Tuplet(multiplier, [note])
+    new_tuplet = Tuplet(multiplier, [matrix_note])
+    staff.append(new_tuplet)
 
 
 def add_matrix_to_staff_group(
@@ -281,20 +286,25 @@ def add_matrix_to_staff_group(
 ):
     frequencies = sort_frequencies(matrix)
     for index, frequency in enumerate(frequencies):
-        note = get_matrix_note_from_melody_note(frequency, melody_note, tuning)
+        matrix_note = get_matrix_note_from_melody_note(
+            frequency, melody_note, tuning
+        )
         staff_names = [staff.name for staff in staff_group]
         staff_name = str(index)
         time_signature = get_melody_note_time_signature(melody_note)
         if staff_name not in staff_names:
-            add_new_staff(staff_group, index, note, time_signature)
+            add_new_staff(staff_group, index, matrix_note, time_signature)
             continue
         staff = get_staff_by_name(staff_group, staff_name)
         if not staff:
             continue
         if melody_note:
-            add_time_signature_to_note(note, time_signature, previous_note)
-            note = add_tuplet_to_note(melody_note, note, previous_note)
-        staff.append(note)
+            add_time_signature_to_note(
+                matrix_note, time_signature, previous_note
+            )
+            add_note_or_tuplet_to_staff(melody_note, matrix_note, staff)
+            continue
+        staff.append(matrix_note)
 
 
 def get_ensemble_score(
