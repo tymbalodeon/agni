@@ -20,7 +20,7 @@ class SoundingNote:
         named_pitch = note.note.written_pitch
         duration = get_duration(note.note)
         time_signature = note.time_signature
-        return SoundingNote(named_pitch, duration, time_signature)
+        return cls(named_pitch, duration, time_signature)
 
 
 class Part:
