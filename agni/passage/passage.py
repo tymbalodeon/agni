@@ -5,7 +5,6 @@ from abjad import Duration, Leaf, NamedPitch, Note, Rest, TimeSignature
 from abjad.get import duration as get_duration
 from abjad.select import logical_ties as get_logical_ties
 
-from agni.matrix import Matrix, get_matrix
 from agni.passage.read_passage import NoteInMeasure, Passage
 
 
@@ -192,24 +191,3 @@ def get_simultaneous_pitches(
     if as_set:
         return get_ordered_unique_pitch_sets(pitches)
     return pitches
-
-
-def get_passage_matrices(
-    passage: Passage,
-    multiples: int,
-    as_set: bool,
-    adjacent_duplicates: bool,
-) -> list[Matrix]:
-    simultaneous_pitches = get_simultaneous_pitches(
-        passage,
-        as_set=as_set,
-        adjacent_duplicates=adjacent_duplicates,
-    )
-    matrices = []
-    for pitches in simultaneous_pitches:
-        if not len(pitches) == 2:
-            continue
-        bass, melody = pitches
-        matrix = get_matrix(bass, melody, multiples=multiples)
-        matrices.append(matrix)
-    return matrices

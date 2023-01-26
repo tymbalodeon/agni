@@ -32,11 +32,14 @@ from agni.passage.read_passage import (
     get_tuplet,
 )
 
-from .matrix import Matrix, Tuning, quantize_pitch
+from .enums import Tuning
+from .helpers import quantize_pitch
 from .passage.passage import remove_none_values
 
 
-def sort_frequencies(matrix: Matrix, limit: int | None = None) -> list[float]:
+def sort_frequencies(
+    matrix: list[list[float]], limit: int | None = None
+) -> list[float]:
     frequencies = [frequency for row in matrix for frequency in row]
     frequencies.sort()
     frequencies = frequencies[1:]
@@ -283,7 +286,7 @@ def add_note_or_tuplet_to_staff(
 
 
 def add_matrix_to_staff_group(
-    matrix: Matrix,
+    matrix: list[list[float]],
     staff_group: StaffGroup,
     tuning: Tuning,
     melody_note: NoteInMeasure | None = None,
@@ -313,8 +316,9 @@ def add_matrix_to_staff_group(
 
 
 def pair_matrices_to_melody_notes(
-    matrices: tuple[Matrix, ...], melody_passage: list[NoteInMeasure]
-) -> list[tuple[Matrix, NoteInMeasure]]:
+    matrices: tuple[list[list[float]], ...],
+    melody_passage: list[NoteInMeasure],
+) -> list[tuple[list[list[float]], NoteInMeasure]]:
     pairs = []
     matrix_iterator = iter(matrices)
     current_matrix = None
@@ -339,7 +343,7 @@ def get_previous_note(
 
 
 def get_ensemble_score(
-    *matrices: Matrix, tuning: Tuning, passage: Passage | None
+    *matrices: list[list[float]], tuning: Tuning, passage: Passage | None
 ) -> Score:
     staff_group = StaffGroup()
     description = "Notating matrices..."
@@ -367,7 +371,7 @@ def get_ensemble_score(
 
 
 def get_reference_score(
-    *matrices: Matrix, tuning: Tuning, as_chord: bool
+    *matrices: list[list[float]], tuning: Tuning, as_chord: bool
 ) -> Score:
     score = Score()
     for matrix in track(matrices, description="Notating matrices..."):
@@ -379,7 +383,7 @@ def get_reference_score(
 
 
 def notate_matrix(
-    *matrices: Matrix,
+    *matrices: list[list[float]],
     tuning: Tuning,
     as_chord=False,
     persist=False,
