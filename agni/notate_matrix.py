@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Generator, Iterator
 
 from abjad import (
     Chord,
@@ -202,7 +201,7 @@ def get_melody_note_duration(
 ) -> Duration:
     if not note_in_measure:
         return Duration(1, 4)
-    return note_in_measure.note.written_duration
+    return note_in_measure.leaf.written_duration
 
 
 def get_melody_note_tuplet(
@@ -210,7 +209,7 @@ def get_melody_note_tuplet(
 ) -> Tuplet | None:
     if not note_in_measure:
         return None
-    return get_tuplet(note_in_measure.note)
+    return get_tuplet(note_in_measure.leaf)
 
 
 def get_melody_note_time_signature(
@@ -224,7 +223,7 @@ def get_melody_note_time_signature(
 def get_melody_note_tie(note_in_measure: NoteInMeasure | None) -> Tie | None:
     if not note_in_measure:
         return None
-    return get_tie(note_in_measure.note)
+    return get_tie(note_in_measure.leaf)
 
 
 def get_staff(
@@ -313,20 +312,18 @@ def add_matrix_to_staff_group(
         staff.append(matrix_note)
 
 
-def get_next_matrix(matrices: Iterator) -> Matrix | None:
-    return next(matrices, None)
-
-
 def pair_matrices_to_melody_notes(
-    matrices: tuple[Matrix], melody_passage: list[NoteInMeasure]
+    matrices: tuple[Matrix, ...], melody_passage: list[NoteInMeasure]
 ) -> list[tuple[Matrix, NoteInMeasure]]:
     pairs = []
     matrix_iterator = iter(matrices)
     current_matrix = None
     for note_in_measure in melody_passage:
-        note = note_in_measure.note
+        note = note_in_measure.leaf
         if not current_matrix or get_logical_ties(note):
-            current_matrix = next(matrix_iterator)
+            current_matrix = next(matrix_iterator, None)
+            if not current_matrix:
+                break
         pair = (current_matrix, note_in_measure)
         pairs.append(pair)
     return pairs

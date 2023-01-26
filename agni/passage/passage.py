@@ -1,7 +1,7 @@
 from collections.abc import Generator, Iterator
 from dataclasses import dataclass
 
-from abjad import Duration, NamedPitch, Note, Rest, TimeSignature
+from abjad import Duration, Leaf, NamedPitch, Note, Rest, TimeSignature
 from abjad.get import duration as get_duration
 from abjad.select import logical_ties as get_logical_ties
 
@@ -16,16 +16,24 @@ class SoundingNote:
     time_signature: TimeSignature
 
     @staticmethod
-    def get_sounding_duration(note: Note) -> Duration | None:
-        logical_tie = get_logical_ties(note)
+    def get_named_pitch(leaf: Leaf) -> NamedPitch | None:
+        if isinstance(leaf, Note):
+            return leaf.written_pitch
+        else:
+            return None
+
+    @staticmethod
+    def get_sounding_duration(leaf: Leaf) -> Duration | None:
+        logical_tie = get_logical_ties(leaf)
         if not logical_tie:
             return None
         return get_duration(logical_tie)
 
     @classmethod
     def from_note(cls, note_in_measure: NoteInMeasure):
-        named_pitch = note_in_measure.note.written_pitch
-        duration = cls.get_sounding_duration(note_in_measure.note)
+        leaf = note_in_measure.leaf
+        named_pitch = cls.get_named_pitch(leaf)
+        duration = cls.get_sounding_duration(note_in_measure.leaf)
         if not duration:
             return None
         time_signature = note_in_measure.time_signature
