@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Generator, Iterator
 
 from abjad import (
     Chord,
@@ -21,6 +22,7 @@ from abjad import (
 )
 from abjad.get import duration as get_duration
 from abjad.persist import as_pdf
+from abjad.select import logical_ties as get_logical_ties
 from rich.progress import track
 
 from agni.passage.read_passage import (
@@ -311,22 +313,50 @@ def add_matrix_to_staff_group(
         staff.append(matrix_note)
 
 
+def get_next_matrix(matrices: Iterator) -> Matrix | None:
+    return next(matrices, None)
+
+
+def pair_matrices_to_melody_notes(
+    matrices: tuple[Matrix], melody_passage: list[NoteInMeasure]
+) -> list[tuple[Matrix, NoteInMeasure]]:
+    pairs = []
+    matrix_iterator = iter(matrices)
+    current_matrix = None
+    while melody_passage:
+        note_in_measure = melody_passage.pop(0)
+        note = note_in_measure.note
+        if not current_matrix or get_logical_ties(note):
+            current_matrix = next(matrix_iterator)
+        pair = (current_matrix, note_in_measure)
+        pairs.append(pair)
+    return pairs
+
+
+def get_previous_note(
+    part: list[NoteInMeasure], index: int
+) -> NoteInMeasure | None:
+    try:
+        return part[index - 1]
+    except Exception:
+        return None
+
+
 def get_ensemble_score(
     *matrices: Matrix, tuning: Tuning, passage: Passage | None
 ) -> Score:
     staff_group = StaffGroup()
     description = "Notating matrices..."
     if passage:
-        for index, data in track(
-            enumerate(zip(matrices, passage.melody)),
+        matrix_melody_note_pairs = pair_matrices_to_melody_notes(
+            matrices, passage.melody
+        )
+        for index, (matrix, melody_note) in track(
+            enumerate(matrix_melody_note_pairs),
             description=description,
             total=len(matrices),
         ):
-            matrix, melody_note = data
-            try:
-                previous_note = passage.melody[index - 1]
-            except Exception:
-                previous_note = None
+            previous_note = get_previous_note(passage.melody, index)
             add_matrix_to_staff_group(
                 matrix,
                 staff_group,
