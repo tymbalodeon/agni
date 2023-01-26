@@ -28,6 +28,7 @@ abjad-ext-rmakers = "^3.15"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^2.21.0"
 bpython = "^0.23"
+py-spy = "^0.3.14"
 
 [build-system]
 requires = ["poetry-core"]
