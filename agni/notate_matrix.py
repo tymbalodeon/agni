@@ -323,8 +323,7 @@ def pair_matrices_to_melody_notes(
     pairs = []
     matrix_iterator = iter(matrices)
     current_matrix = None
-    while melody_passage:
-        note_in_measure = melody_passage.pop(0)
+    for note_in_measure in melody_passage:
         note = note_in_measure.note
         if not current_matrix or get_logical_ties(note):
             current_matrix = next(matrix_iterator)
