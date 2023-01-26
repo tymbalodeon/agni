@@ -30,7 +30,7 @@ class SoundingNote:
         return get_duration(logical_tie)
 
     @classmethod
-    def from_note(cls, note_in_measure: NoteInMeasure):
+    def from_note_in_measure(cls, note_in_measure: NoteInMeasure):
         leaf = note_in_measure.leaf
         named_pitch = cls.get_named_pitch(leaf)
         duration = cls.get_sounding_duration(note_in_measure.leaf)
@@ -51,7 +51,8 @@ class Part:
         notes_in_measure: list[NoteInMeasure],
     ) -> Generator[SoundingNote, None, None]:
         sounding_notes = (
-            SoundingNote.from_note(note) for note in notes_in_measure
+            SoundingNote.from_note_in_measure(note)
+            for note in notes_in_measure
         )
         return (note for note in sounding_notes if note)
 
