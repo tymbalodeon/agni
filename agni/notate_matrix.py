@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import cast
 
 from abjad import (
     Chord,
@@ -196,16 +195,20 @@ def get_staff_name(name: str | None) -> str:
     return f"\\markup {staff_name}"
 
 
-def get_melody_note_duration(note: NoteInMeasure | None) -> Duration:
-    if not note:
+def get_melody_note_duration(
+    note_in_measure: NoteInMeasure | None,
+) -> Duration:
+    if not note_in_measure:
         return Duration(1, 4)
-    return note.note.written_duration
+    return note_in_measure.note.written_duration
 
 
-def get_melody_note_tuplet(note: NoteInMeasure | None) -> Tuplet | None:
-    if not note:
+def get_melody_note_tuplet(
+    note_in_measure: NoteInMeasure | None,
+) -> Tuplet | None:
+    if not note_in_measure:
         return None
-    return get_tuplet(note.note)
+    return get_tuplet(note_in_measure.note)
 
 
 def get_melody_note_time_signature(
@@ -216,10 +219,10 @@ def get_melody_note_time_signature(
     return note.time_signature
 
 
-def get_melody_note_tie(note: NoteInMeasure | None) -> Tie | None:
-    if not note:
+def get_melody_note_tie(note_in_measure: NoteInMeasure | None) -> Tie | None:
+    if not note_in_measure:
         return None
-    return get_tie(note.note)
+    return get_tie(note_in_measure.note)
 
 
 def get_staff(

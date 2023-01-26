@@ -29,8 +29,8 @@ class NoteInMeasure:
 
 @dataclass
 class Passage:
-    title: str | None
-    composer: str | None
+    title: str
+    composer: str
     bass: list[NoteInMeasure]
     melody: list[NoteInMeasure]
     structure: list[Skip]
@@ -91,11 +91,11 @@ def get_staff_notes(staves: list[Staff], part: str) -> list[NoteInMeasure]:
     return get_notes_in_measure(notes)
 
 
-def get_header_item(lilypond_input: str, item: str) -> str | None:
+def get_header_item(lilypond_input: str, item: str) -> str:
     lines = lilypond_input.splitlines()
     matching_line = next((line for line in lines if item in line), None)
     if not matching_line:
-        return None
+        return ""
     return matching_line.split('"')[1]
 
 

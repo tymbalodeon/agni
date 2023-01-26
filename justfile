@@ -1,9 +1,16 @@
 @_help:
     just --list
 
-# Run pre-commit checks.
-@check:
-    poetry run pre-commit run -a
+pre_commit := "poetry run pre-commit"
+
+# Run pre-commit checks or autoupdate ("--autoupdate").
+check *autoupdate:
+    #!/usr/bin/env zsh
+    if [ "{{autoupdate}}" = "--autoupdate" ]; then
+        {{pre_commit}} autoupdate
+    else
+        {{pre_commit}} run --all-files
+    fi
 
 @_get_pyproject_value value:
     printf "%s" \

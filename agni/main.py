@@ -3,12 +3,11 @@ from pathlib import Path
 from rich.markup import escape
 from typer import Argument, Option, Typer
 
-from agni.passage.read_passage import get_passage_from_input_file
-
 from .display_matrix import display_matrix
 from .matrix import InputType, OutputType, Tuning, get_matrix
 from .notate_matrix import notate_matrix
 from .passage.passage import get_passage_matrices
+from .passage.read_passage import get_passage_from_input_file
 from .play_matrix import play_matrix
 
 agni = Typer(
@@ -109,7 +108,9 @@ def passage(
     )
     if notate:
         if not full_score:
-            passage = None
+            notation_passage = None
+        else:
+            notation_passage = passage
         notate_matrix(
             *matrices,
             tuning=tuning,
@@ -117,6 +118,6 @@ def passage(
             persist=persist,
             as_ensemble=as_ensemble,
             full_score=full_score,
-            passage=passage,
+            passage=notation_passage,
         )
     display_matrix(*matrices, output_type=output_type, tuning=tuning)

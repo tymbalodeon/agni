@@ -1,9 +1,9 @@
-from collections.abc import Iterator
-from typing import Self
+from collections.abc import Generator, Iterator
 from dataclasses import dataclass
 
-from abjad import Duration, NamedPitch, Rest, TimeSignature
+from abjad import Duration, NamedPitch, Note, Rest, TimeSignature
 from abjad.get import duration as get_duration
+from abjad.select import logical_ties as get_logical_ties
 
 from agni.matrix import Matrix, get_matrix
 from agni.passage.read_passage import NoteInMeasure, Passage
@@ -15,19 +15,37 @@ class SoundingNote:
     duration: Duration
     time_signature: TimeSignature
 
+    @staticmethod
+    def get_sounding_duration(note: Note) -> Duration | None:
+        logical_tie = get_logical_ties(note)
+        if not logical_tie:
+            return None
+        return get_duration(logical_tie)
+
     @classmethod
-    def from_note(cls, note: NoteInMeasure) -> Self:
-        named_pitch = note.note.written_pitch
-        duration = get_duration(note.note)
-        time_signature = note.time_signature
+    def from_note(cls, note_in_measure: NoteInMeasure):
+        named_pitch = note_in_measure.note.written_pitch
+        duration = cls.get_sounding_duration(note_in_measure.note)
+        if not duration:
+            return None
+        time_signature = note_in_measure.time_signature
         return cls(named_pitch, duration, time_signature)
 
 
 class Part:
     def __init__(self, name: str, notes: list[NoteInMeasure]):
         self.name = name
-        self.notes = (SoundingNote.from_note(note) for note in notes)
+        self.notes = self.get_notes(notes)
         self.current_note = self.get_next_note(self.notes)
+
+    @staticmethod
+    def get_notes(
+        notes_in_measure: list[NoteInMeasure],
+    ) -> Generator[SoundingNote, None, None]:
+        sounding_notes = (
+            SoundingNote.from_note(note) for note in notes_in_measure
+        )
+        return (note for note in sounding_notes if note)
 
     def get_next_note(
         self, notes: Iterator[SoundingNote] | None = None
