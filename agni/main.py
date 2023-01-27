@@ -103,11 +103,17 @@ def passage(
         notation = Notation(*matrices)
         if as_ensemble:
             notation.get_ensemble_score(
-                tuning, persist, passage=notation_passage
+                tuning,
+                persist=persist,
+                passage=notation_passage,
+                full_score=full_score,
             )
         else:
             notation.get_reference_score(
-                tuning, as_chord=as_chord, persist=persist
+                tuning,
+                as_chord=as_chord,
+                persist=persist,
+                full_score=full_score,
             )
     for matrix in matrices:
         matrix.display(output_type, tuning)

@@ -333,8 +333,7 @@ class Notation:
     def _number_of_matrices(self) -> int:
         return len(self.matrices)
 
-    @property
-    def _lilypond_preamble(
+    def _get_lilypond_preamble(
         self, full_score=False, passage: Passage | None = None
     ) -> str:
         if not passage:
@@ -379,8 +378,12 @@ class Notation:
                     }}
                 """
 
-    def _show_with_preamble(self, container: Component, persist: bool):
-        lilypond_file = LilyPondFile([self._lilypond_preamble, container])
+    def _show_with_preamble(
+        self, container: Component, persist: bool, full_score: bool
+    ):
+        lilypond_file = LilyPondFile(
+            [self._get_lilypond_preamble(full_score), container]
+        )
         if persist:
             pdf_file_path = Path("examples") / "matrix.pdf"
             as_pdf(lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True)
@@ -631,7 +634,11 @@ class Notation:
             staff.append(matrix_note)
 
     def get_ensemble_score(
-        self, tuning: Tuning, persist: bool, passage: Passage | None = None
+        self,
+        tuning: Tuning,
+        persist: bool,
+        full_score=False,
+        passage: Passage | None = None,
     ):
         staff_group = StaffGroup()
         description = "Notating matrices..."
@@ -658,7 +665,7 @@ class Notation:
                     matrix, staff_group, tuning=tuning
                 )
         score = Score([staff_group])
-        self._show_with_preamble(score, persist=persist)
+        self._show_with_preamble(score, persist=persist, full_score=full_score)
 
     @staticmethod
     def _set_bass_and_melody_noteheads(notes: list[Note]) -> list[Note]:
@@ -697,7 +704,7 @@ class Notation:
         score.append(staff)
 
     def get_reference_score(
-        self, tuning: Tuning, as_chord: bool, persist: bool
+        self, tuning: Tuning, as_chord: bool, persist: bool, full_score=False
     ):
         score = Score()
         for matrix in track(self.matrices, description="Notating matrices..."):
@@ -707,4 +714,4 @@ class Notation:
             ]
             self._set_clefs(notes)
             self._add_notes_to_score(notes, score, as_chord=as_chord)
-        self._show_with_preamble(score, persist=persist)
+        self._show_with_preamble(score, persist=persist, full_score=full_score)
