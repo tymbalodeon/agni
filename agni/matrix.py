@@ -520,7 +520,8 @@ class Notation:
         first_leaf = staff[0]
         attach(InstrumentName(staff_name), first_leaf)
         attach(ShortInstrumentName(staff_name), first_leaf)
-        attach(time_signature, first_leaf)
+        if time_signature:
+            attach(time_signature, first_leaf)
         return staff
 
     @classmethod
