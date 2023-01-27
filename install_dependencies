@@ -2,6 +2,7 @@
 
 dependencies=(
     "brew"
+    "lilypond"
     "just"
     "cargo"
     "checkexec"
@@ -14,6 +15,9 @@ install_dependency() {
     case ${1} in
         "brew")
             curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+            ;;
+        "lilypond")
+            brew install lilypond
             ;;
         "just")
             brew install just
