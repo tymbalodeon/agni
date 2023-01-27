@@ -3,9 +3,7 @@ from pathlib import Path
 from rich.markup import escape
 from typer import Argument, Option, Typer
 
-from .matrix import InputType, Matrix, Notation, OutputType, Tuning
-from .passage.passage import get_passage_matrices
-from .passage.read_passage import get_passage_from_input_file
+from .matrix import InputType, Matrix, OutputType, Passage, Tuning
 
 agni = Typer(
     help="Create combination-tone matrices.",
@@ -88,32 +86,18 @@ def passage(
         as_ensemble = True
         as_set = False
         adjacent_duplicates = True
-    passage = get_passage_from_input_file(input_file)
-    matrices = get_passage_matrices(
-        passage,
-        multiples=multiples,
-        as_set=as_set,
-        adjacent_duplicates=adjacent_duplicates,
-    )
+    passage = Passage(input_file)
     if notate:
-        if not full_score:
-            notation_passage = None
-        else:
-            notation_passage = passage
-        notation = Notation(*matrices)
-        if as_ensemble:
-            notation.make_ensemble_score(
-                tuning,
-                persist=persist,
-                passage=notation_passage,
-                full_score=full_score,
-            )
-        else:
-            notation.make_reference_score(
-                tuning,
-                as_chord=as_chord,
-                persist=persist,
-                full_score=full_score,
-            )
-    for matrix in matrices:
-        matrix.display(output_type, tuning)
+        passage.notate(
+            tuning,
+            multiples,
+            as_chord,
+            persist,
+            as_ensemble,
+            as_set,
+            adjacent_duplicates,
+            full_score,
+        )
+    passage.display(
+        output_type, tuning, multiples, as_set, adjacent_duplicates
+    )

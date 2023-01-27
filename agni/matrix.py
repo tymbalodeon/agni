@@ -1,12 +1,14 @@
+from collections.abc import Generator, Iterator
 from dataclasses import dataclass
 from enum import Enum
 from functools import lru_cache
 from math import log
 from pathlib import Path
 from time import sleep
-from typing import TypeAlias
+from typing import TypeAlias, cast
 
 from abjad import (
+    Block,
     Chord,
     Clef,
     Component,
@@ -17,6 +19,7 @@ from abjad import (
     NamedPitch,
     Note,
     NumberedPitch,
+    Rest,
     Score,
     ShortInstrumentName,
     Skip,
@@ -26,12 +29,15 @@ from abjad import (
     TimeSignature,
     Tuplet,
     attach,
+    parse,
     show,
 )
 from abjad.get import duration as get_duration
 from abjad.get import indicators as get_indicators
 from abjad.get import lineage as get_lineage
 from abjad.persist import as_pdf
+from abjad.select import components as get_components
+from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
 from rich.box import SIMPLE
 from rich.console import Console
@@ -57,6 +63,10 @@ class OutputType(Enum):
 class Tuning(Enum):
     MICROTONAL = "microtonal"
     EQUAL_TEMPERED = "equal-tempered"
+
+
+def remove_none_values(collection: list) -> list:
+    return [item for item in collection if item]
 
 
 class Matrix:
@@ -282,6 +292,10 @@ class Matrix:
             table.add_row(*formatted_row)
         Console().print(table)
 
+    @property
+    def notation(self) -> "Notation":
+        return Notation(self)
+
     def notate(
         self,
         tuning: Tuning,
@@ -292,13 +306,8 @@ class Matrix:
     ):
         if not multiples:
             multiples = self._multiples
-        notation = Notation(self)
-        if as_ensemble:
-            notation.make_ensemble_score(tuning, persist=persist)
-        else:
-            notation.make_reference_score(
-                tuning, as_chord=as_chord, persist=persist
-            )
+        notation = self.notation
+        notation.make_score(as_ensemble, tuning, persist, as_chord=as_chord)
 
     def play(self, multiples: int | None = None):
         if not multiples:
@@ -311,18 +320,9 @@ class Matrix:
 
 
 @dataclass
-class NoteInMeasure:
+class LeafInMeasure:
     leaf: Leaf
     time_signature: TimeSignature
-
-
-@dataclass
-class Passage:
-    title: str
-    composer: str
-    bass: list[NoteInMeasure]
-    melody: list[NoteInMeasure]
-    structure: list[Skip]
 
 
 class Notation:
@@ -334,7 +334,7 @@ class Notation:
         return len(self.matrices)
 
     def _get_lilypond_preamble(
-        self, full_score=False, passage: Passage | None = None
+        self, full_score=False, passage: "Passage" | None = None
     ) -> str:
         if not passage:
             if self._number_of_matrices > 1:
@@ -391,8 +391,8 @@ class Notation:
             show(lilypond_file)
 
     def _pair_matrices_to_melody_notes(
-        self, melody_passage: list[NoteInMeasure]
-    ) -> list[tuple[Matrix, NoteInMeasure]]:
+        self, melody_passage: list[LeafInMeasure]
+    ) -> list[tuple[Matrix, LeafInMeasure]]:
         pairs = []
         matrix_iterator = iter(self.matrices)
         current_matrix = None
@@ -408,8 +408,8 @@ class Notation:
 
     @staticmethod
     def _get_previous_note(
-        part: list[NoteInMeasure], index: int
-    ) -> NoteInMeasure | None:
+        part: list[LeafInMeasure], index: int
+    ) -> LeafInMeasure | None:
         try:
             return part[index - 1]
         except Exception:
@@ -417,7 +417,7 @@ class Notation:
 
     @staticmethod
     def _get_melody_note_duration(
-        note_in_measure: NoteInMeasure | None,
+        note_in_measure: LeafInMeasure | None,
     ) -> Duration:
         if not note_in_measure:
             return Duration(1, 4)
@@ -431,7 +431,7 @@ class Notation:
 
     @classmethod
     def _get_melody_note_tie(
-        cls, note_in_measure: NoteInMeasure | None
+        cls, note_in_measure: LeafInMeasure | None
     ) -> Tie | None:
         if not note_in_measure:
             return None
@@ -450,7 +450,7 @@ class Notation:
     def _get_matrix_note_from_melody_note(
         cls,
         matrix_frequency: float,
-        melody_note: NoteInMeasure | None,
+        melody_note: LeafInMeasure | None,
         tuning: Tuning,
     ) -> Note:
         duration = cls._get_melody_note_duration(melody_note)
@@ -462,7 +462,7 @@ class Notation:
 
     @staticmethod
     def _get_melody_note_time_signature(
-        note: NoteInMeasure | None,
+        note: LeafInMeasure | None,
     ) -> TimeSignature | None:
         if not note:
             return None
@@ -549,7 +549,7 @@ class Notation:
     def _add_time_signature_to_note(
         note: Note,
         time_signature: TimeSignature | None,
-        previous_note: NoteInMeasure | None,
+        previous_note: LeafInMeasure | None,
     ):
         if previous_note and previous_note.time_signature != time_signature:
             attach(time_signature, note)
@@ -569,7 +569,7 @@ class Notation:
 
     @classmethod
     def _get_melody_note_tuplet(
-        cls, note_in_measure: NoteInMeasure | None
+        cls, note_in_measure: LeafInMeasure | None
     ) -> Tuplet | None:
         if not note_in_measure:
             return None
@@ -582,7 +582,7 @@ class Notation:
 
     @classmethod
     def _add_note_or_tuplet_to_staff(
-        cls, melody_note: NoteInMeasure, matrix_note: Note, staff: Staff
+        cls, melody_note: LeafInMeasure, matrix_note: Note, staff: Staff
     ):
         tuplet = cls._get_melody_note_tuplet(melody_note)
         if not tuplet:
@@ -605,8 +605,8 @@ class Notation:
         matrix: Matrix,
         staff_group: StaffGroup,
         tuning: Tuning,
-        melody_note: NoteInMeasure | None = None,
-        previous_note: NoteInMeasure | None = None,
+        melody_note: LeafInMeasure | None = None,
+        previous_note: LeafInMeasure | None = None,
     ):
         for index, frequency in enumerate(matrix.get_sorted_frequencies()):
             matrix_note = cls._get_matrix_note_from_melody_note(
@@ -633,12 +633,12 @@ class Notation:
                 continue
             staff.append(matrix_note)
 
-    def make_ensemble_score(
+    def _make_ensemble_score(
         self,
         tuning: Tuning,
         persist: bool,
         full_score=False,
-        passage: Passage | None = None,
+        passage: "Passage" | None = None,
     ):
         staff_group = StaffGroup()
         description = "Notating matrices..."
@@ -679,14 +679,10 @@ class Notation:
             return None
         return note.written_pitch.name
 
-    @staticmethod
-    def _remove_none_values(collection: list) -> list:
-        return [item for item in collection if item]
-
     @classmethod
     def _get_chord_notes(cls, notes: list[Note]) -> str:
         note_names = [cls._get_note_name(note) for note in notes]
-        pitched_note_names = cls._remove_none_values(note_names)
+        pitched_note_names = remove_none_values(note_names)
         chord_notes = " ".join(pitched_note_names)
         return f"<{chord_notes}>"
 
@@ -703,7 +699,7 @@ class Notation:
         staff = Staff(components)
         score.append(staff)
 
-    def make_reference_score(
+    def _make_reference_score(
         self, tuning: Tuning, as_chord: bool, persist: bool, full_score=False
     ):
         score = Score()
@@ -715,3 +711,341 @@ class Notation:
             self._set_clefs(notes)
             self._add_notes_to_score(notes, score, as_chord=as_chord)
         self._show_with_preamble(score, persist=persist, full_score=full_score)
+
+    def make_score(
+        self,
+        as_ensemble: bool,
+        tuning: Tuning,
+        persist: bool,
+        as_chord=False,
+        full_score=False,
+        passage: "Passage" | None = None,
+    ):
+        if as_ensemble:
+            self._make_ensemble_score(
+                tuning, persist=persist, full_score=full_score, passage=passage
+            )
+        else:
+            self._make_reference_score(
+                tuning,
+                persist=persist,
+                as_chord=as_chord,
+                full_score=full_score,
+            )
+
+
+@dataclass
+class SoundingLeaves:
+    named_pitch: NamedPitch | None
+    duration: Duration
+    time_signature: TimeSignature
+
+    @staticmethod
+    def _get_named_pitch(leaf: Leaf) -> NamedPitch | None:
+        if isinstance(leaf, Note):
+            return leaf.written_pitch
+        else:
+            return None
+
+    @staticmethod
+    def _get_sounding_duration(leaf: Leaf) -> Duration | None:
+        logical_tie = get_logical_ties(leaf)
+        if not logical_tie:
+            return None
+        return get_duration(logical_tie)
+
+    @classmethod
+    def from_leaves_in_measure(cls, leaf_in_measure: LeafInMeasure):
+        leaf = leaf_in_measure.leaf
+        named_pitch = cls._get_named_pitch(leaf)
+        duration = cls._get_sounding_duration(leaf_in_measure.leaf)
+        if not duration:
+            return None
+        time_signature = leaf_in_measure.time_signature
+        return cls(named_pitch, duration, time_signature)
+
+
+class Part:
+    def __init__(self, name: str, leaves: list[LeafInMeasure]):
+        self.name = name
+        self.leaves = self._get_leaves(leaves)
+        self.current_leaf = self._get_next_leaf(self.leaves)
+
+    @staticmethod
+    def _get_leaves(
+        leaves: list[LeafInMeasure],
+    ) -> Generator[SoundingLeaves, None, None]:
+        sounding_leaves = (
+            SoundingLeaves.from_leaves_in_measure(leaf) for leaf in leaves
+        )
+        return (leaf for leaf in sounding_leaves if leaf)
+
+    def _get_next_leaf(
+        self, leaves: Iterator[SoundingLeaves] | None = None
+    ) -> SoundingLeaves | None:
+        if not leaves:
+            leaves = self.leaves
+        self.current_leaf = next(leaves, None)
+        return self.current_leaf
+
+    def _get_current_duration(self) -> Duration | None:
+        if not self.current_leaf:
+            return None
+        return self.current_leaf.duration
+
+    def _shorten_current_leaf(self, duration: float):
+        if not self.current_leaf:
+            return
+        current_duration = self._get_current_duration()
+        if not current_duration:
+            return
+        shorter_duration = current_duration - duration
+        self.current_leaf.duration = shorter_duration
+
+    def _get_current_pitch(self) -> NamedPitch | None:
+        if not self.current_leaf or isinstance(self.current_leaf, Rest):
+            return None
+        return self.current_leaf.named_pitch
+
+    def _matches_duration(self, duration: float) -> bool:
+        if not self.current_leaf:
+            return False
+        current_duration = self._get_current_duration()
+        return current_duration == duration
+
+
+class Passage:
+    def __init__(self, input_file: Path):
+        lilypond_input = input_file.read_text()
+        self.title = self._get_header_item(lilypond_input, "title")
+        self.composer = self._get_header_item(lilypond_input, "composer")
+        staves, structure = self._get_staves_and_structure(lilypond_input)
+        self.structure = structure
+        self.bass = self._get_staff_leaves(staves, "bass")
+        self.melody = self._get_staff_leaves(staves, "melody")
+
+    @staticmethod
+    def _get_header_item(lilypond_input: str, item: str) -> str:
+        lines = lilypond_input.splitlines()
+        matching_line = next((line for line in lines if item in line), None)
+        if not matching_line:
+            return ""
+        return matching_line.split('"')[1]
+
+    @staticmethod
+    def _get_score_block(lilypond_input: str) -> Block:
+        lilypond_file = cast(LilyPondFile, parse(lilypond_input))
+        items = lilypond_file.items
+        return next(block for block in items if block.name == "score")
+
+    @classmethod
+    def _get_staves_and_structure(
+        cls,
+        lilypond_input: str,
+    ) -> tuple[list[Staff], list[Skip]]:
+        score = cls._get_score_block(lilypond_input)
+        staves = cast(
+            list[Staff], get_components(score.items, prototype=Staff)
+        )
+        structure = cast(list[Skip], get_components(staves, prototype=Skip))
+        return staves, structure
+
+    @staticmethod
+    def _get_time_signature(note: Leaf) -> TimeSignature | None:
+        return next(
+            (
+                time_signature
+                for time_signature in get_indicators(
+                    note, prototype=TimeSignature
+                )
+            ),
+            None,
+        )
+
+    @classmethod
+    def _get_notes_in_measure(cls, notes: list[Leaf]) -> list[LeafInMeasure]:
+        notes_in_measure = []
+        current_time_signature = TimeSignature((4, 4))
+        for note in notes:
+            time_signature = cls._get_time_signature(note)
+            if time_signature:
+                current_time_signature = time_signature
+            notes_in_measure.append(
+                LeafInMeasure(note, current_time_signature)
+            )
+        return notes_in_measure
+
+    @classmethod
+    def _get_staff_leaves(
+        cls, staves: list[Staff], part: str
+    ) -> list[LeafInMeasure]:
+        staff = Notation.get_staff_by_name(staves, part)
+        if not staff:
+            return []
+        components = staff.components
+        leaves = get_leaves(components)
+        return cls._get_notes_in_measure(leaves)
+
+    @property
+    def parts(self) -> list[Part]:
+        bass = self.bass
+        melody = self.melody
+        parts = bass, melody
+        return [Part(str(index), part) for index, part in enumerate(parts)]
+
+    def _get_current_pitches(self) -> list[NamedPitch]:
+        current_pitches = [part._get_current_pitch() for part in self.parts]
+        return remove_none_values(current_pitches)
+
+    def _is_end_of_passage(self) -> bool:
+        current_notes = [part.current_leaf for part in self.parts]
+        return not any(current_notes)
+
+    def _get_shortest_duration(self) -> float:
+        current_durations = [
+            part._get_current_duration() for part in self.parts
+        ]
+        durations = remove_none_values(current_durations)
+        return min(durations)
+
+    def _get_parts_matching_shortest_duration(
+        self, shortest_duration
+    ) -> list[Part]:
+        return [
+            part
+            for part in self.parts
+            if part._matches_duration(shortest_duration)
+        ]
+
+    def _get_parts_with_longer_durations(
+        self, shortest_duration
+    ) -> list[Part]:
+        return [
+            part
+            for part in self.parts
+            if not part._matches_duration(shortest_duration)
+        ]
+
+    def _get_next_pitches(self) -> list[NamedPitch]:
+        shortest_duration = self._get_shortest_duration()
+        parts_matching_shortest_duration = (
+            self._get_parts_matching_shortest_duration(shortest_duration)
+        )
+        parts_with_longer_durations = self._get_parts_with_longer_durations(
+            shortest_duration
+        )
+        for part in parts_matching_shortest_duration:
+            part._get_next_leaf()
+        for part in parts_with_longer_durations:
+            part._shorten_current_leaf(shortest_duration)
+        return self._get_current_pitches()
+
+    @staticmethod
+    def _get_pitch_names(pitches: list[NamedPitch]) -> list[str]:
+        return [pitch.name for pitch in pitches]
+
+    @classmethod
+    def _are_same_pitches(
+        cls, new_pitches: list[NamedPitch], old_pitches: list[list[NamedPitch]]
+    ) -> bool:
+        new_pitch_names = cls._get_pitch_names(new_pitches)
+        old_pitch_names = cls._get_pitch_names(old_pitches[-1])
+        return new_pitch_names == old_pitch_names
+
+    @classmethod
+    def _should_add_pitches(
+        cls,
+        adjacent_duplicates: bool,
+        new_pitches: list[NamedPitch],
+        old_pitches: list[list[NamedPitch]],
+    ) -> bool:
+        if not new_pitches:
+            return False
+        if adjacent_duplicates:
+            return True
+        return not cls._are_same_pitches(new_pitches, old_pitches)
+
+    @staticmethod
+    def _get_ordered_unique_pitch_sets(
+        pitches: list[list[NamedPitch]],
+    ) -> list[list[NamedPitch]]:
+        pitch_sets = [tuple(pitch_set) for pitch_set in pitches]
+        pitch_sets = list(dict.fromkeys(pitch_sets))
+        return [list(pitch_set) for pitch_set in pitch_sets]
+
+    def _get_simultaneous_pitches(
+        self, as_set=True, adjacent_duplicates=False
+    ) -> list[list[NamedPitch]]:
+        pitches = [self._get_current_pitches()]
+        while not self._is_end_of_passage():
+            new_pitches = self._get_next_pitches()
+            if self._should_add_pitches(
+                adjacent_duplicates, new_pitches, pitches
+            ):
+                pitches.append(new_pitches)
+        if as_set:
+            return self._get_ordered_unique_pitch_sets(pitches)
+        return pitches
+
+    def get_matrices(
+        self, multiples: int, as_set: bool, adjacent_duplicates: bool
+    ) -> list[Matrix]:
+        simultaneous_pitches = self._get_simultaneous_pitches(
+            as_set=as_set,
+            adjacent_duplicates=adjacent_duplicates,
+        )
+        matrices = []
+        for pitches in simultaneous_pitches:
+            if not len(pitches) == 2:
+                continue
+            bass, melody = pitches
+            matrix = Matrix(
+                bass, melody, input_type=InputType.HERTZ, multiples=multiples
+            )
+            matrices.append(matrix)
+        return matrices
+
+    def _get_notation(
+        self, multiples: int, as_set: bool, adjacent_duplicates: bool
+    ) -> Notation:
+        return Notation(
+            *self.get_matrices(multiples, as_set, adjacent_duplicates)
+        )
+
+    def display(
+        self,
+        output_type: OutputType,
+        tuning: Tuning,
+        multiples: int,
+        as_set: bool,
+        adjacent_duplicates: bool,
+    ):
+        for matrix in self.get_matrices(
+            multiples, as_set, adjacent_duplicates
+        ):
+            matrix.display(output_type, tuning)
+
+    def notate(
+        self,
+        tuning: Tuning,
+        multiples: int,
+        as_chord: bool,
+        persist: bool,
+        as_ensemble: bool,
+        as_set: bool,
+        adjacent_duplicates: bool,
+        full_score: bool,
+    ):
+        if not full_score:
+            passage = None
+        else:
+            passage = self
+        notation = self._get_notation(multiples, as_set, adjacent_duplicates)
+        notation.make_score(
+            as_ensemble,
+            tuning,
+            persist,
+            as_chord=as_chord,
+            full_score=full_score,
+            passage=passage,
+        )
