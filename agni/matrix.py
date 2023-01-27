@@ -5,7 +5,7 @@ from functools import lru_cache
 from math import log
 from pathlib import Path
 from time import sleep
-from typing import TypeAlias, cast
+from typing import Optional, TypeAlias, cast
 
 from abjad import (
     Block,
@@ -313,7 +313,8 @@ class Matrix:
         if not multiples:
             multiples = self._multiples
         pattern = EventPattern(
-            frequency=SequencePattern(self.get_sorted_frequencies), delta=0.05
+            frequency=SequencePattern(self.get_sorted_frequencies()),
+            delta=0.05,
         )
         pattern.play()
         sleep(5)
@@ -334,7 +335,7 @@ class Notation:
         return len(self.matrices)
 
     def _get_lilypond_preamble(
-        self, full_score=False, passage: "Passage" | None = None
+        self, full_score=False, passage: Optional["Passage"] = None
     ) -> str:
         if not passage:
             if self._number_of_matrices > 1:
@@ -638,7 +639,7 @@ class Notation:
         tuning: Tuning,
         persist: bool,
         full_score=False,
-        passage: "Passage" | None = None,
+        passage: Optional["Passage"] = None,
     ):
         staff_group = StaffGroup()
         description = "Notating matrices..."
@@ -719,7 +720,7 @@ class Notation:
         persist: bool,
         as_chord=False,
         full_score=False,
-        passage: "Passage" | None = None,
+        passage: Optional["Passage"] = None,
     ):
         if as_ensemble:
             self._make_ensemble_score(
