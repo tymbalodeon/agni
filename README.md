@@ -2,6 +2,15 @@
 
 Music compositional tools inspired by the techniques of Claude Vivier.
 
+"Agni" is a character from Vivier's opera _Kopernikus_:
+
+> The main character is Agni; mystical beings borrowed from stories (represented
+> by the other six singers) gravitate around her: Lewis Carroll, Merlin, a witch,
+> the Queen of the Night, a blind prophet, an old monk, Tristan and Isolde,
+> Mozart, the Master of the Waters, Copernicus and his mother. These characters
+> could be Agni’s dreams that follow her during her initiation and finally into
+> her dematerialization.
+
 ## Combination-Tone Matrix
 
 The concept of a "Combination-Tone Matrix" comes from Bryan Christian's article,
@@ -17,7 +26,8 @@ Commands:
 
 ### Example (Lonely Child)
 
-Vivier's _Lonely Child_ is provided as an example.
+Vivier's [_Lonely Child_](https://www.boosey.com/cr/music/Claude-Vivier-Lonely-Child/47752 "Lonely Child")
+is provided as an example.
 
 - `just example --input`: View an input file containing only the soprano melody
   and bass accompaniment.
