@@ -97,7 +97,7 @@ class Matrix:
         if isinstance(pitch, NamedPitch):
             return pitch.hertz
         if input_type == InputType.MIDI:
-            return cls._convert_midi_to_frequency(pitch)
+            return cls._convert_midi_to_frequency(float(pitch))
         if isinstance(pitch, float):
             return pitch
         if pitch.isnumeric():
