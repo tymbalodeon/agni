@@ -1,8 +1,10 @@
 # Agni
 
-Music compositional tools inspired by the techniques of Claude Vivier.
+Music compositional tools inspired by the techniques of
+[Claude Vivier](https://www.boosey.com/composer/Claude+Vivier "Claude Vivier").
 
-"Agni" is a character from Vivier's opera _Kopernikus_:
+"Agni" is a character from Vivier's opera
+[_Kopernikus_](https://www.boosey.com/cr/music/Claude-Vivier-Kopernikus/47743 "Kopernikus"):
 
 > The main character is Agni; mystical beings borrowed from stories (represented
 > by the other six singers) gravitate around her: Lewis Carroll, Merlin, a witch,
@@ -10,6 +12,8 @@ Music compositional tools inspired by the techniques of Claude Vivier.
 > Mozart, the Master of the Waters, Copernicus and his mother. These characters
 > could be Agni’s dreams that follow her during her initiation and finally into
 > her dematerialization.
+>
+> - Claude Vivier
 
 ## Combination-Tone Matrix
 
