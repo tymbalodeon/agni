@@ -3,9 +3,8 @@ from pathlib import Path
 from rich.markup import escape
 from typer import Argument, Option, Typer
 
-from .enums import InputType, OutputType, Tuning
-from .matrix import Matrix, get_passage_matrices
-from .notate_matrix import notate_matrix
+from .matrix import InputType, Matrix, Notation, OutputType, Tuning
+from .passage.passage import get_passage_matrices
 from .passage.read_passage import get_passage_from_input_file
 
 agni = Typer(
@@ -101,13 +100,14 @@ def passage(
             notation_passage = None
         else:
             notation_passage = passage
-        notate_matrix(
-            *matrices,
-            tuning=tuning,
-            as_chord=as_chord,
-            persist=persist,
-            as_ensemble=as_ensemble,
-            full_score=full_score,
-            passage=notation_passage,
-        )
-    # display_matrix(*matrices, output_type=output_type, tuning=tuning)
+        notation = Notation(*matrices)
+        if as_ensemble:
+            notation.get_ensemble_score(
+                tuning, persist, passage=notation_passage
+            )
+        else:
+            notation.get_reference_score(
+                tuning, as_chord=as_chord, persist=persist
+            )
+    for matrix in matrices:
+        matrix.display(output_type, tuning)
