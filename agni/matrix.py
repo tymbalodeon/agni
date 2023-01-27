@@ -343,7 +343,7 @@ class Notation:
             else:
                 matrix_display = "Matrix"
             title = f"Combination-Tone {matrix_display}"
-            composer = None
+            composer = ""
         else:
             title = passage.title
             composer = passage.composer
