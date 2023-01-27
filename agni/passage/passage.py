@@ -1,37 +1,66 @@
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from dataclasses import dataclass
 
-from abjad import Container, Duration, NamedPitch, Note, Rest
+from abjad import Duration, Leaf, NamedPitch, Note, Rest, TimeSignature
 from abjad.get import duration as get_duration
+from abjad.select import logical_ties as get_logical_ties
 
-from agni.matrix import Matrix, get_matrix
-from agni.passage.read_passage import Passage
+from agni.matrix import InputType, Matrix
+from agni.passage.read_passage import NoteInMeasure, Passage
 
 
 @dataclass
 class SoundingNote:
     named_pitch: NamedPitch | None
     duration: Duration
+    time_signature: TimeSignature
+
+    @staticmethod
+    def get_named_pitch(leaf: Leaf) -> NamedPitch | None:
+        if isinstance(leaf, Note):
+            return leaf.written_pitch
+        else:
+            return None
+
+    @staticmethod
+    def get_sounding_duration(leaf: Leaf) -> Duration | None:
+        logical_tie = get_logical_ties(leaf)
+        if not logical_tie:
+            return None
+        return get_duration(logical_tie)
 
     @classmethod
-    def from_note(cls, note: Note):
-        named_pitch = note.written_pitch
-        duration = get_duration(note)
-        return SoundingNote(named_pitch, duration)
+    def from_note_in_measure(cls, note_in_measure: NoteInMeasure):
+        leaf = note_in_measure.leaf
+        named_pitch = cls.get_named_pitch(leaf)
+        duration = cls.get_sounding_duration(note_in_measure.leaf)
+        if not duration:
+            return None
+        time_signature = note_in_measure.time_signature
+        return cls(named_pitch, duration, time_signature)
 
 
 class Part:
-    def __init__(self, name: str, notes: list[Note]):
+    def __init__(self, name: str, notes: list[NoteInMeasure]):
         self.name = name
-        self.notes = (SoundingNote.from_note(note) for note in notes)
+        self.notes = self.get_notes(notes)
         self.current_note = self.get_next_note(self.notes)
+
+    @staticmethod
+    def get_notes(
+        notes_in_measure: list[NoteInMeasure],
+    ) -> Generator[SoundingNote, None, None]:
+        sounding_notes = (
+            SoundingNote.from_note_in_measure(note)
+            for note in notes_in_measure
+        )
+        return (note for note in sounding_notes if note)
 
     def get_next_note(
         self, notes: Iterator[SoundingNote] | None = None
     ) -> SoundingNote | None:
         if not notes:
             notes = self.notes
-        self.first_time = True
         self.current_note = next(notes, None)
         return self.current_note
 
@@ -48,7 +77,6 @@ class Part:
             return
         shorter_duration = current_duration - duration
         self.current_note.duration = shorter_duration
-        self.first_time = False
 
     def get_current_pitch(self) -> NamedPitch | None:
         if not self.current_note or isinstance(self.current_note, Rest):
@@ -60,21 +88,6 @@ class Part:
             return False
         current_duration = self.get_current_duration()
         return current_duration == duration
-
-
-def get_lilypond_part(notes: str, relative: str | None = None) -> str:
-    if not relative:
-        return notes
-    relative = f"\\relative {relative}"
-    relative_notes = f"{relative} {{ {notes} }}"
-    return relative_notes
-
-
-def get_part_containers(
-    parts: list[str], relative: str | None = None
-) -> list[Container]:
-    lilypond_parts = [get_lilypond_part(part, relative) for part in parts]
-    return [Container(part) for part in lilypond_parts]
 
 
 def get_parts(passage: Passage) -> list[Part]:
@@ -154,9 +167,7 @@ def should_add_pitches(
         return False
     if adjacent_duplicates:
         return True
-    is_duplicate = are_same_pitches(new_pitches, old_pitches)
-    should_add = not is_duplicate
-    return should_add
+    return not are_same_pitches(new_pitches, old_pitches)
 
 
 def get_ordered_unique_pitch_sets(
@@ -174,15 +185,10 @@ def get_simultaneous_pitches(
 ) -> list[list[NamedPitch]]:
     parts = get_parts(passage)
     pitches = [get_current_pitches(parts)]
-    end_of_passage = is_end_of_passage(parts)
-    while not end_of_passage:
+    while not is_end_of_passage(parts):
         new_pitches = get_next_pitches(parts)
-        should_add = should_add_pitches(
-            adjacent_duplicates, new_pitches, pitches
-        )
-        if should_add:
+        if should_add_pitches(adjacent_duplicates, new_pitches, pitches):
             pitches.append(new_pitches)
-        end_of_passage = is_end_of_passage(parts)
     if as_set:
         return get_ordered_unique_pitch_sets(pitches)
     return pitches
@@ -204,6 +210,8 @@ def get_passage_matrices(
         if not len(pitches) == 2:
             continue
         bass, melody = pitches
-        matrix = get_matrix(bass, melody, multiples=multiples)
+        matrix = Matrix(
+            bass, melody, input_type=InputType.HERTZ, multiples=multiples
+        )
         matrices.append(matrix)
     return matrices

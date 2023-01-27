@@ -3,13 +3,9 @@ from pathlib import Path
 from rich.markup import escape
 from typer import Argument, Option, Typer
 
-from agni.passage.read_passage import get_passage_from_input_file
-
-from .display_matrix import display_matrix
-from .matrix import InputType, OutputType, Tuning, get_matrix
-from .notate_matrix import notate_matrix
+from .matrix import InputType, Matrix, Notation, OutputType, Tuning
 from .passage.passage import get_passage_matrices
-from .play_matrix import play_matrix
+from .passage.read_passage import get_passage_from_input_file
 
 agni = Typer(
     help="Create combination-tone matrices.",
@@ -54,20 +50,12 @@ def matrix(
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from two pitches."""
-    matrix = get_matrix(
-        bass, melody, input_type=input_type, multiples=multiples
-    )
+    matrix = Matrix(bass, melody, input_type=input_type, multiples=multiples)
     if notate:
-        notate_matrix(
-            matrix,
-            tuning=tuning,
-            as_chord=as_chord,
-            persist=persist,
-            as_ensemble=as_ensebmle,
-        )
-    display_matrix(matrix, output_type=output_type, tuning=tuning)
+        matrix.notate(tuning, as_chord, persist, as_ensebmle)
+    matrix.display(output_type, tuning)
     if play:
-        play_matrix(matrix)
+        matrix.play()
 
 
 @agni.command()
@@ -109,14 +97,23 @@ def passage(
     )
     if notate:
         if not full_score:
-            passage = None
-        notate_matrix(
-            *matrices,
-            tuning=tuning,
-            as_chord=as_chord,
-            persist=persist,
-            as_ensemble=as_ensemble,
-            full_score=full_score,
-            passage=passage,
-        )
-    display_matrix(*matrices, output_type=output_type, tuning=tuning)
+            notation_passage = None
+        else:
+            notation_passage = passage
+        notation = Notation(*matrices)
+        if as_ensemble:
+            notation.get_ensemble_score(
+                tuning,
+                persist=persist,
+                passage=notation_passage,
+                full_score=full_score,
+            )
+        else:
+            notation.get_reference_score(
+                tuning,
+                as_chord=as_chord,
+                persist=persist,
+                full_score=full_score,
+            )
+    for matrix in matrices:
+        matrix.display(output_type, tuning)
