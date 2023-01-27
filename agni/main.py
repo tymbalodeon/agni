@@ -102,14 +102,14 @@ def passage(
             notation_passage = passage
         notation = Notation(*matrices)
         if as_ensemble:
-            notation.get_ensemble_score(
+            notation.make_ensemble_score(
                 tuning,
                 persist=persist,
                 passage=notation_passage,
                 full_score=full_score,
             )
         else:
-            notation.get_reference_score(
+            notation.make_reference_score(
                 tuning,
                 as_chord=as_chord,
                 persist=persist,

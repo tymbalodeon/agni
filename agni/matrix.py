@@ -294,9 +294,9 @@ class Matrix:
             multiples = self._multiples
         notation = Notation(self)
         if as_ensemble:
-            notation.get_ensemble_score(tuning, persist=persist)
+            notation.make_ensemble_score(tuning, persist=persist)
         else:
-            notation.get_reference_score(
+            notation.make_reference_score(
                 tuning, as_chord=as_chord, persist=persist
             )
 
@@ -633,7 +633,7 @@ class Notation:
                 continue
             staff.append(matrix_note)
 
-    def get_ensemble_score(
+    def make_ensemble_score(
         self,
         tuning: Tuning,
         persist: bool,
@@ -703,7 +703,7 @@ class Notation:
         staff = Staff(components)
         score.append(staff)
 
-    def get_reference_score(
+    def make_reference_score(
         self, tuning: Tuning, as_chord: bool, persist: bool, full_score=False
     ):
         score = Score()
