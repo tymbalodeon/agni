@@ -3,7 +3,9 @@ from pathlib import Path
 from rich.markup import escape
 from typer import Argument, Option, Typer
 
-from .matrix import InputType, Matrix, OutputType, Passage, Tuning
+from .matrix import InputType, Matrix
+from .matrix_frequency import OutputType, Tuning
+from .notation import Notation, Passage
 
 agni = Typer(
     help="Create combination-tone matrices.",
@@ -22,7 +24,7 @@ output_type = Option(
     OutputType.LILYPOND.value, help="Set the output type for pitches."
 )
 as_chord = Option(False, "--as-chord", help="Output matrix as chord.")
-as_ensebmle = Option(
+as_ensemble = Option(
     False, "--as-ensemble", help="Notate each note on its own staff."
 )
 notate = Option(False, "--notate", help="Notated matrix.")
@@ -44,13 +46,14 @@ def matrix(
     as_chord: bool = as_chord,
     notate: bool = notate,
     persist: bool = persist,
-    as_ensebmle: bool = as_ensebmle,
+    as_ensemble: bool = as_ensemble,
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from two pitches."""
     matrix = Matrix(bass, melody, input_type=input_type, multiples=multiples)
     if notate:
-        matrix.notate(tuning, as_chord, persist, as_ensebmle)
+        notation = Notation(matrix)
+        notation.make_score(as_ensemble, tuning, persist, as_chord=as_chord)
     matrix.display(output_type, tuning)
     if play:
         matrix.play()
@@ -67,7 +70,7 @@ def passage(
     as_chord: bool = as_chord,
     notate: bool = notate,
     persist: bool = persist,
-    as_ensemble: bool = as_ensebmle,
+    as_ensemble: bool = as_ensemble,
     as_set: bool = Option(
         True, "--as-set/--all", help="Output unique matrices only."
     ),
