@@ -37,6 +37,8 @@ from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
 from rich.progress import track
 
+from agni.matrix_frequency import MatrixFrequency
+
 from .helpers import remove_none_values
 from .matrix import InputType, Matrix
 from .matrix_frequency import OutputType, Tuning
@@ -176,13 +178,15 @@ class Notation:
     @classmethod
     def _get_matrix_note_from_melody_note(
         cls,
-        matrix_frequency: float,
+        matrix_frequency: MatrixFrequency,
         melody_note: LeafInMeasure | None,
         tuning: Tuning,
     ) -> Note:
         duration = cls._get_melody_note_duration(melody_note)
         tie = cls._get_melody_note_tie(melody_note)
-        note = cls._get_note(matrix_frequency, tuning, duration=duration)
+        note = cls._get_note(
+            matrix_frequency.frequency or 0, tuning, duration=duration
+        )
         if tie:
             attach(tie, note)
         return note
@@ -337,7 +341,7 @@ class Notation:
     ):
         for index, frequency in enumerate(matrix.sorted_frequencies):
             matrix_note = cls._get_matrix_note_from_melody_note(
-                frequency.frequency or 0, melody_note, tuning
+                frequency, melody_note, tuning
             )
             staff_names = [staff.name for staff in staff_group]
             staff_name = str(index)
@@ -435,7 +439,7 @@ class Notation:
         ):
             notes = [
                 self._get_note(frequency, tuning)
-                for frequency in matrix.get_sorted_frequencies()
+                for frequency in matrix.sorted_frequencies_in_hertz
             ]
             self._set_clefs(notes)
             self._add_notes_to_score(notes, score, as_chord=as_chord)
