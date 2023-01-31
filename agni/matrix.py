@@ -1,7 +1,7 @@
 from collections.abc import Generator, Iterator
 from dataclasses import dataclass
 from enum import Enum
-from functools import lru_cache
+from functools import cached_property, lru_cache
 from math import log
 from pathlib import Path
 from time import sleep
@@ -69,22 +69,122 @@ def remove_none_values(collection: list) -> list:
     return [item for item in collection if item]
 
 
-class Matrix:
-    DEFAULT_MULTIPLES = 4
-
+class MatrixFrequency:
     def __init__(
         self,
-        bass: Pitch,
-        melody: Pitch,
-        input_type: InputType,
-        multiples: int | None = None,
+        bass: float,
+        melody: float,
+        bass_multiplier: int,
+        melody_multiplier: int,
     ):
-        self.bass = self._get_frequency(bass, input_type)
-        self.melody = self._get_frequency(melody, input_type)
-        if multiples:
-            self._multiples = multiples
-        else:
-            self._multiples = self.DEFAULT_MULTIPLES
+        bass_frequency = bass * bass_multiplier
+        melody_frequency = melody * melody_multiplier
+        self.bass_multiplier = bass_multiplier
+        self.melody_multiplier = melody_multiplier
+        frequency = bass_frequency + melody_frequency
+        self.frequency = frequency or None
+
+    @staticmethod
+    def get_sortable_frequency(matrix_frequency: "MatrixFrequency") -> float:
+        return matrix_frequency.frequency or 0
+
+    @cached_property
+    def is_bass_frequency(self) -> bool:
+        if self.bass_multiplier == 1 and self.melody_multiplier == 0:
+            return True
+        return False
+
+    @cached_property
+    def is_melody_frequency(self) -> bool:
+        if self.bass_multiplier == 0 and self.melody_multiplier == 1:
+            return True
+        return False
+
+    @cached_property
+    def is_base_frequency(self) -> bool:
+        return self.is_bass_frequency or self.is_melody_frequency
+
+    def get_display(self, output_type: OutputType, tuning: Tuning) -> str:
+        if not self.frequency:
+            return ""
+        if output_type == OutputType.LILYPOND:
+            pass
+
+
+class Matrix:
+    def __init__(
+        self, bass: Pitch, melody: Pitch, input_type: InputType, multiples: int
+    ):
+        self.bass = self._get_frequency_from_input(bass, input_type)
+        self.melody = self._get_frequency_from_input(melody, input_type)
+        self._multiples = range(multiples)
+
+    @staticmethod
+    @lru_cache
+    def _convert_midi_to_frequency(midi_number: float | str) -> float:
+        if isinstance(midi_number, str):
+            midi_number = float(midi_number)
+        return (2 ** ((midi_number - 69) / 12)) * 440
+
+    @classmethod
+    @lru_cache
+    def _get_frequency_from_input(
+        cls, pitch: Pitch, input_type: InputType
+    ) -> float:
+        if isinstance(pitch, NamedPitch):
+            return pitch.hertz
+        if (
+            input_type == InputType.MIDI
+            and isinstance(pitch, float)
+            or isinstance(pitch, str)
+            and pitch.isnumeric()
+        ):
+            return cls._convert_midi_to_frequency(pitch)
+        if isinstance(pitch, str):
+            if pitch.isnumeric():
+                return float(pitch)
+            return NamedPitch(pitch).hertz
+        return pitch
+
+    @cached_property
+    def frequencies(self) -> list[MatrixFrequency]:
+        frequencies = []
+        multiples = self._multiples
+        for bass_multiplier in multiples:
+            for melody_multiplier in multiples:
+                matrix_frequency = MatrixFrequency(
+                    self.bass, self.melody, bass_multiplier, melody_multiplier
+                )
+                frequencies.append(matrix_frequency)
+        return frequencies
+
+    @cached_property
+    def sorted_frequencies(self) -> list[MatrixFrequency]:
+        return sorted(
+            self.frequencies, key=MatrixFrequency.get_sortable_frequency
+        )
+
+    @property
+    def _base_pitches(self) -> set[float]:
+        return {self.bass, self.melody}
+
+    @staticmethod
+    def _get_header_multipler(multiplier: int, pitch: str) -> str:
+        return f"[bold cyan]{multiplier} * {pitch}[/bold cyan]"
+
+    def _get_melody_header(self) -> list[str]:
+        header = [
+            self._get_header_multipler(multiplier, "melody")
+            for multiplier in self._multiples
+        ]
+        return [""] + header
+
+    def _get_display_table(self, output_type: OutputType) -> Table:
+        title = f"Combination-Tone Matrix ({output_type.value.title()})"
+        table = Table(title=title, show_header=False, box=SIMPLE)
+        melody_header = self._get_melody_header()
+        table.add_row(*melody_header)
+        return table
 
     @staticmethod
     @lru_cache
@@ -97,109 +197,28 @@ class Matrix:
         return NamedPitch(pitch_name)
 
     @staticmethod
-    @lru_cache
-    def _convert_midi_to_frequency(midi_number: float) -> float:
-        return (2 ** ((midi_number - 69) / 12)) * 440
-
-    @classmethod
-    @lru_cache
-    def _get_frequency(cls, pitch: Pitch, input_type: InputType) -> float:
-        if isinstance(pitch, NamedPitch):
-            return pitch.hertz
-        if input_type == InputType.MIDI:
-            return cls._convert_midi_to_frequency(float(pitch))
-        if isinstance(pitch, float):
-            return pitch
-        if pitch.isnumeric():
-            return float(pitch)
-        return NamedPitch(pitch).hertz
-
-    @staticmethod
-    @lru_cache
-    def _get_sum_frequency(
-        multiplier: int, bass_multiple: float, melody: float
-    ) -> float:
-        melody_multiple = melody * multiplier
-        return bass_multiple + melody_multiple
-
-    @classmethod
-    @lru_cache
-    def _get_melody_column(
-        cls, multiplier: int, columns: range, bass: float, melody: float
-    ) -> list[float]:
-        bass_multiple = bass * multiplier
-        return [
-            cls._get_sum_frequency(column, bass_multiple, melody)
-            for column in columns
-        ]
+    def _bolden_pitch(pitch: Pitch) -> str:
+        return f"[bold yellow]{pitch}[/bold yellow]"
 
     @lru_cache
-    def get_frequencies(
-        self, multiples: int | None = None
-    ) -> list[list[float]]:
-        if not multiples:
-            multiples = self._multiples
-        rows = range(multiples)
-        return [
-            self._get_melody_column(row, rows, self.bass, self.melody)
-            for row in rows
-        ]
-
-    @lru_cache
-    def get_sorted_frequencies(
-        self, multiples: int | None = None, limit: int | None = None
-    ) -> list[float]:
-        if not multiples:
-            multiples = self._multiples
-        frequencies = [
-            frequency
-            for row in self.get_frequencies(multiples)
-            for frequency in row
-        ]
-        frequencies.sort()
-        frequencies = frequencies[1:]
-        if not limit:
-            return frequencies
-        return frequencies[:limit]
-
-    @staticmethod
-    def _get_matrix_table(output_type: OutputType) -> Table:
-        title = f"Combination-Tone Matrix ({output_type.value.title()})"
-        return Table(title=title, show_header=False, box=SIMPLE)
-
-    @staticmethod
-    def _get_header_multipler(multiplier: int, pitch: str) -> str:
-        return f"[bold cyan]{multiplier} * {pitch}[/bold cyan]"
-
-    @property
-    def _number_of_frequencies(self) -> int:
-        return len(self.get_frequencies())
-
-    def _get_melody_header(self) -> list[str]:
-        header = [
-            self._get_header_multipler(multiplier, "melody")
-            for multiplier in range(self._number_of_frequencies)
-        ]
-        return [""] + header
-
-    @property
-    def _base_pitches(self) -> tuple[float, float]:
-        return (self.bass, self.melody)
-
-    @lru_cache
-    def _get_named_pitch(self, frequency: float, tuning: Tuning) -> str | None:
+    def _get_named_pitch(
+        self, matrix_frequency: MatrixFrequency, tuning: Tuning
+    ) -> str | None:
+        frequency = matrix_frequency.frequency
         if not frequency:
             return None
         named_pitch = NamedPitch.from_hertz(frequency)
         if tuning == Tuning.EQUAL_TEMPERED:
             named_pitch = self._quantize_pitch(named_pitch)
         pitch_name = named_pitch.name
-        if frequency in self._base_pitches:
+        if matrix_frequency.is_base_frequency:
             return self._bolden_pitch(pitch_name)
         return pitch_name
 
     @lru_cache
-    def _get_midi_number(self, frequency: float, tuning: Tuning) -> str | None:
+    def _get_midi_number(
+        self, frequency: float | None, tuning: Tuning
+    ) -> str | None:
         if not frequency:
             return None
         frequency = frequency / 440
@@ -214,7 +233,9 @@ class Matrix:
         return str(midi_number)
 
     @lru_cache
-    def _get_hertz(self, frequency: float, tuning: Tuning) -> str | None:
+    def _get_hertz(
+        self, frequency: float | None, tuning: Tuning
+    ) -> str | None:
         if not frequency:
             return None
         if tuning == Tuning.MICROTONAL:
@@ -228,7 +249,7 @@ class Matrix:
 
     @lru_cache
     def _get_all_output_types(
-        self, frequency: float, tuning: Tuning
+        self, frequency: float | None, tuning: Tuning
     ) -> str | None:
         if not frequency:
             return None
@@ -241,7 +262,10 @@ class Matrix:
         return pitches
 
     def _get_output_pitches(
-        self, row: list[float], tuning: Tuning, output_type: OutputType
+        self,
+        row: list[MatrixFrequency],
+        tuning: Tuning,
+        output_type: OutputType,
     ) -> list[str | None]:
         if output_type == OutputType.LILYPOND:
             return [
@@ -260,35 +284,23 @@ class Matrix:
             ]
         return [self._get_hertz(frequency, tuning) for frequency in row]
 
-    def _add_melody_header(self, table: Table):
-        melody_header = self._get_melody_header()
-        table.add_row(*melody_header)
-
-    @staticmethod
-    def _bolden_pitch(pitch: Pitch) -> str:
-        return f"[bold yellow]{pitch}[/bold yellow]"
-
     @classmethod
-    def _get_bass_header(cls, multiplier: int) -> list[str | None]:
+    def _get_bass_label(cls, multiplier: int) -> list[str | None]:
         return [cls._get_header_multipler(multiplier, "bass")]
 
-    def display(
-        self,
-        output_type: OutputType,
-        tuning: Tuning,
-        multiples: int | None = None,
-    ):
-        if not multiples:
-            multiples = self._multiples
-        table = self._get_matrix_table(output_type)
-        self._add_melody_header(table)
-        frequencies = self.get_frequencies(multiples)
-        for multiplier, row in enumerate(frequencies):
-            row_frequencies = self._get_output_pitches(
-                row, tuning=tuning, output_type=output_type
+    def display(self, output_type: OutputType, tuning: Tuning):
+        table = self._get_display_table(output_type)
+        for multiple in self._multiples:
+            frequencies = [
+                frequency
+                for frequency in self.frequencies
+                if frequency.bass_multiplier == multiple
+            ]
+            display_frequencies = self._get_output_pitches(
+                frequencies, tuning=tuning, output_type=output_type
             )
-            bass_header = self._get_bass_header(multiplier)
-            formatted_row = bass_header + row_frequencies
+            bass_label = self._get_bass_label(multiple)
+            formatted_row = bass_label + display_frequencies
             table.add_row(*formatted_row)
         Console().print(table)
 
@@ -297,24 +309,14 @@ class Matrix:
         return Notation(self)
 
     def notate(
-        self,
-        tuning: Tuning,
-        as_chord=False,
-        persist=False,
-        as_ensemble=False,
-        multiples: int | None = None,
+        self, tuning: Tuning, as_chord=False, persist=False, as_ensemble=False
     ):
-        if not multiples:
-            multiples = self._multiples
         notation = self.notation
         notation.make_score(as_ensemble, tuning, persist, as_chord=as_chord)
 
-    def play(self, multiples: int | None = None):
-        if not multiples:
-            multiples = self._multiples
+    def play(self):
         pattern = EventPattern(
-            frequency=SequencePattern(self.get_sorted_frequencies()),
-            delta=0.05,
+            frequency=SequencePattern(self.sorted_frequencies), delta=0.05
         )
         pattern.play()
         sleep(5)
@@ -609,7 +611,7 @@ class Notation:
         melody_note: LeafInMeasure | None = None,
         previous_note: LeafInMeasure | None = None,
     ):
-        for index, frequency in enumerate(matrix.get_sorted_frequencies()):
+        for index, frequency in enumerate(matrix.sorted_frequencies):
             matrix_note = cls._get_matrix_note_from_melody_note(
                 frequency, melody_note, tuning
             )

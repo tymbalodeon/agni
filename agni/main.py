@@ -101,3 +101,12 @@ def passage(
     passage.display(
         output_type, tuning, multiples, as_set, adjacent_duplicates
     )
+
+
+@agni.command()
+def test():
+    matrix = Matrix("a", "bf", InputType.MIDI, multiples=4)
+    from rich import print
+
+    for frequency in matrix.frequencies:
+        print(vars(frequency))
