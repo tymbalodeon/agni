@@ -89,26 +89,72 @@ class MatrixFrequency:
         return matrix_frequency.frequency or 0
 
     @cached_property
-    def is_bass_frequency(self) -> bool:
+    def _is_bass_frequency(self) -> bool:
         if self.bass_multiplier == 1 and self.melody_multiplier == 0:
             return True
         return False
 
     @cached_property
-    def is_melody_frequency(self) -> bool:
+    def _is_melody_frequency(self) -> bool:
         if self.bass_multiplier == 0 and self.melody_multiplier == 1:
             return True
         return False
 
     @cached_property
-    def is_base_frequency(self) -> bool:
-        return self.is_bass_frequency or self.is_melody_frequency
+    def _is_base_frequency(self) -> bool:
+        return self._is_bass_frequency or self._is_melody_frequency
+
+    def _get_lilypond_display_pitch(self, tuning: Tuning) -> str:
+        if not self.frequency:
+            return ""
+        named_pitch = NamedPitch.from_hertz(self.frequency)
+        if tuning == Tuning.EQUAL_TEMPERED:
+            pitch_number = named_pitch.number
+            if isinstance(pitch_number, float):
+                pitch_number = int(pitch_number)
+                pitch_name = NumberedPitch(pitch_number).name
+                named_pitch = NamedPitch(pitch_name)
+        return named_pitch.name
+
+    def _get_midi_display_pitch(self, tuning: Tuning) -> str:
+        if not self.frequency:
+            return ""
+        frequency = self.frequency / 440
+        logarithm = log(frequency, 2)
+        midi_number = 12 * logarithm + 69
+        if tuning == Tuning.MICROTONAL:
+            midi_number = round(midi_number * 2) / 2
+        else:
+            midi_number = round(midi_number)
+        return str(midi_number)
+
+    def _get_hertz_display_pitch(self, tuning: Tuning) -> str:
+        if not self.frequency:
+            return ""
+        if tuning == Tuning.MICROTONAL:
+            decimals = 2
+        else:
+            decimals = None
+        return f"{round(self.frequency, decimals):,}"
 
     def get_display(self, output_type: OutputType, tuning: Tuning) -> str:
         if not self.frequency:
             return ""
+        display_pitch = ""
         if output_type == OutputType.LILYPOND:
-            pass
+            display_pitch = self._get_lilypond_display_pitch(tuning)
+        elif output_type == OutputType.MIDI:
+            display_pitch = self._get_midi_display_pitch(tuning)
+        elif output_type == OutputType.HERTZ:
+            display_pitch = self._get_hertz_display_pitch(tuning)
+        elif output_type == OutputType.ALL:
+            hertz = self._get_hertz_display_pitch(tuning)
+            lilypond = self._get_lilypond_display_pitch(tuning)
+            midi = self._get_midi_display_pitch(tuning)
+            display_pitch = f"{hertz}\n{lilypond}\n{midi}"
+        if self._is_base_frequency:
+            display_pitch = f"[bold yellow]{display_pitch}[/bold yellow]"
+        return display_pitch
 
 
 class Matrix:
@@ -164,154 +210,33 @@ class Matrix:
             self.frequencies, key=MatrixFrequency.get_sortable_frequency
         )
 
-    @property
-    def _base_pitches(self) -> set[float]:
-        return {self.bass, self.melody}
-
     @staticmethod
-    def _get_header_multipler(multiplier: int, pitch: str) -> str:
+    def _get_multiplier_label(multiplier: int, pitch: str) -> str:
         return f"[bold cyan]{multiplier} * {pitch}[/bold cyan]"
 
-    def _get_melody_header(self) -> list[str]:
-        header = [
-            self._get_header_multipler(multiplier, "melody")
-            for multiplier in self._multiples
-        ]
-        return [""] + header
-
-    def _get_display_table(self, output_type: OutputType) -> Table:
+    def display(self, output_type: OutputType, tuning: Tuning):
         title = f"Combination-Tone Matrix ({output_type.value.title()})"
         table = Table(title=title, show_header=False, box=SIMPLE)
-        melody_header = self._get_melody_header()
+        melody_header = [""] + [
+            self._get_multiplier_label(multiplier, "melody")
+            for multiplier in self._multiples
+        ]
         table.add_row(*melody_header)
-        return table
-
-    @staticmethod
-    @lru_cache
-    def _quantize_pitch(pitch: NamedPitch) -> NamedPitch:
-        pitch_number = pitch.number
-        if not isinstance(pitch_number, float):
-            return pitch
-        pitch_number = int(pitch_number)
-        pitch_name = NumberedPitch(pitch_number).name
-        return NamedPitch(pitch_name)
-
-    @staticmethod
-    def _bolden_pitch(pitch: Pitch) -> str:
-        return f"[bold yellow]{pitch}[/bold yellow]"
-
-    @lru_cache
-    def _get_named_pitch(
-        self, matrix_frequency: MatrixFrequency, tuning: Tuning
-    ) -> str | None:
-        frequency = matrix_frequency.frequency
-        if not frequency:
-            return None
-        named_pitch = NamedPitch.from_hertz(frequency)
-        if tuning == Tuning.EQUAL_TEMPERED:
-            named_pitch = self._quantize_pitch(named_pitch)
-        pitch_name = named_pitch.name
-        if matrix_frequency.is_base_frequency:
-            return self._bolden_pitch(pitch_name)
-        return pitch_name
-
-    @lru_cache
-    def _get_midi_number(
-        self, frequency: float | None, tuning: Tuning
-    ) -> str | None:
-        if not frequency:
-            return None
-        frequency = frequency / 440
-        logarithm = log(frequency, 2)
-        midi_number = 12 * logarithm + 69
-        if tuning == Tuning.MICROTONAL:
-            midi_number = round(midi_number * 2) / 2
-        else:
-            midi_number = round(midi_number)
-        if frequency in self._base_pitches:
-            return self._bolden_pitch(midi_number)
-        return str(midi_number)
-
-    @lru_cache
-    def _get_hertz(
-        self, frequency: float | None, tuning: Tuning
-    ) -> str | None:
-        if not frequency:
-            return None
-        if tuning == Tuning.MICROTONAL:
-            decimals = 2
-        else:
-            decimals = None
-        hertz = f"{round(frequency, decimals):,}"
-        if frequency in self._base_pitches:
-            return self._bolden_pitch(hertz)
-        return hertz
-
-    @lru_cache
-    def _get_all_output_types(
-        self, frequency: float | None, tuning: Tuning
-    ) -> str | None:
-        if not frequency:
-            return None
-        hertz = self._get_hertz(frequency, tuning)
-        named_pitch = self._get_named_pitch(frequency, tuning)
-        midi = self._get_midi_number(frequency, tuning)
-        pitches = f"{hertz}\n{named_pitch}\n{midi}"
-        if frequency in self._base_pitches:
-            return self._bolden_pitch(pitches)
-        return pitches
-
-    def _get_output_pitches(
-        self,
-        row: list[MatrixFrequency],
-        tuning: Tuning,
-        output_type: OutputType,
-    ) -> list[str | None]:
-        if output_type == OutputType.LILYPOND:
-            return [
-                self._get_named_pitch(frequency, tuning) for frequency in row
-            ]
-        if output_type == OutputType.MIDI:
-            return [
-                self._get_midi_number(frequency, tuning) for frequency in row
-            ]
-        if output_type == OutputType.HERTZ:
-            return [self._get_hertz(frequency, tuning) for frequency in row]
-        if output_type == OutputType.ALL:
-            return [
-                self._get_all_output_types(frequency, tuning)
-                for frequency in row
-            ]
-        return [self._get_hertz(frequency, tuning) for frequency in row]
-
-    @classmethod
-    def _get_bass_label(cls, multiplier: int) -> list[str | None]:
-        return [cls._get_header_multipler(multiplier, "bass")]
-
-    def display(self, output_type: OutputType, tuning: Tuning):
-        table = self._get_display_table(output_type)
         for multiple in self._multiples:
-            frequencies = [
-                frequency
+            display_frequencies = [
+                frequency.get_display(output_type, tuning)
                 for frequency in self.frequencies
                 if frequency.bass_multiplier == multiple
             ]
-            display_frequencies = self._get_output_pitches(
-                frequencies, tuning=tuning, output_type=output_type
-            )
-            bass_label = self._get_bass_label(multiple)
+            bass_label = [self._get_multiplier_label(multiple, "bass")]
             formatted_row = bass_label + display_frequencies
             table.add_row(*formatted_row)
         Console().print(table)
 
-    @property
-    def notation(self) -> "Notation":
-        return Notation(self)
-
     def notate(
         self, tuning: Tuning, as_chord=False, persist=False, as_ensemble=False
     ):
-        notation = self.notation
+        notation = Notation(self)
         notation.make_score(as_ensemble, tuning, persist, as_chord=as_chord)
 
     def play(self):
@@ -446,7 +371,11 @@ class Notation:
     ) -> Note:
         pitch = NamedPitch.from_hertz(frequency)
         if tuning == Tuning.EQUAL_TEMPERED:
-            pitch = Matrix._quantize_pitch(pitch)
+            pitch_number = pitch.number
+            if isinstance(pitch_number, float):
+                pitch_number = int(pitch_number)
+                pitch_name = NumberedPitch(pitch_number).name
+                pitch = NamedPitch(pitch_name)
         return Note(pitch, duration)
 
     @classmethod
@@ -613,7 +542,7 @@ class Notation:
     ):
         for index, frequency in enumerate(matrix.sorted_frequencies):
             matrix_note = cls._get_matrix_note_from_melody_note(
-                frequency, melody_note, tuning
+                frequency.frequency or 0, melody_note, tuning
             )
             staff_names = [staff.name for staff in staff_group]
             staff_name = str(index)
