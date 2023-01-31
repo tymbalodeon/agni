@@ -37,11 +37,9 @@ from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
 from rich.progress import track
 
-from agni.matrix_frequency import MatrixFrequency
-
 from .helpers import remove_none_values
 from .matrix import InputType, Matrix
-from .matrix_frequency import OutputType, Tuning
+from .matrix_frequency import OutputType, Tuning, MatrixFrequency
 
 
 @dataclass
