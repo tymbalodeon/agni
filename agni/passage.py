@@ -1,5 +1,6 @@
 from collections.abc import Generator, Iterator
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import cast
 
@@ -11,7 +12,6 @@ from abjad import (
     NamedPitch,
     Note,
     Rest,
-    Skip,
     Staff,
     TimeSignature,
     parse,
@@ -117,10 +117,8 @@ class Passage:
         lilypond_input = input_file.read_text()
         self.title = self._get_header_item(lilypond_input, "title")
         self.composer = self._get_header_item(lilypond_input, "composer")
-        staves, structure = self._get_staves_and_structure(lilypond_input)
-        self.structure = structure
-        self.bass = self._get_staff_leaves(staves, "bass")
-        self.melody = self._get_staff_leaves(staves, "melody")
+        self.bass = self._get_staff_leaves(lilypond_input, "bass")
+        self.melody = self._get_staff_leaves(lilypond_input, "melody")
 
     @staticmethod
     def _get_header_item(lilypond_input: str, item: str) -> str:
@@ -130,23 +128,11 @@ class Passage:
             return ""
         return matching_line.split('"')[1]
 
-    @staticmethod
-    def _get_score_block(lilypond_input: str) -> Block:
-        lilypond_file = cast(LilyPondFile, parse(lilypond_input))
-        items = lilypond_file.items
-        return next(block for block in items if block.name == "score")
-
     @classmethod
-    def _get_staves_and_structure(
-        cls,
-        lilypond_input: str,
-    ) -> tuple[list[Staff], list[Skip]]:
+    @lru_cache
+    def _get_staves(cls, lilypond_input: str) -> list[Staff]:
         score = cls._get_score_block(lilypond_input)
-        staves = cast(
-            list[Staff], get_components(score.items, prototype=Staff)
-        )
-        structure = cast(list[Skip], get_components(staves, prototype=Skip))
-        return staves, structure
+        return cast(list[Staff], get_components(score.items, prototype=Staff))
 
     @staticmethod
     def _get_time_signature(note: Leaf) -> TimeSignature | None:
@@ -171,16 +157,22 @@ class Passage:
             notes_in_measure.append(MeteredLeaf(note, current_time_signature))
         return notes_in_measure
 
-    @classmethod
     def _get_staff_leaves(
-        cls, staves: list[Staff], part: str
+        self, lilypond_input: str, part: str
     ) -> list[MeteredLeaf]:
+        staves = self._get_staves(lilypond_input)
         staff = get_staff_by_name(staves, part)
         if not staff:
             return []
         components = staff.components
         leaves = get_leaves(components)
-        return cls._get_notes_in_measure(leaves)
+        return self._get_notes_in_measure(leaves)
+
+    @staticmethod
+    def _get_score_block(lilypond_input: str) -> Block:
+        lilypond_file = cast(LilyPondFile, parse(lilypond_input))
+        items = lilypond_file.items
+        return next(block for block in items if block.name == "score")
 
     @property
     def parts(self) -> list[Part]:
