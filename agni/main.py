@@ -91,15 +91,16 @@ def passage(
         adjacent_duplicates = True
     passage = Passage(input_file)
     if notate:
-        passage.notate(
-            tuning,
-            multiples,
-            as_chord,
-            persist,
+        notation = Notation(
+            *passage.get_matrices(multiples, as_set, adjacent_duplicates)
+        )
+        notation.make_score(
             as_ensemble,
-            as_set,
-            adjacent_duplicates,
-            full_score,
+            tuning,
+            persist,
+            as_chord=as_chord,
+            full_score=full_score,
+            passage=passage,
         )
     passage.display(
         output_type, tuning, multiples, as_set, adjacent_duplicates
