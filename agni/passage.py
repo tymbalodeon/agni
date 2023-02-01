@@ -2,6 +2,7 @@ from collections.abc import Generator, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
+
 from abjad import (
     Block,
     Duration,
@@ -20,19 +21,20 @@ from abjad.get import indicators as get_indicators
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
+
 from .helpers import get_staff_by_name, remove_none_values
 from .matrix import InputType, Matrix
 from .matrix_frequency import OutputType, Tuning
 
 
 @dataclass
-class LeafInMeasure:
+class MeteredLeaf:
     leaf: Leaf
     time_signature: TimeSignature
 
 
 @dataclass
-class SoundingLeaves:
+class SoundingLeaf:
     named_pitch: NamedPitch | None
     duration: Duration
     time_signature: TimeSignature
@@ -51,34 +53,34 @@ class SoundingLeaves:
         return get_duration(logical_tie)
 
     @classmethod
-    def from_leaves_in_measure(cls, leaf_in_measure: LeafInMeasure):
-        leaf = leaf_in_measure.leaf
+    def from_leaves_in_measure(cls, metered_leaf: MeteredLeaf):
+        leaf = metered_leaf.leaf
         named_pitch = cls._get_named_pitch(leaf)
-        duration = cls._get_sounding_duration(leaf_in_measure.leaf)
+        duration = cls._get_sounding_duration(metered_leaf.leaf)
         if not duration:
             return None
-        time_signature = leaf_in_measure.time_signature
+        time_signature = metered_leaf.time_signature
         return cls(named_pitch, duration, time_signature)
 
 
 class Part:
-    def __init__(self, name: str, leaves: list[LeafInMeasure]):
+    def __init__(self, name: str, leaves: list[MeteredLeaf]):
         self.name = name
         self.leaves = self._get_leaves(leaves)
         self.current_leaf = self._get_next_leaf(self.leaves)
 
     @staticmethod
     def _get_leaves(
-        leaves: list[LeafInMeasure],
-    ) -> Generator[SoundingLeaves, None, None]:
+        leaves: list[MeteredLeaf],
+    ) -> Generator[SoundingLeaf, None, None]:
         sounding_leaves = (
-            SoundingLeaves.from_leaves_in_measure(leaf) for leaf in leaves
+            SoundingLeaf.from_leaves_in_measure(leaf) for leaf in leaves
         )
         return (leaf for leaf in sounding_leaves if leaf)
 
     def _get_next_leaf(
-        self, leaves: Iterator[SoundingLeaves] | None = None
-    ) -> SoundingLeaves | None:
+        self, leaves: Iterator[SoundingLeaf] | None = None
+    ) -> SoundingLeaf | None:
         if not leaves:
             leaves = self.leaves
         self.current_leaf = next(leaves, None)
@@ -159,22 +161,20 @@ class Passage:
         )
 
     @classmethod
-    def _get_notes_in_measure(cls, notes: list[Leaf]) -> list[LeafInMeasure]:
+    def _get_notes_in_measure(cls, notes: list[Leaf]) -> list[MeteredLeaf]:
         notes_in_measure = []
         current_time_signature = TimeSignature((4, 4))
         for note in notes:
             time_signature = cls._get_time_signature(note)
             if time_signature:
                 current_time_signature = time_signature
-            notes_in_measure.append(
-                LeafInMeasure(note, current_time_signature)
-            )
+            notes_in_measure.append(MeteredLeaf(note, current_time_signature))
         return notes_in_measure
 
     @classmethod
     def _get_staff_leaves(
         cls, staves: list[Staff], part: str
-    ) -> list[LeafInMeasure]:
+    ) -> list[MeteredLeaf]:
         staff = get_staff_by_name(staves, part)
         if not staff:
             return []

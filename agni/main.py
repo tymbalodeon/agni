@@ -5,7 +5,8 @@ from typer import Argument, Option, Typer
 
 from .matrix import InputType, Matrix
 from .matrix_frequency import OutputType, Tuning
-from .notation import Notation, Passage
+from .notation import notate_matrix, notate_passage
+from .passage import Passage
 
 agni = Typer(
     help="Create combination-tone matrices.",
@@ -52,8 +53,7 @@ def matrix(
     """Create combination-tone matrix from two pitches."""
     matrix = Matrix(bass, melody, input_type=input_type, multiples=multiples)
     if notate:
-        notation = Notation(matrix)
-        notation.make_score(as_ensemble, tuning, persist, as_chord=as_chord)
+        notate_matrix(matrix, as_ensemble, tuning, persist, as_chord)
     matrix.display(output_type, tuning)
     if play:
         matrix.play()
@@ -91,16 +91,16 @@ def passage(
         adjacent_duplicates = True
     passage = Passage(input_file)
     if notate:
-        notation = Notation(
-            *passage.get_matrices(multiples, as_set, adjacent_duplicates)
-        )
-        notation.make_score(
+        notate_passage(
+            passage,
+            multiples,
+            as_set,
+            adjacent_duplicates,
             as_ensemble,
             tuning,
             persist,
-            as_chord=as_chord,
-            full_score=full_score,
-            passage=passage,
+            as_chord,
+            full_score,
         )
     passage.display(
         output_type, tuning, multiples, as_set, adjacent_duplicates

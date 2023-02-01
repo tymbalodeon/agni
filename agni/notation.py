@@ -34,7 +34,7 @@ from rich.progress import track
 from .helpers import get_staff_by_name, remove_none_values
 from .matrix import Matrix
 from .matrix_frequency import MatrixFrequency, Tuning
-from .passage import LeafInMeasure, Passage
+from .passage import MeteredLeaf, Passage
 
 
 class Notation:
@@ -103,8 +103,8 @@ class Notation:
             show(lilypond_file)
 
     def _pair_matrices_to_melody_notes(
-        self, melody_passage: list[LeafInMeasure]
-    ) -> list[tuple[Matrix, LeafInMeasure]]:
+        self, melody_passage: list[MeteredLeaf]
+    ) -> list[tuple[Matrix, MeteredLeaf]]:
         pairs = []
         matrix_iterator = iter(self.matrices)
         current_matrix = None
@@ -120,8 +120,8 @@ class Notation:
 
     @staticmethod
     def _get_previous_note(
-        part: list[LeafInMeasure], index: int
-    ) -> LeafInMeasure | None:
+        part: list[MeteredLeaf], index: int
+    ) -> MeteredLeaf | None:
         try:
             return part[index - 1]
         except Exception:
@@ -129,7 +129,7 @@ class Notation:
 
     @staticmethod
     def _get_melody_note_duration(
-        note_in_measure: LeafInMeasure | None,
+        note_in_measure: MeteredLeaf | None,
     ) -> Duration:
         if not note_in_measure:
             return Duration(1, 4)
@@ -143,7 +143,7 @@ class Notation:
 
     @classmethod
     def _get_melody_note_tie(
-        cls, note_in_measure: LeafInMeasure | None
+        cls, note_in_measure: MeteredLeaf | None
     ) -> Tie | None:
         if not note_in_measure:
             return None
@@ -166,7 +166,7 @@ class Notation:
     def _get_matrix_note_from_melody_note(
         cls,
         matrix_frequency: MatrixFrequency,
-        melody_note: LeafInMeasure | None,
+        melody_note: MeteredLeaf | None,
         tuning: Tuning,
     ) -> Note:
         duration = cls._get_melody_note_duration(melody_note)
@@ -180,7 +180,7 @@ class Notation:
 
     @staticmethod
     def _get_melody_note_time_signature(
-        note: LeafInMeasure | None,
+        note: MeteredLeaf | None,
     ) -> TimeSignature | None:
         if not note:
             return None
@@ -261,7 +261,7 @@ class Notation:
     def _add_time_signature_to_note(
         note: Note,
         time_signature: TimeSignature | None,
-        previous_note: LeafInMeasure | None,
+        previous_note: MeteredLeaf | None,
     ):
         if previous_note and previous_note.time_signature != time_signature:
             attach(time_signature, note)
@@ -281,7 +281,7 @@ class Notation:
 
     @classmethod
     def _get_melody_note_tuplet(
-        cls, note_in_measure: LeafInMeasure | None
+        cls, note_in_measure: MeteredLeaf | None
     ) -> Tuplet | None:
         if not note_in_measure:
             return None
@@ -294,7 +294,7 @@ class Notation:
 
     @classmethod
     def _add_note_or_tuplet_to_staff(
-        cls, melody_note: LeafInMeasure, matrix_note: Note, staff: Staff
+        cls, melody_note: MeteredLeaf, matrix_note: Note, staff: Staff
     ):
         tuplet = cls._get_melody_note_tuplet(melody_note)
         if not tuplet:
@@ -317,8 +317,8 @@ class Notation:
         matrix: Matrix,
         staff_group: StaffGroup,
         tuning: Tuning,
-        melody_note: LeafInMeasure | None = None,
-        previous_note: LeafInMeasure | None = None,
+        melody_note: MeteredLeaf | None = None,
+        previous_note: MeteredLeaf | None = None,
     ):
         for index, frequency in enumerate(matrix.sorted_frequencies):
             matrix_note = cls._get_matrix_note_from_melody_note(
@@ -469,25 +469,25 @@ class SoundingLeaves:
         return get_duration(logical_tie)
 
     @classmethod
-    def from_leaves_in_measure(cls, leaf_in_measure: LeafInMeasure):
-        leaf = leaf_in_measure.leaf
+    def from_leaves_in_measure(cls, metered_leaf: MeteredLeaf):
+        leaf = metered_leaf.leaf
         named_pitch = cls._get_named_pitch(leaf)
-        duration = cls._get_sounding_duration(leaf_in_measure.leaf)
+        duration = cls._get_sounding_duration(metered_leaf.leaf)
         if not duration:
             return None
-        time_signature = leaf_in_measure.time_signature
+        time_signature = metered_leaf.time_signature
         return cls(named_pitch, duration, time_signature)
 
 
 class Part:
-    def __init__(self, name: str, leaves: list[LeafInMeasure]):
+    def __init__(self, name: str, leaves: list[MeteredLeaf]):
         self.name = name
         self.leaves = self._get_leaves(leaves)
         self.current_leaf = self._get_next_leaf(self.leaves)
 
     @staticmethod
     def _get_leaves(
-        leaves: list[LeafInMeasure],
+        leaves: list[MeteredLeaf],
     ) -> Generator[SoundingLeaves, None, None]:
         sounding_leaves = (
             SoundingLeaves.from_leaves_in_measure(leaf) for leaf in leaves
@@ -526,3 +526,38 @@ class Part:
             return False
         current_duration = self._get_current_duration()
         return current_duration == duration
+
+
+def notate_matrix(
+    matrix: Matrix,
+    as_ensemble: bool,
+    tuning: Tuning,
+    persist: bool,
+    as_chord: bool,
+):
+    notation = Notation(matrix)
+    notation.make_score(as_ensemble, tuning, persist, as_chord=as_chord)
+
+
+def notate_passage(
+    passage: Passage,
+    multiples: int,
+    as_set: bool,
+    adjacent_duplicates: bool,
+    as_ensemble: bool,
+    tuning: Tuning,
+    persist: bool,
+    as_chord: bool,
+    full_score: bool,
+):
+    notation = Notation(
+        *passage.get_matrices(multiples, as_set, adjacent_duplicates)
+    )
+    notation.make_score(
+        as_ensemble,
+        tuning,
+        persist,
+        as_chord=as_chord,
+        full_score=full_score,
+        passage=passage,
+    )
