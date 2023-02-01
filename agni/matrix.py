@@ -7,7 +7,6 @@ from rich.console import Console
 from rich.table import Table
 from supriya.patterns import EventPattern, SequencePattern
 
-from .helpers import remove_none_values
 from .matrix_frequency import DisplayType, MatrixFrequency, Tuning
 
 
@@ -72,19 +71,18 @@ class Matrix:
 
     @cached_property
     def sorted_frequencies(self) -> list[MatrixFrequency]:
-        return sorted(
+        frequencies = sorted(
             self.frequencies, key=MatrixFrequency.get_sortable_frequency
         )
+        return [frequency for frequency in frequencies if frequency.frequency]
 
     @cached_property
     def sorted_frequencies_in_hertz(self) -> list[float]:
-        sorted_frequencies = sorted(
-            self.frequencies, key=MatrixFrequency.get_sortable_frequency
-        )
-        sorted_frequencies_in_hertz = [
-            frequency.frequency for frequency in sorted_frequencies
+        return [
+            frequency.frequency
+            for frequency in self.sorted_frequencies
+            if frequency.frequency
         ]
-        return remove_none_values(sorted_frequencies_in_hertz)
 
     @staticmethod
     def _get_multiplier_label(multiplier: int, pitch: str) -> str:
