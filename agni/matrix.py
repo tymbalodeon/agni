@@ -22,11 +22,20 @@ class InputType(Enum):
 
 class Matrix:
     def __init__(
-        self, bass: Pitch, melody: Pitch, input_type: InputType, multiples: int
+        self,
+        bass: Pitch,
+        melody: Pitch,
+        input_type: InputType,
+        multiples: int,
+        output_type: OutputType,
+        tuning: Tuning,
     ):
-        self.bass = self._get_frequency_from_input(bass, input_type)
-        self.melody = self._get_frequency_from_input(melody, input_type)
+        self.input_type = input_type
+        self.output_type = output_type
+        self.tuning = tuning
         self._multiples = range(multiples)
+        self.bass = self._get_frequency_from_input(bass)
+        self.melody = self._get_frequency_from_input(melody)
 
     @staticmethod
     @lru_cache
@@ -35,19 +44,15 @@ class Matrix:
             midi_number = float(midi_number)
         return (2 ** ((midi_number - 69) / 12)) * 440
 
-    @classmethod
-    @lru_cache
-    def _get_frequency_from_input(
-        cls, pitch: Pitch, input_type: InputType
-    ) -> float:
+    def _get_frequency_from_input(self, pitch: Pitch) -> float:
         if isinstance(pitch, NamedPitch):
             return pitch.hertz
-        if input_type == InputType.MIDI and (
+        if self.input_type == InputType.MIDI and (
             isinstance(pitch, float)
             or isinstance(pitch, str)
             and pitch.isnumeric()
         ):
-            return cls._convert_midi_to_frequency(pitch)
+            return self._convert_midi_to_frequency(pitch)
         if isinstance(pitch, str):
             if pitch.isnumeric():
                 return float(pitch)
@@ -84,9 +89,10 @@ class Matrix:
 
     @staticmethod
     def _get_multiplier_label(multiplier: int, pitch: str) -> str:
-        return f"[bold cyan]{multiplier} * {pitch}[/bold cyan]"
+        return f"[bold]{multiplier} * {pitch}[/bold]"
 
-    def display(self, output_type: OutputType, tuning: Tuning):
+    def _display_table(self):
+        output_type = self.output_type
         title = f"Combination-Tone Matrix ({output_type.value.title()})"
         table = Table(title=title, show_header=False, box=SIMPLE)
         melody_header = [""] + [
@@ -96,7 +102,7 @@ class Matrix:
         table.add_row(*melody_header)
         for multiple in self._multiples:
             display_frequencies = [
-                frequency.get_display(output_type, tuning)
+                frequency.get_display(output_type, self.tuning, table=True)
                 for frequency in self.frequencies
                 if frequency.bass_multiplier == multiple
             ]
@@ -104,6 +110,23 @@ class Matrix:
             formatted_row = bass_label + display_frequencies
             table.add_row(*formatted_row)
         Console().print(table)
+
+    def _display_sorted(self):
+        console = Console()
+        for frequency in reversed(self.sorted_frequencies):
+            frequency_display = frequency.get_display(
+                self.output_type, self.tuning, table=False
+            )
+            if frequency._is_base_frequency or frequency._is_base_multiple:
+                console.print(frequency_display)
+            else:
+                print(frequency_display)
+
+    def display(self, sorted: bool):
+        if sorted:
+            self._display_sorted()
+        else:
+            self._display_table()
 
     def play(self):
         pattern = EventPattern(

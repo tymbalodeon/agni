@@ -52,6 +52,22 @@ class MatrixFrequency:
     def _is_base_frequency(self) -> bool:
         return self._is_bass_frequency or self._is_melody_frequency
 
+    @cached_property
+    def _is_bass_multiple(self) -> bool:
+        if self.bass_multiplier > 1 and not self.melody_multiplier:
+            return True
+        return False
+
+    @cached_property
+    def _is_melody_multiple(self) -> bool:
+        if self.melody_multiplier > 1 and not self.bass_multiplier:
+            return True
+        return False
+
+    @cached_property
+    def _is_base_multiple(self) -> bool:
+        return self._is_bass_multiple or self._is_melody_multiple
+
     def _get_lilypond_display_pitch(self, tuning: Tuning) -> str:
         if not self.frequency:
             return ""
@@ -85,7 +101,13 @@ class MatrixFrequency:
             decimals = None
         return f"{round(self.frequency, decimals):,}"
 
-    def get_display(self, output_type: OutputType, tuning: Tuning) -> str:
+    @staticmethod
+    def _bolden_and_color(display_pitch: str, color: str) -> str:
+        return f"[bold {color}]{display_pitch}[/bold {color}]"
+
+    def get_display(
+        self, output_type: OutputType, tuning: Tuning, table: bool
+    ) -> str:
         if not self.frequency:
             return ""
         display_pitch = ""
@@ -101,5 +123,11 @@ class MatrixFrequency:
             midi = self._get_midi_display_pitch(tuning)
             display_pitch = f"{hertz}\n{lilypond}\n{midi}"
         if self._is_base_frequency:
-            display_pitch = f"[bold yellow]{display_pitch}[/bold yellow]"
+            display_pitch = self._bolden_and_color(display_pitch, "orange1")
+        if table and self._is_base_multiple or self._is_melody_multiple:
+            display_pitch = self._bolden_and_color(display_pitch, "yellow")
+        elif self._is_bass_multiple:
+            display_pitch = self._bolden_and_color(
+                display_pitch, "dark_orange3"
+            )
         return display_pitch

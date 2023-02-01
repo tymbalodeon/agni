@@ -44,6 +44,11 @@ def matrix(
     tuning: Tuning = tuning,
     multiples: int = multiples,
     output_type: OutputType = output_type,
+    sorted: bool = Option(
+        False,
+        "--sorted",
+        help="Display frequencies as a list in ascending order.",
+    ),
     as_chord: bool = as_chord,
     notate: bool = notate,
     persist: bool = persist,
@@ -51,10 +56,10 @@ def matrix(
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from two pitches."""
-    matrix = Matrix(bass, melody, input_type, multiples)
+    matrix = Matrix(bass, melody, input_type, multiples, output_type, tuning)
     if notate:
         notate_matrix(matrix, as_ensemble, tuning, persist, as_chord)
-    matrix.display(output_type, tuning)
+    matrix.display(sorted)
     if play:
         matrix.play()
 
