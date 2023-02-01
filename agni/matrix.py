@@ -1,7 +1,5 @@
-from enum import Enum
 from functools import cached_property, lru_cache
 from time import sleep
-from typing import TypeAlias
 
 from abjad import NamedPitch
 from rich.box import SIMPLE
@@ -10,54 +8,55 @@ from rich.table import Table
 from supriya.patterns import EventPattern, SequencePattern
 
 from .helpers import remove_none_values
-from .matrix_frequency import MatrixFrequency, OutputType, Tuning
-
-Pitch: TypeAlias = NamedPitch | str | float
-
-
-class InputType(Enum):
-    HERTZ = "hertz"
-    MIDI = "midi"
+from .matrix_frequency import DisplayType, MatrixFrequency, Tuning
 
 
 class Matrix:
     def __init__(
         self,
-        bass: Pitch,
-        melody: Pitch,
-        input_type: InputType,
+        bass: str | NamedPitch,
+        melody: str | NamedPitch,
         multiples: int,
-        output_type: OutputType,
+        display_type: DisplayType,
         tuning: Tuning,
+        midi_input=False,
     ):
-        self.input_type = input_type
-        self.output_type = output_type
-        self.tuning = tuning
         self._multiples = range(multiples)
+        self._midi_input = midi_input
+        self._display_type = self._get_display_type(
+            bass, midi_input, display_type
+        )
+        self._tuning = tuning
         self.bass = self._get_frequency_from_input(bass)
         self.melody = self._get_frequency_from_input(melody)
 
     @staticmethod
+    def _get_display_type(
+        bass: str, midi_input: bool, display_type: DisplayType | None
+    ) -> DisplayType:
+        if display_type:
+            return display_type
+        if midi_input:
+            return DisplayType.MIDI
+        if bass.isnumeric():
+            return DisplayType.HERTZ
+        return DisplayType.LILYPOND
+
+    @staticmethod
     @lru_cache
-    def _convert_midi_to_frequency(midi_number: float | str) -> float:
+    def _convert_midi_to_hertz(midi_number: float | str) -> float:
         if isinstance(midi_number, str):
             midi_number = float(midi_number)
         return (2 ** ((midi_number - 69) / 12)) * 440
 
-    def _get_frequency_from_input(self, pitch: Pitch) -> float:
+    def _get_frequency_from_input(self, pitch: str | NamedPitch) -> float:
         if isinstance(pitch, NamedPitch):
             return pitch.hertz
-        if self.input_type == InputType.MIDI and (
-            isinstance(pitch, float)
-            or isinstance(pitch, str)
-            and pitch.isnumeric()
-        ):
-            return self._convert_midi_to_frequency(pitch)
-        if isinstance(pitch, str):
-            if pitch.isnumeric():
-                return float(pitch)
-            return NamedPitch(pitch).hertz
-        return pitch
+        if pitch.isnumeric():
+            if self._midi_input:
+                return self._convert_midi_to_hertz(pitch)
+            return float(pitch)
+        return NamedPitch(pitch).hertz
 
     @cached_property
     def frequencies(self) -> list[MatrixFrequency]:
@@ -92,8 +91,8 @@ class Matrix:
         return f"[bold cyan]{multiplier} * {pitch}[/bold cyan]"
 
     def _display_table(self):
-        output_type = self.output_type
-        title = f"Combination-Tone Matrix ({output_type.value.title()})"
+        display_type = self._display_type
+        title = f"Combination-Tone Matrix ({display_type.value.title()})"
         table = Table(title=title, show_header=False, box=SIMPLE)
         melody_header = [""] + [
             self._get_multiplier_label(multiplier, "melody")
@@ -102,7 +101,7 @@ class Matrix:
         table.add_row(*melody_header)
         for multiple in self._multiples:
             display_frequencies = [
-                frequency.get_display(output_type, self.tuning, table=True)
+                frequency.get_display(display_type, self._tuning, table=True)
                 for frequency in self.frequencies
                 if frequency.bass_multiplier == multiple
             ]
@@ -115,7 +114,7 @@ class Matrix:
         console = Console()
         for frequency in reversed(self.sorted_frequencies):
             frequency_display = frequency.get_display(
-                self.output_type, self.tuning, table=False
+                self._display_type, self._tuning, table=False
             )
             if frequency._is_base_frequency or frequency._is_base_multiple:
                 console.print(frequency_display)

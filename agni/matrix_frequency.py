@@ -5,7 +5,7 @@ from math import log
 from abjad import NamedPitch, NumberedPitch
 
 
-class OutputType(Enum):
+class DisplayType(Enum):
     HERTZ = "hertz"
     MIDI = "midi"
     LILYPOND = "lilypond"
@@ -109,18 +109,18 @@ class MatrixFrequency:
         return display_pitch
 
     def get_display(
-        self, output_type: OutputType, tuning: Tuning, table: bool
+        self, display_type: DisplayType, tuning: Tuning, table: bool
     ) -> str:
         if not self.frequency:
             return ""
         display_pitch = ""
-        if output_type == OutputType.LILYPOND:
+        if display_type == DisplayType.LILYPOND:
             display_pitch = self._get_lilypond_display_pitch(tuning)
-        elif output_type == OutputType.MIDI:
+        elif display_type == DisplayType.MIDI:
             display_pitch = self._get_midi_display_pitch(tuning)
-        elif output_type == OutputType.HERTZ:
+        elif display_type == DisplayType.HERTZ:
             display_pitch = self._get_hertz_display_pitch(tuning)
-        elif output_type == OutputType.ALL:
+        elif display_type == DisplayType.ALL:
             hertz = self._get_hertz_display_pitch(tuning)
             lilypond = self._get_lilypond_display_pitch(tuning)
             midi = self._get_midi_display_pitch(tuning)

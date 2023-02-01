@@ -1,6 +1,6 @@
 from collections.abc import Generator, Iterator
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cached_property, lru_cache
 from pathlib import Path
 from typing import cast
 
@@ -22,9 +22,10 @@ from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
 
+from agni.matrix_frequency import DisplayType, Tuning
+
 from .helpers import get_staff_by_name, remove_none_values
-from .matrix import InputType, Matrix
-from .matrix_frequency import OutputType, Tuning
+from .matrix import Matrix
 
 
 @dataclass
@@ -113,9 +114,21 @@ class Part:
 
 
 class Passage:
-    def __init__(self, input_file: Path, multiples: int):
+    def __init__(
+        self,
+        input_file: Path,
+        multiples: int,
+        display_type: DisplayType,
+        tuning: Tuning,
+        as_set: bool,
+        adjacent_duplicates: bool,
+    ):
         lilypond_input = input_file.read_text()
         self._multiples = multiples
+        self._display_type = display_type
+        self._tuning = tuning
+        self._as_set = as_set
+        self._adjacent_duplicates = adjacent_duplicates
         self.title = self._get_header_item(lilypond_input, "title")
         self.composer = self._get_header_item(lilypond_input, "composer")
         self.bass = self._get_staff_leaves(lilypond_input, "bass")
@@ -243,18 +256,16 @@ class Passage:
         old_pitch_names = cls._get_pitch_names(old_pitches[-1])
         return new_pitch_names == old_pitch_names
 
-    @classmethod
     def _should_add_pitches(
-        cls,
-        adjacent_duplicates: bool,
+        self,
         new_pitches: list[NamedPitch],
         old_pitches: list[list[NamedPitch]],
     ) -> bool:
         if not new_pitches:
             return False
-        if adjacent_duplicates:
+        if self._adjacent_duplicates:
             return True
-        return not cls._are_same_pitches(new_pitches, old_pitches)
+        return not self._are_same_pitches(new_pitches, old_pitches)
 
     @staticmethod
     def _get_ordered_unique_pitch_sets(
@@ -264,43 +275,30 @@ class Passage:
         pitch_sets = list(dict.fromkeys(pitch_sets))
         return [list(pitch_set) for pitch_set in pitch_sets]
 
-    def _get_simultaneous_pitches(
-        self, as_set=True, adjacent_duplicates=False
-    ) -> list[list[NamedPitch]]:
+    def _get_simultaneous_pitches(self) -> list[list[NamedPitch]]:
         parts = self.parts
         pitches = [self._get_current_pitches(parts)]
         while not self._is_end_of_passage(parts):
             new_pitches = self._get_next_pitches(parts)
-            if self._should_add_pitches(
-                adjacent_duplicates, new_pitches, pitches
-            ):
+            if self._should_add_pitches(new_pitches, pitches):
                 pitches.append(new_pitches)
-        if as_set:
+        if self._as_set:
             return self._get_ordered_unique_pitch_sets(pitches)
         return pitches
 
-    def get_matrices(
-        self, as_set: bool, adjacent_duplicates: bool
-    ) -> list[Matrix]:
-        simultaneous_pitches = self._get_simultaneous_pitches(
-            as_set=as_set,
-            adjacent_duplicates=adjacent_duplicates,
-        )
+    @cached_property
+    def matrices(self) -> list[Matrix]:
         matrices = []
-        for pitches in simultaneous_pitches:
+        for pitches in self._get_simultaneous_pitches():
             if not len(pitches) == 2:
                 continue
             bass, melody = pitches
-            matrix = Matrix(bass, melody, InputType.HERTZ, self._multiples)
+            matrix = Matrix(
+                bass, melody, self._multiples, self._display_type, self._tuning
+            )
             matrices.append(matrix)
         return matrices
 
-    def display(
-        self,
-        output_type: OutputType,
-        tuning: Tuning,
-        as_set: bool,
-        adjacent_duplicates: bool,
-    ):
-        for matrix in self.get_matrices(as_set, adjacent_duplicates):
-            matrix.display(output_type, tuning)
+    def display(self, sorted: bool):
+        for matrix in self.matrices:
+            matrix.display(sorted)

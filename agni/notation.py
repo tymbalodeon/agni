@@ -458,16 +458,13 @@ def notate_matrix(
 
 def notate_passage(
     passage: Passage,
-    as_set: bool,
-    adjacent_duplicates: bool,
     as_ensemble: bool,
     tuning: Tuning,
     persist: bool,
     as_chord: bool,
     full_score: bool,
 ):
-    matrices = passage.get_matrices(as_set, adjacent_duplicates)
-    notation = Notation(*matrices)
+    notation = Notation(*passage.matrices)
     notation.make_score(
         as_ensemble,
         tuning,
