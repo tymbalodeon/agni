@@ -1,5 +1,3 @@
-from collections.abc import Generator, Iterator
-from dataclasses import dataclass
 from pathlib import Path
 
 from abjad import (
@@ -13,7 +11,6 @@ from abjad import (
     NamedPitch,
     Note,
     NumberedPitch,
-    Rest,
     Score,
     ShortInstrumentName,
     Staff,
@@ -48,24 +45,24 @@ class Notation:
     def _get_lilypond_preamble(
         self, full_score=False, passage: Passage | None = None
     ) -> str:
-        if not passage:
+        if passage:
+            title = passage.title
+            composer = passage.composer
+        else:
             if self._number_of_matrices > 1:
                 matrix_display = "Matrices"
             else:
                 matrix_display = "Matrix"
             title = f"Combination-Tone {matrix_display}"
             composer = ""
+        if full_score:
+            stencils = ""
         else:
-            title = passage.title
-            composer = passage.composer
-        if not full_score:
             stencils = """
                 \\override TimeSignature.stencil = ##f
                 \\override BarLine.stencil = ##f
                 \\override Stem.stencil = ##f
             """
-        else:
-            stencils = ""
         return f"""
                     \\header {{
                         tagline = ##f
@@ -431,7 +428,7 @@ class Notation:
         as_ensemble: bool,
         tuning: Tuning,
         persist: bool,
-        as_chord=False,
+        as_chord: bool,
         full_score=False,
         passage: Passage | None = None,
     ):
@@ -448,86 +445,6 @@ class Notation:
             )
 
 
-@dataclass
-class SoundingLeaves:
-    named_pitch: NamedPitch | None
-    duration: Duration
-    time_signature: TimeSignature
-
-    @staticmethod
-    def _get_named_pitch(leaf: Leaf) -> NamedPitch | None:
-        if isinstance(leaf, Note):
-            return leaf.written_pitch
-        else:
-            return None
-
-    @staticmethod
-    def _get_sounding_duration(leaf: Leaf) -> Duration | None:
-        logical_tie = get_logical_ties(leaf)
-        if not logical_tie:
-            return None
-        return get_duration(logical_tie)
-
-    @classmethod
-    def from_leaves_in_measure(cls, metered_leaf: MeteredLeaf):
-        leaf = metered_leaf.leaf
-        named_pitch = cls._get_named_pitch(leaf)
-        duration = cls._get_sounding_duration(metered_leaf.leaf)
-        if not duration:
-            return None
-        time_signature = metered_leaf.time_signature
-        return cls(named_pitch, duration, time_signature)
-
-
-class Part:
-    def __init__(self, name: str, leaves: list[MeteredLeaf]):
-        self.name = name
-        self.leaves = self._get_leaves(leaves)
-        self.current_leaf = self._get_next_leaf(self.leaves)
-
-    @staticmethod
-    def _get_leaves(
-        leaves: list[MeteredLeaf],
-    ) -> Generator[SoundingLeaves, None, None]:
-        sounding_leaves = (
-            SoundingLeaves.from_leaves_in_measure(leaf) for leaf in leaves
-        )
-        return (leaf for leaf in sounding_leaves if leaf)
-
-    def _get_next_leaf(
-        self, leaves: Iterator[SoundingLeaves] | None = None
-    ) -> SoundingLeaves | None:
-        if not leaves:
-            leaves = self.leaves
-        self.current_leaf = next(leaves, None)
-        return self.current_leaf
-
-    def _get_current_duration(self) -> Duration | None:
-        if not self.current_leaf:
-            return None
-        return self.current_leaf.duration
-
-    def _shorten_current_leaf(self, duration: float):
-        if not self.current_leaf:
-            return
-        current_duration = self._get_current_duration()
-        if not current_duration:
-            return
-        shorter_duration = current_duration - duration
-        self.current_leaf.duration = shorter_duration
-
-    def _get_current_pitch(self) -> NamedPitch | None:
-        if not self.current_leaf or isinstance(self.current_leaf, Rest):
-            return None
-        return self.current_leaf.named_pitch
-
-    def _matches_duration(self, duration: float) -> bool:
-        if not self.current_leaf:
-            return False
-        current_duration = self._get_current_duration()
-        return current_duration == duration
-
-
 def notate_matrix(
     matrix: Matrix,
     as_ensemble: bool,
@@ -536,12 +453,11 @@ def notate_matrix(
     as_chord: bool,
 ):
     notation = Notation(matrix)
-    notation.make_score(as_ensemble, tuning, persist, as_chord=as_chord)
+    notation.make_score(as_ensemble, tuning, persist, as_chord)
 
 
 def notate_passage(
     passage: Passage,
-    multiples: int,
     as_set: bool,
     adjacent_duplicates: bool,
     as_ensemble: bool,
@@ -550,14 +466,13 @@ def notate_passage(
     as_chord: bool,
     full_score: bool,
 ):
-    notation = Notation(
-        *passage.get_matrices(multiples, as_set, adjacent_duplicates)
-    )
+    matrices = passage.get_matrices(as_set, adjacent_duplicates)
+    notation = Notation(*matrices)
     notation.make_score(
         as_ensemble,
         tuning,
         persist,
-        as_chord=as_chord,
+        as_chord,
         full_score=full_score,
         passage=passage,
     )

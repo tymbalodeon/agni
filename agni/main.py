@@ -51,7 +51,7 @@ def matrix(
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from two pitches."""
-    matrix = Matrix(bass, melody, input_type=input_type, multiples=multiples)
+    matrix = Matrix(bass, melody, input_type, multiples)
     if notate:
         notate_matrix(matrix, as_ensemble, tuning, persist, as_chord)
     matrix.display(output_type, tuning)
@@ -89,11 +89,10 @@ def passage(
         as_ensemble = True
         as_set = False
         adjacent_duplicates = True
-    passage = Passage(input_file)
+    passage = Passage(input_file, multiples)
     if notate:
         notate_passage(
             passage,
-            multiples,
             as_set,
             adjacent_duplicates,
             as_ensemble,
@@ -102,6 +101,4 @@ def passage(
             as_chord,
             full_score,
         )
-    passage.display(
-        output_type, tuning, multiples, as_set, adjacent_duplicates
-    )
+    passage.display(output_type, tuning, as_set, adjacent_duplicates)

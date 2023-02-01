@@ -113,8 +113,9 @@ class Part:
 
 
 class Passage:
-    def __init__(self, input_file: Path):
+    def __init__(self, input_file: Path, multiples: int):
         lilypond_input = input_file.read_text()
+        self._multiples = multiples
         self.title = self._get_header_item(lilypond_input, "title")
         self.composer = self._get_header_item(lilypond_input, "composer")
         self.bass = self._get_staff_leaves(lilypond_input, "bass")
@@ -279,7 +280,7 @@ class Passage:
         return pitches
 
     def get_matrices(
-        self, multiples: int, as_set: bool, adjacent_duplicates: bool
+        self, as_set: bool, adjacent_duplicates: bool
     ) -> list[Matrix]:
         simultaneous_pitches = self._get_simultaneous_pitches(
             as_set=as_set,
@@ -290,9 +291,7 @@ class Passage:
             if not len(pitches) == 2:
                 continue
             bass, melody = pitches
-            matrix = Matrix(
-                bass, melody, input_type=InputType.HERTZ, multiples=multiples
-            )
+            matrix = Matrix(bass, melody, InputType.HERTZ, self._multiples)
             matrices.append(matrix)
         return matrices
 
@@ -300,11 +299,8 @@ class Passage:
         self,
         output_type: OutputType,
         tuning: Tuning,
-        multiples: int,
         as_set: bool,
         adjacent_duplicates: bool,
     ):
-        for matrix in self.get_matrices(
-            multiples, as_set, adjacent_duplicates
-        ):
+        for matrix in self.get_matrices(as_set, adjacent_duplicates):
             matrix.display(output_type, tuning)
