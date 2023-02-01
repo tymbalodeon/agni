@@ -31,13 +31,17 @@ class Matrix:
 
     @staticmethod
     def _get_display_type(
-        bass: str, midi_input: bool, display_type: DisplayType | None
+        bass: str | NamedPitch,
+        midi_input: bool,
+        display_type: DisplayType | None,
     ) -> DisplayType:
         if display_type:
             return display_type
-        if midi_input:
-            return DisplayType.MIDI
+        if isinstance(bass, NamedPitch):
+            return DisplayType.LILYPOND
         if bass.isnumeric():
+            if midi_input:
+                return DisplayType.MIDI
             return DisplayType.HERTZ
         return DisplayType.LILYPOND
 
