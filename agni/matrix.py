@@ -89,7 +89,7 @@ class Matrix:
 
     @staticmethod
     def _get_multiplier_label(multiplier: int, pitch: str) -> str:
-        return f"[bold]{multiplier} * {pitch}[/bold]"
+        return f"[bold cyan]{multiplier} * {pitch}[/bold cyan]"
 
     def _display_table(self):
         output_type = self.output_type
