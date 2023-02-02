@@ -1,6 +1,6 @@
 from collections.abc import Generator, Iterator
 from dataclasses import dataclass
-from functools import cached_property, lru_cache
+from functools import lru_cache
 from pathlib import Path
 from typing import cast
 
@@ -287,7 +287,8 @@ class Passage:
         pitch_sets = list(dict.fromkeys(pitch_sets))
         return [list(pitch_set) for pitch_set in pitch_sets]
 
-    def _get_simultaneous_pitches(self) -> list[list[NamedPitch]]:
+    @property
+    def simultaneous_pitches(self) -> list[list[NamedPitch]]:
         parts = self._parts
         pitches = [self._get_current_pitches(parts)]
         while not self._is_end_of_passage(parts):
@@ -298,10 +299,10 @@ class Passage:
             return self._get_ordered_unique_pitch_sets(pitches)
         return pitches
 
-    @cached_property
+    @property
     def matrices(self) -> list[Matrix]:
         matrices = []
-        for pitches in self._get_simultaneous_pitches():
+        for pitches in self.simultaneous_pitches:
             if not len(pitches) == 2:
                 continue
             bass, melody = pitches
