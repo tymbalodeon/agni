@@ -128,10 +128,11 @@ class Passage:
         self._display_format = display_format
         self._as_set = as_set
         self._adjacent_duplicates = adjacent_duplicates
-        self._title = self._get_title(lilypond_input)
-        self._composer = self._get_composer(lilypond_input)
+        self.title = self._get_title(lilypond_input)
+        self.composer = self._get_composer(lilypond_input)
         self._bass_leaves = self._get_bass_leaves(lilypond_input)
-        self._melody_leaves = self._get_melody_leaves(lilypond_input)
+        self.melody_leaves = self._get_melody_leaves(lilypond_input)
+        self._parts = self._get_parts()
 
     @staticmethod
     def _get_header_item(lilypond_input: str, item: str) -> str:
@@ -200,61 +201,59 @@ class Passage:
     def _get_melody_leaves(cls, lilypond_input: str):
         return cls._get_staff_leaves(lilypond_input, "melody")
 
-    @property
-    def _parts(self) -> list[Part]:
-        bass = self._bass_leaves
-        melody = self._melody_leaves
-        parts = bass, melody
+    def _get_parts(self) -> list[Part]:
+        bass_leaves = self._bass_leaves
+        melody_leaves = self.melody_leaves
+        parts = bass_leaves, melody_leaves
         return [Part(part) for part in parts]
 
-    @staticmethod
-    def _get_current_pitches(parts: list[Part]) -> list[NamedPitch]:
-        current_pitches = [part._get_current_pitch() for part in parts]
+    def _get_current_pitches(self) -> list[NamedPitch]:
+        current_pitches = [part._get_current_pitch() for part in self._parts]
         return remove_none_values(current_pitches)
 
-    @staticmethod
-    def _is_end_of_passage(parts: list[Part]) -> bool:
-        current_notes = [part.current_leaf for part in parts]
+    def _is_end_of_passage(self) -> bool:
+        current_notes = [part.current_leaf for part in self._parts]
         return not any(current_notes)
 
-    @staticmethod
-    def _get_shortest_duration(parts: list[Part]) -> float:
-        current_durations = [part._get_current_duration() for part in parts]
+    def _get_shortest_duration(self) -> float:
+        current_durations = [
+            part._get_current_duration() for part in self._parts
+        ]
         durations = remove_none_values(current_durations)
         return min(durations)
 
-    @staticmethod
     def _get_parts_matching_shortest_duration(
-        parts: list[Part], shortest_duration
-    ) -> list[Part]:
-        return [
-            part for part in parts if part._matches_duration(shortest_duration)
-        ]
-
-    @staticmethod
-    def _get_parts_with_longer_durations(
-        parts: list[Part], shortest_duration
+        self, shortest_duration: float
     ) -> list[Part]:
         return [
             part
-            for part in parts
+            for part in self._parts
+            if part._matches_duration(shortest_duration)
+        ]
+
+    def _get_parts_with_longer_durations(
+        self, shortest_duration: float
+    ) -> list[Part]:
+        return [
+            part
+            for part in self._parts
             if not part._matches_duration(shortest_duration)
         ]
 
-    @classmethod
-    def _get_next_pitches(cls, parts: list[Part]) -> list[NamedPitch]:
-        shortest_duration = cls._get_shortest_duration(parts)
+    def _get_next_pitches(self) -> list[NamedPitch]:
+        self._parts
+        shortest_duration = self._get_shortest_duration()
         parts_matching_shortest_duration = (
-            cls._get_parts_matching_shortest_duration(parts, shortest_duration)
+            self._get_parts_matching_shortest_duration(shortest_duration)
         )
-        parts_with_longer_durations = cls._get_parts_with_longer_durations(
-            parts, shortest_duration
+        parts_with_longer_durations = self._get_parts_with_longer_durations(
+            shortest_duration
         )
         for part in parts_matching_shortest_duration:
             part._get_next_leaf()
         for part in parts_with_longer_durations:
             part._shorten_current_leaf(shortest_duration)
-        return cls._get_current_pitches(parts)
+        return self._get_current_pitches()
 
     @staticmethod
     def _get_pitch_names(pitches: list[NamedPitch]) -> list[str]:
@@ -288,11 +287,10 @@ class Passage:
         return [list(pitch_set) for pitch_set in pitch_sets]
 
     @property
-    def simultaneous_pitches(self) -> list[list[NamedPitch]]:
-        parts = self._parts
-        pitches = [self._get_current_pitches(parts)]
-        while not self._is_end_of_passage(parts):
-            new_pitches = self._get_next_pitches(parts)
+    def _simultaneous_pitches(self) -> list[list[NamedPitch]]:
+        pitches = [self._get_current_pitches()]
+        while not self._is_end_of_passage():
+            new_pitches = self._get_next_pitches()
             if self._should_add_pitches(new_pitches, pitches):
                 pitches.append(new_pitches)
         if self._as_set:
@@ -302,7 +300,7 @@ class Passage:
     @property
     def matrices(self) -> list[Matrix]:
         matrices = []
-        for pitches in self.simultaneous_pitches:
+        for pitches in self._simultaneous_pitches:
             if not len(pitches) == 2:
                 continue
             bass, melody = pitches
