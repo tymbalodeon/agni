@@ -4,7 +4,7 @@ from math import log
 
 from abjad import NamedPitch, NumberedPitch
 
-from agni.helpers import stylize
+from .helpers import stylize
 
 
 class DisplayType(Enum):
@@ -30,7 +30,7 @@ class MatrixFrequency:
         bass_frequency = bass * bass_multiplier
         melody_frequency = melody * melody_multiplier
         self.bass_multiplier = bass_multiplier
-        self.melody_multiplier = melody_multiplier
+        self._melody_multiplier = melody_multiplier
         frequency = bass_frequency + melody_frequency
         self.frequency = frequency or None
 
@@ -40,13 +40,13 @@ class MatrixFrequency:
 
     @cached_property
     def _is_bass_frequency(self) -> bool:
-        if self.bass_multiplier == 1 and self.melody_multiplier == 0:
+        if self.bass_multiplier == 1 and self._melody_multiplier == 0:
             return True
         return False
 
     @cached_property
     def _is_melody_frequency(self) -> bool:
-        if self.bass_multiplier == 0 and self.melody_multiplier == 1:
+        if self.bass_multiplier == 0 and self._melody_multiplier == 1:
             return True
         return False
 
@@ -56,13 +56,13 @@ class MatrixFrequency:
 
     @cached_property
     def _is_bass_multiple(self) -> bool:
-        if self.bass_multiplier > 1 and self.melody_multiplier == 0:
+        if self.bass_multiplier > 1 and self._melody_multiplier == 0:
             return True
         return False
 
     @cached_property
     def _is_melody_multiple(self) -> bool:
-        if self.melody_multiplier > 1 and self.bass_multiplier == 0:
+        if self._melody_multiplier > 1 and self.bass_multiplier == 0:
             return True
         return False
 
@@ -121,7 +121,7 @@ class MatrixFrequency:
 
     def _get_display_label(self) -> str:
         bass_multiplier = f"({self.bass_multiplier} x bass)"
-        melody_multiplier = f"({self.melody_multiplier} x melody)"
+        melody_multiplier = f"({self._melody_multiplier} x melody)"
         if self._is_bass_frequency:
             bass_multiplier = self._stylize_base_frequency(bass_multiplier)
             melody_multiplier = self._stylize_combination(melody_multiplier)

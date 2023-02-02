@@ -7,8 +7,7 @@ from rich.console import Console
 from rich.table import Table
 from supriya.patterns import EventPattern, SequencePattern
 
-from agni.helpers import stylize
-
+from .helpers import stylize
 from .matrix_frequency import DisplayType, MatrixFrequency, Tuning
 
 
@@ -28,8 +27,8 @@ class Matrix:
             bass, midi_input, display_type
         )
         self._tuning = tuning
-        self.bass = self._get_frequency_from_input(bass)
-        self.melody = self._get_frequency_from_input(melody)
+        self._bass = self._get_frequency_from_input(bass)
+        self._melody = self._get_frequency_from_input(melody)
 
     @staticmethod
     def _get_display_type(
@@ -70,7 +69,10 @@ class Matrix:
         for bass_multiplier in multiples:
             for melody_multiplier in multiples:
                 matrix_frequency = MatrixFrequency(
-                    self.bass, self.melody, bass_multiplier, melody_multiplier
+                    self._bass,
+                    self._melody,
+                    bass_multiplier,
+                    melody_multiplier,
                 )
                 frequencies.append(matrix_frequency)
         return frequencies

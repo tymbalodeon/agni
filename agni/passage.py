@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import cast
 
 from abjad import (
-    Block,
     Duration,
     Leaf,
     LilyPondFile,
@@ -22,10 +21,9 @@ from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
 
-from agni.matrix_frequency import DisplayType, Tuning
-
 from .helpers import get_staff_by_name, remove_none_values
 from .matrix import Matrix
+from .matrix_frequency import DisplayType, Tuning
 
 
 @dataclass
@@ -65,10 +63,9 @@ class SoundingLeaf:
 
 
 class Part:
-    def __init__(self, name: str, leaves: list[MeteredLeaf]):
-        self.name = name
-        self.leaves = self._get_leaves(leaves)
-        self.current_leaf = self._get_next_leaf(self.leaves)
+    def __init__(self, leaves: list[MeteredLeaf]):
+        self._leaves = self._get_leaves(leaves)
+        self.current_leaf = self._get_next_leaf(self._leaves)
 
     @staticmethod
     def _get_leaves(
@@ -83,7 +80,7 @@ class Part:
         self, leaves: Iterator[SoundingLeaf] | None = None
     ) -> SoundingLeaf | None:
         if not leaves:
-            leaves = self.leaves
+            leaves = self._leaves
         self.current_leaf = next(leaves, None)
         return self.current_leaf
 
@@ -129,10 +126,10 @@ class Passage:
         self._tuning = tuning
         self._as_set = as_set
         self._adjacent_duplicates = adjacent_duplicates
-        self.title = self._get_header_item(lilypond_input, "title")
-        self.composer = self._get_header_item(lilypond_input, "composer")
-        self.bass = self._get_staff_leaves(lilypond_input, "bass")
-        self.melody = self._get_staff_leaves(lilypond_input, "melody")
+        self._title = self._get_header_item(lilypond_input, "title")
+        self._composer = self._get_header_item(lilypond_input, "composer")
+        self._bass = self._get_staff_leaves(lilypond_input, "bass")
+        self._melody = self._get_staff_leaves(lilypond_input, "melody")
 
     @staticmethod
     def _get_header_item(lilypond_input: str, item: str) -> str:
@@ -142,10 +139,12 @@ class Passage:
             return ""
         return matching_line.split('"')[1]
 
-    @classmethod
+    @staticmethod
     @lru_cache
-    def _get_staves(cls, lilypond_input: str) -> list[Staff]:
-        score = cls._get_score_block(lilypond_input)
+    def _get_staves(lilypond_input: str) -> list[Staff]:
+        lilypond_file = cast(LilyPondFile, parse(lilypond_input))
+        items = lilypond_file.items
+        score = next(block for block in items if block.name == "score")
         return cast(list[Staff], get_components(score.items, prototype=Staff))
 
     @staticmethod
@@ -161,7 +160,7 @@ class Passage:
         )
 
     @classmethod
-    def _get_notes_in_measure(cls, notes: list[Leaf]) -> list[MeteredLeaf]:
+    def _get_metered_leaves(cls, notes: list[Leaf]) -> list[MeteredLeaf]:
         notes_in_measure = []
         current_time_signature = TimeSignature((4, 4))
         for note in notes:
@@ -171,29 +170,24 @@ class Passage:
             notes_in_measure.append(MeteredLeaf(note, current_time_signature))
         return notes_in_measure
 
+    @classmethod
     def _get_staff_leaves(
-        self, lilypond_input: str, part: str
+        cls, lilypond_input: str, name: str
     ) -> list[MeteredLeaf]:
-        staves = self._get_staves(lilypond_input)
-        staff = get_staff_by_name(staves, part)
+        staves = cls._get_staves(lilypond_input)
+        staff = get_staff_by_name(staves, name)
         if not staff:
             return []
         components = staff.components
         leaves = get_leaves(components)
-        return self._get_notes_in_measure(leaves)
-
-    @staticmethod
-    def _get_score_block(lilypond_input: str) -> Block:
-        lilypond_file = cast(LilyPondFile, parse(lilypond_input))
-        items = lilypond_file.items
-        return next(block for block in items if block.name == "score")
+        return cls._get_metered_leaves(leaves)
 
     @property
-    def parts(self) -> list[Part]:
-        bass = self.bass
-        melody = self.melody
+    def _parts(self) -> list[Part]:
+        bass = self._bass
+        melody = self._melody
         parts = bass, melody
-        return [Part(str(index), part) for index, part in enumerate(parts)]
+        return [Part(part) for part in parts]
 
     @staticmethod
     def _get_current_pitches(parts: list[Part]) -> list[NamedPitch]:
@@ -276,7 +270,7 @@ class Passage:
         return [list(pitch_set) for pitch_set in pitch_sets]
 
     def _get_simultaneous_pitches(self) -> list[list[NamedPitch]]:
-        parts = self.parts
+        parts = self._parts
         pitches = [self._get_current_pitches(parts)]
         while not self._is_end_of_passage(parts):
             new_pitches = self._get_next_pitches(parts)

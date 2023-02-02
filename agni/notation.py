@@ -46,8 +46,8 @@ class Notation:
         self, full_score=False, passage: Passage | None = None
     ) -> str:
         if passage:
-            title = passage.title
-            composer = passage.composer
+            title = passage._title
+            composer = passage._composer
         else:
             if self._number_of_matrices > 1:
                 matrix_display = "Matrices"
@@ -105,13 +105,13 @@ class Notation:
         pairs = []
         matrix_iterator = iter(self.matrices)
         current_matrix = None
-        for note_in_measure in melody_passage:
-            note = note_in_measure.leaf
+        for metered_leaf in melody_passage:
+            note = metered_leaf.leaf
             if not current_matrix or get_logical_ties(note):
                 current_matrix = next(matrix_iterator, None)
                 if not current_matrix:
                     break
-            pair = (current_matrix, note_in_measure)
+            pair = (current_matrix, metered_leaf)
             pairs.append(pair)
         return pairs
 
@@ -126,11 +126,11 @@ class Notation:
 
     @staticmethod
     def _get_melody_note_duration(
-        note_in_measure: MeteredLeaf | None,
+        metered_leaf: MeteredLeaf | None,
     ) -> Duration:
-        if not note_in_measure:
+        if not metered_leaf:
             return Duration(1, 4)
-        return note_in_measure.leaf.written_duration
+        return metered_leaf.leaf.written_duration
 
     @staticmethod
     def _get_tie(note: Leaf | None) -> Tie | None:
@@ -140,11 +140,11 @@ class Notation:
 
     @classmethod
     def _get_melody_note_tie(
-        cls, note_in_measure: MeteredLeaf | None
+        cls, metered_leaf: MeteredLeaf | None
     ) -> Tie | None:
-        if not note_in_measure:
+        if not metered_leaf:
             return None
-        return cls._get_tie(note_in_measure.leaf)
+        return cls._get_tie(metered_leaf.leaf)
 
     @staticmethod
     def _get_note(
@@ -278,11 +278,11 @@ class Notation:
 
     @classmethod
     def _get_melody_note_tuplet(
-        cls, note_in_measure: MeteredLeaf | None
+        cls, metered_leaf: MeteredLeaf | None
     ) -> Tuplet | None:
-        if not note_in_measure:
+        if not metered_leaf:
             return None
-        return cls._get_tuplet(note_in_measure.leaf)
+        return cls._get_tuplet(metered_leaf.leaf)
 
     @staticmethod
     def _is_incomplete_tuplet(component: Component) -> bool:
@@ -353,14 +353,14 @@ class Notation:
         description = "Generating matrices..."
         if passage:
             matrix_melody_note_pairs = self._pair_matrices_to_melody_notes(
-                passage.melody
+                passage._melody
             )
             for index, (matrix, melody_note) in track(
                 enumerate(matrix_melody_note_pairs),
                 description=description,
                 total=self._number_of_matrices,
             ):
-                previous_note = self._get_previous_note(passage.melody, index)
+                previous_note = self._get_previous_note(passage._melody, index)
                 self._add_matrix_to_staff_group(
                     matrix,
                     staff_group,
