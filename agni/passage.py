@@ -22,8 +22,8 @@ from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
 
 from .helpers import get_staff_by_name, remove_none_values
-from .matrix import Matrix
-from .matrix_frequency import DisplayType, Tuning
+from .matrix import DisplayFormat, Matrix
+from .matrix_frequency import PitchType, Tuning
 
 
 @dataclass
@@ -115,15 +115,17 @@ class Passage:
         self,
         input_file: Path,
         multiples: int,
-        display_type: DisplayType,
+        pitch_type: PitchType,
         tuning: Tuning,
+        display_format: DisplayFormat,
         as_set: bool,
         adjacent_duplicates: bool,
     ):
         lilypond_input = input_file.read_text()
         self._multiples = multiples
-        self._display_type = display_type
+        self._pitch_type = pitch_type
         self._tuning = tuning
+        self._display_format = display_format
         self._as_set = as_set
         self._adjacent_duplicates = adjacent_duplicates
         self._title = self._get_title(lilypond_input)
@@ -304,11 +306,16 @@ class Passage:
                 continue
             bass, melody = pitches
             matrix = Matrix(
-                bass, melody, self._multiples, self._display_type, self._tuning
+                bass,
+                melody,
+                self._multiples,
+                self._pitch_type,
+                self._tuning,
+                self._display_format,
             )
             matrices.append(matrix)
         return matrices
 
-    def display(self, sorted: bool):
+    def display(self):
         for matrix in self.matrices:
-            matrix.display(sorted)
+            matrix.display()

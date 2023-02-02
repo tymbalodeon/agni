@@ -4,7 +4,7 @@ from rich.markup import escape
 from typer import Argument, Option, Typer
 
 from .matrix import Matrix
-from .matrix_frequency import DisplayType, Tuning
+from .matrix_frequency import DisplayFormat, PitchType, Tuning
 from .notation import notate_matrix, notate_passage
 from .passage import Passage
 
@@ -21,13 +21,18 @@ tuning = Option(
     Tuning.MICROTONAL.value, "--tuning", help="Set the tuning to quantize to."
 )
 multiples = Option(4, help="Number of multiples to calculate.")
-sorted = Option(
+list = Option(
     False,
-    "--sorted",
+    "--list",
     help=(
-        "Display frequencies as a vertical list with low to high frequencies"
-        " as bottom to top."
+        "Display frequencies as a list with low to high frequencies"
+        " as left to right."
     ),
+)
+display_format = Option(
+    DisplayFormat.TABLE.value,
+    "--display",
+    help="Set the matrix display format.",
 )
 as_chord = Option(False, "--as-chord", help="Output matrix as a chord.")
 as_ensemble = Option(
@@ -42,7 +47,8 @@ save = Option(
         " score."
     ),
 )
-display_type_help = (
+pitch_type_option_name = "--pitch-type"
+pitch_type_help = (
     "Set the display type for pitches. (If none is provided, the same"
     " type as the input pitches is used.)"
 )
@@ -53,8 +59,8 @@ def matrix(
     bass: str = Argument(..., help=pitch_help),
     melody: str = Argument(..., help=pitch_help),
     multiples: int = multiples,
-    display_type: DisplayType = Option(
-        None, "--display-type", help=display_type_help
+    pitch_type: PitchType = Option(
+        None, pitch_type_option_name, help=pitch_type_help
     ),
     tuning: Tuning = tuning,
     midi_input: bool = Option(
@@ -62,7 +68,7 @@ def matrix(
         "--midi-input",
         help="Set the input type (applies to numeric input only).",
     ),
-    sorted: bool = sorted,
+    display_format: DisplayFormat = display_format,
     as_chord: bool = as_chord,
     notate: bool = notate,
     save: bool = save,
@@ -71,11 +77,17 @@ def matrix(
 ):
     """Create combination-tone matrix from two pitches."""
     matrix = Matrix(
-        bass, melody, multiples, display_type, tuning, midi_input=midi_input
+        bass,
+        melody,
+        multiples,
+        pitch_type,
+        tuning,
+        display_format,
+        midi_input=midi_input,
     )
     if notate:
         notate_matrix(matrix, as_ensemble, tuning, save, as_chord)
-    matrix.display(sorted)
+    matrix.display()
     if play:
         matrix.play()
 
@@ -86,11 +98,13 @@ def passage(
         Path("examples/lonely-child-notes.ily"), help="LilyPond input file."
     ),
     multiples: int = multiples,
-    display_type: DisplayType = Option(
-        DisplayType.HERTZ.value, "--display-type", help=display_type_help
+    pitch_type: PitchType = Option(
+        PitchType.HERTZ.value,
+        pitch_type_option_name,
+        help=pitch_type_help,
     ),
     tuning: Tuning = tuning,
-    sorted: bool = sorted,
+    display_format: DisplayFormat = display_format,
     as_chord: bool = as_chord,
     notate: bool = notate,
     save: bool = save,
@@ -117,8 +131,9 @@ def passage(
     passage = Passage(
         input_file,
         multiples,
-        display_type,
+        pitch_type,
         tuning,
+        display_format,
         as_set,
         adjacent_duplicates,
     )
@@ -131,4 +146,4 @@ def passage(
             as_chord,
             full_score,
         )
-    passage.display(sorted)
+    passage.display()

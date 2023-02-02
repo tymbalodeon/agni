@@ -7,16 +7,22 @@ from abjad import NamedPitch, NumberedPitch
 from .helpers import stylize
 
 
-class DisplayType(Enum):
+class PitchType(Enum):
+    ALL = "all"
     HERTZ = "hertz"
     MIDI = "midi"
     LILYPOND = "lilypond"
-    ALL = "all"
 
 
 class Tuning(Enum):
-    MICROTONAL = "microtonal"
     EQUAL_TEMPERED = "equal-tempered"
+    MICROTONAL = "microtonal"
+
+
+class DisplayFormat(Enum):
+    LIST = "list"
+    STACK = "stack"
+    TABLE = "table"
 
 
 class MatrixFrequency:
@@ -140,29 +146,36 @@ class MatrixFrequency:
         return f"{bass_multiplier} + {melody_multiplier} = "
 
     def get_display(
-        self, display_type: DisplayType, tuning: Tuning, table: bool
+        self,
+        pitch_type: PitchType,
+        tuning: Tuning,
+        display_format: DisplayFormat,
     ) -> str:
         if not self.frequency:
             return ""
         display_pitch = ""
-        if display_type == DisplayType.LILYPOND:
+        if pitch_type == PitchType.LILYPOND:
             display_pitch = self._get_lilypond_display_pitch(tuning)
-        elif display_type == DisplayType.MIDI:
+        elif pitch_type == PitchType.MIDI:
             display_pitch = self._get_midi_display_pitch(tuning)
-        elif display_type == DisplayType.HERTZ:
+        elif pitch_type == PitchType.HERTZ:
             display_pitch = self._get_hertz_display_pitch(tuning)
-        elif display_type == DisplayType.ALL:
+        elif pitch_type == PitchType.ALL:
             hertz = self._get_hertz_display_pitch(tuning)
             lilypond = self._get_lilypond_display_pitch(tuning)
             midi = self._get_midi_display_pitch(tuning)
             display_pitch = f"{hertz}\n{lilypond}\n{midi}"
         if self.is_base_frequency:
             display_pitch = self._stylize_base_frequency(display_pitch)
-        if table and self.is_base_multiple or self._is_melody_multiple:
+        if (
+            display_format == DisplayFormat.TABLE
+            and self.is_base_multiple
+            or self._is_melody_multiple
+        ):
             display_pitch = self._stylize_multiple(display_pitch)
         elif self._is_bass_multiple:
             display_pitch = self._stylize_bass_multiple(display_pitch)
-        if not table:
+        if display_format == DisplayFormat.STACK:
             display_label = self._get_display_label()
             display_pitch = f"{display_label}{display_pitch}"
         return display_pitch
