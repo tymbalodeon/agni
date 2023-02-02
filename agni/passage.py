@@ -130,9 +130,8 @@ class Passage:
         self._adjacent_duplicates = adjacent_duplicates
         self.title = self._get_title(lilypond_input)
         self.composer = self._get_composer(lilypond_input)
-        self._bass_leaves = self._get_bass_leaves(lilypond_input)
         self.melody_leaves = self._get_melody_leaves(lilypond_input)
-        self._parts = self._get_parts()
+        self._parts = self._get_parts(lilypond_input)
 
     @staticmethod
     def _get_header_item(lilypond_input: str, item: str) -> str:
@@ -201,8 +200,8 @@ class Passage:
     def _get_melody_leaves(cls, lilypond_input: str):
         return cls._get_staff_leaves(lilypond_input, "melody")
 
-    def _get_parts(self) -> list[Part]:
-        bass_leaves = self._bass_leaves
+    def _get_parts(self, lilypond_input: str) -> list[Part]:
+        bass_leaves = self._get_bass_leaves(lilypond_input)
         melody_leaves = self.melody_leaves
         parts = bass_leaves, melody_leaves
         return [Part(part) for part in parts]
