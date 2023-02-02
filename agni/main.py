@@ -105,6 +105,7 @@ def passage(
     ),
     full_score: bool = Option(
         False,
+        "--full-score",
         help="Output matrices as an ensemble score using the input rhythms.",
     ),
 ):
