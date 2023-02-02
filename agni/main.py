@@ -24,14 +24,28 @@ multiples = Option(4, help="Number of multiples to calculate.")
 sorted = Option(
     False,
     "--sorted",
-    help="Display frequencies as a list in ascending order.",
+    help=(
+        "Display frequencies as a vertical list with low to high frequencies"
+        " as bottom to top."
+    ),
 )
-as_chord = Option(False, "--as-chord", help="Output matrix as chord.")
+as_chord = Option(False, "--as-chord", help="Output matrix as a chord.")
 as_ensemble = Option(
     False, "--as-ensemble", help="Notate each note on its own staff."
 )
-notate = Option(False, "--notate", help="Notated matrix.")
-persist = Option(False, "--persist", help="Persist the notated score.")
+notate = Option(False, "--notate", help="Notate matrix in a pdf score.")
+save = Option(
+    False,
+    "--save",
+    help=(
+        "Save the notated score as a named file instead of an Abjad temporary"
+        " score."
+    ),
+)
+display_type_help = (
+    "Set the display type for pitches. (If none is provided, the same"
+    " type as the input pitches is used.)"
+)
 
 
 @agni.command()
@@ -40,18 +54,18 @@ def matrix(
     melody: str = Argument(..., help=pitch_help),
     multiples: int = multiples,
     display_type: DisplayType = Option(
-        None, "--display-type", help="Set the display type for pitches."
+        None, "--display-type", help=display_type_help
     ),
     tuning: Tuning = tuning,
     midi_input: bool = Option(
         False,
         "--midi-input",
-        help="Set the input type for numeric input.",
+        help="Set the input type (applies to numeric input only).",
     ),
     sorted: bool = sorted,
     as_chord: bool = as_chord,
     notate: bool = notate,
-    persist: bool = persist,
+    save: bool = save,
     as_ensemble: bool = as_ensemble,
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
@@ -60,7 +74,7 @@ def matrix(
         bass, melody, multiples, display_type, tuning, midi_input=midi_input
     )
     if notate:
-        notate_matrix(matrix, as_ensemble, tuning, persist, as_chord)
+        notate_matrix(matrix, as_ensemble, tuning, save, as_chord)
     matrix.display(sorted)
     if play:
         matrix.play()
@@ -73,15 +87,13 @@ def passage(
     ),
     multiples: int = multiples,
     display_type: DisplayType = Option(
-        DisplayType.HERTZ.value,
-        "--display-type",
-        help="Set the display type for pitches.",
+        DisplayType.HERTZ.value, "--display-type", help=display_type_help
     ),
     tuning: Tuning = tuning,
     sorted: bool = sorted,
     as_chord: bool = as_chord,
     notate: bool = notate,
-    persist: bool = persist,
+    save: bool = save,
     as_ensemble: bool = as_ensemble,
     as_set: bool = Option(
         True, "--as-set/--all", help="Output unique matrices only."
@@ -114,7 +126,7 @@ def passage(
             passage,
             as_ensemble,
             tuning,
-            persist,
+            save,
             as_chord,
             full_score,
         )

@@ -59,7 +59,7 @@ example *type:
     if [ "{{type}}" != "--input" ]; then
         matrix_score=examples/matrix.pdf
         checkexec "${matrix_score}" "${input_file_name}-notes.ily" \
-            -- just try passage --notate --persist --full-score
+            -- just try passage --notate --save --full-score
         pdf_files+="${matrix_score}"
     fi
     open "${pdf_files[@]}"

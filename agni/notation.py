@@ -88,12 +88,12 @@ class Notation:
                 """
 
     def _show_with_preamble(
-        self, container: Component, persist: bool, full_score: bool
+        self, container: Component, save: bool, full_score: bool
     ):
         lilypond_file = LilyPondFile(
             [self._get_lilypond_preamble(full_score), container]
         )
-        if persist:
+        if save:
             pdf_file_path = Path("examples") / "matrix.pdf"
             as_pdf(lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True)
         else:
@@ -345,7 +345,7 @@ class Notation:
     def _make_ensemble_score(
         self,
         tuning: Tuning,
-        persist: bool,
+        save: bool,
         full_score=False,
         passage: Passage | None = None,
     ):
@@ -374,7 +374,7 @@ class Notation:
                     matrix, staff_group, tuning=tuning
                 )
         score = Score([staff_group])
-        self._show_with_preamble(score, persist=persist, full_score=full_score)
+        self._show_with_preamble(score, save=save, full_score=full_score)
 
     @staticmethod
     def _set_bass_and_melody_noteheads(notes: list[Note]) -> list[Note]:
@@ -409,7 +409,7 @@ class Notation:
         score.append(staff)
 
     def _make_reference_score(
-        self, tuning: Tuning, as_chord: bool, persist: bool, full_score=False
+        self, tuning: Tuning, as_chord: bool, save: bool, full_score=False
     ):
         score = Score()
         for matrix in track(
@@ -421,25 +421,25 @@ class Notation:
             ]
             self._set_clefs(notes)
             self._add_notes_to_score(notes, score, as_chord=as_chord)
-        self._show_with_preamble(score, persist=persist, full_score=full_score)
+        self._show_with_preamble(score, save=save, full_score=full_score)
 
     def make_score(
         self,
         as_ensemble: bool,
         tuning: Tuning,
-        persist: bool,
+        save: bool,
         as_chord: bool,
         full_score=False,
         passage: Passage | None = None,
     ):
         if as_ensemble:
             self._make_ensemble_score(
-                tuning, persist=persist, full_score=full_score, passage=passage
+                tuning, save=save, full_score=full_score, passage=passage
             )
         else:
             self._make_reference_score(
                 tuning,
-                persist=persist,
+                save=save,
                 as_chord=as_chord,
                 full_score=full_score,
             )
@@ -449,18 +449,18 @@ def notate_matrix(
     matrix: Matrix,
     as_ensemble: bool,
     tuning: Tuning,
-    persist: bool,
+    save: bool,
     as_chord: bool,
 ):
     notation = Notation(matrix)
-    notation.make_score(as_ensemble, tuning, persist, as_chord)
+    notation.make_score(as_ensemble, tuning, save, as_chord)
 
 
 def notate_passage(
     passage: Passage,
     as_ensemble: bool,
     tuning: Tuning,
-    persist: bool,
+    save: bool,
     as_chord: bool,
     full_score: bool,
 ):
@@ -468,7 +468,7 @@ def notate_passage(
     notation.make_score(
         as_ensemble,
         tuning,
-        persist,
+        save,
         as_chord,
         full_score=full_score,
         passage=passage,
