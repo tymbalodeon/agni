@@ -126,10 +126,10 @@ class Passage:
         self._tuning = tuning
         self._as_set = as_set
         self._adjacent_duplicates = adjacent_duplicates
-        self._title = self._get_header_item(lilypond_input, "title")
-        self._composer = self._get_header_item(lilypond_input, "composer")
-        self._bass = self._get_staff_leaves(lilypond_input, "bass")
-        self._melody = self._get_staff_leaves(lilypond_input, "melody")
+        self._title = self._get_title(lilypond_input)
+        self._composer = self._get_composer(lilypond_input)
+        self._bass_leaves = self._get_bass_leaves(lilypond_input)
+        self._melody_leaves = self._get_melody_leaves(lilypond_input)
 
     @staticmethod
     def _get_header_item(lilypond_input: str, item: str) -> str:
@@ -138,6 +138,14 @@ class Passage:
         if not matching_line:
             return ""
         return matching_line.split('"')[1]
+
+    @classmethod
+    def _get_title(cls, lilypond_input: str) -> str:
+        return cls._get_header_item(lilypond_input, "title")
+
+    @classmethod
+    def _get_composer(cls, lilypond_input: str) -> str:
+        return cls._get_header_item(lilypond_input, "composer")
 
     @staticmethod
     @lru_cache
@@ -182,10 +190,18 @@ class Passage:
         leaves = get_leaves(components)
         return cls._get_metered_leaves(leaves)
 
+    @classmethod
+    def _get_bass_leaves(cls, lilypond_input: str):
+        return cls._get_staff_leaves(lilypond_input, "bass")
+
+    @classmethod
+    def _get_melody_leaves(cls, lilypond_input: str):
+        return cls._get_staff_leaves(lilypond_input, "melody")
+
     @property
     def _parts(self) -> list[Part]:
-        bass = self._bass
-        melody = self._melody
+        bass = self._bass_leaves
+        melody = self._melody_leaves
         parts = bass, melody
         return [Part(part) for part in parts]
 

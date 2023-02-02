@@ -353,14 +353,16 @@ class Notation:
         description = "Generating matrices..."
         if passage:
             matrix_melody_note_pairs = self._pair_matrices_to_melody_notes(
-                passage._melody
+                passage._melody_leaves
             )
             for index, (matrix, melody_note) in track(
                 enumerate(matrix_melody_note_pairs),
                 description=description,
                 total=self._number_of_matrices,
             ):
-                previous_note = self._get_previous_note(passage._melody, index)
+                previous_note = self._get_previous_note(
+                    passage._melody_leaves, index
+                )
                 self._add_matrix_to_staff_group(
                     matrix,
                     staff_group,
