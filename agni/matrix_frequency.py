@@ -4,6 +4,8 @@ from math import log
 
 from abjad import NamedPitch, NumberedPitch
 
+from agni.helpers import stylize
+
 
 class DisplayType(Enum):
     HERTZ = "hertz"
@@ -102,35 +104,39 @@ class MatrixFrequency:
         return f"{round(self.frequency, decimals):,}"
 
     @staticmethod
-    def _stylize(text: str, color: str, bold: bool = False) -> str:
-        text = f"[{color}]{text}[/{color}]"
-        if bold:
-            text = f"[bold]{text}[/bold]"
-        return text
+    def _stylize_base_frequency(text: str) -> str:
+        return stylize(text, "orange1", bold=True)
 
-    @classmethod
-    def _stylize_base_frequency(cls, text: str) -> str:
-        return cls._stylize(text, "orange1", bold=True)
+    @staticmethod
+    def _stylize_bass_multiple(text: str) -> str:
+        return stylize(text, "dark_orange3")
 
-    @classmethod
-    def _stylize_bass_multiple(cls, text: str) -> str:
-        return cls._stylize(text, "dark_orange3")
+    @staticmethod
+    def _stylize_multiple(text: str) -> str:
+        return stylize(text, "yellow")
 
-    @classmethod
-    def _stylize_multiple(cls, text: str) -> str:
-        return cls._stylize(text, "yellow")
+    @staticmethod
+    def _stylize_combination(text: str) -> str:
+        return stylize(text, "white")
 
     def _get_display_label(self) -> str:
         bass_multiplier = f"({self.bass_multiplier} x bass)"
         melody_multiplier = f"({self.melody_multiplier} x melody)"
         if self._is_bass_frequency:
             bass_multiplier = self._stylize_base_frequency(bass_multiplier)
+            melody_multiplier = self._stylize_combination(melody_multiplier)
         elif self._is_melody_frequency:
             melody_multiplier = self._stylize_base_frequency(melody_multiplier)
+            bass_multiplier = self._stylize_combination(bass_multiplier)
         elif self._is_bass_multiple:
             bass_multiplier = self._stylize_bass_multiple(bass_multiplier)
+            melody_multiplier = self._stylize_combination(melody_multiplier)
         elif self._is_melody_multiple:
             melody_multiplier = self._stylize_multiple(melody_multiplier)
+            bass_multiplier = self._stylize_combination(bass_multiplier)
+        else:
+            bass_multiplier = self._stylize_combination(bass_multiplier)
+            melody_multiplier = self._stylize_combination(melody_multiplier)
         return f"{bass_multiplier} + {melody_multiplier} = "
 
     def get_display(

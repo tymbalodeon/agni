@@ -5,8 +5,9 @@ from abjad import NamedPitch
 from rich.box import SIMPLE
 from rich.console import Console
 from rich.table import Table
-from rich.theme import Theme
 from supriya.patterns import EventPattern, SequencePattern
+
+from agni.helpers import stylize
 
 from .matrix_frequency import DisplayType, MatrixFrequency, Tuning
 
@@ -91,12 +92,17 @@ class Matrix:
 
     @staticmethod
     def _get_multiplier_label(multiplier: int, pitch: str) -> str:
-        return f"[bold cyan]{multiplier} * {pitch}[/bold cyan]"
+        multiplier_label = f"{multiplier} * {pitch}"
+        return stylize(multiplier_label, "white", bold=False)
 
-    def _display_table(self):
+    def _get_display_table(self) -> Table:
         display_type = self._display_type
         title = f"Combination-Tone Matrix ({display_type.value.title()})"
-        table = Table(title=title, show_header=False, box=SIMPLE)
+        title = stylize(title, "cyan")
+        return Table(title=title, show_header=False, box=SIMPLE)
+
+    def _display_table(self):
+        table = self._get_display_table()
         melody_header = [""] + [
             self._get_multiplier_label(multiplier, "melody")
             for multiplier in self._multiples
@@ -104,7 +110,9 @@ class Matrix:
         table.add_row(*melody_header)
         for multiple in self._multiples:
             display_frequencies = [
-                frequency.get_display(display_type, self._tuning, table=True)
+                frequency.get_display(
+                    self._display_type, self._tuning, table=True
+                )
                 for frequency in self.frequencies
                 if frequency.bass_multiplier == multiple
             ]
@@ -114,12 +122,13 @@ class Matrix:
         Console().print(table)
 
     def _display_sorted(self):
-        console = Console(theme=Theme(inherit=False))
+        table = self._get_display_table()
         for frequency in reversed(self.sorted_frequencies):
             frequency_display = frequency.get_display(
                 self._display_type, self._tuning, table=False
             )
-            console.print(frequency_display)
+            table.add_row(frequency_display)
+        Console().print(table)
 
     def display(self, sorted: bool):
         if sorted:
