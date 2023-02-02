@@ -92,7 +92,7 @@ class Matrix:
 
     @staticmethod
     def _get_multiplier_label(multiplier: int, pitch: str) -> str:
-        multiplier_label = f"{multiplier} * {pitch}"
+        multiplier_label = f"{multiplier} x {pitch}"
         return stylize(multiplier_label, "white", bold=False)
 
     def _get_display_table(self) -> Table:
