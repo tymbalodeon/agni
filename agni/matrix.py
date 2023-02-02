@@ -5,6 +5,7 @@ from abjad import NamedPitch
 from rich.box import SIMPLE
 from rich.console import Console
 from rich.table import Table
+from rich.theme import Theme
 from supriya.patterns import EventPattern, SequencePattern
 
 from .matrix_frequency import DisplayType, MatrixFrequency, Tuning
@@ -113,15 +114,12 @@ class Matrix:
         Console().print(table)
 
     def _display_sorted(self):
-        console = Console()
+        console = Console(theme=Theme(inherit=False))
         for frequency in reversed(self.sorted_frequencies):
             frequency_display = frequency.get_display(
                 self._display_type, self._tuning, table=False
             )
-            if frequency._is_base_frequency or frequency._is_base_multiple:
-                console.print(frequency_display)
-            else:
-                print(frequency_display)
+            console.print(frequency_display)
 
     def display(self, sorted: bool):
         if sorted:

@@ -49,23 +49,23 @@ class MatrixFrequency:
         return False
 
     @cached_property
-    def _is_base_frequency(self) -> bool:
+    def is_base_frequency(self) -> bool:
         return self._is_bass_frequency or self._is_melody_frequency
 
     @cached_property
     def _is_bass_multiple(self) -> bool:
-        if self.bass_multiplier > 1 and not self.melody_multiplier:
+        if self.bass_multiplier > 1 and self.melody_multiplier == 0:
             return True
         return False
 
     @cached_property
     def _is_melody_multiple(self) -> bool:
-        if self.melody_multiplier > 1 and not self.bass_multiplier:
+        if self.melody_multiplier > 1 and self.bass_multiplier == 0:
             return True
         return False
 
     @cached_property
-    def _is_base_multiple(self) -> bool:
+    def is_base_multiple(self) -> bool:
         return self._is_bass_multiple or self._is_melody_multiple
 
     def _get_lilypond_display_pitch(self, tuning: Tuning) -> str:
@@ -102,11 +102,36 @@ class MatrixFrequency:
         return f"{round(self.frequency, decimals):,}"
 
     @staticmethod
-    def _colorize(display_pitch: str, color: str, bold: bool = False) -> str:
-        display_pitch = f"[{color}]{display_pitch}[/{color}]"
+    def _stylize(text: str, color: str, bold: bool = False) -> str:
+        text = f"[{color}]{text}[/{color}]"
         if bold:
-            display_pitch = f"[bold]{display_pitch}[/bold]"
-        return display_pitch
+            text = f"[bold]{text}[/bold]"
+        return text
+
+    @classmethod
+    def _stylize_base_frequency(cls, text: str) -> str:
+        return cls._stylize(text, "orange1", bold=True)
+
+    @classmethod
+    def _stylize_bass_multiple(cls, text: str) -> str:
+        return cls._stylize(text, "dark_orange3")
+
+    @classmethod
+    def _stylize_multiple(cls, text: str) -> str:
+        return cls._stylize(text, "yellow")
+
+    def _get_display_label(self) -> str:
+        bass_multiplier = f"({self.bass_multiplier} x bass)"
+        melody_multiplier = f"({self.melody_multiplier} x melody)"
+        if self._is_bass_frequency:
+            bass_multiplier = self._stylize_base_frequency(bass_multiplier)
+        elif self._is_melody_frequency:
+            melody_multiplier = self._stylize_base_frequency(melody_multiplier)
+        elif self._is_bass_multiple:
+            bass_multiplier = self._stylize_bass_multiple(bass_multiplier)
+        elif self._is_melody_multiple:
+            melody_multiplier = self._stylize_multiple(melody_multiplier)
+        return f"{bass_multiplier} + {melody_multiplier} = "
 
     def get_display(
         self, display_type: DisplayType, tuning: Tuning, table: bool
@@ -125,10 +150,13 @@ class MatrixFrequency:
             lilypond = self._get_lilypond_display_pitch(tuning)
             midi = self._get_midi_display_pitch(tuning)
             display_pitch = f"{hertz}\n{lilypond}\n{midi}"
-        if self._is_base_frequency:
-            display_pitch = self._colorize(display_pitch, "orange1", bold=True)
-        if table and self._is_base_multiple or self._is_melody_multiple:
-            display_pitch = self._colorize(display_pitch, "yellow")
+        if self.is_base_frequency:
+            display_pitch = self._stylize_base_frequency(display_pitch)
+        if table and self.is_base_multiple or self._is_melody_multiple:
+            display_pitch = self._stylize_multiple(display_pitch)
         elif self._is_bass_multiple:
-            display_pitch = self._colorize(display_pitch, "dark_orange3")
+            display_pitch = self._stylize_bass_multiple(display_pitch)
+        if not table:
+            display_label = self._get_display_label()
+            display_pitch = f"{display_label}{display_pitch}"
         return display_pitch
