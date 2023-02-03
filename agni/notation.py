@@ -36,11 +36,11 @@ from .passage import MeteredLeaf, Passage
 
 class Notation:
     def __init__(self, *matrices: Matrix):
-        self.matrices = matrices
+        self._matrices = matrices
 
     @property
     def _number_of_matrices(self) -> int:
-        return len(self.matrices)
+        return len(self._matrices)
 
     def _get_lilypond_preamble(
         self, full_score=False, passage: Passage | None = None
@@ -103,7 +103,7 @@ class Notation:
         self, melody_passage: list[MeteredLeaf]
     ) -> list[tuple[Matrix, MeteredLeaf]]:
         pairs = []
-        matrix_iterator = iter(self.matrices)
+        matrix_iterator = iter(self._matrices)
         current_matrix = None
         for metered_leaf in melody_passage:
             note = metered_leaf.leaf
@@ -371,7 +371,7 @@ class Notation:
                     previous_note=previous_note,
                 )
         else:
-            for matrix in track(self.matrices, description=description):
+            for matrix in track(self._matrices, description=description):
                 self._add_matrix_to_staff_group(
                     matrix, staff_group, tuning=tuning
                 )
@@ -415,7 +415,7 @@ class Notation:
     ):
         score = Score()
         for matrix in track(
-            self.matrices, description="Generating matrices..."
+            self._matrices, description="Generating matrices..."
         ):
             notes = [
                 self._get_note(frequency, tuning)
