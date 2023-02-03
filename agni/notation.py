@@ -1,3 +1,4 @@
+from functools import cached_property
 from pathlib import Path
 
 from abjad import (
@@ -38,7 +39,7 @@ class Notation:
     def __init__(self, *matrices: Matrix):
         self._matrices = matrices
 
-    @property
+    @cached_property
     def _number_of_matrices(self) -> int:
         return len(self._matrices)
 
