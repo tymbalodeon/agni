@@ -1,4 +1,4 @@
-from collections.abc import Generator, Iterator
+from collections.abc import Generator
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -65,7 +65,7 @@ class SoundingLeaf:
 class Part:
     def __init__(self, leaves: list[MeteredLeaf]):
         self._leaves = self._get_leaves(leaves)
-        self.current_leaf = self._get_next_leaf(self._leaves)
+        self.current_leaf = self._get_next_leaf()
 
     @staticmethod
     def _get_leaves(
@@ -76,11 +76,8 @@ class Part:
         )
         return (leaf for leaf in sounding_leaves if leaf)
 
-    def _get_next_leaf(
-        self, leaves: Iterator[SoundingLeaf] | None = None
-    ) -> SoundingLeaf | None:
-        if not leaves:
-            leaves = self._leaves
+    def _get_next_leaf(self) -> SoundingLeaf | None:
+        leaves = self._leaves
         self.current_leaf = next(leaves, None)
         return self.current_leaf
 
@@ -98,7 +95,7 @@ class Part:
         shorter_duration = current_duration - duration
         self.current_leaf.duration = shorter_duration
 
-    def _get_current_pitch(self) -> NamedPitch | None:
+    def get_current_pitch(self) -> NamedPitch | None:
         if not self.current_leaf or isinstance(self.current_leaf, Rest):
             return None
         return self.current_leaf.named_pitch
@@ -207,7 +204,7 @@ class Passage:
         return [Part(part) for part in parts]
 
     def _get_current_pitches(self) -> list[NamedPitch]:
-        current_pitches = [part._get_current_pitch() for part in self._parts]
+        current_pitches = [part.get_current_pitch() for part in self._parts]
         return remove_none_values(current_pitches)
 
     def _is_end_of_passage(self) -> bool:
@@ -240,7 +237,6 @@ class Passage:
         ]
 
     def _get_next_pitches(self) -> list[NamedPitch]:
-        self._parts
         shortest_duration = self._get_shortest_duration()
         parts_matching_shortest_duration = (
             self._get_parts_matching_shortest_duration(shortest_duration)
@@ -300,9 +296,7 @@ class Passage:
     def matrices(self) -> list[Matrix]:
         matrices = []
         for pitches in self._simultaneous_pitches:
-            if not len(pitches) == 2:
-                continue
-            bass, melody = pitches
+            bass, melody = pitches[:2]
             matrix = Matrix(
                 bass,
                 melody,
