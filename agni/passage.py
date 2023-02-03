@@ -296,7 +296,9 @@ class Passage:
     def matrices(self) -> list[Matrix]:
         matrices = []
         for pitches in self._simultaneous_pitches:
-            bass, melody = pitches[:2]
+            if not len(pitches) == 2:
+                continue
+            bass, melody = pitches
             matrix = Matrix(
                 bass,
                 melody,
