@@ -99,7 +99,7 @@ def passage(
     ),
     multiples: int = multiples,
     pitch_type: PitchType = Option(
-        PitchType.HERTZ.value,
+        PitchType.LILYPOND.value,
         pitch_type_option_name,
         help=pitch_type_help,
     ),
