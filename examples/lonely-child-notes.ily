@@ -7,242 +7,294 @@
   composer = "Claude Vivier"
 }
 
-structureOne = {
-  \time 5/4
-  s1 s4
-  s1 s4
-  \time 4/4
-  s1 * 2
-  \time 5/4
-  s1 s4
-  s1 s4
-  \time 4/4
-  s1
-  \time 3/4
-  s2.
-  \time 6/4
-  s1 s2
-  s1 s2
-  \time 3/4
-  s2.
-  \time 6/4
-  s1 s2
-  s1 s2
-  \time 9/8
-  s1 s8
-  \time 4/4
-  s1
-  \time 5/4
-  s1 s4
-  \time 6/4
-  s1 s2
-  \time 7/8
-  s2. s8
-}
+restsOne = {
+  \time 13/4
 
-structureTwo = {
+  R1 * 13/4
+
+  \time 3/4
+
+  R2. * 3
+
   \time 4/4
-  s1
+
+  R1
+
+  \time 3/4
+
+  R2.
+
+  \time 4/4
+
+  R1
+
+  \time 3/4
+
+  R2.
+
+  \time 2/4
+
+  R2
+
+  \time 4/4
+
+  R1 * 2
+
+  \time 3/4
+
+  R2. * 3
+
+  \time 4/4
+
+  R1 * 2
+
+  \time 6/4
+
+  R1.
+
+  \time 1/8
+
+  R8
+
+  \time 4/4
+
+  R1
+
+  \time 5/4
+
+  R1 * 5/4
+
+  \time 2/4
+
+  R2
+
+  \time 5/4
+
+  R1 * 5/4
+
   \time 8/4
-  s1 * 2
+
+  R \breve
 }
 
-structureThree = {
-  \time 4/4
-  s1
+restsTwo = {
+  \time 5/8
+
+  R1 * 10/8
+
   \time 3/4
-  s2.
+
+  R2.
+
+  \time 5/8
+
+  R1 * 5/8
+
   \time 4/4
-  s1
-  \time 5/4
-  s1 s4
-  \time 6/4
-  s1 s2
+
+  R1
+
+  \time 3/8
+
+  R8 * 3
+
+  \time 2/4
+
+  R2
+
+  \time 5/8
+
+  R1 * 5/8
+
+  \time 2/4
+
+  R2
+
   \time 3/4
-  s2.
-  \time 6/4
-  s1 s2
-  \time 4/4
-  s1
-  \time 5/4
-  s1 s4
-  \time 6/4
-  s1 s2
+
+  R2.
+
+  \time 5/8
+
+  R1 * 5/8
+
+  \time 2/4
+
+  R2
 }
 
-structureFour = {
-  \time 4/4
-  s1
-  \time 3/4
-  s2. * 2
-  \time 5/4
-  s1 s4
-  \time 4/4
-  s1
-  \time 3/4
-  s2.
+restsThree = {
+  \time 1/4
+
+  R4
+}
+
+restsFour = {
+  \time 5/8
+
+  R8 * 5
+
+  \time 5/16
+
+  R16 * 5
+
+  \time 5/8
+
+  R8 * 5
+
+  \time 9/16
+
+  R16 * 9
+
+  \time 2/4
+
+  R2
+
   \time 7/16
-  s4 s16 * 3
-  \time 5/8
-  s2 s8
+
+  R16 * 7
+
   \time 3/8
-  s4 s8
-  \time 9/16
-  s2 s16
-  \time 3/4
-  s2 s4
-  \time 4/4
-  s1 * 2
-  \time 3/4
-  s2 s4
-  \time 2/4
-  s2
+
+  R8 * 3
+
   \time 5/16
-  s4 s16
-  \time 5/8
-  s2 s8
-  \time 11/16
-  s2 s16 * 3
-  \time 5/16
-  s4 s16
-  \time 5/8
-  s2 s8
-  \time 9/16
-  s2 s16
+
+  R16 * 5
+
+  \time 2/8
+
+  R8 * 2
+
   \time 3/8
-  s4 s8
+
+  R8 * 3
+
+  \time 2/4
+
+  R2
+}
+
+restsFive = {
   \time 3/4
-  s2 s4
+
+  R2.
+}
+
+restsSix = {
+  \time 10/4
+
+  R4 * 10
+
+  \time 9/4
+
+  R4 * 9
+
+  \time 8/4
+
+  R4 * 8
+
+  \time 7/4
+
+  R4 * 7
+
+  \time 6/4
+
+  R4 * 6
+
   \time 5/4
-  s1 s4
+
+  R4 * 5
+
+  \time 10/4
+
+  R4 * 10
+
+  \time 5/4
+
+  R4 * 10
+}
+
+restsSeven = {
   \time 3/8
-  s4 s8
-  \time 9/16
-  s2 s16
-  \time 15/16
-  s2. s16 * 3
-  \time 11/16
-  s2 s16 * 3
-  \time 7/8
-  s2. s8
-  \time 3/8
-  s4 s8
-  \time 9/16
-  s2 s16
-  \time 7/8
-  s2. s8
-  \time 5/4
-  s1 s4
-  \time 4/4
-  s1
+
+  R8 * 3
 }
 
-structureFive = {
-  \time 3/4
-  s2.
-  \time 4/4
-  s1 * 4
-  \time 3/4
-  s2.
-  \time 4/4
-  s1 * 2
-  \time 3/4
-  s2.
-  \time 4/4
-  s1
-  \time 3/4
-  s2.
-  \time 4/4
-  s1
-  \time 3/4
-  s2. * 2
+restsEight = {
+  \time 1/8
+
+  R8
+
+  \time 8/4
+
+  R \breve
+
   \time 5/4
-  s1 s4
-  s1 s4
+
+  R4 * 5
+
   \time 3/4
-  s2. * 2
-  \time 4/4
-  s1 * 2
-  \time 3/4
-  s2. * 2
-  \time 4/4
-  s1 * 2
-  \time 2/4
-  s2
-  \time 3/4
-  s2. * 3
+
+  R2.
 }
 
-structureSix = {
-  \time 5/4
-  s1 s4
+restsNine = {
   \time 3/4
-  s2.
+
+  R2. * 2
+}
+
+restsTen = {
   \time 4/4
-  s1 * 2
+
+  R1
+}
+
+restsEleven = {
+  \time 3/4
+
+  R2. * 8
+
+  \time 5/4
+
+  R4 * 5
+
+  \time 3/4
+
+  R2.
+
+  \time 4/4
+
+  R1 * 3
+
   \time 2/4
-  s2
+
+  R2
+
+  \time 4/4
+
+  R1 * 2
+
   \time 6/4
-  s1.
-  \time 3/4
-  s2.
-  \time 5/4
-  s1 s4
-  \time 4/4
-  s1
-  \time 6/4
-  s1.
-  \time 4/4
-  s1
-  \time 5/4
-  s1 s4
-  s1 s4
-  \time 4/4
-  s1 * 2
-  \time 5/4
-  s1 s4
-  \time 3/4
-  s2.
-  \time 2/4
-  s2
-  \time 4/4
-  s1 * 3
-  \time 2/4
-  s2
-  \time 3/4
-  s2.
-  \time 4/4
-  s1
-  \time 6/4
-  s1.
-  \time 3/4
-  s2. * 2
-}
 
-structureSeven = {
-  \time 3/4
-  s2.
-  \time 4/4
-  s1
-  \time 3/4
-  s2.
-}
+  R4 * 6
 
-structureEight = {
   \time 4/4
-  s1
-  \time 3/4
-  s2.
-}
 
-structureNine = {
+  R1 * 2
+
+  \time 3/4
+
+  R2.
+
   \time 5/4
-  s1 s4
-}
 
-structureTen = {
+  R4 * 10
+
   \time 3/4
-  s2.
+
+  R2.
 }
 
 melodyOne = \relative a' {
@@ -1105,7 +1157,6 @@ bassSix = \relative c, {
 
   \time 2/4
 
-
   g8 c ~ c4
 
   \time 3/4
@@ -1116,7 +1167,7 @@ bassSix = \relative c, {
 
   g8 bf4. g8 bf g4
 
-  \time 4/4
+  \time 6/4
 
   d4 c2 d2.
 
@@ -1165,57 +1216,52 @@ bassTen = \relative e,, {
   e4. ds4 e8
 }
 
-structure = {
-  \structureOne
-  \structureTwo
-  \structureThree
-  \structureFour
-  \structureFive
-  \structureSix
-  \structureSeven
-  \structureEight
-  \structureNine
-  \structureTen
-}
-
 melody = {
+  \restsOne
   \melodyOne
+  \restsTwo
   \melodyTwo
+  \restsThree
   \melodyThree
+  \restsFour
   \melodyFour
+  \restsFive
   \melodyFive
+  \restsSix
   \melodySix
+  \restsSeven
   \melodySeven
+  \restsEight
   \melodyEight
+  \restsNine
   \melodyNine
+  \restsTen
   \melodyTen
+  \restsEleven
 }
 
 bass = {
+  \restsOne
   \bassOne
+  \restsTwo
   \bassTwo
+  \restsThree
   \bassThree
+  \restsFour
   \bassFour
+  \restsFive
   \bassFive
+  \restsSix
   \bassSix
+  \restsSeven
   \bassSeven
+  \restsEight
   \bassEight
+  \restsNine
   \bassNine
+  \restsTen
   \bassTen
-}
-
-melody = {
-  <<
-    \melody
-    \structure
-  >>
-}
-
-bass = {
-  <<
-    \bass
-    \structure
-  >>
+  \restsEleven
 }
 
 \score {
