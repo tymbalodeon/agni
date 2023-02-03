@@ -36,16 +36,16 @@ from .passage import MeteredLeaf, Passage
 
 
 class Notation:
-    def __init__(self, *matrices: Matrix):
+    def __init__(self, *matrices: Matrix, passage: Passage | None = None):
         self._matrices = matrices
+        self._passage = passage
 
     @cached_property
     def _number_of_matrices(self) -> int:
         return len(self._matrices)
 
-    def _get_lilypond_preamble(
-        self, full_score=False, passage: Passage | None = None
-    ) -> str:
+    def _get_lilypond_preamble(self, full_score=False) -> str:
+        passage = self._passage
         if passage:
             title = passage.title
             composer = passage.composer
@@ -347,11 +347,11 @@ class Notation:
         self,
         tuning: Tuning,
         save: bool,
-        full_score=False,
-        passage: Passage | None = None,
+        full_score: bool,
     ):
         staff_group = StaffGroup()
         description = "Generating matrices..."
+        passage = self._passage
         if passage:
             matrix_melody_note_pairs = self._pair_matrices_to_melody_notes(
                 passage.melody_leaves
@@ -367,17 +367,15 @@ class Notation:
                 self._add_matrix_to_staff_group(
                     matrix,
                     staff_group,
-                    tuning=tuning,
+                    tuning,
                     melody_note=melody_note,
                     previous_note=previous_note,
                 )
         else:
             for matrix in track(self._matrices, description=description):
-                self._add_matrix_to_staff_group(
-                    matrix, staff_group, tuning=tuning
-                )
+                self._add_matrix_to_staff_group(matrix, staff_group, tuning)
         score = Score([staff_group])
-        self._show_with_preamble(score, save=save, full_score=full_score)
+        self._show_with_preamble(score, save, full_score)
 
     @staticmethod
     def _set_bass_and_melody_noteheads(notes: list[Note]) -> list[Note]:
@@ -412,7 +410,7 @@ class Notation:
         score.append(staff)
 
     def _make_reference_score(
-        self, tuning: Tuning, as_chord: bool, save: bool, full_score=False
+        self, tuning: Tuning, as_chord: bool, save: bool, full_score: bool
     ):
         score = Score()
         for matrix in track(
@@ -423,8 +421,8 @@ class Notation:
                 for frequency in matrix.sorted_frequencies_in_hertz
             ]
             self._set_clefs(notes)
-            self._add_notes_to_score(notes, score, as_chord=as_chord)
-        self._show_with_preamble(score, save=save, full_score=full_score)
+            self._add_notes_to_score(notes, score, as_chord)
+        self._show_with_preamble(score, save, full_score)
 
     def make_score(
         self,
@@ -433,19 +431,11 @@ class Notation:
         save: bool,
         as_chord: bool,
         full_score=False,
-        passage: Passage | None = None,
     ):
         if as_ensemble:
-            self._make_ensemble_score(
-                tuning, save=save, full_score=full_score, passage=passage
-            )
+            self._make_ensemble_score(tuning, save, full_score)
         else:
-            self._make_reference_score(
-                tuning,
-                save=save,
-                as_chord=as_chord,
-                full_score=full_score,
-            )
+            self._make_reference_score(tuning, save, as_chord, full_score)
 
 
 def notate_matrix(
@@ -467,12 +457,11 @@ def notate_passage(
     as_chord: bool,
     full_score: bool,
 ):
-    notation = Notation(*passage.matrices)
+    notation = Notation(*passage.matrices, passage=passage)
     notation.make_score(
         as_ensemble,
         tuning,
         save,
         as_chord,
         full_score=full_score,
-        passage=passage,
     )
