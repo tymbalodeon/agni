@@ -36,6 +36,8 @@ from .passage import MeteredLeaf, Passage
 
 
 class Notation:
+    PROGRESS_DESCRIPTION = "Generating matrices..."
+
     def __init__(self, *matrices: Matrix, passage: Passage | None = None):
         self._matrices = matrices
         self._passage = passage
@@ -350,20 +352,19 @@ class Notation:
         full_score: bool,
     ):
         staff_group = StaffGroup()
-        description = "Generating matrices..."
+        description = self.PROGRESS_DESCRIPTION
         passage = self._passage
         if passage:
+            melody_leaves = passage.melody_leaves
             matrix_melody_note_pairs = self._pair_matrices_to_melody_notes(
-                passage.melody_leaves
+                melody_leaves
             )
             for index, (matrix, melody_note) in track(
                 enumerate(matrix_melody_note_pairs),
                 description=description,
                 total=self._number_of_matrices,
             ):
-                previous_note = self._get_previous_note(
-                    passage.melody_leaves, index
-                )
+                previous_note = self._get_previous_note(melody_leaves, index)
                 self._add_matrix_to_staff_group(
                     matrix,
                     staff_group,
@@ -414,7 +415,7 @@ class Notation:
     ):
         score = Score()
         for matrix in track(
-            self._matrices, description="Generating matrices..."
+            self._matrices, description=self.PROGRESS_DESCRIPTION
         ):
             notes = [
                 self._get_note(frequency, tuning)
