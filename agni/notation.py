@@ -355,7 +355,7 @@ class Notation:
         description = self.PROGRESS_DESCRIPTION
         passage = self._passage
         if passage:
-            melody_leaves = passage.melody_leaves
+            melody_leaves = passage.melody
             matrix_melody_note_pairs = self._pair_matrices_to_melody_notes(
                 melody_leaves
             )
