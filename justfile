@@ -43,12 +43,13 @@ build *pip:
         pipx install "${wheel}" --force --pip-args="--force-reinstall"
     fi
 
-# Run an example passage and open the input score ("--input"), output score ("--output") or both.
-example *type:
+# Run example if output is nonexistent or outdated (or if "--force-output"), then open input and output files (or only "--input" or "--output").
+example *args:
     #!/usr/bin/env zsh
     input_file_name=examples/lonely-child
+    matrix_score=examples/matrix.pdf
     pdf_files=()
-    if [ "{{type}}" != "--output" ]; then
+    if [ -z "{{args}}" ] || [[ "{{args}}" = *"--input"* ]]; then
         input_score="${input_file_name}.pdf"
         lilypond_file="${input_file_name}.ly"
         checkexec "${input_score}" examples/*.*ly \
@@ -56,13 +57,18 @@ example *type:
         mv "${input_file_name}-formatted.pdf" "${input_score}" 2>/dev/null
         pdf_files+="${input_score}"
     fi
-    if [ "{{type}}" != "--input" ]; then
-        matrix_score=examples/matrix.pdf
+    if [ -z "{{args}}" ] || [[ "{{args}}" = *"--output"* ]]; then
         checkexec "${matrix_score}" "${input_file_name}-notes.ily" \
             -- just try passage --notate --save --full-score
         pdf_files+="${matrix_score}"
     fi
-    open "${pdf_files[@]}"
+    if [[ "{{args}}" = *"--force-output"* ]]; then
+        just try passage --notate --save --full-score
+        pdf_files+="${matrix_score}"
+    fi
+    if [ -n "${pdf_files[*]}" ]; then
+        open "${pdf_files[@]}"
+    fi
 
 # Install dependencies.
 @install:
