@@ -121,29 +121,18 @@ class MatrixFrequency:
     def _stylize_multiple(text: str) -> str:
         return stylize(text, "yellow")
 
-    @staticmethod
-    def _stylize_combination(text: str) -> str:
-        return stylize(text, "white")
-
     def _get_display_label(self) -> str:
         bass_multiplier = f"({self.bass_multiplier} x bass)"
         melody_multiplier = f"({self._melody_multiplier} x melody)"
         if self._is_bass_frequency:
             bass_multiplier = self._stylize_base_frequency(bass_multiplier)
-            melody_multiplier = self._stylize_combination(melody_multiplier)
         elif self._is_melody_frequency:
             melody_multiplier = self._stylize_base_frequency(melody_multiplier)
-            bass_multiplier = self._stylize_combination(bass_multiplier)
         elif self._is_bass_multiple:
             bass_multiplier = self._stylize_bass_multiple(bass_multiplier)
-            melody_multiplier = self._stylize_combination(melody_multiplier)
         elif self._is_melody_multiple:
             melody_multiplier = self._stylize_multiple(melody_multiplier)
-            bass_multiplier = self._stylize_combination(bass_multiplier)
-        else:
-            bass_multiplier = self._stylize_combination(bass_multiplier)
-            melody_multiplier = self._stylize_combination(melody_multiplier)
-        return f"{bass_multiplier} + {melody_multiplier} = "
+        return stylize(f"{bass_multiplier} + {melody_multiplier} = ", "white")
 
     def get_display(
         self,
