@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from dataclasses import dataclass
+from enum import Enum
 from functools import lru_cache
 from pathlib import Path
 from typing import cast
@@ -24,6 +25,11 @@ from abjad.select import logical_ties as get_logical_ties
 from .helpers import get_staff_by_name, remove_none_values
 from .matrix import DisplayFormat, Matrix
 from .matrix_frequency import PitchType, Tuning
+
+
+class InputPart(Enum):
+    BASS = "bass"
+    MELODY = "melody"
 
 
 @dataclass
@@ -127,8 +133,8 @@ class Passage:
         self._adjacent_duplicates = adjacent_duplicates
         self.title = self._get_title(lilypond_input)
         self.composer = self._get_composer(lilypond_input)
-        self.bass = self._get_bass_leaves(lilypond_input)
-        self.melody = self._get_melody_leaves(lilypond_input)
+        self.bass_staff = self._get_bass_staff(lilypond_input)
+        self.melody_staff = self._get_melody_staff(lilypond_input)
         self._parts = self._get_parts()
 
     @staticmethod
@@ -155,6 +161,16 @@ class Passage:
         score = next(block for block in items if block.name == "score")
         return cast(list[Staff], get_components(score.items, prototype=Staff))
 
+    @classmethod
+    def _get_bass_staff(cls, lilypond_input: str) -> Staff | None:
+        staves = cls._get_staves(lilypond_input)
+        return get_staff_by_name(staves, InputPart.BASS.value)
+
+    @classmethod
+    def _get_melody_staff(cls, lilypond_input: str) -> Staff | None:
+        staves = cls._get_staves(lilypond_input)
+        return get_staff_by_name(staves, InputPart.MELODY.value)
+
     @staticmethod
     def _get_time_signature(note: Leaf) -> TimeSignature | None:
         return next(
@@ -178,31 +194,27 @@ class Passage:
             notes_in_measure.append(MeteredLeaf(note, current_time_signature))
         return notes_in_measure
 
-    @classmethod
-    def _get_staff_leaves(
-        cls, lilypond_input: str, name: str
-    ) -> list[MeteredLeaf]:
-        staves = cls._get_staves(lilypond_input)
-        staff = get_staff_by_name(staves, name)
+    def _get_staff_leaves(self, input_part: InputPart) -> list[MeteredLeaf]:
+        if input_part == InputPart.BASS:
+            staff = self.bass_staff
+        else:
+            staff = self.melody_staff
         if not staff:
             return []
         components = staff.components
         leaves = get_leaves(components)
-        return cls._get_metered_leaves(leaves)
+        return self._get_metered_leaves(leaves)
 
-    @classmethod
-    def _get_bass_leaves(cls, lilypond_input: str):
-        return cls._get_staff_leaves(lilypond_input, "bass")
+    def _get_bass_leaves(self):
+        return self._get_staff_leaves(InputPart.BASS)
 
-    @classmethod
-    def _get_melody_leaves(cls, lilypond_input: str):
-        return cls._get_staff_leaves(lilypond_input, "melody")
+    def _get_melody_leaves(self):
+        return self._get_staff_leaves(InputPart.MELODY)
 
     def _get_parts(self) -> list[Part]:
-        bass_leaves = self.bass
-        melody_leaves = self.melody
-        parts = bass_leaves, melody_leaves
-        return [Part(part) for part in parts]
+        bass_leaves = self._get_bass_leaves()
+        melody_leaves = self._get_melody_leaves()
+        return [Part(leaves) for leaves in (bass_leaves, melody_leaves)]
 
     def _get_current_pitches(self) -> list[NamedPitch]:
         current_pitches = [part.get_current_pitch() for part in self._parts]

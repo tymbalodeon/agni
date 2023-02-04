@@ -355,23 +355,26 @@ class Notation:
         description = self.PROGRESS_DESCRIPTION
         passage = self._passage
         if passage:
-            melody_leaves = passage.melody
-            matrix_melody_note_pairs = self._pair_matrices_to_melody_notes(
-                melody_leaves
-            )
-            for index, (matrix, melody_note) in track(
-                enumerate(matrix_melody_note_pairs),
-                description=description,
-                total=self._number_of_matrices,
-            ):
-                previous_note = self._get_previous_note(melody_leaves, index)
-                self._add_matrix_to_staff_group(
-                    matrix,
-                    staff_group,
-                    tuning,
-                    melody_note=melody_note,
-                    previous_note=previous_note,
-                )
+            melody = passage.melody_staff or Staff()
+            bass = passage.bass_staff or Staff()
+            staff_group.append(melody)
+            staff_group.append(bass)
+            # matrix_melody_note_pairs = self._pair_matrices_to_melody_notes(
+            #     melody_leaves
+            # )
+            # for index, (matrix, melody_note) in track(
+            #     enumerate(matrix_melody_note_pairs),
+            #     description=description,
+            #     total=self._number_of_matrices,
+            # ):
+            #     previous_note = self._get_previous_note(melody_leaves, index)
+            #     self._add_matrix_to_staff_group(
+            #         matrix,
+            #         staff_group,
+            #         tuning,
+            #         melody_note=melody_note,
+            #         previous_note=previous_note,
+            #     )
         else:
             for matrix in track(self._matrices, description=description):
                 self._add_matrix_to_staff_group(matrix, staff_group, tuning)
