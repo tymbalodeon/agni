@@ -133,8 +133,8 @@ class Passage:
         self._adjacent_duplicates = adjacent_duplicates
         self.title = self._get_title(lilypond_input)
         self.composer = self._get_composer(lilypond_input)
-        self.bass_staff = self._get_bass_staff(lilypond_input)
-        self.melody_staff = self._get_melody_staff(lilypond_input)
+        self._bass_staff = self._get_bass_staff(lilypond_input)
+        self._melody_staff = self._get_melody_staff(lilypond_input)
         self._parts = self._get_parts()
 
     @staticmethod
@@ -196,9 +196,9 @@ class Passage:
 
     def _get_staff_leaves(self, input_part: InputPart) -> list[MeteredLeaf]:
         if input_part == InputPart.BASS:
-            staff = self.bass_staff
+            staff = self._bass_staff
         else:
-            staff = self.melody_staff
+            staff = self._melody_staff
         if not staff:
             return []
         components = staff.components
@@ -215,6 +215,14 @@ class Passage:
         bass_leaves = self._get_bass_leaves()
         melody_leaves = self._get_melody_leaves()
         return [Part(leaves) for leaves in (bass_leaves, melody_leaves)]
+
+    @property
+    def bass_staff(self) -> Staff:
+        return self._bass_staff or Staff()
+
+    @property
+    def melody_staff(self) -> Staff:
+        return self._melody_staff or Staff()
 
     def _get_current_pitches(self) -> list[NamedPitch]:
         current_pitches = [part.get_current_pitch() for part in self._parts]

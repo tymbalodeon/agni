@@ -26,7 +26,7 @@ from abjad.get import duration as get_duration
 from abjad.get import indicators as get_indicators
 from abjad.get import lineage as get_lineage
 from abjad.persist import as_pdf
-from abjad.select import logical_ties as get_logical_ties
+from abjad.select import leaves as get_leaves
 from rich.progress import track
 
 from .helpers import get_staff_by_name, remove_none_values
@@ -101,31 +101,6 @@ class Notation:
             as_pdf(lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True)
         else:
             show(lilypond_file)
-
-    def _pair_matrices_to_melody_notes(
-        self, melody_passage: list[MeteredLeaf]
-    ) -> list[tuple[Matrix, MeteredLeaf]]:
-        pairs = []
-        matrix_iterator = iter(self._matrices)
-        current_matrix = None
-        for metered_leaf in melody_passage:
-            note = metered_leaf.leaf
-            if not current_matrix or get_logical_ties(note):
-                current_matrix = next(matrix_iterator, None)
-                if not current_matrix:
-                    break
-            pair = (current_matrix, metered_leaf)
-            pairs.append(pair)
-        return pairs
-
-    @staticmethod
-    def _get_previous_note(
-        part: list[MeteredLeaf], index: int
-    ) -> MeteredLeaf | None:
-        try:
-            return part[index - 1]
-        except Exception:
-            return None
 
     @staticmethod
     def _get_melody_note_duration(
@@ -345,6 +320,33 @@ class Notation:
                 continue
             staff.append(matrix_note)
 
+    @staticmethod
+    def _get_first_staff_leaf(staff: Staff) -> Leaf | None:
+        leaves = get_leaves(staff)
+        if not leaves:
+            return None
+        return leaves[0]
+
+    @staticmethod
+    def _get_staff_name_test(staff: Staff) -> str:
+        return staff.name or ""
+
+    @classmethod
+    def _set_staff_instrument_name(cls, staff: Staff):
+        full_name = cls._get_staff_name_test(staff).title()
+        short_name = full_name[0]
+        first_leaf = cls._get_first_staff_leaf(staff)
+        attach(InstrumentName(full_name), first_leaf)
+        attach(ShortInstrumentName(short_name), first_leaf)
+
+    @classmethod
+    def _get_part_staves(cls, passage: Passage) -> tuple[Staff, Staff]:
+        bass = passage.bass_staff
+        melody = passage.melody_staff
+        for staff in bass, melody:
+            cls._set_staff_instrument_name(staff)
+        return bass, melody
+
     def _make_ensemble_score(
         self,
         tuning: Tuning,
@@ -355,26 +357,13 @@ class Notation:
         description = self.PROGRESS_DESCRIPTION
         passage = self._passage
         if passage:
-            melody = passage.melody_staff or Staff()
-            bass = passage.bass_staff or Staff()
-            staff_group.append(melody)
-            staff_group.append(bass)
-            # matrix_melody_note_pairs = self._pair_matrices_to_melody_notes(
-            #     melody_leaves
-            # )
-            # for index, (matrix, melody_note) in track(
-            #     enumerate(matrix_melody_note_pairs),
-            #     description=description,
-            #     total=self._number_of_matrices,
-            # ):
-            #     previous_note = self._get_previous_note(melody_leaves, index)
-            #     self._add_matrix_to_staff_group(
-            #         matrix,
-            #         staff_group,
-            #         tuning,
-            #         melody_note=melody_note,
-            #         previous_note=previous_note,
-            #     )
+            bass, melody = self._get_part_staves(passage)
+            for staff in melody, bass:
+                staff_group.append(staff)
+            bass_leaves = get_leaves(bass)
+            melody_leaves = get_leaves(melody)
+            for bass, melody in zip(bass_leaves, melody_leaves):
+                print(bass, melody)
         else:
             for matrix in track(self._matrices, description=description):
                 self._add_matrix_to_staff_group(matrix, staff_group, tuning)
