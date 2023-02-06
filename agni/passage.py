@@ -70,8 +70,10 @@ class SoundingLeaf:
 
 class Part:
     def __init__(self, leaves: list[MeteredLeaf]):
-        self._leaves = self._get_leaves(leaves)
-        self.current_leaf = self._get_next_leaf()
+        self._leaves = (leaf for leaf in leaves)
+        self._sounding_leaves = self._get_leaves(leaves)
+        self.current_leaf = self.get_next_leaf()
+        self.current_sounding_leaf = self.get_next_sounding_leaf()
 
     @staticmethod
     def _get_leaves(
@@ -82,34 +84,63 @@ class Part:
         )
         return (leaf for leaf in sounding_leaves if leaf)
 
-    def _get_next_leaf(self) -> SoundingLeaf | None:
-        leaves = self._leaves
-        self.current_leaf = next(leaves, None)
+    def get_next_leaf(self) -> MeteredLeaf | None:
+        self.current_leaf = next(self._leaves, None)
         return self.current_leaf
 
-    def _get_current_duration(self) -> Duration | None:
+    def get_next_sounding_leaf(self) -> SoundingLeaf | None:
+        self.current_sounding_leaf = next(self._sounding_leaves, None)
+        return self.current_sounding_leaf
+
+    @property
+    def current_leaf_duration(self) -> Duration | None:
         if not self.current_leaf:
             return None
-        return self.current_leaf.duration
+        return self.current_leaf.leaf.written_duration
 
-    def _shorten_current_leaf(self, duration: float):
+    @property
+    def current_sounding_leaf_duration(self) -> Duration | None:
+        if not self.current_sounding_leaf:
+            return None
+        return self.current_sounding_leaf.duration
+
+    def shorten_current_leaf(self, duration: Duration):
         if not self.current_leaf:
             return
-        current_duration = self._get_current_duration()
+        current_duration = self.current_leaf_duration
         if not current_duration:
             return
         shorter_duration = current_duration - duration
-        self.current_leaf.duration = shorter_duration
+        self.current_leaf.leaf.written_duration = shorter_duration
 
-    def get_current_pitch(self) -> NamedPitch | None:
-        if not self.current_leaf or isinstance(self.current_leaf, Rest):
+    def shorten_current_sounding_leaf(self, duration: float):
+        if not self.current_sounding_leaf:
+            return
+        current_duration = self.current_sounding_leaf_duration
+        if not current_duration:
+            return
+        shorter_duration = current_duration - duration
+        self.current_sounding_leaf.duration = shorter_duration
+
+    @property
+    def current_leaf_pitch(self) -> NamedPitch | None:
+        current_leaf = self.current_leaf
+        if not current_leaf or not isinstance(current_leaf.leaf, Note):
             return None
-        return self.current_leaf.named_pitch
+        return current_leaf.leaf.written_pitch
 
-    def _matches_duration(self, duration: float) -> bool:
-        if not self.current_leaf:
+    @property
+    def current_sounding_pitch(self) -> NamedPitch | None:
+        if not self.current_sounding_leaf or isinstance(
+            self.current_sounding_leaf, Rest
+        ):
+            return None
+        return self.current_sounding_leaf.named_pitch
+
+    def matches_current_sounding_duration(self, duration: float) -> bool:
+        if not self.current_sounding_leaf:
             return False
-        current_duration = self._get_current_duration()
+        current_duration = self.current_sounding_leaf_duration
         return current_duration == duration
 
 
@@ -135,7 +166,8 @@ class Passage:
         self.composer = self._get_composer(lilypond_input)
         self._bass_staff = self._get_bass_staff(lilypond_input)
         self._melody_staff = self._get_melody_staff(lilypond_input)
-        self._parts = self._get_parts()
+        self._bass_part = self._get_bass_part()
+        self._melody_part = self._get_melody_part()
 
     @staticmethod
     def _get_header_item(lilypond_input: str, item: str) -> str:
@@ -211,10 +243,17 @@ class Passage:
     def _get_melody_leaves(self):
         return self._get_staff_leaves(InputPart.MELODY)
 
-    def _get_parts(self) -> list[Part]:
+    def _get_bass_part(self) -> Part:
         bass_leaves = self._get_bass_leaves()
+        return Part(bass_leaves)
+
+    def _get_melody_part(self) -> Part:
         melody_leaves = self._get_melody_leaves()
-        return [Part(leaves) for leaves in (bass_leaves, melody_leaves)]
+        return Part(melody_leaves)
+
+    @property
+    def _parts(self) -> tuple[Part, Part]:
+        return self._bass_part, self._melody_part
 
     @property
     def bass_staff(self) -> Staff:
@@ -225,50 +264,50 @@ class Passage:
         return self._melody_staff or Staff()
 
     def _get_current_pitches(self) -> list[NamedPitch]:
-        current_pitches = [part.get_current_pitch() for part in self._parts]
+        current_pitches = [part.current_sounding_pitch for part in self._parts]
         return remove_none_values(current_pitches)
 
-    def _is_end_of_passage(self) -> bool:
-        current_notes = [part.current_leaf for part in self._parts]
-        return not any(current_notes)
+    def _passage_contains_more_sounding_leaves(self) -> bool:
+        current_notes = [part.current_sounding_leaf for part in self._parts]
+        return any(current_notes)
 
-    def _get_shortest_duration(self) -> float:
+    def _get_shortest_sounding_duration(self) -> float:
         current_durations = [
-            part._get_current_duration() for part in self._parts
+            part.current_sounding_leaf_duration for part in self._parts
         ]
         durations = remove_none_values(current_durations)
         return min(durations)
 
-    def _get_parts_matching_shortest_duration(
+    def _get_shortest_sounding_duration_parts(
         self, shortest_duration: float
     ) -> list[Part]:
         return [
             part
             for part in self._parts
-            if part._matches_duration(shortest_duration)
+            if part.matches_current_sounding_duration(shortest_duration)
         ]
 
-    def _get_parts_with_longer_durations(
+    def _get_longer_sounding_duration_parts(
         self, shortest_duration: float
     ) -> list[Part]:
         return [
             part
             for part in self._parts
-            if not part._matches_duration(shortest_duration)
+            if not part.matches_current_sounding_duration(shortest_duration)
         ]
 
     def _get_next_pitches(self) -> list[NamedPitch]:
-        shortest_duration = self._get_shortest_duration()
-        parts_matching_shortest_duration = (
-            self._get_parts_matching_shortest_duration(shortest_duration)
+        shortest_duration = self._get_shortest_sounding_duration()
+        shortest_sounding_duration_parts = (
+            self._get_shortest_sounding_duration_parts(shortest_duration)
         )
-        parts_with_longer_durations = self._get_parts_with_longer_durations(
-            shortest_duration
+        longer_sounding_duration_parts = (
+            self._get_longer_sounding_duration_parts(shortest_duration)
         )
-        for part in parts_matching_shortest_duration:
-            part._get_next_leaf()
-        for part in parts_with_longer_durations:
-            part._shorten_current_leaf(shortest_duration)
+        for part in shortest_sounding_duration_parts:
+            part.get_next_sounding_leaf()
+        for part in longer_sounding_duration_parts:
+            part.shorten_current_sounding_leaf(shortest_duration)
         return self._get_current_pitches()
 
     @staticmethod
@@ -305,13 +344,43 @@ class Passage:
     @property
     def _simultaneous_pitches(self) -> list[list[NamedPitch]]:
         pitches = [self._get_current_pitches()]
-        while not self._is_end_of_passage():
+        while self._passage_contains_more_sounding_leaves():
             new_pitches = self._get_next_pitches()
             if self._should_add_pitches(new_pitches, pitches):
                 pitches.append(new_pitches)
         if self._as_set:
             return self._get_ordered_unique_pitch_sets(pitches)
         return pitches
+
+    def _passage_contains_more_leaves(self) -> bool:
+        current_notes = [part.current_leaf for part in self._parts]
+        return any(current_notes)
+
+    def _simultaneous_leaves(self):
+        bass_part = self._bass_part
+        melody_part = self._melody_part
+        while self._passage_contains_more_leaves():
+            if (
+                bass_part.current_leaf
+                and isinstance(bass_part.current_leaf.leaf, Note)
+                and melody_part.current_leaf
+                and isinstance(melody_part.current_leaf.leaf, Note)
+            ):
+                bass_duration = bass_part.current_leaf_duration
+                melody_duration = melody_part.current_leaf_duration
+                if bass_duration and melody_duration:
+                    if bass_duration != melody_duration:
+                        if bass_duration < melody_duration:
+                            bass_part.get_next_leaf()
+                            melody_part.shorten_current_leaf(bass_duration)
+                        else:
+                            melody_part.get_next_leaf()
+                            bass_part.shorten_current_leaf(melody_duration)
+                            continue
+                    else:
+                        pass
+            bass_part.get_next_leaf()
+            melody_part.get_next_leaf()
 
     @property
     def matrices(self) -> list[Matrix]:
@@ -332,5 +401,9 @@ class Passage:
         return matrices
 
     def display(self):
-        for matrix in self.matrices:
-            matrix.display()
+        # for matrix in self.matrices:
+        #     matrix.display()
+        from rich import print
+
+        leaves = self._simultaneous_leaves()
+        print(leaves)
