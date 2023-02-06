@@ -145,7 +145,7 @@ class Part:
 
 
 @dataclass
-class MeteredMatrix:
+class MatrixLeaf:
     bass: NamedPitch | None
     melody: NamedPitch | None
     duration: Duration | None
@@ -363,50 +363,61 @@ class Passage:
         current_notes = [part.current_leaf for part in self._parts]
         return any(current_notes)
 
-    def _simultaneous_leaves(self):
+    def _current_leaves_are_notes(self) -> bool:
+        if (
+            self._bass_part.current_leaf
+            and self._melody_part.current_leaf
+            and isinstance(self._bass_part.current_leaf.leaf, Note)
+            and isinstance(self._melody_part.current_leaf.leaf, Note)
+        ):
+            return True
+        return False
+
+    def _current_notes_have_different_durations(
+        self, bass_duration: Duration | None, melody_duration: Duration | None
+    ) -> bool:
+        if (
+            bass_duration
+            and melody_duration
+            and bass_duration != melody_duration
+            and self._current_leaves_are_notes()
+        ):
+            return True
+        return False
+
+    @property
+    def matrix_leaves(self):
         bass_part = self._bass_part
         melody_part = self._melody_part
         leaves = []
         while self._passage_contains_more_leaves():
             bass_duration = bass_part.current_leaf_duration
             melody_duration = melody_part.current_leaf_duration
-            if (
-                bass_part.current_leaf
-                and isinstance(bass_part.current_leaf.leaf, Note)
-                and melody_part.current_leaf
-                and isinstance(melody_part.current_leaf.leaf, Note)
-            ) and (
-                bass_duration
-                and melody_duration
-                and bass_duration != melody_duration
+            matrix_duration = melody_duration
+            parts_requiring_next_leaf = [bass_part, melody_part]
+            part_requiring_shortened_leaf = None
+            if self._current_notes_have_different_durations(
+                bass_duration, melody_duration
             ):
-                if bass_duration < melody_duration:
+                if bass_duration and bass_duration < melody_duration:
                     matrix_duration = bass_duration
-                elif melody_duration < bass_duration:
-                    matrix_duration = melody_duration
+                    parts_requiring_next_leaf.remove(melody_part)
+                    part_requiring_shortened_leaf = melody_part
                 else:
-                    matrix_duration = None
-                matrix = MeteredMatrix(
-                    bass_part.current_leaf_pitch,
-                    melody_part.current_leaf_pitch,
-                    matrix_duration,
-                )
-                if bass_duration < melody_duration:
-                    bass_part.get_next_leaf()
-                    melody_part.shorten_current_leaf(bass_duration)
-                elif melody_duration < bass_duration:
-                    melody_part.get_next_leaf()
-                    bass_part.shorten_current_leaf(melody_duration)
-                leaves.append(matrix)
-                continue
-            matrix = MeteredMatrix(
+                    parts_requiring_next_leaf.remove(bass_part)
+                    part_requiring_shortened_leaf = bass_part
+            matrix = MatrixLeaf(
                 bass_part.current_leaf_pitch,
                 melody_part.current_leaf_pitch,
-                melody_part.current_leaf_duration,
+                matrix_duration,
             )
             leaves.append(matrix)
-            bass_part.get_next_leaf()
-            melody_part.get_next_leaf()
+            for part in parts_requiring_next_leaf:
+                part.get_next_leaf()
+            if part_requiring_shortened_leaf and matrix_duration:
+                part_requiring_shortened_leaf.shorten_current_leaf(
+                    matrix_duration
+                )
         return leaves
 
     @property
@@ -428,9 +439,5 @@ class Passage:
         return matrices
 
     def display(self):
-        # for matrix in self.matrices:
-        #     matrix.display()
-        from rich import print
-
-        leaves = self._simultaneous_leaves()
-        print(leaves)
+        for matrix in self.matrices:
+            matrix.display()

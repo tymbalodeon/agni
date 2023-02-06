@@ -360,6 +360,7 @@ class Notation:
             bass, melody = self._get_part_staves(passage)
             for staff in melody, bass:
                 staff_group.append(staff)
+            print(passage.matrix_leaves)
         else:
             for matrix in track(self._matrices, description=description):
                 self._add_matrix_to_staff_group(matrix, staff_group, tuning)
