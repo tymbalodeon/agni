@@ -144,6 +144,13 @@ class Part:
         return current_duration == duration
 
 
+@dataclass
+class MeteredMatrix:
+    bass: NamedPitch | None
+    melody: NamedPitch | None
+    duration: Duration | None
+
+
 class Passage:
     def __init__(
         self,
@@ -359,27 +366,48 @@ class Passage:
     def _simultaneous_leaves(self):
         bass_part = self._bass_part
         melody_part = self._melody_part
+        leaves = []
         while self._passage_contains_more_leaves():
-            print(bass_part.current_leaf_pitch, melody_part.current_leaf_pitch)
+            bass_duration = bass_part.current_leaf_duration
+            melody_duration = melody_part.current_leaf_duration
             if (
                 bass_part.current_leaf
                 and isinstance(bass_part.current_leaf.leaf, Note)
                 and melody_part.current_leaf
                 and isinstance(melody_part.current_leaf.leaf, Note)
+            ) and (
+                bass_duration
+                and melody_duration
+                and bass_duration != melody_duration
             ):
-                bass_duration = bass_part.current_leaf_duration
-                melody_duration = melody_part.current_leaf_duration
-                if bass_duration and melody_duration:
-                    if bass_duration != melody_duration:
-                        if bass_duration < melody_duration:
-                            bass_part.get_next_leaf()
-                            melody_part.shorten_current_leaf(bass_duration)
-                        else:
-                            melody_part.get_next_leaf()
-                            bass_part.shorten_current_leaf(melody_duration)
-                            continue
+                if bass_duration < melody_duration:
+                    matrix_duration = bass_duration
+                elif melody_duration < bass_duration:
+                    matrix_duration = melody_duration
+                else:
+                    matrix_duration = None
+                matrix = MeteredMatrix(
+                    bass_part.current_leaf_pitch,
+                    melody_part.current_leaf_pitch,
+                    matrix_duration,
+                )
+                if bass_duration < melody_duration:
+                    bass_part.get_next_leaf()
+                    melody_part.shorten_current_leaf(bass_duration)
+                elif melody_duration < bass_duration:
+                    melody_part.get_next_leaf()
+                    bass_part.shorten_current_leaf(melody_duration)
+                leaves.append(matrix)
+                continue
+            matrix = MeteredMatrix(
+                bass_part.current_leaf_pitch,
+                melody_part.current_leaf_pitch,
+                melody_part.current_leaf_duration,
+            )
+            leaves.append(matrix)
             bass_part.get_next_leaf()
             melody_part.get_next_leaf()
+        return leaves
 
     @property
     def matrices(self) -> list[Matrix]:
