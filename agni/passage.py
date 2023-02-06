@@ -150,6 +150,10 @@ class MatrixLeaf:
     melody: NamedPitch | None
     duration: Duration | None
 
+    @property
+    def contains_pitches(self) -> bool:
+        return all([self.bass, self.melody])
+
 
 class Passage:
     def __init__(

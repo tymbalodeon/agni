@@ -12,6 +12,7 @@ from abjad import (
     NamedPitch,
     Note,
     NumberedPitch,
+    Rest,
     Score,
     ShortInstrumentName,
     Staff,
@@ -360,7 +361,11 @@ class Notation:
             bass, melody = self._get_part_staves(passage)
             for staff in melody, bass:
                 staff_group.append(staff)
-            print(passage.matrix_leaves)
+            for matrix in passage.matrix_leaves:
+                if not matrix.contains_pitches:
+                    rest = Rest(matrix.duration)
+                    print(rest)
+                print(matrix)
         else:
             for matrix in track(self._matrices, description=description):
                 self._add_matrix_to_staff_group(matrix, staff_group, tuning)
