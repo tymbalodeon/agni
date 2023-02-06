@@ -72,8 +72,8 @@ class Part:
     def __init__(self, leaves: list[MeteredLeaf]):
         self._leaves = (leaf for leaf in leaves)
         self._sounding_leaves = self._get_leaves(leaves)
+        self.current_leaf_duration = None
         self.current_leaf = self.get_next_leaf()
-        self.current_leaf_duration = self._get_current_leaf_duration()
         self.current_sounding_leaf = self.get_next_sounding_leaf()
 
     @staticmethod
@@ -88,14 +88,9 @@ class Part:
     def get_next_leaf(self) -> MeteredLeaf | None:
         next_leaf = next(self._leaves, None)
         if next_leaf:
-            self.current_leaf_duration = next_leaf.leaf.written_duration
+            self.current_leaf_duration = get_duration(next_leaf.leaf)
         self.current_leaf = next_leaf
         return next_leaf
-
-    def _get_current_leaf_duration(self) -> Duration | None:
-        if not self.current_leaf:
-            return None
-        return self.current_leaf.leaf.written_duration
 
     def get_next_sounding_leaf(self) -> SoundingLeaf | None:
         next_sounding_leaf = next(self._sounding_leaves, None)
@@ -365,6 +360,7 @@ class Passage:
         bass_part = self._bass_part
         melody_part = self._melody_part
         while self._passage_contains_more_leaves():
+            print(bass_part.current_leaf_pitch, melody_part.current_leaf_pitch)
             if (
                 bass_part.current_leaf
                 and isinstance(bass_part.current_leaf.leaf, Note)
