@@ -73,6 +73,7 @@ class Part:
         self._leaves = (leaf for leaf in leaves)
         self._sounding_leaves = self._get_leaves(leaves)
         self.current_leaf = self.get_next_leaf()
+        self.current_leaf_duration = self._get_current_leaf_duration()
         self.current_sounding_leaf = self.get_next_sounding_leaf()
 
     @staticmethod
@@ -85,24 +86,28 @@ class Part:
         return (leaf for leaf in sounding_leaves if leaf)
 
     def get_next_leaf(self) -> MeteredLeaf | None:
-        self.current_leaf = next(self._leaves, None)
-        return self.current_leaf
+        next_leaf = next(self._leaves, None)
+        if next_leaf:
+            self.current_leaf_duration = next_leaf.leaf.written_duration
+        self.current_leaf = next_leaf
+        return next_leaf
 
-    def get_next_sounding_leaf(self) -> SoundingLeaf | None:
-        self.current_sounding_leaf = next(self._sounding_leaves, None)
-        return self.current_sounding_leaf
-
-    @property
-    def current_leaf_duration(self) -> Duration | None:
+    def _get_current_leaf_duration(self) -> Duration | None:
         if not self.current_leaf:
             return None
         return self.current_leaf.leaf.written_duration
 
+    def get_next_sounding_leaf(self) -> SoundingLeaf | None:
+        next_sounding_leaf = next(self._sounding_leaves, None)
+        self.current_sounding_leaf = next_sounding_leaf
+        return next_sounding_leaf
+
     @property
     def current_sounding_leaf_duration(self) -> Duration | None:
-        if not self.current_sounding_leaf:
+        current_sounding_leaf = self.current_sounding_leaf
+        if not current_sounding_leaf:
             return None
-        return self.current_sounding_leaf.duration
+        return current_sounding_leaf.duration
 
     def shorten_current_leaf(self, duration: Duration):
         if not self.current_leaf:
@@ -111,7 +116,7 @@ class Part:
         if not current_duration:
             return
         shorter_duration = current_duration - duration
-        self.current_leaf.leaf.written_duration = shorter_duration
+        self.current_leaf_duration = shorter_duration
 
     def shorten_current_sounding_leaf(self, duration: float):
         if not self.current_sounding_leaf:
@@ -377,8 +382,6 @@ class Passage:
                             melody_part.get_next_leaf()
                             bass_part.shorten_current_leaf(melody_duration)
                             continue
-                    else:
-                        pass
             bass_part.get_next_leaf()
             melody_part.get_next_leaf()
 
