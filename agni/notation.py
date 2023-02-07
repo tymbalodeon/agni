@@ -1,5 +1,6 @@
 from functools import cached_property
 from pathlib import Path
+from typing import cast
 
 from abjad import (
     Chord,
@@ -9,6 +10,7 @@ from abjad import (
     InstrumentName,
     Leaf,
     LilyPondFile,
+    MultimeasureRest,
     NamedPitch,
     Note,
     NumberedPitch,
@@ -28,6 +30,7 @@ from abjad.get import indicators as get_indicators
 from abjad.get import lineage as get_lineage
 from abjad.persist import as_pdf
 from abjad.select import leaves as get_leaves
+from abjadext.rmakers import multiplied_duration
 from rich.progress import track
 
 from .helpers import get_staff_by_name, remove_none_values
@@ -348,6 +351,13 @@ class Notation:
             cls._set_staff_instrument_name(staff)
         return bass, melody
 
+    @staticmethod
+    def _get_multimeasure_rest(duration: Duration) -> MultimeasureRest:
+        return cast(
+            MultimeasureRest,
+            multiplied_duration([duration], MultimeasureRest)[0],
+        )
+
     def _make_ensemble_score(
         self,
         tuning: Tuning,
@@ -361,14 +371,21 @@ class Notation:
             bass, melody = self._get_part_staves(passage)
             for staff in melody, bass:
                 staff_group.append(staff)
-            for matrix in passage.matrix_leaves:
-                if not matrix.contains_pitches:
-                    rest = Rest(matrix.duration)
-                    print(rest)
-                print(matrix)
+            for matrix_leaf in passage.matrix_leaves:
+                duration = matrix_leaf.duration
+                print(duration, duration.is_assignable)
+                if matrix_leaf.contains_pitches:
+                    pass
+                else:
+                    if duration.is_assignable:
+                        Rest(duration)
+                    else:
+                        self._get_multimeasure_rest(duration)
         else:
-            for matrix in track(self._matrices, description=description):
-                self._add_matrix_to_staff_group(matrix, staff_group, tuning)
+            for matrix_leaf in track(self._matrices, description=description):
+                self._add_matrix_to_staff_group(
+                    matrix_leaf, staff_group, tuning
+                )
         score = Score([staff_group])
         self._show_with_preamble(score, save, full_score)
 

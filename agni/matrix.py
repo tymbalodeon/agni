@@ -1,14 +1,14 @@
 from functools import cached_property, lru_cache
 from time import sleep
 
-from abjad import NamedPitch
+from abjad import Duration, NamedPitch, Note
 from rich.box import SIMPLE
 from rich.console import Console
 from rich.table import Table
 from rich.theme import Theme
 from supriya.patterns import EventPattern, SequencePattern
 
-from .helpers import stylize
+from .helpers import remove_none_values, stylize
 from .matrix_frequency import DisplayFormat, MatrixFrequency, PitchType, Tuning
 
 
@@ -18,9 +18,9 @@ class Matrix:
         bass: str | NamedPitch,
         melody: str | NamedPitch,
         multiples: int,
-        pitch_type: PitchType,
-        tuning: Tuning,
-        display_format: DisplayFormat,
+        pitch_type: PitchType = PitchType.HERTZ,
+        tuning: Tuning = Tuning.MICROTONAL,
+        display_format: DisplayFormat = DisplayFormat.TABLE,
         midi_input=False,
     ):
         self._multiples = range(multiples)
@@ -92,6 +92,11 @@ class Matrix:
             for frequency in self.sorted_frequencies
             if frequency.frequency
         ]
+
+    def get_sorted_generated_notes(self, duration: Duration) -> list[Note]:
+        sorted_frequencies = self.sorted_frequencies
+        notes = [note.get_note(duration) for note in sorted_frequencies]
+        return remove_none_values(notes)
 
     @staticmethod
     def _get_multiplier_label(multiplier: int, pitch: str) -> str:

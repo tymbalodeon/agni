@@ -146,13 +146,24 @@ class Part:
 
 @dataclass
 class MatrixLeaf:
-    bass: NamedPitch | None
-    melody: NamedPitch | None
+    _bass: NamedPitch | None
+    _melody: NamedPitch | None
     duration: Duration | None
+    _multiples: int
 
     @property
     def contains_pitches(self) -> bool:
-        return all([self.bass, self.melody])
+        return all([self._bass, self._melody])
+
+    @property
+    def pitches(self) -> list[Note]:
+        bass = self._bass
+        melody = self._melody
+        duration = self.duration
+        if not bass or not melody or not duration:
+            return []
+        matrix = Matrix(bass.name, melody.name, self._multiples)
+        return matrix.get_sorted_generated_notes(duration)
 
 
 class Passage:
@@ -414,6 +425,7 @@ class Passage:
                 bass_part.current_leaf_pitch,
                 melody_part.current_leaf_pitch,
                 matrix_duration,
+                self._multiples,
             )
             leaves.append(matrix)
             for part in parts_requiring_next_leaf:
