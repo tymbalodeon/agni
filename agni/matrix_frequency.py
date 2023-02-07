@@ -2,7 +2,7 @@ from enum import Enum
 from functools import cached_property
 from math import log
 
-from abjad import Duration, NamedPitch, Note, NumberedPitch
+from abjad import NamedPitch, NumberedPitch
 
 from .helpers import stylize
 
@@ -121,9 +121,15 @@ class MatrixFrequency:
     def _stylize_multiple(text: str) -> str:
         return stylize(text, "yellow")
 
+    def _get_bass_label(self) -> str:
+        return f"({self.bass_multiplier} x bass)"
+
+    def _get_melody_label(self) -> str:
+        return f"({self._melody_multiplier} x melody)"
+
     def _get_display_label(self) -> str:
-        bass_multiplier = f"({self.bass_multiplier} x bass)"
-        melody_multiplier = f"({self._melody_multiplier} x melody)"
+        bass_multiplier = self._get_bass_label()
+        melody_multiplier = self._get_melody_label()
         if self._is_bass_frequency:
             bass_multiplier = self._stylize_base_frequency(bass_multiplier)
         elif self._is_melody_frequency:
@@ -169,8 +175,7 @@ class MatrixFrequency:
             display_pitch = f"{display_label}{display_pitch}"
         return display_pitch
 
-    def get_note(self, duration: Duration) -> Note | None:
-        if self._is_bass_frequency:
-            return None
-        named_pitch = NamedPitch.from_hertz(self.frequency)
-        return Note.from_pitch_and_duration(named_pitch, duration)
+    def get_staff_name(self) -> str:
+        bass_multiplier = self._get_bass_label()
+        melody_multiplier = self._get_melody_label()
+        return f"{bass_multiplier} + {melody_multiplier}"

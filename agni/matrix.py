@@ -1,7 +1,7 @@
 from functools import cached_property, lru_cache
 from time import sleep
 
-from abjad import Duration, NamedPitch, Note
+from abjad import NamedPitch
 from rich.box import SIMPLE
 from rich.console import Console
 from rich.table import Table
@@ -93,9 +93,11 @@ class Matrix:
             if frequency.frequency
         ]
 
-    def get_sorted_generated_notes(self, duration: Duration) -> list[Note]:
+    def get_sorted_generated_frequencies(self) -> list[MatrixFrequency]:
         sorted_frequencies = self.sorted_frequencies
-        notes = [note.get_note(duration) for note in sorted_frequencies]
+        notes = [
+            note for note in sorted_frequencies if not note.is_base_frequency
+        ]
         return remove_none_values(notes)
 
     @staticmethod

@@ -373,9 +373,25 @@ class Notation:
                 staff_group.append(staff)
             for matrix_leaf in passage.matrix_leaves:
                 duration = matrix_leaf.duration
-                print(duration, duration.is_assignable)
                 if matrix_leaf.contains_pitches:
-                    pass
+                    if not duration.is_assignable:
+                        continue
+                    for pitch in matrix_leaf.generated_pitches:
+                        staff_name = pitch.get_staff_name()
+                        staff_names = [staff.name for staff in staff_group]
+                        if staff_name not in staff_names:
+                            staff = Staff(name=staff_name)
+                            staff_group.append(staff)
+                        named_pitch = NamedPitch.from_hertz(pitch.frequency)
+                        note = Note.from_pitch_and_duration(
+                            named_pitch, duration
+                        )
+                        staff = next(
+                            staff
+                            for staff in staff_group
+                            if staff.name == staff_name
+                        )
+                        staff.append(note)
                 else:
                     if duration.is_assignable:
                         Rest(duration)

@@ -24,7 +24,7 @@ from abjad.select import logical_ties as get_logical_ties
 
 from .helpers import get_staff_by_name, remove_none_values
 from .matrix import DisplayFormat, Matrix
-from .matrix_frequency import PitchType, Tuning
+from .matrix_frequency import MatrixFrequency, PitchType, Tuning
 
 
 class InputPart(Enum):
@@ -156,14 +156,14 @@ class MatrixLeaf:
         return all([self._bass, self._melody])
 
     @property
-    def pitches(self) -> list[Note]:
+    def generated_pitches(self) -> list[MatrixFrequency]:
         bass = self._bass
         melody = self._melody
         duration = self.duration
         if not bass or not melody or not duration:
             return []
         matrix = Matrix(bass.name, melody.name, self._multiples)
-        return matrix.get_sorted_generated_notes(duration)
+        return matrix.get_sorted_generated_frequencies()
 
 
 class Passage:
