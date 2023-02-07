@@ -1,7 +1,7 @@
 from collections.abc import Generator
 from dataclasses import dataclass
 from enum import Enum
-from functools import lru_cache
+from functools import cached_property, lru_cache
 from pathlib import Path
 from typing import cast
 
@@ -155,7 +155,7 @@ class MatrixLeaf:
     def contains_pitches(self) -> bool:
         return all([self._bass, self._melody])
 
-    @property
+    @cached_property
     def generated_pitches(self) -> list[MatrixFrequency]:
         bass = self._bass
         melody = self._melody
@@ -164,6 +164,24 @@ class MatrixLeaf:
             return []
         matrix = Matrix(bass.name, melody.name, self._multiples)
         return matrix.get_sorted_generated_frequencies()
+
+    @cached_property
+    def staff_names(self) -> list[str]:
+        multiples = range(self._multiples)
+        staff_names = []
+        for bass_multiple in multiples:
+            for melody_multiple in multiples:
+                if (
+                    bass_multiple == 0
+                    and melody_multiple == 0
+                    or bass_multiple == 1
+                    and melody_multiple == 0
+                    or bass_multiple == 0
+                    and melody_multiple == 1
+                ):
+                    continue
+                staff_names.append(f"{bass_multiple}B {melody_multiple}M")
+        return staff_names
 
 
 class Passage:

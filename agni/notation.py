@@ -377,26 +377,44 @@ class Notation:
                     if not duration.is_assignable:
                         continue
                     for pitch in matrix_leaf.generated_pitches:
-                        staff_name = pitch.get_staff_name()
-                        staff_names = [staff.name for staff in staff_group]
-                        if staff_name not in staff_names:
-                            staff = Staff(name=staff_name)
-                            staff_group.append(staff)
                         named_pitch = NamedPitch.from_hertz(pitch.frequency)
                         note = Note.from_pitch_and_duration(
                             named_pitch, duration
                         )
-                        staff = next(
-                            staff
-                            for staff in staff_group
-                            if staff.name == staff_name
-                        )
-                        staff.append(note)
+                        staff_name = pitch.get_staff_name()
+                        existing_staff_names = [
+                            staff.name for staff in staff_group
+                        ]
+                        if staff_name not in existing_staff_names:
+                            staff = Staff([note], name=staff_name)
+                            staff_group.insert(0, staff)
+                        else:
+                            staff = next(
+                                staff
+                                for staff in staff_group
+                                if staff.name == staff_name
+                            )
+                            staff.append(note)
                 else:
                     if duration.is_assignable:
-                        Rest(duration)
+                        rest = Rest(duration)
                     else:
-                        self._get_multimeasure_rest(duration)
+                        for staff_name in matrix_leaf.staff_names:
+                            existing_staff_names = [
+                                staff.name for staff in staff_group
+                            ]
+                            rest = self._get_multimeasure_rest(duration)
+                            if staff_name not in existing_staff_names:
+                                staff = Staff(name=staff_name)
+                                staff.append(rest)
+                                staff_group.insert(0, staff)
+                            else:
+                                staff = next(
+                                    staff
+                                    for staff in staff_group
+                                    if staff.name == staff_name
+                                )
+                                staff.append(rest)
         else:
             for matrix_leaf in track(self._matrices, description=description):
                 self._add_matrix_to_staff_group(
