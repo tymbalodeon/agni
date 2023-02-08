@@ -370,7 +370,11 @@ class Notation:
         is_start_of_tuplet: bool,
     ):
         if tuplet and is_start_of_tuplet:
-            component = Tuplet(tuplet.multiplier, components=[leaf])
+            input_multiplier = tuplet.multiplier
+            numerator = input_multiplier.numerator
+            denominator = input_multiplier.denominator
+            multiplier = f"{denominator}:{numerator}"
+            component = Tuplet(multiplier, components=[leaf])
         else:
             component = leaf
         staff = next(
@@ -412,6 +416,9 @@ class Notation:
                         note = matrix_frequency.get_note(
                             duration, matrix_leaf.tie
                         )
+                        if not note:
+                            continue
+                        self._set_clef(note)
                         staff_name = matrix_frequency.get_staff_name()
                         self._add_leaf_to_staff(
                             staff_group,
