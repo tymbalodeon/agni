@@ -2,7 +2,7 @@ from enum import Enum
 from functools import cached_property
 from math import log
 
-from abjad import NamedPitch, NumberedPitch
+from abjad import Duration, NamedPitch, Note, NumberedPitch, Tie, attach
 
 from .helpers import stylize
 
@@ -181,3 +181,12 @@ class MatrixFrequency:
         if no_special_characters:
             return f"{self.bass_multiplier}B {self._melody_multiplier}M"
         return f"{bass_multiplier} + {melody_multiplier}"
+
+    def get_note(self, duration: Duration, tie: bool) -> Note | None:
+        if not self.frequency:
+            return None
+        named_pitch = NamedPitch.from_hertz(self.frequency)
+        note = Note.from_pitch_and_duration(named_pitch, duration)
+        if tie:
+            attach(Tie(), note)
+        return note

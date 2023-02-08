@@ -13,11 +13,14 @@ from abjad import (
     Note,
     Rest,
     Staff,
+    Tie,
     TimeSignature,
+    Tuplet,
     parse,
 )
 from abjad.get import duration as get_duration
 from abjad.get import indicators as get_indicators
+from abjad.get import parentage as get_parentage
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
@@ -143,12 +146,44 @@ class Part:
         current_duration = self.current_sounding_leaf_duration
         return current_duration == duration
 
+    @property
+    def current_leaf_tie(self) -> bool:
+        if not self.current_leaf:
+            return False
+        return bool(get_indicators(self.current_leaf.leaf, prototype=Tie))
+
+    @property
+    def current_leaf_tuplet(self) -> Tuplet | None:
+        if not self.current_leaf or not self.current_leaf_duration:
+            return None
+        current_leaf = self.current_leaf.leaf
+        parent = get_parentage(current_leaf).parent
+        if isinstance(parent, Tuplet):
+            return parent
+        return None
+
+    @property
+    def is_start_of_tuplet(self) -> bool:
+        if not self.current_leaf or not self.current_leaf_tuplet:
+            return False
+        return self.current_leaf_tuplet.index(self.current_leaf.leaf) == 0
+
+    @property
+    def current_leaf_written_duration(self) -> Duration | None:
+        current_leaf = self.current_leaf
+        if not current_leaf:
+            return None
+        return current_leaf.leaf.written_duration
+
 
 @dataclass
 class MatrixLeaf:
     _bass: NamedPitch | None
     _melody: NamedPitch | None
     duration: Duration | None
+    tie: bool
+    tuplet: Tuplet | None
+    is_start_of_tuplet: bool
     _multiples: int
 
     @property
@@ -210,8 +245,8 @@ class Passage:
         self._adjacent_duplicates = adjacent_duplicates
         self.title = self._get_title(lilypond_input)
         self.composer = self._get_composer(lilypond_input)
-        self._bass_staff = self._get_bass_staff(lilypond_input)
-        self._melody_staff = self._get_melody_staff(lilypond_input)
+        self._bass_input_staff = self._get_bass_staff(lilypond_input)
+        self._melody_input_staff = self._get_melody_staff(lilypond_input)
         self._bass_part = self._get_bass_part()
         self._melody_part = self._get_melody_part()
 
@@ -250,12 +285,12 @@ class Passage:
         return get_staff_by_name(staves, InputPart.MELODY.value)
 
     @staticmethod
-    def _get_time_signature(note: Leaf) -> TimeSignature | None:
+    def _get_time_signature(leaf: Leaf) -> TimeSignature | None:
         return next(
             (
                 time_signature
                 for time_signature in get_indicators(
-                    note, prototype=TimeSignature
+                    leaf, prototype=TimeSignature
                 )
             ),
             None,
@@ -274,9 +309,9 @@ class Passage:
 
     def _get_staff_leaves(self, input_part: InputPart) -> list[MeteredLeaf]:
         if input_part == InputPart.BASS:
-            staff = self._bass_staff
+            staff = self._bass_input_staff
         else:
-            staff = self._melody_staff
+            staff = self._melody_input_staff
         if not staff:
             return []
         components = staff.components
@@ -303,11 +338,11 @@ class Passage:
 
     @property
     def bass_staff(self) -> Staff:
-        return self._bass_staff or Staff()
+        return self._bass_input_staff or Staff()
 
     @property
     def melody_staff(self) -> Staff:
-        return self._melody_staff or Staff()
+        return self._melody_input_staff or Staff()
 
     def _get_current_pitches(self) -> list[NamedPitch]:
         current_pitches = [part.current_sounding_pitch for part in self._parts]
@@ -425,38 +460,65 @@ class Passage:
         return False
 
     @property
-    def matrix_leaves(self):
+    def matrix_leaves(self) -> list[MatrixLeaf]:
         bass_part = self._bass_part
         melody_part = self._melody_part
         leaves = []
         while self._passage_contains_more_leaves():
             bass_duration = bass_part.current_leaf_duration
             melody_duration = melody_part.current_leaf_duration
-            matrix_duration = melody_duration
+            tie = melody_part.current_leaf_tie
+            tuplet = melody_part.current_leaf_tuplet
+            is_start_of_tuplet = melody_part.is_start_of_tuplet
+            if (
+                tuplet
+                or melody_part.current_leaf
+                and isinstance(melody_part.current_leaf.leaf, Note)
+                and melody_duration
+                and not melody_duration.is_assignable
+            ):
+                matrix_duration = melody_part.current_leaf_written_duration
+                duration_to_shorten_by = melody_duration
+            else:
+                matrix_duration = melody_duration
+                duration_to_shorten_by = melody_duration
             parts_requiring_next_leaf = [bass_part, melody_part]
             part_requiring_shortened_leaf = None
             if self._current_notes_have_different_durations(
                 bass_duration, melody_duration
             ):
                 if bass_duration and bass_duration < melody_duration:
-                    matrix_duration = bass_duration
+                    tie = bass_part.current_leaf_tie
+                    tuplet = bass_part.current_leaf_tuplet
+                    is_start_of_tuplet = bass_part.is_start_of_tuplet
+                    if tuplet or not bass_duration.is_assignable:
+                        matrix_duration = (
+                            bass_part.current_leaf_written_duration
+                        )
+                        duration_to_shorten_by = bass_duration
+                    else:
+                        matrix_duration = bass_duration
+                        duration_to_shorten_by = bass_duration
                     parts_requiring_next_leaf.remove(melody_part)
                     part_requiring_shortened_leaf = melody_part
                 else:
                     parts_requiring_next_leaf.remove(bass_part)
                     part_requiring_shortened_leaf = bass_part
-            matrix = MatrixLeaf(
+            matrix_leaf = MatrixLeaf(
                 bass_part.current_leaf_pitch,
                 melody_part.current_leaf_pitch,
                 matrix_duration,
+                tie,
+                tuplet,
+                is_start_of_tuplet,
                 self._multiples,
             )
-            leaves.append(matrix)
+            leaves.append(matrix_leaf)
             for part in parts_requiring_next_leaf:
                 part.get_next_leaf()
-            if part_requiring_shortened_leaf and matrix_duration:
+            if part_requiring_shortened_leaf and duration_to_shorten_by:
                 part_requiring_shortened_leaf.shorten_current_leaf(
-                    matrix_duration
+                    duration_to_shorten_by
                 )
         return leaves
 

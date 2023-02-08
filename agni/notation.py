@@ -1,6 +1,5 @@
 from functools import cached_property
 from pathlib import Path
-from re import escape
 from typing import cast
 
 from abjad import (
@@ -31,6 +30,7 @@ from abjad.get import indicators as get_indicators
 from abjad.get import lineage as get_lineage
 from abjad.persist import as_pdf
 from abjad.select import leaves as get_leaves
+from abjad.select import tuplets as get_tuplets
 from abjadext.rmakers import multiplied_duration
 from rich.progress import track
 
@@ -352,13 +352,6 @@ class Notation:
             cls._set_staff_instrument_name(staff)
         return bass, melody
 
-    @staticmethod
-    def _get_matrix_frequency_note(
-        matrix_frequency: MatrixFrequency, duration: Duration
-    ) -> Note:
-        named_pitch = NamedPitch.from_hertz(matrix_frequency.frequency)
-        return Note.from_pitch_and_duration(named_pitch, duration)
-
     @classmethod
     def _get_rest(cls, duration: Duration) -> Rest | MultimeasureRest:
         if duration.is_assignable:
@@ -370,15 +363,27 @@ class Notation:
 
     @staticmethod
     def _add_leaf_to_staff(
-        staff_group: StaffGroup, staff_name: str, leaf: Leaf
+        staff_group: StaffGroup,
+        staff_name: str,
+        leaf: Leaf,
+        tuplet: Tuplet | None,
+        is_start_of_tuplet: bool,
     ):
+        if tuplet and is_start_of_tuplet:
+            component = Tuplet(tuplet.multiplier, components=[leaf])
+        else:
+            component = leaf
         staff = next(
             (staff for staff in staff_group if staff.name == staff_name), None
         )
         if staff:
-            staff.append(leaf)
+            if tuplet and not is_start_of_tuplet:
+                parent = get_tuplets(staff)[-1]
+            else:
+                parent = staff
+            parent.append(component)
         else:
-            staff = Staff([leaf], name=staff_name)
+            staff = Staff([component], name=staff_name)
             staff_name_markup = f"\\markup { {staff_name} }"
             staff_name_markup = staff_name_markup.replace("'", "")
             first_leaf = staff[0]
@@ -400,26 +405,36 @@ class Notation:
                 staff_group.append(staff)
             for matrix_leaf in passage.matrix_leaves:
                 duration = matrix_leaf.duration
+                if not duration:
+                    continue
                 if matrix_leaf.contains_pitches:
-                    if not duration.is_assignable:
-                        continue
                     for matrix_frequency in matrix_leaf.generated_pitches:
-                        note = self._get_matrix_frequency_note(
-                            matrix_frequency, duration
+                        note = matrix_frequency.get_note(
+                            duration, matrix_leaf.tie
                         )
                         staff_name = matrix_frequency.get_staff_name()
-                        self._add_leaf_to_staff(staff_group, staff_name, note)
+                        self._add_leaf_to_staff(
+                            staff_group,
+                            staff_name,
+                            note,
+                            matrix_leaf.tuplet,
+                            matrix_leaf.is_start_of_tuplet,
+                        )
                 else:
                     for staff_name in matrix_leaf.staff_names:
                         rest = self._get_rest(duration)
-                        self._add_leaf_to_staff(staff_group, staff_name, rest)
+                        self._add_leaf_to_staff(
+                            staff_group,
+                            staff_name,
+                            rest,
+                            matrix_leaf.tuplet,
+                            matrix_leaf.is_start_of_tuplet,
+                        )
         else:
-            for matrix_leaf in track(
+            for matrix in track(
                 self._matrices, description=self.PROGRESS_DESCRIPTION
             ):
-                self._add_matrix_to_staff_group(
-                    matrix_leaf, staff_group, tuning
-                )
+                self._add_matrix_to_staff_group(matrix, staff_group, tuning)
         score = Score([staff_group])
         self._show_with_preamble(score, save, full_score)
 

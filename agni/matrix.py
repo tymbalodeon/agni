@@ -8,7 +8,7 @@ from rich.table import Table
 from rich.theme import Theme
 from supriya.patterns import EventPattern, SequencePattern
 
-from .helpers import remove_none_values, stylize
+from .helpers import stylize
 from .matrix_frequency import DisplayFormat, MatrixFrequency, PitchType, Tuning
 
 
@@ -94,11 +94,11 @@ class Matrix:
         ]
 
     def get_sorted_generated_frequencies(self) -> list[MatrixFrequency]:
-        sorted_frequencies = self.sorted_frequencies
-        notes = [
-            note for note in sorted_frequencies if not note.is_base_frequency
+        return [
+            frequency
+            for frequency in self.sorted_frequencies
+            if frequency.frequency and not frequency.is_base_frequency
         ]
-        return remove_none_values(notes)
 
     @staticmethod
     def _get_multiplier_label(multiplier: int, pitch: str) -> str:
