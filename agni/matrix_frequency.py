@@ -175,7 +175,7 @@ class MatrixFrequency:
             display_pitch = f"{display_label}{display_pitch}"
         return display_pitch
 
-    def get_staff_name(self, no_special_characters=True) -> str:
+    def get_staff_name(self, no_special_characters=False) -> str:
         bass_multiplier = self._get_bass_label()
         melody_multiplier = self._get_melody_label()
         if no_special_characters:

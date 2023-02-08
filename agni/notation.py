@@ -1,5 +1,6 @@
 from functools import cached_property
 from pathlib import Path
+from re import escape
 from typing import cast
 
 from abjad import (
@@ -378,7 +379,8 @@ class Notation:
             staff.append(leaf)
         else:
             staff = Staff([leaf], name=staff_name)
-            staff_name_markup = "TEST"
+            staff_name_markup = f"\\markup { {staff_name} }"
+            staff_name_markup = staff_name_markup.replace("'", "")
             first_leaf = staff[0]
             attach(InstrumentName(staff_name_markup), first_leaf)
             attach(ShortInstrumentName(staff_name_markup), first_leaf)
