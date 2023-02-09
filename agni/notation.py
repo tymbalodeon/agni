@@ -11,6 +11,7 @@ from abjad import (
     InstrumentName,
     Leaf,
     LilyPondFile,
+    LilyPondLiteral,
     MultimeasureRest,
     NamedPitch,
     Note,
@@ -446,6 +447,7 @@ class Notation:
             last_leaf = get_leaves(staff)[-1]
             attach(BarLine("|."), last_leaf)
         score = Score([staff_group])
+        attach(LilyPondLiteral(r"\compressMMRests"), score)
         self._show_with_preamble(score, save, full_score)
 
     @staticmethod
