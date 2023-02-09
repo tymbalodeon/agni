@@ -1,6 +1,5 @@
 from collections.abc import Generator
 from dataclasses import dataclass
-from enum import Enum
 from functools import cached_property, lru_cache
 from pathlib import Path
 from typing import cast
@@ -25,14 +24,14 @@ from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
 
-from .helpers import get_staff_by_name, remove_none_values
+from .helpers import (
+    InputPart,
+    get_instrument_name,
+    get_staff_by_name,
+    remove_none_values,
+)
 from .matrix import DisplayFormat, Matrix
 from .matrix_frequency import MatrixFrequency, PitchType, Tuning
-
-
-class InputPart(Enum):
-    BASS = "bass"
-    MELODY = "melody"
 
 
 @dataclass
@@ -215,7 +214,9 @@ class MatrixLeaf:
                     and melody_multiple == 1
                 ):
                     continue
-                instrument_name = f"{bass_multiple}B + {melody_multiple}M"
+                instrument_name = get_instrument_name(
+                    bass_multiple, melody_multiple
+                )
                 staff_names.append(instrument_name)
         return staff_names
 
@@ -499,6 +500,8 @@ class Passage:
                 else:
                     parts_requiring_next_leaf.remove(bass_part)
                     part_requiring_shortened_leaf = bass_part
+            elif not tuplet and bass_part.current_leaf_tuplet:
+                tuplet = bass_part.current_leaf_tuplet
             matrix_leaf = MatrixLeaf(
                 bass_part.current_leaf_pitch,
                 melody_part.current_leaf_pitch,

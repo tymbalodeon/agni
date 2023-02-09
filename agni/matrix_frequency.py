@@ -4,7 +4,7 @@ from math import log
 
 from abjad import Duration, NamedPitch, Note, NumberedPitch, Tie, attach
 
-from .helpers import stylize
+from .helpers import get_instrument_name, stylize
 
 
 class PitchType(Enum):
@@ -176,7 +176,9 @@ class MatrixFrequency:
         return display_pitch
 
     def get_instrument_names(self) -> str:
-        return f"{self.bass_multiplier}B + {self._melody_multiplier}M"
+        return get_instrument_name(
+            self.bass_multiplier, self._melody_multiplier
+        )
 
     def get_note(self, duration: Duration, tie: bool) -> Note | None:
         if not self.frequency:
