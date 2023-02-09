@@ -80,7 +80,7 @@ class Notation:
 
                     \\paper {{
                         #(set-paper-size "letter")
-                        left-margin = 0.75\\in
+                        left-margin = 1.5\\in
                         right-margin = 0.75\\in
                         top-margin = 0.5\\in
                         bottom-margin = 0.5\\in
@@ -364,11 +364,12 @@ class Notation:
     @staticmethod
     def _add_leaf_to_staff(
         staff_group: StaffGroup,
-        staff_name: str,
+        instrument_names: tuple[str, str],
         leaf: Leaf,
         tuplet: Tuplet | None,
         is_start_of_tuplet: bool,
     ):
+        instrument_name, short_instrument_name = instrument_names
         if tuplet and is_start_of_tuplet:
             input_multiplier = tuplet.multiplier
             numerator = input_multiplier.numerator
@@ -378,7 +379,8 @@ class Notation:
         else:
             component = leaf
         staff = next(
-            (staff for staff in staff_group if staff.name == staff_name), None
+            (staff for staff in staff_group if staff.name == instrument_name),
+            None,
         )
         if staff:
             if tuplet and not is_start_of_tuplet:
@@ -387,12 +389,20 @@ class Notation:
                 parent = staff
             parent.append(component)
         else:
-            staff = Staff([component], name=staff_name)
-            staff_name_markup = f"\\markup { {staff_name} }"
-            staff_name_markup = staff_name_markup.replace("'", "")
+            staff = Staff([component], name=instrument_name)
+            instrument_name_markup = f"\\markup { {instrument_name} }"
+            instrument_name_markup = instrument_name_markup.replace("'", "")
+            short_instrument_name_markup = (
+                f"\\markup { {short_instrument_name} }"
+            )
+            short_instrument_name_markup = (
+                short_instrument_name_markup.replace("'", "")
+            )
             first_leaf = staff[0]
-            attach(InstrumentName(staff_name_markup), first_leaf)
-            attach(ShortInstrumentName(staff_name_markup), first_leaf)
+            attach(InstrumentName(instrument_name_markup), first_leaf)
+            attach(
+                ShortInstrumentName(short_instrument_name_markup), first_leaf
+            )
             staff_group.insert(0, staff)
 
     def _make_ensemble_score(
@@ -419,20 +429,22 @@ class Notation:
                         if not note:
                             continue
                         self._set_clef(note)
-                        staff_name = matrix_frequency.get_staff_name()
+                        instrument_names = (
+                            matrix_frequency.get_instrument_names()
+                        )
                         self._add_leaf_to_staff(
                             staff_group,
-                            staff_name,
+                            instrument_names,
                             note,
                             matrix_leaf.tuplet,
                             matrix_leaf.is_start_of_tuplet,
                         )
                 else:
-                    for staff_name in matrix_leaf.staff_names:
+                    for instrument_names in matrix_leaf.staff_names:
                         rest = self._get_rest(duration)
                         self._add_leaf_to_staff(
                             staff_group,
-                            staff_name,
+                            instrument_names,
                             rest,
                             matrix_leaf.tuplet,
                             matrix_leaf.is_start_of_tuplet,

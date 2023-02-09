@@ -201,7 +201,7 @@ class MatrixLeaf:
         return matrix.get_sorted_generated_frequencies()
 
     @cached_property
-    def staff_names(self, no_special_characters=False) -> list[str]:
+    def staff_names(self) -> list[tuple[str, str]]:
         multiples = range(self._multiples)
         staff_names = []
         for bass_multiple in multiples:
@@ -215,13 +215,13 @@ class MatrixLeaf:
                     and melody_multiple == 1
                 ):
                     continue
-                if no_special_characters:
-                    staff_names.append(f"{bass_multiple}B {melody_multiple}M")
-                else:
-                    staff_names.append(
-                        f"({bass_multiple} x bass) +"
-                        f" ({melody_multiple} x melody)"
-                    )
+                instrument_name = (
+                    f"({bass_multiple} x bass) + ({melody_multiple} x melody)"
+                )
+                short_instrument_name = (
+                    f"{bass_multiple}B + {melody_multiple}M"
+                )
+                staff_names.append((instrument_name, short_instrument_name))
         return staff_names
 
 
