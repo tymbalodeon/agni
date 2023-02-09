@@ -175,14 +175,8 @@ class MatrixFrequency:
             display_pitch = f"{display_label}{display_pitch}"
         return display_pitch
 
-    def get_instrument_names(self) -> tuple[str, str]:
-        bass_multiplier = self._get_bass_label()
-        melody_multiplier = self._get_melody_label()
-        instrument_name = f"{bass_multiplier} + {melody_multiplier}"
-        short_instrument_name = (
-            f"{self.bass_multiplier}B + {self._melody_multiplier}M"
-        )
-        return instrument_name, short_instrument_name
+    def get_instrument_names(self) -> str:
+        return f"{self.bass_multiplier}B + {self._melody_multiplier}M"
 
     def get_note(self, duration: Duration, tie: bool) -> Note | None:
         if not self.frequency:

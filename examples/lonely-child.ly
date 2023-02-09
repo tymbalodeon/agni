@@ -26,8 +26,8 @@
       \compressMMRests {
         <<
           \new Staff = "melody" \with {
-            instrumentName = "Soprano"
-            shortInstrumentName = "S."
+            instrumentName = "Melody"
+            shortInstrumentName = "M."
           } {
             \melody \addlyrics \text
 

@@ -80,7 +80,7 @@ class Notation:
 
                     \\paper {{
                         #(set-paper-size "letter")
-                        left-margin = 1.5\\in
+                        left-margin = 1.25\\in
                         right-margin = 0.75\\in
                         top-margin = 0.5\\in
                         bottom-margin = 0.5\\in
@@ -332,17 +332,13 @@ class Notation:
             return None
         return leaves[0]
 
-    @staticmethod
-    def _get_staff_name_test(staff: Staff) -> str:
-        return staff.name or ""
-
     @classmethod
     def _set_staff_instrument_name(cls, staff: Staff):
-        full_name = cls._get_staff_name_test(staff).title()
-        short_name = full_name[0]
+        instrument_name = staff.name or ""
+        instrument_name = instrument_name.title()
         first_leaf = cls._get_first_staff_leaf(staff)
-        attach(InstrumentName(full_name), first_leaf)
-        attach(ShortInstrumentName(short_name), first_leaf)
+        attach(InstrumentName(instrument_name), first_leaf)
+        attach(ShortInstrumentName(instrument_name), first_leaf)
 
     @classmethod
     def _get_part_staves(cls, passage: Passage) -> tuple[Staff, Staff]:
@@ -364,12 +360,11 @@ class Notation:
     @staticmethod
     def _add_leaf_to_staff(
         staff_group: StaffGroup,
-        instrument_names: tuple[str, str],
+        instrument_name: str,
         leaf: Leaf,
         tuplet: Tuplet | None,
         is_start_of_tuplet: bool,
     ):
-        instrument_name, short_instrument_name = instrument_names
         if tuplet and is_start_of_tuplet:
             input_multiplier = tuplet.multiplier
             numerator = input_multiplier.numerator
@@ -392,17 +387,9 @@ class Notation:
             staff = Staff([component], name=instrument_name)
             instrument_name_markup = f"\\markup { {instrument_name} }"
             instrument_name_markup = instrument_name_markup.replace("'", "")
-            short_instrument_name_markup = (
-                f"\\markup { {short_instrument_name} }"
-            )
-            short_instrument_name_markup = (
-                short_instrument_name_markup.replace("'", "")
-            )
             first_leaf = staff[0]
             attach(InstrumentName(instrument_name_markup), first_leaf)
-            attach(
-                ShortInstrumentName(short_instrument_name_markup), first_leaf
-            )
+            attach(ShortInstrumentName(instrument_name_markup), first_leaf)
             staff_group.insert(0, staff)
 
     def _make_ensemble_score(
@@ -440,7 +427,7 @@ class Notation:
                             matrix_leaf.is_start_of_tuplet,
                         )
                 else:
-                    for instrument_names in matrix_leaf.staff_names:
+                    for instrument_names in matrix_leaf.instrument_names:
                         rest = self._get_rest(duration)
                         self._add_leaf_to_staff(
                             staff_group,
