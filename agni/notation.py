@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import cast
 
 from abjad import (
+    BarLine,
     Chord,
     Clef,
     Component,
@@ -441,6 +442,9 @@ class Notation:
                 self._matrices, description=self.PROGRESS_DESCRIPTION
             ):
                 self._add_matrix_to_staff_group(matrix, staff_group, tuning)
+        for staff in staff_group:
+            last_leaf = get_leaves(staff)[-1]
+            attach(BarLine("|."), last_leaf)
         score = Score([staff_group])
         self._show_with_preamble(score, save, full_score)
 
