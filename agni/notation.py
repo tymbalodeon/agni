@@ -394,6 +394,15 @@ class Notation:
             attach(ShortInstrumentName(instrument_name_markup), first_leaf)
             staff_group.insert(0, staff)
 
+    @staticmethod
+    def _add_double_bar_lines(staff_group: StaffGroup):
+        for staff in staff_group:
+            leaves = get_leaves(staff)
+            if not leaves:
+                return
+            last_leaf = leaves[-1]
+            attach(BarLine("|."), last_leaf)
+
     def _make_ensemble_score(
         self,
         tuning: Tuning,
@@ -443,9 +452,7 @@ class Notation:
                 self._matrices, description=self.PROGRESS_DESCRIPTION
             ):
                 self._add_matrix_to_staff_group(matrix, staff_group, tuning)
-        for staff in staff_group:
-            last_leaf = get_leaves(staff)[-1]
-            attach(BarLine("|."), last_leaf)
+        self._add_double_bar_lines(staff_group)
         score = Score([staff_group])
         attach(LilyPondLiteral(r"\compressMMRests"), score)
         self._show_with_preamble(score, save, full_score)
