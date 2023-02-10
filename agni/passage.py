@@ -455,6 +455,11 @@ class Passage:
             return True
         return False
 
+    def _current_notes_tie(self) -> bool:
+        bass_tie = self._bass_part.current_leaf_tie
+        melody_tie = self._melody_part.current_leaf_tie
+        return bass_tie and melody_tie
+
     @property
     def matrix_leaves(self) -> list[MatrixLeaf]:
         bass_part = self._bass_part
@@ -463,7 +468,7 @@ class Passage:
         while self._passage_contains_more_leaves():
             bass_duration = bass_part.current_leaf_duration
             melody_duration = melody_part.current_leaf_duration
-            tie = melody_part.current_leaf_tie
+            tie = self._current_notes_tie()
             tuplet = melody_part.current_leaf_tuplet
             is_start_of_tuplet = melody_part.is_start_of_tuplet
             if (
@@ -484,7 +489,6 @@ class Passage:
                 bass_duration, melody_duration
             ):
                 if bass_duration and bass_duration < melody_duration:
-                    tie = bass_part.current_leaf_tie
                     tuplet = bass_part.current_leaf_tuplet
                     is_start_of_tuplet = bass_part.is_start_of_tuplet
                     if tuplet or not bass_duration.is_assignable:
