@@ -428,7 +428,7 @@ class Notation:
                             continue
                         self._set_clef(note)
                         instrument_names = (
-                            matrix_frequency.get_instrument_names()
+                            matrix_frequency.get_instrument_name()
                         )
                         self._add_leaf_to_staff(
                             staff_group,
