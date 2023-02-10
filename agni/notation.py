@@ -1,5 +1,6 @@
 from functools import cached_property
 from pathlib import Path
+from statistics import mode
 from typing import cast
 
 from abjad import (
@@ -32,6 +33,7 @@ from abjad.get import indicators as get_indicators
 from abjad.get import lineage as get_lineage
 from abjad.persist import as_pdf
 from abjad.select import leaves as get_leaves
+from abjad.select import notes as get_notes
 from abjad.select import tuplets as get_tuplets
 from abjadext.rmakers import multiplied_duration
 from rich.progress import track
@@ -204,6 +206,20 @@ class Notation:
             new_clef = cls._get_clef_by_octave(octave)
             if new_clef != current_clef:
                 cls._set_clef(note)
+
+    @classmethod
+    def _set_staff_group_clefs(cls, staff_group: StaffGroup):
+        for staff in staff_group:
+            written_pitches = [note.written_pitch for note in get_notes(staff)]
+            pitches = [note for note in written_pitches if note]
+            octaves = [pitch.octave.number for pitch in pitches]
+            octave = mode(octaves)
+            clef = cls._get_clef_by_octave(octave)
+            leaves = get_leaves(staff)
+            if not leaves:
+                continue
+            first_leaf = leaves[0]
+            attach(clef, first_leaf)
 
     @staticmethod
     def _get_staff_name(name: str | None) -> str:
@@ -426,7 +442,6 @@ class Notation:
                         )
                         if not note:
                             continue
-                        self._set_clef(note)
                         instrument_names = (
                             matrix_frequency.get_instrument_name()
                         )
@@ -453,6 +468,7 @@ class Notation:
             ):
                 self._add_matrix_to_staff_group(matrix, staff_group, tuning)
         self._add_double_bar_lines(staff_group)
+        self._set_staff_group_clefs(staff_group)
         score = Score([staff_group])
         attach(LilyPondLiteral(r"\compressMMRests"), score)
         self._show_with_preamble(score, save, full_score)
