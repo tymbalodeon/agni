@@ -178,9 +178,9 @@ class Notation:
             return Clef("bass_8")
         if octave < 4:
             return Clef("bass")
-        if octave < 5:
-            return Clef("treble")
         if octave < 6:
+            return Clef("treble")
+        if octave < 7:
             return Clef("treble^8")
         return Clef("treble^15")
 
