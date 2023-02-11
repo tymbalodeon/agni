@@ -8,6 +8,7 @@ from abjad import (
     Duration,
     Leaf,
     LilyPondFile,
+    MultimeasureRest,
     NamedPitch,
     Note,
     Rest,
@@ -174,12 +175,21 @@ class Part:
             return None
         return current_leaf.leaf.written_duration
 
+    @property
+    def is_multi_measure_rest(self) -> bool:
+        if not self.current_leaf or not isinstance(
+            self.current_leaf.leaf, MultimeasureRest
+        ):
+            return False
+        return True
+
 
 @dataclass
 class MatrixLeaf:
     _bass: NamedPitch | None
     _melody: NamedPitch | None
     duration: Duration | None
+    is_multi_measure_rest: bool
     tie: bool
     tuplet: Tuplet | None
     is_start_of_tuplet: bool
@@ -203,8 +213,8 @@ class MatrixLeaf:
     def instrument_names(self) -> list[str]:
         multiples = range(self._multiples)
         staff_names = []
-        for bass_multiple in multiples:
-            for melody_multiple in multiples:
+        for melody_multiple in multiples:
+            for bass_multiple in multiples:
                 if (
                     bass_multiple == 0
                     and melody_multiple == 0
@@ -506,10 +516,15 @@ class Passage:
                     part_requiring_shortened_leaf = bass_part
             elif not tuplet and bass_part.current_leaf_tuplet:
                 tuplet = bass_part.current_leaf_tuplet
+            is_multi_measure_rest = (
+                bass_part.is_multi_measure_rest
+                and melody_part.is_multi_measure_rest
+            )
             matrix_leaf = MatrixLeaf(
                 bass_part.current_leaf_pitch,
                 melody_part.current_leaf_pitch,
                 matrix_duration,
+                is_multi_measure_rest,
                 tie,
                 tuplet,
                 is_start_of_tuplet,

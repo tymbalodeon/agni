@@ -209,7 +209,12 @@ class Notation:
 
     @classmethod
     def _set_staff_group_clefs(cls, staff_group: StaffGroup):
-        for staff in staff_group:
+        staves = [
+            staff
+            for staff in staff_group
+            if staff.name not in ["bass", "melody"]
+        ]
+        for staff in staves:
             written_pitches = [note.written_pitch for note in get_notes(staff)]
             pitches = [note for note in written_pitches if note]
             octaves = [pitch.octave.number for pitch in pitches]
@@ -367,13 +372,15 @@ class Notation:
         return bass, melody
 
     @classmethod
-    def _get_rest(cls, duration: Duration) -> Rest | MultimeasureRest:
-        if duration.is_assignable:
-            return Rest(duration)
-        return cast(
-            MultimeasureRest,
-            multiplied_duration([duration], MultimeasureRest)[0],
-        )
+    def _get_rest(
+        cls, duration: Duration, is_multi_measure_rest: bool
+    ) -> Rest | MultimeasureRest:
+        if is_multi_measure_rest:
+            return cast(
+                MultimeasureRest,
+                multiplied_duration([duration], MultimeasureRest)[0],
+            )
+        return Rest(duration)
 
     @staticmethod
     def _add_leaf_to_staff(
@@ -454,7 +461,9 @@ class Notation:
                         )
                 else:
                     for instrument_names in matrix_leaf.instrument_names:
-                        rest = self._get_rest(duration)
+                        rest = self._get_rest(
+                            duration, matrix_leaf.is_multi_measure_rest
+                        )
                         self._add_leaf_to_staff(
                             staff_group,
                             instrument_names,
