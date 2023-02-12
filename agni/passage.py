@@ -465,10 +465,25 @@ class Passage:
             return True
         return False
 
-    def _current_notes_tie(self) -> bool:
+    def _get_tie(self) -> bool:
         bass_tie = self._bass_part.current_leaf_tie
         melody_tie = self._melody_part.current_leaf_tie
-        return bass_tie and melody_tie
+        if bass_tie and melody_tie:
+            return True
+        bass_leaf = self._bass_part.current_leaf
+        melody_leaf = self._melody_part.current_leaf
+        if not bass_leaf or not melody_leaf:
+            return False
+        bass_duration = bass_leaf.leaf.written_duration
+        melody_duration = melody_leaf.leaf.written_duration
+        if not bass_duration or not melody_duration:
+            return False
+        return (
+            bass_tie
+            and bass_duration < melody_duration
+            or melody_tie
+            and melody_duration < bass_duration
+        )
 
     @property
     def matrix_leaves(self) -> list[MatrixLeaf]:
@@ -478,7 +493,7 @@ class Passage:
         while self._passage_contains_more_leaves():
             bass_duration = bass_part.current_leaf_duration
             melody_duration = melody_part.current_leaf_duration
-            tie = self._current_notes_tie()
+            tie = self._get_tie()
             tuplet = melody_part.current_leaf_tuplet
             is_start_of_tuplet = melody_part.is_start_of_tuplet
             if (
