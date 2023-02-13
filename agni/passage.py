@@ -24,6 +24,7 @@ from abjad.get import parentage as get_parentage
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
+from more_itertools import peekable
 
 from .helpers import (
     InputPart,
@@ -73,7 +74,7 @@ class SoundingLeaf:
 
 class Part:
     def __init__(self, leaves: list[MeteredLeaf]):
-        self._leaves = (leaf for leaf in leaves)
+        self._leaves = peekable(leaf for leaf in leaves)
         self._sounding_leaves = self._get_leaves(leaves)
         self.current_leaf_duration = None
         self.current_leaf = self.get_next_leaf()
@@ -465,6 +466,43 @@ class Passage:
             return True
         return False
 
+    @property
+    def _next_leaves_are_same_as_current(self) -> bool:
+        current_bass = self._bass_part.current_leaf
+        current_melody = self._melody_part.current_leaf
+        if not current_bass or not current_melody:
+            return False
+        current_bass_leaf = current_bass.leaf
+        current_melody_leaf = current_melody.leaf
+        if not isinstance(current_bass_leaf, Note) or not isinstance(
+            current_melody_leaf, Note
+        ):
+            return False
+        current_bass_pitch = current_bass_leaf.written_pitch
+        current_melody_pitch = current_melody_leaf.written_pitch
+        if not current_bass_pitch or not current_melody_pitch:
+            return False
+        current_bass_hertz = current_bass_pitch.hertz
+        current_melody_hertz = current_melody_pitch.hertz
+        next_bass = self._bass_part._leaves.peek()
+        next_melody = self._bass_part._leaves.peek()
+        if not next_bass or not next_melody:
+            return False
+        next_bass_leaf = next_bass.leaf
+        next_melody_leaf = next_melody.leaf
+        if not next_bass_leaf or not next_melody_leaf:
+            return False
+        next_bass_pitch = next_bass_leaf.written_pitch
+        next_melody_pitch = next_melody_leaf.written_pitch
+        if not next_bass_pitch or not next_melody_pitch:
+            return False
+        next_bass_hertz = next_bass_pitch.hertz
+        next_melody_hertz = next_melody_pitch.hertz
+        return (
+            current_bass_hertz == next_bass_hertz
+            and current_melody_hertz == next_melody_hertz
+        )
+
     def _get_tie(self) -> bool:
         bass_tie = self._bass_part.current_leaf_tie
         melody_tie = self._melody_part.current_leaf_tie
@@ -483,6 +521,7 @@ class Passage:
             and bass_duration < melody_duration
             or melody_tie
             and melody_duration < bass_duration
+            # and self._next_leaves_are_same_as_current
         )
 
     @property
