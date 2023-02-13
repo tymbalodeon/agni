@@ -492,6 +492,10 @@ class Passage:
         next_melody_leaf = next_melody.leaf
         if not next_bass_leaf or not next_melody_leaf:
             return False
+        if not isinstance(next_bass_leaf, Note) or not isinstance(
+            next_melody_leaf, Note
+        ):
+            return False
         next_bass_pitch = next_bass_leaf.written_pitch
         next_melody_pitch = next_melody_leaf.written_pitch
         if not next_bass_pitch or not next_melody_pitch:
