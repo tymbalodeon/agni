@@ -80,6 +80,13 @@ class Part:
         self.current_leaf = self.get_next_leaf()
         self.current_sounding_leaf = self.get_next_sounding_leaf()
 
+    @property
+    def current_leaf_hertz(self) -> float | None:
+        current_leaf_pitch = self.current_leaf_pitch
+        if not current_leaf_pitch:
+            return None
+        return current_leaf_pitch.hertz
+
     @staticmethod
     def _get_leaves(
         leaves: list[MeteredLeaf],
@@ -89,7 +96,23 @@ class Part:
         )
         return (leaf for leaf in sounding_leaves if leaf)
 
-    def get_next_leaf(self) -> MeteredLeaf | None:
+    def peek_next_leaf(self, duration: Duration | None) -> Leaf | None:
+        if duration:
+            current_leaf = self.current_leaf
+            if not current_leaf:
+                return None
+            return current_leaf.leaf
+        next_leaf = self._leaves.peek()
+        if not next_leaf:
+            return None
+        return next_leaf.leaf
+
+    def get_next_leaf(
+        self, duration: Duration | None = None
+    ) -> MeteredLeaf | None:
+        if duration:
+            self._shorten_current_leaf(duration)
+            return None
         next_leaf = next(self._leaves, None)
         if next_leaf:
             self.current_leaf_duration = get_duration(next_leaf.leaf)
@@ -108,7 +131,7 @@ class Part:
             return None
         return current_sounding_leaf.duration
 
-    def shorten_current_leaf(self, duration: Duration):
+    def _shorten_current_leaf(self, duration: Duration):
         if not self.current_leaf:
             return
         current_duration = self.current_leaf_duration
@@ -467,65 +490,61 @@ class Passage:
         return False
 
     @property
-    def _next_leaves_are_same_as_current(self) -> bool:
-        current_bass = self._bass_part.current_leaf
-        current_melody = self._melody_part.current_leaf
-        if not current_bass or not current_melody:
-            return False
-        current_bass_leaf = current_bass.leaf
-        current_melody_leaf = current_melody.leaf
-        if not isinstance(current_bass_leaf, Note) or not isinstance(
-            current_melody_leaf, Note
-        ):
-            return False
-        current_bass_pitch = current_bass_leaf.written_pitch
-        current_melody_pitch = current_melody_leaf.written_pitch
-        if not current_bass_pitch or not current_melody_pitch:
-            return False
-        current_bass_hertz = current_bass_pitch.hertz
-        current_melody_hertz = current_melody_pitch.hertz
-        next_bass = self._bass_part._leaves.peek()
-        next_melody = self._bass_part._leaves.peek()
-        if not next_bass or not next_melody:
-            return False
-        next_bass_leaf = next_bass.leaf
-        next_melody_leaf = next_melody.leaf
-        if not next_bass_leaf or not next_melody_leaf:
-            return False
-        if not isinstance(next_bass_leaf, Note) or not isinstance(
-            next_melody_leaf, Note
-        ):
-            return False
-        next_bass_pitch = next_bass_leaf.written_pitch
-        next_melody_pitch = next_melody_leaf.written_pitch
-        if not next_bass_pitch or not next_melody_pitch:
-            return False
-        next_bass_hertz = next_bass_pitch.hertz
-        next_melody_hertz = next_melody_pitch.hertz
-        return (
-            current_bass_hertz == next_bass_hertz
-            and current_melody_hertz == next_melody_hertz
-        )
+    def _current_hertz_values(self) -> set[float | None]:
+        current_bass_hertz = self._bass_part.current_leaf_hertz
+        current_melody_hertz = self._melody_part.current_leaf_hertz
+        return {current_bass_hertz, current_melody_hertz}
 
-    def _get_tie(self) -> bool:
+    @staticmethod
+    def _get_next_hertz_values(
+        next_leaf_instructions: dict[Part, Duration | None]
+    ) -> set[float | None]:
+        next_notes = [
+            part.peek_next_leaf(duration)
+            for part, duration in next_leaf_instructions.items()
+        ]
+        next_notes = [leaf for leaf in next_notes if isinstance(leaf, Note)]
+        next_pitches = [
+            leaf.written_pitch
+            for leaf in next_notes
+            if leaf and leaf.written_pitch
+        ]
+        return {pitch.hertz for pitch in next_pitches}
+
+    def _next_leaves_are_same_as_current(
+        self, next_leaf_instructions: dict[Part, Duration | None]
+    ) -> bool:
+        next_hertz_values = self._get_next_hertz_values(next_leaf_instructions)
+        return self._current_hertz_values == next_hertz_values
+
+    @property
+    def _both_parts_are_tied(self) -> bool:
         bass_tie = self._bass_part.current_leaf_tie
         melody_tie = self._melody_part.current_leaf_tie
-        if bass_tie and melody_tie:
-            return True
-        bass_leaf = self._bass_part.current_leaf
-        melody_leaf = self._melody_part.current_leaf
-        if not bass_leaf or not melody_leaf:
-            return False
-        bass_duration = bass_leaf.leaf.written_duration
-        melody_duration = melody_leaf.leaf.written_duration
+        return bass_tie and melody_tie
+
+    @property
+    def _shorter_note_is_tied(self) -> bool:
+        bass_duration = self._bass_part.current_leaf_duration
+        melody_duration = self._melody_part.current_leaf_duration
+        bass_tie = self._bass_part.current_leaf_tie
+        melody_tie = self._melody_part.current_leaf_tie
         if not bass_duration or not melody_duration:
             return False
         return (
             bass_tie
-            and bass_duration < melody_duration
+            and bass_duration <= melody_duration
             or melody_tie
-            and melody_duration < bass_duration
-            # and self._next_leaves_are_same_as_current
+            and melody_duration <= bass_duration
+        )
+
+    def _get_tie(
+        self, next_leaf_instructions: dict[Part, Duration | None]
+    ) -> bool:
+        return (
+            self._both_parts_are_tied
+            or self._shorter_note_is_tied
+            and self._next_leaves_are_same_as_current(next_leaf_instructions)
         )
 
     @property
@@ -536,7 +555,6 @@ class Passage:
         while self._passage_contains_more_leaves():
             bass_duration = bass_part.current_leaf_duration
             melody_duration = melody_part.current_leaf_duration
-            tie = self._get_tie()
             tuplet = melody_part.current_leaf_tuplet
             is_start_of_tuplet = melody_part.is_start_of_tuplet
             if (
@@ -551,8 +569,12 @@ class Passage:
             else:
                 matrix_duration = melody_duration
                 duration_to_shorten_by = melody_duration
-            parts_requiring_next_leaf = [bass_part, melody_part]
-            part_requiring_shortened_leaf = None
+            next_leaf_instructions: dict[Part, Duration | None] = {
+                bass_part: None,
+                melody_part: None,
+            }
+            # parts_requiring_next_leaf = [bass_part, melody_part]
+            # part_requiring_shortened_leaf = None
             if self._current_notes_have_different_durations(
                 bass_duration, melody_duration
             ):
@@ -567,13 +589,18 @@ class Passage:
                     else:
                         matrix_duration = bass_duration
                         duration_to_shorten_by = bass_duration
-                    parts_requiring_next_leaf.remove(melody_part)
-                    part_requiring_shortened_leaf = melody_part
+                    # parts_requiring_next_leaf.remove(melody_part)
+                    next_leaf_instructions[melody_part] = (
+                        duration_to_shorten_by
+                    )
+                    # part_requiring_shortened_leaf = melody_part
                 else:
-                    parts_requiring_next_leaf.remove(bass_part)
-                    part_requiring_shortened_leaf = bass_part
+                    next_leaf_instructions[bass_part] = duration_to_shorten_by
+                    # parts_requiring_next_leaf.remove(bass_part)
+                    # part_requiring_shortened_leaf = bass_part
             elif not tuplet and bass_part.current_leaf_tuplet:
                 tuplet = bass_part.current_leaf_tuplet
+            tie = self._get_tie(next_leaf_instructions)
             is_multi_measure_rest = (
                 bass_part.is_multi_measure_rest
                 and melody_part.is_multi_measure_rest
@@ -589,12 +616,14 @@ class Passage:
                 self._multiples,
             )
             leaves.append(matrix_leaf)
-            for part in parts_requiring_next_leaf:
-                part.get_next_leaf()
-            if part_requiring_shortened_leaf and duration_to_shorten_by:
-                part_requiring_shortened_leaf.shorten_current_leaf(
-                    duration_to_shorten_by
-                )
+            for part, duration in next_leaf_instructions.items():
+                part.get_next_leaf(duration)
+            # for part in parts_requiring_next_leaf:
+            #     part.get_next_leaf()
+            # if part_requiring_shortened_leaf and duration_to_shorten_by:
+            #     part_requiring_shortened_leaf.get_next_leaf(
+            #         duration_to_shorten_by
+            #     )
         return leaves
 
     @property
