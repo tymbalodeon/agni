@@ -102,7 +102,7 @@ class Part:
             if not current_leaf:
                 return None
             return current_leaf.leaf
-        next_leaf = self._leaves.peek()
+        next_leaf = self._leaves.peek(None)
         if not next_leaf:
             return None
         return next_leaf.leaf
@@ -132,8 +132,6 @@ class Part:
         return current_sounding_leaf.duration
 
     def _shorten_current_leaf(self, duration: Duration):
-        if not self.current_leaf:
-            return
         current_duration = self.current_leaf_duration
         if not current_duration:
             return
@@ -533,9 +531,9 @@ class Passage:
             return False
         return (
             bass_tie
-            and bass_duration <= melody_duration
+            and bass_duration < melody_duration
             or melody_tie
-            and melody_duration <= bass_duration
+            and melody_duration < bass_duration
         )
 
     def _get_tie(
@@ -565,16 +563,13 @@ class Passage:
                 and not melody_duration.is_assignable
             ):
                 matrix_duration = melody_part.current_leaf_written_duration
-                duration_to_shorten_by = melody_duration
             else:
                 matrix_duration = melody_duration
-                duration_to_shorten_by = melody_duration
+            duration_to_shorten_by = melody_duration
             next_leaf_instructions: dict[Part, Duration | None] = {
                 bass_part: None,
                 melody_part: None,
             }
-            # parts_requiring_next_leaf = [bass_part, melody_part]
-            # part_requiring_shortened_leaf = None
             if self._current_notes_have_different_durations(
                 bass_duration, melody_duration
             ):
@@ -585,19 +580,14 @@ class Passage:
                         matrix_duration = (
                             bass_part.current_leaf_written_duration
                         )
-                        duration_to_shorten_by = bass_duration
                     else:
                         matrix_duration = bass_duration
-                        duration_to_shorten_by = bass_duration
-                    # parts_requiring_next_leaf.remove(melody_part)
+                    duration_to_shorten_by = bass_duration
                     next_leaf_instructions[melody_part] = (
                         duration_to_shorten_by
                     )
-                    # part_requiring_shortened_leaf = melody_part
                 else:
                     next_leaf_instructions[bass_part] = duration_to_shorten_by
-                    # parts_requiring_next_leaf.remove(bass_part)
-                    # part_requiring_shortened_leaf = bass_part
             elif not tuplet and bass_part.current_leaf_tuplet:
                 tuplet = bass_part.current_leaf_tuplet
             tie = self._get_tie(next_leaf_instructions)
@@ -618,12 +608,6 @@ class Passage:
             leaves.append(matrix_leaf)
             for part, duration in next_leaf_instructions.items():
                 part.get_next_leaf(duration)
-            # for part in parts_requiring_next_leaf:
-            #     part.get_next_leaf()
-            # if part_requiring_shortened_leaf and duration_to_shorten_by:
-            #     part_requiring_shortened_leaf.get_next_leaf(
-            #         duration_to_shorten_by
-            #     )
         return leaves
 
     @property
