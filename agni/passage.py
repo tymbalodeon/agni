@@ -24,7 +24,7 @@ from abjad.get import parentage as get_parentage
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties as get_logical_ties
-from more_itertools import peekable
+from more_itertools import seekable
 
 from .helpers import (
     InputPart,
@@ -74,7 +74,7 @@ class SoundingLeaf:
 
 class Part:
     def __init__(self, leaves: list[MeteredLeaf]):
-        self._leaves = peekable(leaf for leaf in leaves)
+        self._leaves = seekable(leaf for leaf in leaves)
         self._sounding_leaves = self._get_leaves(leaves)
         self.current_leaf_duration = None
         self.current_leaf = self.get_next_leaf()
@@ -95,6 +95,19 @@ class Part:
             SoundingLeaf.from_leaves_in_measure(leaf) for leaf in leaves
         )
         return (leaf for leaf in sounding_leaves if leaf)
+
+    @property
+    def current_matrix_duration(self) -> Duration | None:
+        current_duration = self.current_leaf_duration
+        if (
+            self.current_leaf_tuplet
+            or self.current_leaf
+            and isinstance(self.current_leaf.leaf, Note)
+            and current_duration
+            and not current_duration.is_assignable
+        ):
+            return self.current_leaf_written_duration
+        return current_duration
 
     def peek_next_leaf(self, duration: Duration | None) -> Leaf | None:
         if duration:
@@ -546,6 +559,13 @@ class Passage:
         )
 
     @property
+    def _is_multi_measure_rest(self) -> bool:
+        return (
+            self._bass_part.is_multi_measure_rest
+            and self._melody_part.is_multi_measure_rest
+        )
+
+    @property
     def matrix_leaves(self) -> list[MatrixLeaf]:
         bass_part = self._bass_part
         melody_part = self._melody_part
@@ -553,18 +573,10 @@ class Passage:
         while self._passage_contains_more_leaves():
             bass_duration = bass_part.current_leaf_duration
             melody_duration = melody_part.current_leaf_duration
-            tuplet = melody_part.current_leaf_tuplet
+            melody_tuplet = melody_part.current_leaf_tuplet
+            tuplet = melody_tuplet
             is_start_of_tuplet = melody_part.is_start_of_tuplet
-            if (
-                tuplet
-                or melody_part.current_leaf
-                and isinstance(melody_part.current_leaf.leaf, Note)
-                and melody_duration
-                and not melody_duration.is_assignable
-            ):
-                matrix_duration = melody_part.current_leaf_written_duration
-            else:
-                matrix_duration = melody_duration
+            matrix_duration = melody_part.current_matrix_duration
             duration_to_shorten_by = melody_duration
             next_leaf_instructions: dict[Part, Duration | None] = {
                 bass_part: None,
@@ -576,30 +588,21 @@ class Passage:
                 if bass_duration and bass_duration < melody_duration:
                     tuplet = bass_part.current_leaf_tuplet
                     is_start_of_tuplet = bass_part.is_start_of_tuplet
-                    if tuplet or not bass_duration.is_assignable:
-                        matrix_duration = (
-                            bass_part.current_leaf_written_duration
-                        )
-                    else:
-                        matrix_duration = bass_duration
+                    matrix_duration = bass_part.current_matrix_duration
                     duration_to_shorten_by = bass_duration
                     next_leaf_instructions[melody_part] = (
                         duration_to_shorten_by
                     )
                 else:
                     next_leaf_instructions[bass_part] = duration_to_shorten_by
-            elif not tuplet and bass_part.current_leaf_tuplet:
+            elif not melody_tuplet and bass_part.current_leaf_tuplet:
                 tuplet = bass_part.current_leaf_tuplet
             tie = self._get_tie(next_leaf_instructions)
-            is_multi_measure_rest = (
-                bass_part.is_multi_measure_rest
-                and melody_part.is_multi_measure_rest
-            )
             matrix_leaf = MatrixLeaf(
                 bass_part.current_leaf_pitch,
                 melody_part.current_leaf_pitch,
                 matrix_duration,
-                is_multi_measure_rest,
+                self._is_multi_measure_rest,
                 tie,
                 tuplet,
                 is_start_of_tuplet,
