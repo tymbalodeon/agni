@@ -26,7 +26,6 @@ from abjad.select import leaves as get_leaves
 from abjad.select import logical_ties
 from abjad.select import logical_ties as get_logical_ties
 from more_itertools import seekable
-from typer import Exit
 
 from .helpers import (
     InputPart,
