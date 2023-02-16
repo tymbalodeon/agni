@@ -23,8 +23,10 @@ from abjad.get import indicators as get_indicators
 from abjad.get import parentage as get_parentage
 from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
+from abjad.select import logical_ties
 from abjad.select import logical_ties as get_logical_ties
 from more_itertools import seekable
+from typer import Exit
 
 from .helpers import (
     InputPart,
@@ -75,7 +77,8 @@ class SoundingLeaf:
 class Part:
     def __init__(self, leaves: list[MeteredLeaf]):
         self._leaves = seekable(leaf for leaf in leaves)
-        self._sounding_leaves = self._get_leaves(leaves)
+        self._sounding_leaves = self._get_sounding_leaves(leaves)
+        self._current_index = 0
         self.current_leaf_duration = None
         self.current_leaf = self.get_next_leaf()
         self.current_sounding_leaf = self.get_next_sounding_leaf()
@@ -88,7 +91,7 @@ class Part:
         return current_leaf_pitch.hertz
 
     @staticmethod
-    def _get_leaves(
+    def _get_sounding_leaves(
         leaves: list[MeteredLeaf],
     ) -> Generator[SoundingLeaf, None, None]:
         sounding_leaves = (
@@ -109,27 +112,34 @@ class Part:
             return self.current_leaf_written_duration
         return current_duration
 
-    def peek_next_leaf(self, duration: Duration | None) -> Leaf | None:
-        if duration:
-            current_leaf = self.current_leaf
-            if not current_leaf:
-                return None
-            return current_leaf.leaf
+    def peek_next_leaf(
+        self, duration: Duration | None = None
+    ) -> MeteredLeaf | None:
+        if duration and duration < self.current_leaf_duration:
+            return self.current_leaf
         next_leaf = self._leaves.peek(None)
-        if not next_leaf:
-            return None
-        return next_leaf.leaf
+        return next_leaf
+
+    def seek(self, index: int):
+        index = index - 1
+        self._leaves.seek(index)
+        self._current_index = index
+        self.current_leaf = self.get_next_leaf()
 
     def get_next_leaf(
-        self, duration: Duration | None = None
+        self, duration: Duration | None = None, skip_beyond_tie=False
     ) -> MeteredLeaf | None:
         if duration:
             self._shorten_current_leaf(duration)
             return None
         next_leaf = next(self._leaves, None)
+        if skip_beyond_tie:
+            while next_leaf and not logical_ties(next_leaf.leaf):
+                next_leaf = next(self._leaves, None)
         if next_leaf:
             self.current_leaf_duration = get_duration(next_leaf.leaf)
         self.current_leaf = next_leaf
+        self._current_index += 1
         return next_leaf
 
     def get_next_sounding_leaf(self) -> SoundingLeaf | None:
@@ -479,23 +489,26 @@ class Passage:
         return any(current_notes)
 
     def _current_leaves_are_notes(self) -> bool:
+        current_bass_leaf = self._bass_part.current_leaf
+        current_melody_leaf = self._melody_part.current_leaf
         if (
-            self._bass_part.current_leaf
-            and self._melody_part.current_leaf
-            and isinstance(self._bass_part.current_leaf.leaf, Note)
-            and isinstance(self._melody_part.current_leaf.leaf, Note)
+            current_bass_leaf
+            and current_melody_leaf
+            and isinstance(current_bass_leaf.leaf, Note)
+            and isinstance(current_melody_leaf.leaf, Note)
         ):
             return True
         return False
 
-    def _current_notes_have_different_durations(
-        self, bass_duration: Duration | None, melody_duration: Duration | None
-    ) -> bool:
+    @property
+    def _current_notes_have_different_durations(self) -> bool:
+        bass_duration = self._bass_part.current_leaf_duration
+        melody_duration = self._melody_part.current_leaf_duration
         if (
-            bass_duration
+            self._current_leaves_are_notes()
+            and bass_duration
             and melody_duration
             and bass_duration != melody_duration
-            and self._current_leaves_are_notes()
         ):
             return True
         return False
@@ -510,11 +523,16 @@ class Passage:
     def _get_next_hertz_values(
         next_leaf_instructions: dict[Part, Duration | None]
     ) -> set[float | None]:
-        next_notes = [
+        next_metered_leaves = [
             part.peek_next_leaf(duration)
             for part, duration in next_leaf_instructions.items()
         ]
-        next_notes = [leaf for leaf in next_notes if isinstance(leaf, Note)]
+        next_leaves = [
+            metered_leaf.leaf
+            for metered_leaf in next_metered_leaves
+            if metered_leaf
+        ]
+        next_notes = [leaf for leaf in next_leaves if isinstance(leaf, Note)]
         next_pitches = [
             leaf.written_pitch
             for leaf in next_notes
@@ -582,22 +600,86 @@ class Passage:
                 bass_part: None,
                 melody_part: None,
             }
-            if self._current_notes_have_different_durations(
-                bass_duration, melody_duration
-            ):
+            current_notes_have_different_durations = (
+                self._current_notes_have_different_durations
+            )
+            if current_notes_have_different_durations:
                 if bass_duration and bass_duration < melody_duration:
+                    # print(bass_part._current_index)
+                    # print(melody_part._current_index)
+                    # print(bass_part.current_leaf.leaf)
+                    # print(melody_part.current_leaf.leaf)
                     tuplet = bass_part.current_leaf_tuplet
                     is_start_of_tuplet = bass_part.is_start_of_tuplet
                     matrix_duration = bass_part.current_matrix_duration
-                    duration_to_shorten_by = bass_duration
-                    next_leaf_instructions[melody_part] = (
-                        duration_to_shorten_by
+                    melody_part_original_duration = (
+                        melody_part.current_leaf_written_duration
                     )
+                    duration = bass_duration
+                    duration_seeked = duration
+                    bass_part_current_index = bass_part._current_index
+                    melody_part_current_index = melody_part._current_index
+                    should_change = False
+                    while (
+                        bass_part.current_leaf_tie
+                        and duration_seeked
+                        and duration_seeked < melody_part_original_duration
+                    ):
+                        bass_part.get_next_leaf(duration)
+                        if not bass_part.current_leaf_tie:
+                            break
+                        melody_part.get_next_leaf(duration)
+                        bass_part_duration = bass_part.current_leaf_duration
+                        melody_part_duration = (
+                            melody_part.current_leaf_duration
+                        )
+                        if (
+                            bass_part_duration
+                            and melody_part_duration
+                            and bass_part_duration < melody_part_duration
+                        ):
+                            duration = bass_part_duration
+                        else:
+                            duration = melody_part_duration
+                        duration_seeked += duration
+                    if (
+                        bass_part.current_leaf_tie
+                        and duration_seeked
+                        and duration_seeked >= melody_part_original_duration
+                    ):
+                        should_change = True
+                    if should_change:
+                        matrix_duration = melody_part_original_duration
+                        bass_part.get_next_leaf(skip_beyond_tie=True)
+                        melody_part.get_next_leaf()
+                        next_leaf_instructions.pop(bass_part, None)
+                        next_leaf_instructions.pop(melody_part, None)
+                        # print("SHOULD CHANGE")
+                        # print(bass_part._current_index)
+                        # print(melody_part._current_index)
+                        # print(bass_part.current_leaf.leaf)
+                        # print(melody_part.current_leaf.leaf)
+                    else:
+                        duration_to_shorten_by = bass_duration
+                        next_leaf_instructions[melody_part] = (
+                            duration_to_shorten_by
+                        )
+                        bass_part.seek(bass_part_current_index)
+                        melody_part.seek(melody_part_current_index)
+                    # print()
                 else:
                     next_leaf_instructions[bass_part] = duration_to_shorten_by
             elif not melody_tuplet and bass_part.current_leaf_tuplet:
                 tuplet = bass_part.current_leaf_tuplet
             tie = self._get_tie(next_leaf_instructions)
+            # if (
+            #     matrix_duration
+            #     and not matrix_duration.is_assignable
+            #     and not self._is_multi_measure_rest
+            # ):
+            #     print("NOT ASSIGNABLE")
+            #     print(matrix_duration)
+            #     raise Exit()
             matrix_leaf = MatrixLeaf(
                 bass_part.current_leaf_pitch,
                 melody_part.current_leaf_pitch,
