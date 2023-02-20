@@ -57,8 +57,8 @@ to facilitate development. Available commands:
 
 ## Dependencies
 
-Most dependencies can be installed via [poetry](https://python-poetry.org/ "poetry")
-by running `poetry install`. The rest (listed below) can be installed by running
+Most dependencies can be installed via [pdm](https://pdm.fming.dev/latest/)
+by running `pdm install`. The rest (listed below) can be installed by running
 the included script: `./install_dependencies`. Or, if `just` is already
 installed: `just install` to install the rest of the dependencies.
 

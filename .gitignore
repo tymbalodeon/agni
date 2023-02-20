@@ -1,8 +1,7 @@
-.DS_Store
-*.pyc
-.python-version
-dist/
 *.pdf
+*.pyc
 *.svg
+.pdm.toml
+__pypackages__/
+dist/
 profiles/
-*.json

@@ -1,7 +1,7 @@
 @_help:
     just --list
 
-pre_commit := "poetry run pre-commit"
+pre_commit := "pdm run pre-commit"
 
 # Run pre-commit checks or autoupdate ("--autoupdate").
 check *autoupdate:
@@ -23,7 +23,7 @@ check *autoupdate:
 try *args:
     #!/usr/bin/env zsh
     command="$(just _get_command_name)"
-    poetry run "${command}" {{args}}
+    pdm run "${command}" {{args}}
 
 _get_wheel:
     #!/usr/bin/env zsh
@@ -34,8 +34,8 @@ _get_wheel:
 # Build the project and install it using pipx, or optionally with pip ("--pip").
 build *pip:
     #!/usr/bin/env zsh
-    poetry install
-    poetry build
+    pdm install
+    pdm build
     wheel="$(just _get_wheel)"
     if [ "{{pip}}" = "--pip" ]; then
         pip install --user "${wheel}" --force-reinstall
@@ -82,5 +82,5 @@ profile *args:
     output_file="${output_directory}/profile.json"
     command="$(just _get_command_name)"
     sudo py-spy record -f speedscope -o "${output_file}" \
-        -- poetry run python -m "${command}" {{args}}
+        -- pdm run python -m "${command}" {{args}}
     speedscope "${output_file}"
