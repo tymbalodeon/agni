@@ -395,7 +395,7 @@ class Notation:
             numerator = input_multiplier.numerator
             denominator = input_multiplier.denominator
             multiplier = f"{denominator}:{numerator}"
-            component = Tuplet(multiplier, components=[leaf])
+            component: Leaf | Tuplet = Tuplet(multiplier, components=[leaf])
         else:
             component = leaf
         staff = next(
@@ -508,7 +508,7 @@ class Notation:
         notes = cls._set_bass_and_melody_noteheads(notes)
         if as_chord:
             chord_notes = cls._get_chord_notes(notes)
-            components = [Chord(chord_notes)]
+            components: list[Chord] | list[Note] = [Chord(chord_notes)]
         else:
             components = notes
         staff = Staff(components)
