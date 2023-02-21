@@ -18,6 +18,9 @@ dependencies = [
     "more-itertools>=9.0.0",
 ]
 
+[project.urls]
+repository = "https://github.com/tymbalodeon/agni"
+
 [tool.pdm.dev-dependencies]
 dev = [
     "pre-commit>=3.0.4",
