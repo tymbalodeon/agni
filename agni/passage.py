@@ -1,5 +1,4 @@
 from collections.abc import Generator
-from typer import Exit
 from dataclasses import dataclass
 from functools import cached_property, lru_cache
 from pathlib import Path
@@ -136,7 +135,6 @@ class Part:
         duration_skipped = self.current_leaf_duration
         next_leaf = next(self._leaves, None)
         if skip_duration and duration_skipped is not None:
-            print("SKIP DURATION", skip_duration)
             while not duration_skipped or duration_skipped < skip_duration:
                 next_leaf = next(self._leaves, None)
                 if next_leaf:
@@ -607,14 +605,6 @@ class Passage:
             }
             if self._current_notes_have_different_durations:
                 if bass_duration and bass_duration < melody_duration:
-                    print(
-                        bass_part.current_leaf.leaf,
-                        bass_part.current_leaf.time_signature,
-                    )
-                    print(
-                        melody_part.current_leaf.leaf,
-                        melody_part.current_leaf.time_signature,
-                    )
                     tuplet = bass_part.current_leaf_tuplet
                     is_start_of_tuplet = bass_part.is_start_of_tuplet
                     matrix_duration = bass_part.current_matrix_duration
@@ -627,27 +617,13 @@ class Passage:
                     bass_part_current_index = bass_part._current_index
                     melody_part_current_index = melody_part._current_index
                     should_change = False
-                    print("BASS START", bass_part.current_leaf.leaf)
-                    print("MELODY START", melody_part.current_leaf.leaf)
                     while (
                         bass_part.current_leaf_tie
                         and duration_seeked
-                        and duration_seeked < melody_part_original_duration
+                        and duration_seeked < melody_part.current_leaf_duration
                     ):
                         for part, duration in next_leaf_instructions.items():
                             part.get_next_leaf(duration)
-                        print(
-                            "NEXT BASSS",
-                            bass_part.current_leaf.leaf,
-                            bass_part.current_leaf_duration,
-                            bass_part.current_leaf_tie,
-                        )
-                        print(
-                            "NEXT MELODY",
-                            melody_part.current_leaf.leaf,
-                            melody_part.current_leaf_duration,
-                            melody_part.current_leaf_tie,
-                        )
                         bass_part_duration = bass_part.current_leaf_duration
                         melody_part_duration = (
                             melody_part.current_leaf_duration
@@ -664,9 +640,7 @@ class Passage:
                             duration = melody_part_duration
                             next_leaf_instructions[bass_part] = duration
                             next_leaf_instructions[melody_part] = None
-                        print("SEEKING BY", duration)
                         duration_seeked += duration
-                    print(bass_part.current_leaf_tie, duration_seeked)
                     if (
                         not bass_part.current_leaf_tie
                         and duration_seeked
@@ -679,15 +653,6 @@ class Passage:
                         melody_part.get_next_leaf()
                         next_leaf_instructions.pop(bass_part, None)
                         next_leaf_instructions.pop(melody_part, None)
-                        print("SHOULD CHANGE")
-                        print(
-                            bass_part.current_leaf.leaf,
-                            bass_part.current_leaf.time_signature,
-                        )
-                        print(
-                            melody_part.current_leaf.leaf,
-                            melody_part.current_leaf.time_signature,
-                        )
                     else:
                         duration_to_shorten_by = bass_duration
                         next_leaf_instructions[melody_part] = (
@@ -695,23 +660,12 @@ class Passage:
                         )
                         bass_part.seek(bass_part_current_index)
                         melody_part.seek(melody_part_current_index)
-                    print(matrix_duration)
-                    print(bass_part.peek_next_leaf())
-                    print(melody_part.peek_next_leaf())
-                    print()
+                        melody_part.current_leaf_duration = melody_duration
                 else:
                     next_leaf_instructions[bass_part] = duration_to_shorten_by
             elif not melody_tuplet and bass_part.current_leaf_tuplet:
                 tuplet = bass_part.current_leaf_tuplet
             tie = self._get_tie(next_leaf_instructions)
-            if (
-                matrix_duration
-                and not matrix_duration.is_assignable
-                and not self._is_multi_measure_rest
-            ):
-                print("NOT ASSIGNABLE")
-                print(matrix_duration)
-                raise Exit()
             matrix_leaf = MatrixLeaf(
                 bass_part.current_leaf_pitch,
                 melody_part.current_leaf_pitch,
@@ -724,7 +678,7 @@ class Passage:
             )
             leaves.append(matrix_leaf)
             for part, duration in next_leaf_instructions.items():
-                next_note = part.get_next_leaf(duration)
+                part.get_next_leaf(duration)
         return leaves
 
     @property
