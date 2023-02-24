@@ -29,7 +29,7 @@ packaging==23.0
 pathspec==0.11.0
 platformdirs==3.0.0
 ply==3.11
-pre-commit==3.0.4
+pre-commit==3.1.0
 py-spy==0.3.14
 pygments==2.14.0
 pytz==2022.7.1
