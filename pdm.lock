@@ -3,22 +3,22 @@
 
 [[package]]
 name = "abjad"
-version = "3.15"
+version = "3.16"
 requires_python = ">=3.10"
 summary = "Abjad is a Python API for building LilyPond files."
 dependencies = [
     "ply>=3.11",
     "roman>=1.4",
-    "uqbar>=0.6.8",
+    "uqbar>=0.6.9",
 ]
 
 [[package]]
 name = "abjad-ext-rmakers"
-version = "3.15"
+version = "3.16"
 requires_python = ">=3.10"
 summary = "Rhythm-makers extend Abjad with tools for rhythmic construction."
 dependencies = [
-    "abjad>=3.15",
+    "abjad>=3.16",
 ]
 
 [[package]]
@@ -468,11 +468,11 @@ lock_version = "4.1"
 content_hash = "sha256:dfc213913aa7beb98e15d1ccae36b5c21f130df6f000f26ec0cb20b4faa06739"
 
 [metadata.files]
-"abjad 3.15" = [
-    {url = "https://files.pythonhosted.org/packages/79/e3/ed8c2a704dcc9c419023315f9ec122edc24981eed64b4739d88b7d89e5ce/abjad-3.15.tar.gz", hash = "sha256:644f311868a7435d7abe708e079ab60c4ed954234ae5799ff3f4d36c39829449"},
+"abjad 3.16" = [
+    {url = "https://files.pythonhosted.org/packages/51/e2/7858149d51a4c64310ae89e7655cfb7789f86f5a539dd9248931e475157d/abjad-3.16.tar.gz", hash = "sha256:26c1d610f1aedce5eab681847e9fc0b3fe6e86fabc89ed6d11423a1c0364a02b"},
 ]
-"abjad-ext-rmakers 3.15" = [
-    {url = "https://files.pythonhosted.org/packages/a4/f9/82d0752cba75312fce9c17addd8c1ec927e3f9e67c911e49cfd22e5febda/abjad-ext-rmakers-3.15.tar.gz", hash = "sha256:b00fc6b31e360ed06dd70881ab615c2f4f27e9ce2cda223d429aec670ac1aacc"},
+"abjad-ext-rmakers 3.16" = [
+    {url = "https://files.pythonhosted.org/packages/58/4f/8234eb729ed93f1b26ec6282b3ab5b89f31e1d891193e4114e481eeecf6f/abjad-ext-rmakers-3.16.tar.gz", hash = "sha256:8d9f7d5cb5da8342bdf45da3e5d1499cedc94d1be8a509a3bf74f067dbd166ef"},
 ]
 "alabaster 0.7.13" = [
     {url = "https://files.pythonhosted.org/packages/64/88/c7083fc61120ab661c5d0b82cb77079fc1429d3f913a456c1c82cf4658f7/alabaster-0.7.13-py3-none-any.whl", hash = "sha256:1ee19aca801bbabb5ba3f5f258e4422dfa86f82f3e9cefb0859b283cdd7f62a3"},
