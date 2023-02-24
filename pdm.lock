@@ -242,7 +242,7 @@ summary = "Python Lex & Yacc"
 
 [[package]]
 name = "pre-commit"
-version = "3.0.4"
+version = "3.1.0"
 requires_python = ">=3.8"
 summary = "A framework for managing and maintaining multi-language pre-commit hooks."
 dependencies = [
@@ -846,9 +846,9 @@ content_hash = "sha256:dfc213913aa7beb98e15d1ccae36b5c21f130df6f000f26ec0cb20b4f
     {url = "https://files.pythonhosted.org/packages/a3/58/35da89ee790598a0700ea49b2a66594140f44dec458c07e8e3d4979137fc/ply-3.11-py2.py3-none-any.whl", hash = "sha256:096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce"},
     {url = "https://files.pythonhosted.org/packages/e5/69/882ee5c9d017149285cab114ebeab373308ef0f874fcdac9beb90e0ac4da/ply-3.11.tar.gz", hash = "sha256:00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3"},
 ]
-"pre-commit 3.0.4" = [
-    {url = "https://files.pythonhosted.org/packages/7e/ba/4d263a47ded76149dcbd11a1cc4035413f5765ffe407810338209c2a2d43/pre_commit-3.0.4.tar.gz", hash = "sha256:bc4687478d55578c4ac37272fe96df66f73d9b5cf81be6f28627d4e712e752d5"},
-    {url = "https://files.pythonhosted.org/packages/cb/5c/d74ae18271f63d15c40851ccbff8f5dd259454f5225245ca85152e77ab85/pre_commit-3.0.4-py2.py3-none-any.whl", hash = "sha256:9e3255edb0c9e7fe9b4f328cb3dc86069f8fdc38026f1bf521018a05eaf4d67b"},
+"pre-commit 3.1.0" = [
+    {url = "https://files.pythonhosted.org/packages/2b/79/eba698322c66bd4fb69cc10c34b1e68ec29c2f28622ec1f7176f856dfba3/pre_commit-3.1.0-py2.py3-none-any.whl", hash = "sha256:7001dfcd174540658822b1fd3630ceadf4f41375a5d1844b5c3b3830f227348c"},
+    {url = "https://files.pythonhosted.org/packages/61/52/ade3c4d7cb8753ca1e6a8473dc6161f27f3dbd7195b7bf1dc02e4f59e848/pre_commit-3.1.0.tar.gz", hash = "sha256:61bd9f1b96d3d1e763f2a9a0f8522aed341646800642ff6803c73fac5781f5b7"},
 ]
 "py-spy 0.3.14" = [
     {url = "https://files.pythonhosted.org/packages/3d/14/47fa8b0cb7e9c95117682dfcfaf6245256553bdff7ca83ba4b89db226858/py_spy-0.3.14-py2.py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:fd6211fe7f587b3532ba9d300784326d9a6f2b890af7bf6fff21a029ebbc812b"},
