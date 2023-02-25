@@ -391,10 +391,7 @@ class Notation:
         is_start_of_tuplet: bool,
     ):
         if tuplet and is_start_of_tuplet:
-            input_multiplier = tuplet.multiplier
-            numerator = input_multiplier.numerator
-            denominator = input_multiplier.denominator
-            multiplier = f"{denominator}:{numerator}"
+            multiplier = tuplet.multiplier
             component: Leaf | Tuplet = Tuplet(multiplier, components=[leaf])
         else:
             component = leaf
