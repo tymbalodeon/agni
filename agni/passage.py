@@ -466,7 +466,7 @@ class Passage:
             return self._get_ordered_unique_pitch_sets(pitches)
         return pitches
 
-    def _passage_contains_more_leaves(self) -> bool:
+    def _contains_more_leaves(self) -> bool:
         current_notes = [part.current_leaf for part in self._parts]
         return any(current_notes)
 
@@ -570,7 +570,7 @@ class Passage:
         bass_part = self._bass_part
         melody_part = self._melody_part
         leaves = []
-        while self._passage_contains_more_leaves():
+        while self._contains_more_leaves():
             bass_duration = bass_part.current_leaf_duration
             melody_duration = melody_part.current_leaf_duration
             melody_tuplet = melody_part.current_leaf_tuplet

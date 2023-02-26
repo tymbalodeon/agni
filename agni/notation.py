@@ -435,7 +435,9 @@ class Notation:
             bass, melody = self._get_part_staves(passage)
             for staff in melody, bass:
                 staff_group.append(staff)
-            for matrix_leaf in passage.matrix_leaves:
+            for matrix_leaf in track(
+                passage.matrix_leaves, description=self.PROGRESS_DESCRIPTION
+            ):
                 duration = matrix_leaf.duration
                 if not duration:
                     continue
