@@ -565,6 +565,29 @@ class Passage:
             and self._melody_part.is_multi_measure_rest
         )
 
+    def _use_longer_written_duration(self) -> bool:
+        bass_part = self._bass_part
+        melody_part = self._melody_part
+        bass_duration = bass_part.current_leaf_duration
+        original_melody_duration = melody_part.current_leaf_written_duration
+        duration_seeked = bass_duration
+        bass_part_current_index = bass_part._current_index
+        if not bass_part.current_leaf_tie or melody_part.current_leaf_tie:
+            return False
+        use_longer_duration = False
+        while (
+            bass_part.current_leaf_tie
+            and duration_seeked
+            and duration_seeked < melody_part.current_leaf_duration
+        ):
+            bass_part.get_next_leaf()
+            duration_seeked += bass_part.current_leaf_duration
+        if duration_seeked and duration_seeked >= original_melody_duration:
+            use_longer_duration = True
+        bass_part.seek(bass_part_current_index)
+        bass_part.current_leaf_duration = bass_duration
+        return use_longer_duration
+
     @property
     def matrix_leaves(self) -> list[MatrixLeaf]:
         bass_part = self._bass_part
@@ -587,36 +610,13 @@ class Passage:
                     tuplet = bass_part.current_leaf_tuplet
                     is_start_of_tuplet = bass_part.is_start_of_tuplet
                     matrix_duration = bass_part.current_matrix_duration
-                    melody_part_original_duration = (
-                        melody_part.current_leaf_written_duration
-                    )
-                    duration_seeked = bass_duration
-                    bass_part_current_index = bass_part._current_index
-                    should_change = False
-                    if (
-                        bass_part.current_leaf_tie
-                        and not melody_part.current_leaf_tie
-                    ):
-                        while (
-                            bass_part.current_leaf_tie
-                            and duration_seeked
-                            and duration_seeked
-                            < melody_part.current_leaf_duration
-                        ):
-                            bass_part.get_next_leaf()
-                            duration_seeked += bass_part.current_leaf_duration
-                        if (
-                            duration_seeked
-                            and duration_seeked
-                            >= melody_part_original_duration
-                        ):
-                            should_change = True
-                        bass_part.seek(bass_part_current_index)
-                        bass_part.current_leaf_duration = bass_duration
-                    if should_change:
-                        matrix_duration = melody_part_original_duration
+                    if self._use_longer_written_duration():
+                        original_melody_duration = (
+                            melody_part.current_leaf_written_duration
+                        )
+                        matrix_duration = original_melody_duration
                         next_leaf_instructions[bass_part] = (
-                            melody_part_original_duration
+                            original_melody_duration
                         )
                     else:
                         duration_to_shorten_by = bass_duration
