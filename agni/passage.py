@@ -1,6 +1,6 @@
 from collections.abc import Generator
 from dataclasses import dataclass
-from functools import cached_property, lru_cache
+from functools import cached_property
 from pathlib import Path
 from typing import cast
 
@@ -73,13 +73,45 @@ class SoundingLeaf:
 
 
 class Part:
-    def __init__(self, leaves: list[MeteredLeaf]):
-        self._leaves = seekable(leaf for leaf in leaves)
-        self._sounding_leaves = self._get_sounding_leaves(leaves)
+    def __init__(self, lilypond_input: str, input_part: InputPart):
+        self.input_staff = self._get_input_staff(lilypond_input, input_part)
+        metered_leaves = self._get_metered_leaves()
+        self._leaves = seekable(metered_leaves)
+        self._sounding_leaves = self._get_sounding_leaves(metered_leaves)
         self._current_index = 0
         self.current_leaf_duration: Duration | None = None
         self.current_leaf = self.get_next_leaf()
         self.current_sounding_leaf = self.get_next_sounding_leaf()
+
+    @classmethod
+    def _get_input_staff(
+        cls, lilypond_input: str, input_part: InputPart
+    ) -> Staff | None:
+        lilypond_file = cast(LilyPondFile, parse(lilypond_input))
+        items = lilypond_file.items
+        score = next(block for block in items if block.name == "score")
+        staves = cast(
+            list[Staff], get_components(score.items, prototype=Staff)
+        )
+        return get_staff_by_name(staves, input_part.value)
+
+    @staticmethod
+    def _get_time_signature(leaf: Leaf) -> TimeSignature | None:
+        time_signatures = get_indicators(leaf, prototype=TimeSignature)
+        return next(iter(time_signatures), None)
+
+    def _get_metered_leaves(self) -> list[MeteredLeaf]:
+        staff = cast(Staff, self.input_staff)
+        components = staff.components
+        leaves = get_leaves(components)
+        notes_in_measure = []
+        current_time_signature = TimeSignature((4, 4))
+        for leaf in leaves:
+            time_signature = self._get_time_signature(leaf)
+            if time_signature:
+                current_time_signature = time_signature
+            notes_in_measure.append(MeteredLeaf(leaf, current_time_signature))
+        return notes_in_measure
 
     @property
     def current_leaf_hertz(self) -> float | None:
@@ -96,33 +128,6 @@ class Part:
             SoundingLeaf.from_leaves_in_measure(leaf) for leaf in leaves
         )
         return (leaf for leaf in sounding_leaves if leaf)
-
-    @property
-    def current_matrix_duration(self) -> Duration | None:
-        current_duration = self.current_leaf_duration
-        if (
-            self.current_leaf_tuplet
-            or self.current_leaf
-            and isinstance(self.current_leaf.leaf, Note)
-            and current_duration
-            and not current_duration.is_assignable
-        ):
-            return self.current_leaf_written_duration
-        return current_duration
-
-    def peek_next_leaf(
-        self, duration: Duration | None = None
-    ) -> MeteredLeaf | None:
-        if duration and duration < self.current_leaf_duration:
-            return self.current_leaf
-        next_leaf = self._leaves.peek(None)
-        return next_leaf
-
-    def seek(self, index: int):
-        index = index - 1
-        self._leaves.seek(index)
-        self._current_index = index
-        self.current_leaf = self.get_next_leaf()
 
     def _shorten_current_leaf(self, duration: Duration):
         current_duration = self.current_leaf_duration
@@ -165,6 +170,33 @@ class Part:
         next_sounding_leaf = next(self._sounding_leaves, None)
         self.current_sounding_leaf = next_sounding_leaf
         return next_sounding_leaf
+
+    @property
+    def current_matrix_duration(self) -> Duration | None:
+        current_duration = self.current_leaf_duration
+        if (
+            self.current_leaf_tuplet
+            or self.current_leaf
+            and isinstance(self.current_leaf.leaf, Note)
+            and current_duration
+            and not current_duration.is_assignable
+        ):
+            return self.current_leaf_written_duration
+        return current_duration
+
+    def peek_next_leaf(
+        self, duration: Duration | None = None
+    ) -> MeteredLeaf | None:
+        if duration and duration < self.current_leaf_duration:
+            return self.current_leaf
+        next_leaf = self._leaves.peek(None)
+        return next_leaf
+
+    def seek(self, index: int):
+        index = index - 1
+        self._leaves.seek(index)
+        self._current_index = index
+        self.current_leaf = self.get_next_leaf()
 
     @property
     def current_sounding_leaf_duration(self) -> Duration | None:
@@ -308,10 +340,8 @@ class Passage:
         self._adjacent_duplicates = adjacent_duplicates
         self.title = self._get_title(lilypond_input)
         self.composer = self._get_composer(lilypond_input)
-        self._bass_input_staff = self._get_bass_staff(lilypond_input)
-        self._melody_input_staff = self._get_melody_staff(lilypond_input)
-        self._bass_part = self._get_bass_part()
-        self._melody_part = self._get_melody_part()
+        self._bass_part = self._get_bass_part(lilypond_input)
+        self._melody_part = self._get_melody_part(lilypond_input)
 
     @staticmethod
     def _get_header_item(lilypond_input: str, item: str) -> str:
@@ -329,71 +359,11 @@ class Passage:
     def _get_composer(cls, lilypond_input: str) -> str:
         return cls._get_header_item(lilypond_input, "composer")
 
-    @staticmethod
-    @lru_cache
-    def _get_staves(lilypond_input: str) -> list[Staff]:
-        lilypond_file = cast(LilyPondFile, parse(lilypond_input))
-        items = lilypond_file.items
-        score = next(block for block in items if block.name == "score")
-        return cast(list[Staff], get_components(score.items, prototype=Staff))
+    def _get_bass_part(self, lilypond_input: str) -> Part:
+        return Part(lilypond_input, InputPart.BASS)
 
-    @classmethod
-    def _get_bass_staff(cls, lilypond_input: str) -> Staff | None:
-        staves = cls._get_staves(lilypond_input)
-        return get_staff_by_name(staves, InputPart.BASS.value)
-
-    @classmethod
-    def _get_melody_staff(cls, lilypond_input: str) -> Staff | None:
-        staves = cls._get_staves(lilypond_input)
-        return get_staff_by_name(staves, InputPart.MELODY.value)
-
-    @staticmethod
-    def _get_time_signature(leaf: Leaf) -> TimeSignature | None:
-        return next(
-            (
-                time_signature
-                for time_signature in get_indicators(
-                    leaf, prototype=TimeSignature
-                )
-            ),
-            None,
-        )
-
-    @classmethod
-    def _get_metered_leaves(cls, notes: list[Leaf]) -> list[MeteredLeaf]:
-        notes_in_measure = []
-        current_time_signature = TimeSignature((4, 4))
-        for note in notes:
-            time_signature = cls._get_time_signature(note)
-            if time_signature:
-                current_time_signature = time_signature
-            notes_in_measure.append(MeteredLeaf(note, current_time_signature))
-        return notes_in_measure
-
-    def _get_staff_leaves(self, input_part: InputPart) -> list[MeteredLeaf]:
-        if input_part == InputPart.BASS:
-            staff = self._bass_input_staff
-        else:
-            staff = self._melody_input_staff
-        if not staff:
-            return []
-        components = staff.components
-        leaves = get_leaves(components)
-        return self._get_metered_leaves(leaves)
-
-    def _get_bass_leaves(self):
-        return self._get_staff_leaves(InputPart.BASS)
-
-    def _get_melody_leaves(self):
-        return self._get_staff_leaves(InputPart.MELODY)
-
-    def _get_bass_part(self) -> Part:
-        bass_leaves = self._get_bass_leaves()
-        return Part(bass_leaves)
-
-    def _get_melody_part(self) -> Part:
-        melody_leaves = self._get_melody_leaves()
-        return Part(melody_leaves)
+    def _get_melody_part(self, lilypond_input) -> Part:
+        return Part(lilypond_input, InputPart.MELODY)
 
     @property
     def _parts(self) -> tuple[Part, Part]:
@@ -401,17 +371,17 @@ class Passage:
 
     @property
     def bass_staff(self) -> Staff:
-        return self._bass_input_staff or Staff()
+        return self._bass_part.input_staff or Staff()
 
     @property
     def melody_staff(self) -> Staff:
-        return self._melody_input_staff or Staff()
+        return self._melody_part.input_staff or Staff()
 
     def _get_current_pitches(self) -> list[NamedPitch]:
         current_pitches = [part.current_sounding_pitch for part in self._parts]
         return remove_none_values(current_pitches)
 
-    def _passage_contains_more_sounding_leaves(self) -> bool:
+    def _contains_more_sounding_leaves(self) -> bool:
         current_notes = [part.current_sounding_leaf for part in self._parts]
         return any(current_notes)
 
@@ -488,7 +458,7 @@ class Passage:
     @property
     def _simultaneous_pitches(self) -> list[list[NamedPitch]]:
         pitches = [self._get_current_pitches()]
-        while self._passage_contains_more_sounding_leaves():
+        while self._contains_more_sounding_leaves():
             new_pitches = self._get_next_pitches()
             if self._should_add_pitches(new_pitches, pitches):
                 pitches.append(new_pitches)
