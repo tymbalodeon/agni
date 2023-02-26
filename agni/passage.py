@@ -597,7 +597,11 @@ class Passage:
             bass_duration = bass_part.current_leaf_duration
             melody_duration = melody_part.current_leaf_duration
             melody_tuplet = melody_part.current_leaf_tuplet
-            tuplet = melody_tuplet
+            bass_tuplet = bass_part.current_leaf_tuplet
+            if not melody_tuplet and bass_tuplet:
+                tuplet: Tuplet | None = bass_tuplet
+            else:
+                tuplet = melody_tuplet
             is_start_of_tuplet = melody_part.is_start_of_tuplet
             matrix_duration = melody_part.current_matrix_duration
             duration_to_shorten_by = melody_duration
@@ -625,8 +629,6 @@ class Passage:
                         )
                 else:
                     next_leaf_instructions[bass_part] = duration_to_shorten_by
-            elif not melody_tuplet and bass_part.current_leaf_tuplet:
-                tuplet = bass_part.current_leaf_tuplet
             tie = self._get_tie(next_leaf_instructions)
             matrix_leaf = MatrixLeaf(
                 bass_part.current_leaf_pitch,
