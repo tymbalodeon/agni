@@ -2,6 +2,7 @@
 *.pyc
 *.svg
 .pdm.toml
+__pycache__/
 __pypackages__/
 dist/
 profiles/
