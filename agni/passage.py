@@ -565,79 +565,120 @@ class Passage:
             and self._melody_part.is_multi_measure_rest
         )
 
+    @property
     def _use_longer_written_duration(self) -> bool:
-        bass_part = self._bass_part
-        melody_part = self._melody_part
-        bass_duration = bass_part.current_leaf_duration
-        original_melody_duration = melody_part.current_leaf_written_duration
-        duration_seeked = bass_duration
-        bass_part_current_index = bass_part._current_index
-        if not bass_part.current_leaf_tie or melody_part.current_leaf_tie:
+        shorter_part = self._shorter_part
+        longer_part = self._longer_part
+        if (
+            not self._current_notes_have_different_durations
+            or not shorter_part.current_leaf_tie
+            or longer_part.current_leaf_tie
+        ):
             return False
+        shorter_duration = shorter_part.current_leaf_duration
+        duration_seeked = Duration()
+        shorter_part_current_index = shorter_part._current_index
         use_longer_duration = False
         while (
-            bass_part.current_leaf_tie
-            and duration_seeked
-            and duration_seeked < melody_part.current_leaf_duration
+            shorter_part.current_leaf_tie
+            and duration_seeked < longer_part.current_leaf_duration
         ):
-            bass_part.get_next_leaf()
-            duration_seeked += bass_part.current_leaf_duration
-        if duration_seeked and duration_seeked >= original_melody_duration:
+            duration_seeked += shorter_part.current_leaf_duration
+            shorter_part.get_next_leaf()
+        next_leaf = shorter_part.peek_next_leaf()
+        if (
+            duration_seeked
+            and duration_seeked >= longer_part.current_leaf_written_duration
+            or duration_seeked
+            and next_leaf
+            and isinstance(next_leaf.leaf, Note)
+            and duration_seeked + next_leaf.leaf.written_duration
+            >= longer_part.current_leaf_written_duration
+            and longer_part.current_leaf_duration
+            == longer_part.current_leaf_written_duration
+        ):
             use_longer_duration = True
-        bass_part.seek(bass_part_current_index)
-        bass_part.current_leaf_duration = bass_duration
+        shorter_part.seek(shorter_part_current_index)
+        shorter_part.current_leaf_duration = shorter_duration
         return use_longer_duration
 
     @property
-    def matrix_leaves(self) -> list[MatrixLeaf]:
+    def _bass_is_shorter_than_melody(self) -> bool:
         bass_part = self._bass_part
         melody_part = self._melody_part
+        bass_duration = bass_part.current_leaf_duration
+        melody_duration = melody_part.current_leaf_duration
+        if (
+            self._current_notes_have_different_durations
+            and bass_duration
+            and melody_duration
+            and bass_duration < melody_duration
+        ):
+            return True
+        return False
+
+    @property
+    def _shorter_part(self) -> Part:
+        if self._bass_is_shorter_than_melody:
+            return self._bass_part
+        return self._melody_part
+
+    @property
+    def _longer_part(self) -> Part:
+        if self._bass_is_shorter_than_melody:
+            return self._melody_part
+        return self._bass_part
+
+    @property
+    def _tuplet(self) -> Tuplet | None:
+        shorter_part = self._shorter_part
+        longer_part = self._longer_part
+        shorter_part_tuplet = shorter_part.current_leaf_tuplet
+        longer_part_tuplet = longer_part.current_leaf_tuplet
+        if not shorter_part_tuplet and longer_part_tuplet:
+            return longer_part_tuplet
+        return shorter_part_tuplet
+
+    @property
+    def _is_start_of_tuplet(self) -> bool:
+        shorter_part = self._shorter_part
+        longer_part = self._longer_part
+        shorter_part_tuplet = shorter_part.current_leaf_tuplet
+        longer_part_tuplet = longer_part.current_leaf_tuplet
+        if not shorter_part_tuplet and longer_part_tuplet:
+            return longer_part.is_start_of_tuplet
+        return shorter_part.is_start_of_tuplet
+
+    @property
+    def matrix_leaves(self) -> list[MatrixLeaf]:
         leaves = []
         while self._contains_more_leaves():
-            bass_duration = bass_part.current_leaf_duration
-            melody_duration = melody_part.current_leaf_duration
-            melody_tuplet = melody_part.current_leaf_tuplet
-            bass_tuplet = bass_part.current_leaf_tuplet
-            if not melody_tuplet and bass_tuplet:
-                tuplet: Tuplet | None = bass_tuplet
-            else:
-                tuplet = melody_tuplet
-            is_start_of_tuplet = melody_part.is_start_of_tuplet
-            matrix_duration = melody_part.current_matrix_duration
-            duration_to_shorten_by = melody_duration
+            bass_part = self._bass_part
+            melody_part = self._melody_part
             next_leaf_instructions: dict[Part, Duration | None] = {
-                bass_part: None,
                 melody_part: None,
+                bass_part: None,
             }
-            if self._current_notes_have_different_durations:
-                if bass_duration and bass_duration < melody_duration:
-                    tuplet = bass_part.current_leaf_tuplet
-                    is_start_of_tuplet = bass_part.is_start_of_tuplet
-                    matrix_duration = bass_part.current_matrix_duration
-                    if self._use_longer_written_duration():
-                        original_melody_duration = (
-                            melody_part.current_leaf_written_duration
-                        )
-                        matrix_duration = original_melody_duration
-                        next_leaf_instructions[bass_part] = (
-                            original_melody_duration
-                        )
-                    else:
-                        duration_to_shorten_by = bass_duration
-                        next_leaf_instructions[melody_part] = (
-                            duration_to_shorten_by
-                        )
-                else:
-                    next_leaf_instructions[bass_part] = duration_to_shorten_by
-            tie = self._get_tie(next_leaf_instructions)
+            shorter_part = self._shorter_part
+            longer_part = self._longer_part
+            if self._use_longer_written_duration:
+                longer_duration = longer_part.current_leaf_written_duration
+                matrix_duration = longer_duration
+                next_leaf_instructions[shorter_part] = longer_duration
+            else:
+                matrix_duration = shorter_part.current_matrix_duration
+                if self._current_notes_have_different_durations:
+                    next_leaf_instructions[longer_part] = (
+                        shorter_part.current_leaf_duration
+                    )
             matrix_leaf = MatrixLeaf(
                 bass_part.current_leaf_pitch,
                 melody_part.current_leaf_pitch,
                 matrix_duration,
                 self._is_multi_measure_rest,
-                tie,
-                tuplet,
-                is_start_of_tuplet,
+                self._get_tie(next_leaf_instructions),
+                self._tuplet,
+                self._is_start_of_tuplet,
                 self._multiples,
             )
             leaves.append(matrix_leaf)
