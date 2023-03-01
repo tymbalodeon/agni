@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from pathlib import Path
 from statistics import mode
 from typing import cast
@@ -58,20 +59,18 @@ class Notation:
         full_score: bool = False,
     ):
         if isinstance(input, Matrix):
-            self._matrices = [input]
+            matrices = [input]
             self._passage = None
         else:
-            self._matrices = input.matrices
+            matrices = input.matrices
             self._passage = input
+        self._number_of_matrices = len(matrices)
+        self._matrices = track(matrices, description=self.PROGRESS_DESCRIPTION)
         self._as_ensemble = as_ensemble
         self._tuning = tuning
         self._save = save
         self._as_chord = as_chord
         self._full_score = full_score
-
-    @property
-    def _number_of_matrices(self) -> int:
-        return len(self._matrices)
 
     @staticmethod
     def _get_first_staff_leaf(staff: Staff) -> Leaf | None:
@@ -87,6 +86,14 @@ class Notation:
         first_leaf = cls._get_first_staff_leaf(staff)
         attach(InstrumentName(instrument_name), first_leaf)
         attach(ShortInstrumentName(instrument_name), first_leaf)
+
+    @property
+    def _matrix_leaves(self) -> Iterable[MatrixLeaf]:
+        passage = self._passage
+        if not passage:
+            return []
+        matrix_leaves = passage.matrix_leaves
+        return track(matrix_leaves, description=self.PROGRESS_DESCRIPTION)
 
     @property
     def _input_staves(self) -> list[Staff]:
@@ -474,16 +481,13 @@ class Notation:
                 progress.add_task("Engraving score...", total=None)
                 show(lilypond_file)
 
-    def _make_ensemble_score(self):
+    def _get_ensemble_score(self) -> Score:
         staff_group = StaffGroup()
         passage = self._passage
         if passage:
             for staff in self._input_staves:
                 staff_group.append(staff)
-            matrix_leaves = track(
-                passage.matrix_leaves, description=self.PROGRESS_DESCRIPTION
-            )
-            for matrix_leaf in matrix_leaves:
+            for matrix_leaf in self._matrix_leaves:
                 duration = matrix_leaf.duration
                 if not duration:
                     continue
@@ -492,15 +496,13 @@ class Notation:
                 else:
                     self._add_rests_to_staff(matrix_leaf, staff_group)
         else:
-            for matrix in track(
-                self._matrices, description=self.PROGRESS_DESCRIPTION
-            ):
+            for matrix in self._matrices:
                 self._add_matrix_to_staff_group(matrix, staff_group)
         self._add_double_bar_lines(staff_group)
         self._set_staff_group_clefs(staff_group)
         score = Score([staff_group])
         attach(LilyPondLiteral(r"\compressMMRests"), score)
-        self._engrave_score(score)
+        return score
 
     @staticmethod
     def _set_bass_and_melody_noteheads(notes: list[Note]) -> list[Note]:
@@ -515,37 +517,34 @@ class Notation:
         return note.written_pitch.name
 
     @classmethod
-    def _get_chord_notes(cls, notes: list[Note]) -> str:
+    def _get_chord(cls, notes: list[Note]) -> Chord:
         note_names = [cls._get_note_name(note) for note in notes]
         pitched_note_names = remove_none_values(note_names)
         chord_notes = " ".join(pitched_note_names)
-        return f"<{chord_notes}>"
+        return Chord(f"<{chord_notes}>")
 
-    def _add_notes_to_score(self, notes: list[Note], score: Score):
+    def _get_matrix_notes(self, matrix: Matrix) -> list[Note]:
+        sorted_frequencies = matrix.sorted_frequencies_in_hertz
+        notes = [self._get_note(frequency) for frequency in sorted_frequencies]
         notes = self._set_bass_and_melody_noteheads(notes)
+        self._set_clefs(notes)
+        return notes
+
+    def _get_matrix_staff(self, matrix: Matrix) -> Staff:
+        notes = self._get_matrix_notes(matrix)
         if self._as_chord:
-            chord_notes = self._get_chord_notes(notes)
-            components: list[Chord] | list[Note] = [Chord(chord_notes)]
+            components: list[Chord] | list[Note] = [self._get_chord(notes)]
         else:
             components = notes
-        staff = Staff(components)
-        score.append(staff)
+        return Staff(components)
 
-    def _make_reference_score(self):
-        score = Score()
-        for matrix in track(
-            self._matrices, description=self.PROGRESS_DESCRIPTION
-        ):
-            notes = [
-                self._get_note(frequency)
-                for frequency in matrix.sorted_frequencies_in_hertz
-            ]
-            self._set_clefs(notes)
-            self._add_notes_to_score(notes, score)
-        self._engrave_score(score)
+    def _get_reference_score(self) -> Score:
+        staves = [self._get_matrix_staff(matrix) for matrix in self._matrices]
+        return Score(staves)
 
     def notate(self):
         if self._as_ensemble:
-            self._make_ensemble_score()
+            score = self._get_ensemble_score()
         else:
-            self._make_reference_score()
+            score = self._get_reference_score()
+        self._engrave_score(score)
