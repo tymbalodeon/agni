@@ -40,8 +40,9 @@ from rich.progress import track
 
 from .helpers import get_staff_by_name, remove_none_values
 from .matrix import Matrix
-from .matrix_frequency import MatrixFrequency, Tuning
-from .passage import MeteredLeaf, Passage
+from .matrix_pitch import MatrixPitch, Tuning
+from .part import MeteredLeaf
+from .passage import Passage
 
 
 class Notation:
@@ -149,14 +150,14 @@ class Notation:
     @classmethod
     def _get_matrix_note_from_melody_note(
         cls,
-        matrix_frequency: MatrixFrequency,
+        matrix_pitch: MatrixPitch,
         melody_note: MeteredLeaf | None,
         tuning: Tuning,
     ) -> Note:
         duration = cls._get_melody_note_duration(melody_note)
         tie = cls._get_melody_note_tie(melody_note)
         note = cls._get_note(
-            matrix_frequency.frequency or 0, tuning, duration=duration
+            matrix_pitch.frequency or 0, tuning, duration=duration
         )
         if tie:
             attach(tie, note)
@@ -442,15 +443,11 @@ class Notation:
                 if not duration:
                     continue
                 if matrix_leaf.contains_pitches:
-                    for matrix_frequency in matrix_leaf.generated_pitches:
-                        note = matrix_frequency.get_note(
-                            duration, matrix_leaf.tie
-                        )
+                    for matrix_pitch in matrix_leaf.generated_pitches:
+                        note = matrix_pitch.get_note(duration, matrix_leaf.tie)
                         if not note:
                             continue
-                        instrument_names = (
-                            matrix_frequency.get_instrument_name()
-                        )
+                        instrument_names = matrix_pitch.get_instrument_name()
                         self._add_leaf_to_staff(
                             staff_group,
                             instrument_names,

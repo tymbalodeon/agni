@@ -1,5 +1,6 @@
 from functools import cached_property, lru_cache
 from time import sleep
+from typing import Any
 
 from abjad import NamedPitch
 from rich.box import SIMPLE
@@ -9,7 +10,7 @@ from rich.theme import Theme
 from supriya.patterns import EventPattern, SequencePattern
 
 from .helpers import stylize
-from .matrix_frequency import DisplayFormat, MatrixFrequency, PitchType, Tuning
+from .matrix_pitch import DisplayFormat, MatrixPitch, PitchType, Tuning
 
 
 class Matrix:
@@ -28,8 +29,16 @@ class Matrix:
         self._pitch_type = self._get_pitch_type(bass, midi_input, pitch_type)
         self._tuning = tuning
         self._display_format = display_format
-        self._bass = self._get_frequency_from_input(bass)
-        self._melody = self._get_frequency_from_input(melody)
+        self.bass = self._get_frequency_from_input(bass)
+        self.melody = self._get_frequency_from_input(melody)
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return other.bass == self.bass and other.melody == self.melody
+
+    def __hash__(self) -> int:
+        return hash((self.bass, self.melody))
 
     @staticmethod
     def _get_pitch_type(
@@ -64,24 +73,24 @@ class Matrix:
         return NamedPitch(pitch).hertz
 
     @cached_property
-    def frequencies(self) -> list[MatrixFrequency]:
+    def frequencies(self) -> list[MatrixPitch]:
         frequencies = []
         multiples = self._multiples
         for bass_multiplier in multiples:
             for melody_multiplier in multiples:
-                matrix_frequency = MatrixFrequency(
-                    self._bass,
-                    self._melody,
+                matrix_pitch = MatrixPitch(
+                    self.bass,
+                    self.melody,
                     bass_multiplier,
                     melody_multiplier,
                 )
-                frequencies.append(matrix_frequency)
+                frequencies.append(matrix_pitch)
         return frequencies
 
     @cached_property
-    def sorted_frequencies(self) -> list[MatrixFrequency]:
+    def sorted_frequencies(self) -> list[MatrixPitch]:
         frequencies = sorted(
-            self.frequencies, key=MatrixFrequency.get_sortable_frequency
+            self.frequencies, key=MatrixPitch.get_sortable_frequency
         )
         return [frequency for frequency in frequencies if frequency.frequency]
 
@@ -93,7 +102,7 @@ class Matrix:
             if frequency.frequency
         ]
 
-    def get_sorted_generated_frequencies(self) -> list[MatrixFrequency]:
+    def get_sorted_generated_frequencies(self) -> list[MatrixPitch]:
         return [
             frequency
             for frequency in self.sorted_frequencies

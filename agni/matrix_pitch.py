@@ -25,7 +25,7 @@ class DisplayFormat(Enum):
     TABLE = "table"
 
 
-class MatrixFrequency:
+class MatrixPitch:
     def __init__(
         self,
         bass: float,
@@ -41,8 +41,8 @@ class MatrixFrequency:
         self.frequency = frequency or None
 
     @staticmethod
-    def get_sortable_frequency(matrix_frequency: "MatrixFrequency") -> float:
-        return matrix_frequency.frequency or 0
+    def get_sortable_frequency(matrix_pitch: "MatrixPitch") -> float:
+        return matrix_pitch.frequency or 0
 
     @cached_property
     def _is_bass_frequency(self) -> bool:

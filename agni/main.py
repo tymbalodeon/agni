@@ -4,7 +4,7 @@ from rich.markup import escape
 from typer import Argument, Option, Typer
 
 from .matrix import Matrix
-from .matrix_frequency import DisplayFormat, PitchType, Tuning
+from .matrix_pitch import DisplayFormat, PitchType, Tuning
 from .notation import notate_matrix, notate_passage
 from .passage import Passage
 
