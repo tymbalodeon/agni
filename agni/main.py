@@ -17,17 +17,14 @@ agni = Typer(
 
 pitch_choices = escape("[hertz|midi|lilypond]")
 pitch_help = f"[bold yellow]{pitch_choices}[/bold yellow]"
+multiples = Option(4, help="Number of multiples to calculate.")
+pitch_type_option_name = "--pitch-type"
+pitch_type_help = (
+    "Set the display type for pitches. (If none is provided, the same"
+    " type as the input pitches is used.)"
+)
 tuning = Option(
     Tuning.MICROTONAL.value, "--tuning", help="Set the tuning to quantize to."
-)
-multiples = Option(4, help="Number of multiples to calculate.")
-list = Option(
-    False,
-    "--list",
-    help=(
-        "Display frequencies as a list with low to high frequencies"
-        " as left to right."
-    ),
 )
 display_format = Option(
     DisplayFormat.TABLE.value,
@@ -35,9 +32,6 @@ display_format = Option(
     help="Set the matrix display format.",
 )
 as_chord = Option(False, "--as-chord", help="Output matrix as a chord.")
-as_ensemble = Option(
-    False, "--as-ensemble", help="Notate each note on its own staff."
-)
 notate = Option(False, "--notate", help="Notate matrix in a pdf score.")
 save = Option(
     False,
@@ -47,10 +41,11 @@ save = Option(
         " score."
     ),
 )
-pitch_type_option_name = "--pitch-type"
-pitch_type_help = (
-    "Set the display type for pitches. (If none is provided, the same"
-    " type as the input pitches is used.)"
+as_ensemble = Option(
+    False, "--as-ensemble", help="Notate each note on its own staff."
+)
+display = Option(
+    True, " /--no-display", help="Display the output in the terminal."
 )
 
 
@@ -73,6 +68,7 @@ def matrix(
     notate: bool = notate,
     save: bool = save,
     as_ensemble: bool = as_ensemble,
+    display: bool = display,
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from two pitches."""
@@ -87,7 +83,8 @@ def matrix(
     )
     if notate:
         notate_matrix(matrix, as_ensemble, tuning, save, as_chord)
-    matrix.display()
+    if display:
+        matrix.display()
     if play:
         matrix.play()
 
@@ -122,6 +119,7 @@ def passage(
         "--full-score",
         help="Output matrices as an ensemble score using the input rhythms.",
     ),
+    display: bool = display,
 ):
     """Create combination-tone matrices for a two-voice passage."""
     if full_score:
@@ -146,4 +144,5 @@ def passage(
             as_chord,
             full_score,
         )
-    passage.display()
+    if display:
+        passage.display()

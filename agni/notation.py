@@ -35,7 +35,7 @@ from abjad.select import leaves as get_leaves
 from abjad.select import notes as get_notes
 from abjad.select import tuplets as get_tuplets
 from abjadext.rmakers import multiplied_duration
-from rich.progress import track
+from rich.progress import Progress, track
 
 from agni.matrix_leaf import MatrixLeaf
 
@@ -453,15 +453,22 @@ class Notation:
                     }}
                 """
 
-    def _show_with_preamble(self, score: Score, save: bool, full_score: bool):
+    def _engrave_score(self, score: Score, save: bool, full_score: bool):
         lilypond_file = LilyPondFile(
             [self._get_lilypond_preamble(full_score), score]
         )
         if save:
             pdf_file_path = Path("examples") / "matrix.pdf"
-            as_pdf(lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True)
+            with Progress() as progress:
+                progress.add_task("Engraving score...", total=None)
+                as_pdf(
+                    lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True
+                )
+            print(f"Score saved to: {pdf_file_path}")
         else:
-            show(lilypond_file)
+            with Progress() as progress:
+                progress.add_task("Engraving score...", total=None)
+                show(lilypond_file)
 
     def _make_ensemble_score(
         self, tuning: Tuning, save: bool, full_score: bool
@@ -491,7 +498,7 @@ class Notation:
         self._set_staff_group_clefs(staff_group)
         score = Score([staff_group])
         attach(LilyPondLiteral(r"\compressMMRests"), score)
-        self._show_with_preamble(score, save, full_score)
+        self._engrave_score(score, save, full_score)
 
     @staticmethod
     def _set_bass_and_melody_noteheads(notes: list[Note]) -> list[Note]:
@@ -538,7 +545,7 @@ class Notation:
             ]
             self._set_clefs(notes)
             self._add_notes_to_score(notes, score, as_chord)
-        self._show_with_preamble(score, save, full_score)
+        self._engrave_score(score, save, full_score)
 
     def make_score(
         self,
