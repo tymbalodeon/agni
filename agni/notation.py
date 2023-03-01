@@ -421,66 +421,6 @@ class Notation:
             first_leaf = leaves[0]
             attach(clef, first_leaf)
 
-    @property
-    def lilypond_preamble(self) -> str:
-        passage = self._passage
-        if passage:
-            title = passage.title
-            composer = passage.composer
-        else:
-            if self._number_of_matrices > 1:
-                matrix_display = "Matrices"
-            else:
-                matrix_display = "Matrix"
-            title = f"Combination-Tone {matrix_display}"
-            composer = ""
-        if self._full_score:
-            stencils = ""
-        else:
-            stencils = """
-                \\override TimeSignature.stencil = ##f
-                \\override BarLine.stencil = ##f
-                \\override Stem.stencil = ##f
-            """
-        return f"""
-                    \\header {{
-                        tagline = ##f
-                        title = "{title}"
-                        composer = "{composer}"
-                    }}
-
-                    \\paper {{
-                        #(set-paper-size "letter")
-                        left-margin = 1.25\\in
-                        right-margin = 0.75\\in
-                        top-margin = 0.5\\in
-                        bottom-margin = 0.5\\in
-                    }}
-
-                    \\layout {{
-                        \\context {{
-                            \\Score
-                            \\numericTimeSignature
-                            {stencils}
-                        }}
-                    }}
-                """
-
-    def _engrave_score(self, score: Score):
-        lilypond_file = LilyPondFile([self.lilypond_preamble, score])
-        if self._save:
-            pdf_file_path = Path("examples") / "matrix.pdf"
-            with Progress() as progress:
-                progress.add_task("Engraving score...", total=None)
-                as_pdf(
-                    lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True
-                )
-            print(f"Score saved to: {pdf_file_path}")
-        else:
-            with Progress() as progress:
-                progress.add_task("Engraving score...", total=None)
-                show(lilypond_file)
-
     def _get_ensemble_score(self) -> Score:
         staff_group = StaffGroup()
         passage = self._passage
@@ -542,9 +482,66 @@ class Notation:
         staves = [self._get_matrix_staff(matrix) for matrix in self._matrices]
         return Score(staves)
 
+    @property
+    def lilypond_preamble(self) -> str:
+        passage = self._passage
+        if passage:
+            title = passage.title
+            composer = passage.composer
+        else:
+            if self._number_of_matrices > 1:
+                matrix_display = "Matrices"
+            else:
+                matrix_display = "Matrix"
+            title = f"Combination-Tone {matrix_display}"
+            composer = ""
+        if self._full_score:
+            stencils = ""
+        else:
+            stencils = """
+                \\override TimeSignature.stencil = ##f
+                \\override BarLine.stencil = ##f
+                \\override Stem.stencil = ##f
+            """
+        return f"""
+                    \\header {{
+                        tagline = ##f
+                        title = "{title}"
+                        composer = "{composer}"
+                    }}
+
+                    \\paper {{
+                        #(set-paper-size "letter")
+                        left-margin = 1.25\\in
+                        right-margin = 0.75\\in
+                        top-margin = 0.5\\in
+                        bottom-margin = 0.5\\in
+                    }}
+
+                    \\layout {{
+                        \\context {{
+                            \\Score
+                            \\numericTimeSignature
+                            {stencils}
+                        }}
+                    }}
+                """
+
     def notate(self):
         if self._as_ensemble:
             score = self._get_ensemble_score()
         else:
             score = self._get_reference_score()
-        self._engrave_score(score)
+        lilypond_file = LilyPondFile([self.lilypond_preamble, score])
+        if self._save:
+            pdf_file_path = Path("examples") / "matrix.pdf"
+            with Progress() as progress:
+                progress.add_task("Engraving score...", total=None)
+                as_pdf(
+                    lilypond_file, pdf_file_path=pdf_file_path, remove_ly=True
+                )
+            print(f"Score saved to: {pdf_file_path}")
+        else:
+            with Progress() as progress:
+                progress.add_task("Engraving score...", total=None)
+                show(lilypond_file)
