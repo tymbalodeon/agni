@@ -69,28 +69,27 @@ class Passage:
 
     @property
     def _contains_more_leaves(self) -> bool:
-        current_notes = [part.current_leaf for part in self._parts]
-        return any(current_notes)
+        return any([part.metered_leaf for part in self._parts])
 
     @property
-    def _current_leaves_are_notes(self) -> bool:
-        current_bass_leaf = self._bass.current_leaf
-        current_melody_leaf = self._melody.current_leaf
+    def _leaves_are_notes(self) -> bool:
+        bass_metered_leaf = self._bass.metered_leaf
+        melody_metered_leaf = self._melody.metered_leaf
         if (
-            current_bass_leaf
-            and current_melody_leaf
-            and isinstance(current_bass_leaf.leaf, Note)
-            and isinstance(current_melody_leaf.leaf, Note)
+            bass_metered_leaf
+            and melody_metered_leaf
+            and isinstance(bass_metered_leaf.leaf, Note)
+            and isinstance(melody_metered_leaf.leaf, Note)
         ):
             return True
         return False
 
     @property
-    def _current_notes_have_different_durations(self) -> bool:
-        bass_duration = self._bass.current_leaf_duration
-        melody_duration = self._melody.current_leaf_duration
+    def _leaves_are_notes_of_different_durations(self) -> bool:
+        bass_duration = self._bass.remaining_duration
+        melody_duration = self._melody.remaining_duration
         if (
-            self._current_leaves_are_notes
+            self._leaves_are_notes
             and bass_duration
             and melody_duration
             and bass_duration != melody_duration
@@ -102,10 +101,10 @@ class Passage:
     def _bass_is_shorter_than_melody(self) -> bool:
         bass = self._bass
         melody = self._melody
-        bass_duration = bass.current_leaf_duration
-        melody_duration = melody.current_leaf_duration
+        bass_duration = bass.remaining_duration
+        melody_duration = melody.remaining_duration
         if (
-            self._current_notes_have_different_durations
+            self._leaves_are_notes_of_different_durations
             and bass_duration
             and melody_duration
             and bass_duration < melody_duration
@@ -130,31 +129,31 @@ class Passage:
         shorter_part = self._shorter_part
         longer_part = self._longer_part
         if (
-            not self._current_notes_have_different_durations
-            or not shorter_part.current_leaf_tie
-            or longer_part.current_leaf_tie
+            not self._leaves_are_notes_of_different_durations
+            or not shorter_part.tie
+            or longer_part.tie
         ):
             return False
-        shorter_duration = shorter_part.current_leaf_duration
+        shorter_duration = shorter_part.remaining_duration
         duration_seeked = shorter_duration
-        shorter_part_current_index = shorter_part._current_index
+        shorter_part_index = shorter_part._index
         longer_part_has_shortest_sounding_note = False
         while (
-            shorter_part.current_leaf_tie
+            shorter_part.tie
             and duration_seeked
-            and duration_seeked < longer_part.current_leaf_duration
+            and duration_seeked < longer_part.remaining_duration
         ):
-            shorter_part.get_next_leaf()
-            duration_seeked += shorter_part.current_leaf_duration
-        longer_written_duration = longer_part.current_leaf_written_duration
+            shorter_part.get_next_metered_leaf()
+            duration_seeked += shorter_part.remaining_duration
+        longer_written_duration = longer_part.written_duration
         if (
             duration_seeked
             and duration_seeked >= longer_written_duration
             and longer_part.is_start_of_written_note
         ):
             longer_part_has_shortest_sounding_note = True
-        shorter_part.seek(shorter_part_current_index)
-        shorter_part.current_leaf_duration = shorter_duration
+        shorter_part.seek(shorter_part_index)
+        shorter_part.remaining_duration = shorter_duration
         return longer_part_has_shortest_sounding_note
 
     @property
@@ -166,16 +165,16 @@ class Passage:
 
     @property
     def _both_parts_are_tied(self) -> bool:
-        bass_tie = self._bass.current_leaf_tie
-        melody_tie = self._melody.current_leaf_tie
+        bass_tie = self._bass.tie
+        melody_tie = self._melody.tie
         return bass_tie and melody_tie
 
     @property
     def _shorter_note_is_tied(self) -> bool:
-        bass_duration = self._bass.current_leaf_duration
-        melody_duration = self._melody.current_leaf_duration
-        bass_tie = self._bass.current_leaf_tie
-        melody_tie = self._melody.current_leaf_tie
+        bass_duration = self._bass.remaining_duration
+        melody_duration = self._melody.remaining_duration
+        bass_tie = self._bass.tie
+        melody_tie = self._melody.tie
         if not bass_duration or not melody_duration:
             return False
         return (
@@ -190,7 +189,7 @@ class Passage:
         next_leaf_instructions: dict[Part, Duration | None]
     ) -> set[float | None]:
         next_metered_leaves = [
-            part.peek_next_leaf(duration)
+            part.peek(duration)
             for part, duration in next_leaf_instructions.items()
         ]
         next_leaves = [
@@ -207,16 +206,16 @@ class Passage:
         return {pitch.hertz for pitch in next_pitches}
 
     @property
-    def _current_hertz_values(self) -> set[float | None]:
-        current_bass_hertz = self._bass.current_leaf_hertz
-        current_melody_hertz = self._melody.current_leaf_hertz
-        return {current_bass_hertz, current_melody_hertz}
+    def _hertz(self) -> set[float | None]:
+        bass_hertz = self._bass.hertz
+        melody_hertz = self._melody.hertz
+        return {bass_hertz, melody_hertz}
 
-    def _next_leaves_are_same_as_current(
+    def _next_matrix_is_same(
         self, next_leaf_instructions: dict[Part, Duration | None]
     ) -> bool:
         next_hertz_values = self._get_next_hertz_values(next_leaf_instructions)
-        return self._current_hertz_values == next_hertz_values
+        return self._hertz == next_hertz_values
 
     def _get_tie(
         self, next_leaf_instructions: dict[Part, Duration | None]
@@ -224,15 +223,15 @@ class Passage:
         return (
             self._both_parts_are_tied
             or self._shorter_note_is_tied
-            and self._next_leaves_are_same_as_current(next_leaf_instructions)
+            and self._next_matrix_is_same(next_leaf_instructions)
         )
 
     @property
     def _tuplet(self) -> Tuplet | None:
         shorter_part = self._shorter_part
         longer_part = self._longer_part
-        shorter_part_tuplet = shorter_part.current_leaf_tuplet
-        longer_part_tuplet = longer_part.current_leaf_tuplet
+        shorter_part_tuplet = shorter_part.tuplet
+        longer_part_tuplet = longer_part.tuplet
         if not shorter_part_tuplet and longer_part_tuplet:
             return longer_part_tuplet
         return shorter_part_tuplet
@@ -241,10 +240,7 @@ class Passage:
     def _is_start_of_tuplet(self) -> bool:
         shorter_part = self._shorter_part
         longer_part = self._longer_part
-        if (
-            not shorter_part.current_leaf_tuplet
-            and longer_part.current_leaf_tuplet
-        ):
+        if not shorter_part.tuplet and longer_part.tuplet:
             return longer_part.is_start_of_tuplet
         return shorter_part.is_start_of_tuplet
 
@@ -261,18 +257,18 @@ class Passage:
             shorter_part = self._shorter_part
             longer_part = self._longer_part
             if self._longer_part_has_shortest_sounding_note:
-                longer_duration = longer_part.current_leaf_written_duration
+                longer_duration = longer_part.written_duration
                 matrix_duration = longer_duration
                 decrement_durations[shorter_part] = longer_duration
             else:
-                matrix_duration = shorter_part.current_matrix_duration
-                if self._current_notes_have_different_durations:
+                matrix_duration = shorter_part.matrix_duration
+                if self._leaves_are_notes_of_different_durations:
                     decrement_durations[longer_part] = (
-                        shorter_part.current_leaf_duration
+                        shorter_part.remaining_duration
                     )
             matrix_leaf = MatrixLeaf(
-                bass.current_leaf_pitch,
-                melody.current_leaf_pitch,
+                bass.named_pitch,
+                melody.named_pitch,
                 matrix_duration,
                 self._is_multi_measure_rest,
                 self._get_tie(decrement_durations),
@@ -285,7 +281,7 @@ class Passage:
             )
             leaves.append(matrix_leaf)
             for part, duration in decrement_durations.items():
-                part.get_next_leaf(duration)
+                part.get_next_metered_leaf(duration)
         return leaves
 
     @property

@@ -34,10 +34,10 @@ class Part:
     def __init__(self, lilypond_input: str, input_part: InputPart):
         self.input_staff = self._get_input_staff(lilypond_input, input_part)
         metered_leaves = self._get_metered_leaves()
-        self._leaves = seekable(metered_leaves)
-        self._current_index = 0
-        self.current_leaf_duration: Duration | None = None
-        self.current_leaf = self.get_next_leaf()
+        self._metered_leaves = seekable(metered_leaves)
+        self._index = 0
+        self.remaining_duration: Duration | None = None
+        self.metered_leaf = self.get_next_metered_leaf()
 
     @classmethod
     def _get_input_staff(
@@ -50,6 +50,11 @@ class Part:
             list[Staff], get_components(score.items, prototype=Staff)
         )
         return get_staff_by_name(staves, input_part.value)
+
+    @staticmethod
+    def _get_time_signature(leaf: Leaf) -> TimeSignature | None:
+        time_signatures = get_indicators(leaf, prototype=TimeSignature)
+        return next(iter(time_signatures), None)
 
     def _get_metered_leaves(self) -> list[MeteredLeaf]:
         staff = cast(Staff, self.input_staff)
@@ -64,126 +69,120 @@ class Part:
             notes_in_measure.append(MeteredLeaf(leaf, current_time_signature))
         return notes_in_measure
 
-    def _shorten_current_leaf(self, duration: Duration):
-        current_duration = self.current_leaf_duration
-        if not current_duration:
+    def _shorten_leaf(self, duration: Duration):
+        remaining_duration = self.remaining_duration
+        if not remaining_duration:
             return
-        shortened_duration = current_duration - duration
+        shortened_duration = remaining_duration - duration
         if not shortened_duration:
             return
         if shortened_duration >= 0:
-            self.current_leaf_duration = shortened_duration
+            self.remaining_duration = shortened_duration
             return
-        self.get_next_leaf()
+        self.get_next_metered_leaf()
         shortened_duration = abs(shortened_duration)
-        if self.current_leaf_duration == shortened_duration:
+        if self.remaining_duration == shortened_duration:
             shortened_duration = None
-        self.get_next_leaf(shortened_duration)
+        self.get_next_metered_leaf(shortened_duration)
 
-    def get_next_leaf(
+    def get_next_metered_leaf(
         self,
         shorten_duration: Duration | None = None,
         skip_duration: Duration | None = None,
     ) -> MeteredLeaf | None:
         if shorten_duration:
-            self._shorten_current_leaf(shorten_duration)
+            self._shorten_leaf(shorten_duration)
             return None
-        duration_skipped = self.current_leaf_duration
-        next_leaf = next(self._leaves, None)
+        duration_skipped = self.remaining_duration
+        next_leaf = next(self._metered_leaves, None)
         if skip_duration and duration_skipped is not None:
             while not duration_skipped or duration_skipped < skip_duration:
-                next_leaf = next(self._leaves, None)
+                next_leaf = next(self._metered_leaves, None)
                 if next_leaf:
                     duration_skipped += get_duration(next_leaf.leaf)
         if next_leaf:
-            self.current_leaf_duration = get_duration(next_leaf.leaf)
-        self.current_leaf = next_leaf
-        self._current_index += 1
+            self.remaining_duration = get_duration(next_leaf.leaf)
+        self.metered_leaf = next_leaf
+        self._index += 1
         return next_leaf
 
-    @staticmethod
-    def _get_time_signature(leaf: Leaf) -> TimeSignature | None:
-        time_signatures = get_indicators(leaf, prototype=TimeSignature)
-        return next(iter(time_signatures), None)
-
-    @property
-    def current_leaf_hertz(self) -> float | None:
-        current_leaf_pitch = self.current_leaf_pitch
-        if not current_leaf_pitch:
-            return None
-        return current_leaf_pitch.hertz
-
-    @property
-    def current_matrix_duration(self) -> Duration | None:
-        current_duration = self.current_leaf_duration
-        if (
-            self.current_leaf_tuplet
-            or self.current_leaf
-            and isinstance(self.current_leaf.leaf, Note)
-            and current_duration
-            and not current_duration.is_assignable
-        ):
-            return self.current_leaf_written_duration
-        return current_duration
-
-    def peek_next_leaf(
-        self, duration: Duration | None = None
-    ) -> MeteredLeaf | None:
-        if duration and duration < self.current_leaf_duration:
-            return self.current_leaf
-        next_leaf = self._leaves.peek(None)
+    def peek(self, duration: Duration | None = None) -> MeteredLeaf | None:
+        if duration and duration < self.remaining_duration:
+            return self.metered_leaf
+        next_leaf = self._metered_leaves.peek(None)
         return next_leaf
 
     def seek(self, index: int):
         index = index - 1
-        self._leaves.seek(index)
-        self._current_index = index
-        self.current_leaf = self.get_next_leaf()
+        self._metered_leaves.seek(index)
+        self._index = index
+        self.metered_leaf = self.get_next_metered_leaf()
 
     @property
-    def current_leaf_pitch(self) -> NamedPitch | None:
-        current_leaf = self.current_leaf
-        if not current_leaf or not isinstance(current_leaf.leaf, Note):
+    def named_pitch(self) -> NamedPitch | None:
+        metered_leaf = self.metered_leaf
+        if not metered_leaf or not isinstance(metered_leaf.leaf, Note):
             return None
-        return current_leaf.leaf.written_pitch
+        return metered_leaf.leaf.written_pitch
 
     @property
-    def current_leaf_tie(self) -> bool:
-        if not self.current_leaf:
+    def matrix_duration(self) -> Duration | None:
+        remaining_duration = self.remaining_duration
+        if (
+            self.tuplet
+            or self.metered_leaf
+            and isinstance(self.metered_leaf.leaf, Note)
+            and remaining_duration
+            and not remaining_duration.is_assignable
+        ):
+            return self.written_duration
+        return remaining_duration
+
+    @property
+    def written_duration(self) -> Duration | None:
+        metered_leaf = self.metered_leaf
+        if not metered_leaf:
+            return None
+        return metered_leaf.leaf.written_duration
+
+    @property
+    def is_start_of_written_note(self) -> bool:
+        return self.remaining_duration == self.written_duration
+
+    @property
+    def is_multi_measure_rest(self) -> bool:
+        if not self.metered_leaf or not isinstance(
+            self.metered_leaf.leaf, MultimeasureRest
+        ):
             return False
-        return bool(get_indicators(self.current_leaf.leaf, prototype=Tie))
+        return True
 
     @property
-    def current_leaf_tuplet(self) -> Tuplet | None:
-        if not self.current_leaf or not self.current_leaf_duration:
+    def hertz(self) -> float | None:
+        named_pitch = self.named_pitch
+        if not named_pitch:
             return None
-        current_leaf = self.current_leaf.leaf
-        parent = get_parentage(current_leaf).parent
+        return named_pitch.hertz
+
+    @property
+    def tie(self) -> bool:
+        if not self.metered_leaf:
+            return False
+        ties = get_indicators(self.metered_leaf.leaf, prototype=Tie)
+        return bool(ties)
+
+    @property
+    def tuplet(self) -> Tuplet | None:
+        if not self.metered_leaf or not self.remaining_duration:
+            return None
+        leaf = self.metered_leaf.leaf
+        parent = get_parentage(leaf).parent
         if isinstance(parent, Tuplet):
             return parent
         return None
 
     @property
     def is_start_of_tuplet(self) -> bool:
-        if not self.current_leaf or not self.current_leaf_tuplet:
+        if not self.metered_leaf or not self.tuplet:
             return False
-        return self.current_leaf_tuplet.index(self.current_leaf.leaf) == 0
-
-    @property
-    def current_leaf_written_duration(self) -> Duration | None:
-        current_leaf = self.current_leaf
-        if not current_leaf:
-            return None
-        return current_leaf.leaf.written_duration
-
-    @property
-    def is_multi_measure_rest(self) -> bool:
-        if not self.current_leaf or not isinstance(
-            self.current_leaf.leaf, MultimeasureRest
-        ):
-            return False
-        return True
-
-    @property
-    def is_start_of_written_note(self) -> bool:
-        return self.current_leaf_duration == self.current_leaf_written_duration
+        return self.tuplet.index(self.metered_leaf.leaf) == 0
