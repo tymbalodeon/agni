@@ -5,7 +5,7 @@ from typer import Argument, Option, Typer
 
 from .matrix import Matrix
 from .matrix_pitch import DisplayFormat, PitchType, Tuning
-from .notation import notate_matrix, notate_passage
+from .notation import Notation
 from .passage import Passage
 
 agni = Typer(
@@ -82,7 +82,7 @@ def matrix(
         midi_input=midi_input,
     )
     if notate:
-        notate_matrix(matrix, as_ensemble, tuning, save, as_chord)
+        Notation(matrix, as_ensemble, tuning, save, as_chord).notate()
     if display:
         matrix.display()
     if play:
@@ -136,13 +136,13 @@ def passage(
         adjacent_duplicates,
     )
     if notate:
-        notate_passage(
+        Notation(
             passage,
             as_ensemble,
             tuning,
             save,
             as_chord,
             full_score,
-        )
+        ).notate()
     if display:
         passage.display()
