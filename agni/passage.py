@@ -556,23 +556,20 @@ class Passage:
         ):
             return False
         shorter_duration = shorter_part.current_leaf_duration
-        duration_seeked = Duration()
+        duration_seeked = shorter_duration
         shorter_part_current_index = shorter_part._current_index
         longer_part_has_shortest_sounding_note = False
         while (
             shorter_part.current_leaf_tie
+            and duration_seeked
             and duration_seeked < longer_part.current_leaf_duration
         ):
-            duration_seeked += shorter_part.current_leaf_duration
             shorter_part.get_next_leaf()
-        next_leaf = shorter_part.peek_next_leaf()
+            duration_seeked += shorter_part.current_leaf_duration
         longer_written_duration = longer_part.current_leaf_written_duration
         if (
-            duration_seeked >= longer_written_duration
-            or next_leaf
-            and isinstance(next_leaf.leaf, Note)
-            and duration_seeked + next_leaf.leaf.written_duration
-            >= longer_written_duration
+            duration_seeked
+            and duration_seeked >= longer_written_duration
             and longer_part.current_leaf_duration == longer_written_duration
         ):
             longer_part_has_shortest_sounding_note = True
