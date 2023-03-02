@@ -30,7 +30,7 @@ def callback(
     _: bool = Option(
         False,
         "--version",
-        "-v",
+        "-V",
         callback=display_version,
         help="Display version number.",
     ),
