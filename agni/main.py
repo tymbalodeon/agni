@@ -1,7 +1,10 @@
 from pathlib import Path
 
+from rich import print
 from rich.markup import escape
-from typer import Argument, Option, Typer
+from typer import Argument, Exit, Option, Typer
+
+from agni import __version__
 
 from .matrix import Matrix
 from .matrix_pitch import DisplayFormat, PitchType, Tuning
@@ -14,6 +17,26 @@ agni = Typer(
     no_args_is_help=True,
     rich_markup_mode="rich",
 )
+
+
+def display_version(version: bool):
+    if version:
+        print(f"agni {__version__}")
+        raise Exit()
+
+
+@agni.callback()
+def callback(
+    _: bool = Option(
+        False,
+        "--version",
+        "-v",
+        callback=display_version,
+        help="Display version number.",
+    ),
+):
+    return
+
 
 pitch_choices = escape("[hertz|midi|lilypond]")
 pitch_help = f"[bold yellow]{pitch_choices}[/bold yellow]"
