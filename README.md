@@ -54,6 +54,7 @@ to facilitate development. Available commands:
   the results with speedscope.
 - `try *args`: Try a command using the current state of the files without
   building.
+- `shell`: Open a python shell with project dependencies available.
 
 ## Dependencies
 

@@ -84,3 +84,8 @@ profile *args:
     sudo py-spy record -f speedscope -o "${output_file}" \
         -- pdm run python -m "${command}" {{args}}
     speedscope "${output_file}"
+
+# Open a python shell with project dependencies available.
+shell:
+    #!/usr/bin/env zsh
+    pdm run bpython
