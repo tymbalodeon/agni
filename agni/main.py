@@ -6,13 +6,15 @@ from typer import Argument, Exit, Option, Typer
 
 from agni import __version__
 
+from .helpers import stylize
 from .matrix import Matrix
 from .matrix_pitch import DisplayFormat, PitchType, Tuning
 from .notation import Notation
 from .passage import Passage
 
+app_name = stylize("Agni", color="bright_green")
 agni = Typer(
-    help="Create combination-tone matrices.",
+    help=f"{app_name}: Create combination-tone matrices.",
     context_settings={"help_option_names": ["-h", "--help"]},
     no_args_is_help=True,
     rich_markup_mode="rich",
