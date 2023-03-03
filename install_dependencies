@@ -4,6 +4,7 @@ dependencies=(
     "brew"
     "lilypond"
     "just"
+    "pdm"
     "cargo"
     "checkexec"
     "pipx"
@@ -21,6 +22,9 @@ install_dependency() {
             ;;
         "just")
             brew install just
+            ;;
+        "pdm")
+            brew install pdm
             ;;
         "cargo")
             curl https://sh.rustup.rs -sSf | sh

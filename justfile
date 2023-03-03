@@ -6,7 +6,7 @@ pre_commit := "pdm run pre-commit"
 # Run pre-commit checks or autoupdate ("--autoupdate").
 check *autoupdate:
     #!/usr/bin/env zsh
-    if [ "{{autoupdate}}" = "--autoupdate" ]; then
+    if [ "{{autoupdate}}" = "autoupdate" ]; then
         {{pre_commit}} autoupdate
     else
         {{pre_commit}} run --all-files
@@ -70,7 +70,7 @@ example *args:
         open "${pdf_files[@]}"
     fi
 
-# Install dependencies.
+# Install non-Python dependencies.
 @install:
     ./install_dependencies
 
@@ -89,3 +89,9 @@ profile *args:
 shell:
     #!/usr/bin/env zsh
     pdm run bpython
+
+# Update project dependencies and pre-commit hooks.
+update:
+    #!/usr/bin/env zsh
+    pdm update
+    {{pre_commit}} autoupdate

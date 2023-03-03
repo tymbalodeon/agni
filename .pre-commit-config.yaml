@@ -56,7 +56,7 @@ repos:
           - --exclude
           - "*/__pypackages__/*,*/.venv/*"
   - repo: https://github.com/pdm-project/pdm
-    rev: 2.4.6
+    rev: 2.4.7
     hooks:
       - id: pdm-export
         args:
