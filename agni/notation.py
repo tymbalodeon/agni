@@ -425,7 +425,7 @@ class Notation:
         staff_group = StaffGroup()
         passage = self._passage
         if passage:
-            for staff in self._input_staves:
+            for staff in reversed(self._input_staves):
                 staff_group.append(staff)
             for matrix_leaf in self._matrix_leaves:
                 duration = matrix_leaf.duration
