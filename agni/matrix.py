@@ -58,19 +58,19 @@ class Matrix:
 
     @staticmethod
     @lru_cache
-    def _convert_midi_to_hertz(midi_number: float | str) -> float:
-        if isinstance(midi_number, str):
-            midi_number = float(midi_number)
+    def _convert_midi_to_hertz(midi_number: float) -> float:
         return (2 ** ((midi_number - 69) / 12)) * 440
 
     def _get_frequency_from_input(self, pitch: str | NamedPitch) -> float:
         if isinstance(pitch, NamedPitch):
             return pitch.hertz
-        if pitch.isnumeric():
+        try:
+            frequency = float(pitch)
             if self._midi_input:
-                return self._convert_midi_to_hertz(pitch)
-            return float(pitch)
-        return NamedPitch(pitch).hertz
+                return self._convert_midi_to_hertz(frequency)
+            return frequency
+        except ValueError:
+            return NamedPitch(pitch).hertz
 
     @cached_property
     def frequencies(self) -> list[MatrixPitch]:
