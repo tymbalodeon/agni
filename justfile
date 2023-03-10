@@ -72,7 +72,7 @@ example *args:
 
 # Install non-Python dependencies.
 @install:
-    ./install_dependencies
+    ./install_dependencies.zsh
 
 # Run the py-spy profiler on a command and its <args> and open the results with speedscope.
 profile *args:
