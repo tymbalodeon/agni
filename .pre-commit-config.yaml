@@ -55,6 +55,8 @@ repos:
           - ./
           - --exclude
           - "*/__pypackages__/*,*/.venv/*"
+          - --ignore-names
+          - "_generate_next_value_"
   - repo: https://github.com/pdm-project/pdm
     rev: 2.4.7
     hooks:

@@ -49,7 +49,7 @@ class Part:
         staves = cast(
             list[Staff], get_components(score.items, prototype=Staff)
         )
-        return get_staff_by_name(staves, input_part.value)
+        return get_staff_by_name(staves, input_part)
 
     @staticmethod
     def _get_time_signature(leaf: Leaf) -> TimeSignature | None:

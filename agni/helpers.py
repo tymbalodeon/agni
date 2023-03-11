@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import StrEnum, auto
 
 from abjad import Staff, StaffGroup
 
 
-class InputPart(Enum):
-    BASS = "bass"
-    MELODY = "melody"
+class InputPart(StrEnum):
+    BASS = auto()
+    MELODY = auto()
 
 
 def _get_part_label(multiple: int, input_part: InputPart) -> str:

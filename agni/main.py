@@ -49,10 +49,10 @@ pitch_type_help = (
     " type as the input pitches is used.)"
 )
 tuning = Option(
-    Tuning.MICROTONAL.value, "--tuning", help="Set the tuning to quantize to."
+    Tuning.MICROTONAL, "--tuning", help="Set the tuning to quantize to."
 )
 display_format = Option(
-    DisplayFormat.TABLE.value,
+    DisplayFormat.TABLE,
     "--display",
     help="Set the matrix display format.",
 )
@@ -121,7 +121,7 @@ def passage(
     ),
     multiples: int = multiples,
     pitch_type: PitchType = Option(
-        PitchType.LILYPOND.value,
+        PitchType.LILYPOND,
         pitch_type_option_name,
         help=pitch_type_help,
     ),

@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum, auto
 from functools import cached_property
 from math import log
 
@@ -7,22 +7,26 @@ from abjad import Duration, NamedPitch, Note, NumberedPitch, Tie, attach
 from .helpers import get_instrument_name, stylize
 
 
-class PitchType(Enum):
-    ALL = "all"
-    HERTZ = "hertz"
-    MIDI = "midi"
-    LILYPOND = "lilypond"
+class PitchType(StrEnum):
+    ALL = auto()
+    HERTZ = auto()
+    MIDI = auto()
+    LILYPOND = auto()
 
 
-class Tuning(Enum):
-    EQUAL_TEMPERED = "equal-tempered"
-    MICROTONAL = "microtonal"
+class Tuning(StrEnum):
+    @staticmethod
+    def _generate_next_value_(name, *_):
+        return name.lower().replace("_", "-")
+
+    EQUAL_TEMPERED = auto()
+    MICROTONAL = auto()
 
 
-class DisplayFormat(Enum):
-    LIST = "list"
-    STACK = "stack"
-    TABLE = "table"
+class DisplayFormat(StrEnum):
+    MELODY = auto()
+    CHORD = auto()
+    TABLE = auto()
 
 
 class MatrixPitch:
@@ -170,7 +174,7 @@ class MatrixPitch:
             display_pitch = self._stylize_multiple(display_pitch)
         elif self._is_bass_multiple:
             display_pitch = self._stylize_bass_multiple(display_pitch)
-        if display_format == DisplayFormat.STACK:
+        if display_format == DisplayFormat.CHORD:
             display_label = self._get_display_label()
             display_pitch = f"{display_label}{display_pitch}"
         return display_pitch

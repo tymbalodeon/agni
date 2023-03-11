@@ -116,7 +116,7 @@ class Matrix:
 
     def _get_display_table(self) -> Table:
         pitch_type = self._pitch_type
-        title = f"Combination-Tone Matrix ({pitch_type.value.title()})"
+        title = f"Combination-Tone Matrix ({pitch_type.title()})"
         title = stylize(title, "cyan")
         return Table(title=title, show_header=False, box=SIMPLE)
 
@@ -131,7 +131,7 @@ class Matrix:
         console = Console(theme=Theme(inherit=False))
         console.print(frequencies)
 
-    def _display_stack(self):
+    def _display_chord(self):
         table = self._get_display_table()
         for frequency in reversed(self.sorted_frequencies):
             frequency_display = frequency.get_display(
@@ -164,10 +164,10 @@ class Matrix:
 
     def display(self):
         display_format = self._display_format
-        if display_format == DisplayFormat.LIST:
+        if display_format == DisplayFormat.MELODY:
             self._display_list()
-        elif display_format == DisplayFormat.STACK:
-            self._display_stack()
+        elif display_format == DisplayFormat.CHORD:
+            self._display_chord()
         else:
             self._display_table()
 
