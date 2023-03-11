@@ -46,25 +46,25 @@ build *pip:
 # Run example if output is nonexistent or outdated (or if "--force-output"), then open input and output files (or only "--input" or "--output").
 example *args:
     #!/usr/bin/env zsh
-    input_file_name=examples/lonely-child
-    matrix_score=examples/matrix.pdf
+    input_file_name="examples/lonely-child"
+    output_pdf="examples/matrix.pdf"
     pdf_files=()
     if [ -z "{{args}}" ] || [[ "{{args}}" = *"--input"* ]]; then
-        input_score="${input_file_name}.pdf"
-        lilypond_file="${input_file_name}.ly"
-        checkexec "${input_score}" examples/*.*ly \
-            -- lilypond -o examples "${lilypond_file}"
-        mv "${input_file_name}-formatted.pdf" "${input_score}" 2>/dev/null
-        pdf_files+="${input_score}"
+        input_pdf="${input_file_name}.pdf"
+        input_ly="${input_file_name}.ly"
+        checkexec "${input_pdf}" examples/*.*ly \
+            -- lilypond -o examples "${input_ly}"
+        mv "${input_file_name}-formatted.pdf" "${input_pdf}" 2>/dev/null
+        pdf_files+="${input_pdf}"
     fi
     if [ -z "{{args}}" ] || [[ "{{args}}" = *"--output"* ]]; then
-        checkexec "${matrix_score}" "${input_file_name}-notes.ily" \
+        checkexec "${output_pdf}" "${input_file_name}"*.ily \
             -- just try passage --notate --save --full-score
-        pdf_files+="${matrix_score}"
+        pdf_files+="${output_pdf}"
     fi
     if [[ "{{args}}" = *"--force-output"* ]]; then
         just try passage --notate --save --full-score
-        pdf_files+="${matrix_score}"
+        pdf_files+="${output_pdf}"
     fi
     if [ -n "${pdf_files[*]}" ]; then
         open "${pdf_files[@]}"
