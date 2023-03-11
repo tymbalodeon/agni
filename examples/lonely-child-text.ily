@@ -118,4 +118,8 @@ text = \lyricmode {
   bri -- _ lent pour toi
   Ta -- zio
   et t'ai -- ment é -- ter -- nel -- le -- ment
+
+  _ _
+
+  ka
 }
