@@ -30,6 +30,13 @@ class DisplayFormat(StrEnum):
     TABLE = auto()
 
 
+class DisplayColor(StrEnum):
+    BASE_FREQUENCY = "orange1"
+    BASS_MULTIPLE = "dark_orange3"
+    MELODY_MULTIPLE = "yellow"
+    LABEL = "white"
+
+
 class MatrixPitch:
     def __init__(
         self,
@@ -77,10 +84,6 @@ class MatrixPitch:
             return True
         return False
 
-    @cached_property
-    def is_base_multiple(self) -> bool:
-        return self._is_bass_multiple or self._is_melody_multiple
-
     def _get_lilypond_display_pitch(self, tuning: Tuning) -> str:
         if not self.frequency:
             return ""
@@ -116,15 +119,15 @@ class MatrixPitch:
 
     @staticmethod
     def _stylize_base_frequency(text: str) -> str:
-        return stylize(text, "orange1", bold=True)
+        return stylize(text, DisplayColor.BASE_FREQUENCY, bold=True)
 
     @staticmethod
     def _stylize_bass_multiple(text: str) -> str:
-        return stylize(text, "dark_orange3")
+        return stylize(text, DisplayColor.BASS_MULTIPLE)
 
     @staticmethod
-    def _stylize_multiple(text: str) -> str:
-        return stylize(text, "yellow")
+    def _stylize_melody_multiple(text: str) -> str:
+        return stylize(text, DisplayColor.MELODY_MULTIPLE)
 
     def _get_bass_label(self, abbreviated=False) -> str:
         if abbreviated:
@@ -150,11 +153,13 @@ class MatrixPitch:
         elif self._is_bass_multiple:
             bass_multiplier = self._stylize_bass_multiple(bass_multiplier)
         elif self._is_melody_multiple:
-            melody_multiplier = self._stylize_multiple(melody_multiplier)
+            melody_multiplier = self._stylize_melody_multiple(
+                melody_multiplier
+            )
         label = f"{bass_multiplier} + {melody_multiplier}"
         if display_format == DisplayFormat.CHORD:
             label = f"{label} = "
-        return stylize(label, "white")
+        return stylize(label, DisplayColor.LABEL)
 
     def get_display(
         self,
@@ -178,12 +183,8 @@ class MatrixPitch:
             display_pitch = f"{hertz}\n{lilypond}\n{midi}"
         if self.is_base_frequency:
             display_pitch = self._stylize_base_frequency(display_pitch)
-        if (
-            display_format == DisplayFormat.TABLE
-            and self.is_base_multiple
-            or self._is_melody_multiple
-        ):
-            display_pitch = self._stylize_multiple(display_pitch)
+        if self._is_melody_multiple:
+            display_pitch = self._stylize_melody_multiple(display_pitch)
         elif self._is_bass_multiple:
             display_pitch = self._stylize_bass_multiple(display_pitch)
         if display_format == DisplayFormat.CHORD:

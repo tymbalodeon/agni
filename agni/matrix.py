@@ -3,14 +3,20 @@ from time import sleep
 from typing import Any
 
 from abjad import NamedPitch
-from rich.box import MINIMAL, SIMPLE
+from rich.box import SIMPLE
 from rich.console import Console
 from rich.table import Table
 from rich.theme import Theme
 from supriya.patterns import EventPattern, SequencePattern
 
 from .helpers import stylize
-from .matrix_pitch import DisplayFormat, MatrixPitch, PitchType, Tuning
+from .matrix_pitch import (
+    DisplayColor,
+    DisplayFormat,
+    MatrixPitch,
+    PitchType,
+    Tuning,
+)
 
 
 class Matrix:
@@ -121,13 +127,25 @@ class Matrix:
     @staticmethod
     def _get_multiplier_label(multiplier: int, pitch: str) -> str:
         multiplier_label = f"{multiplier} x {pitch}"
-        return stylize(multiplier_label, "white", bold=False)
+        if multiplier == 1:
+            color = DisplayColor.BASE_FREQUENCY
+            bold = True
+        elif multiplier > 1:
+            if pitch == "bass":
+                color = DisplayColor.BASS_MULTIPLE
+            else:
+                color = DisplayColor.MELODY_MULTIPLE
+            bold = False
+        else:
+            color = DisplayColor.LABEL
+            bold = False
+        return stylize(multiplier_label, color, bold=bold)
 
-    def _get_display_table(self, show_header=False, box=SIMPLE) -> Table:
+    def _get_display_table(self) -> Table:
         pitch_type = self._pitch_type
         title = f"Combination-Tone Matrix ({pitch_type.title()})"
         title = stylize(title, "cyan")
-        return Table(title=title, show_header=show_header, box=box)
+        return Table(title=title, show_header=False, box=SIMPLE)
 
     def _display_chord(self):
         table = self._get_display_table()
@@ -144,13 +162,12 @@ class Matrix:
         console.print(frequencies)
 
     def _display_melody(self):
-        table = self._get_display_table(show_header=True, box=MINIMAL)
+        table = self._get_display_table()
         labels = [
             frequency._get_display_label(display_format=DisplayFormat.MELODY)
             for frequency in self.sorted_frequencies
         ]
-        for label in labels:
-            table.add_column(label, justify="center")
+        table.add_row(*labels)
         table.add_row(*self.frequency_displays)
         Console().print(table)
 
