@@ -470,17 +470,16 @@ class Notation:
         self._set_clefs(notes)
         return notes
 
-    def _get_matrix_staff(self, matrix: Matrix) -> Staff:
+    def _get_matrix_score(self, matrix: Matrix) -> Score:
         notes = self._get_matrix_notes(matrix)
         if self._as_chord:
             components: list[Chord] | list[Note] = [self._get_chord(notes)]
         else:
             components = notes
-        return Staff(components)
+        return Score([Staff(components)])
 
-    def _get_reference_score(self) -> Score:
-        staves = [self._get_matrix_staff(matrix) for matrix in self._matrices]
-        return Score(staves)
+    def _get_reference_score(self) -> list[Score]:
+        return [self._get_matrix_score(matrix) for matrix in self._matrices]
 
     @property
     def lilypond_preamble(self) -> str:
@@ -529,10 +528,10 @@ class Notation:
 
     def notate(self):
         if self._as_ensemble:
-            score = self._get_ensemble_score()
+            scores = [self._get_ensemble_score()]
         else:
-            score = self._get_reference_score()
-        lilypond_file = LilyPondFile([self.lilypond_preamble, score])
+            scores = self._get_reference_score()
+        lilypond_file = LilyPondFile([self.lilypond_preamble] + scores)
         if self._save:
             pdf_file_path = Path("examples") / "matrix.pdf"
             with Progress() as progress:
