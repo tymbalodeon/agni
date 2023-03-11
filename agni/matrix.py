@@ -3,8 +3,11 @@ from time import sleep
 from typing import Any
 
 from abjad import NamedPitch
+from rich import print
 from rich.box import SIMPLE
+from rich.columns import Columns
 from rich.console import Console
+from rich.panel import Panel
 from rich.table import Table
 from rich.theme import Theme
 from supriya.patterns import EventPattern, SequencePattern
@@ -141,10 +144,13 @@ class Matrix:
             bold = False
         return stylize(multiplier_label, color, bold=bold)
 
-    def _get_display_table(self) -> Table:
+    def _get_display_title(self) -> str:
         pitch_type = self._pitch_type
         title = f"Combination-Tone Matrix ({pitch_type.title()})"
-        title = stylize(title, "cyan")
+        return stylize(title, "cyan")
+
+    def _get_display_table(self) -> Table:
+        title = self._get_display_title()
         return Table(title=title, show_header=False, box=SIMPLE)
 
     def _display_chord(self):
@@ -162,14 +168,17 @@ class Matrix:
         console.print(frequencies)
 
     def _display_melody(self):
-        table = self._get_display_table()
         labels = [
             frequency._get_display_label(display_format=DisplayFormat.MELODY)
             for frequency in self.sorted_frequencies
         ]
-        table.add_row(*labels)
-        table.add_row(*self.frequency_displays)
-        Console().print(table)
+        labeled_pitches = [
+            Panel("\n".join(pitch), box=SIMPLE)
+            for pitch in zip(labels, self.frequency_displays)
+        ]
+        title = self._get_display_title()
+        columns = Columns(labeled_pitches, title=title)
+        print(columns)
 
     def _display_table(self):
         table = self._get_display_table()
