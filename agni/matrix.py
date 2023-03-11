@@ -3,7 +3,7 @@ from time import sleep
 from typing import Any
 
 from abjad import NamedPitch
-from rich.box import SIMPLE
+from rich.box import MINIMAL, SIMPLE
 from rich.console import Console
 from rich.table import Table
 from rich.theme import Theme
@@ -72,7 +72,7 @@ class Matrix:
         except ValueError:
             return NamedPitch(pitch).hertz
 
-    @cached_property
+    @property
     def frequencies(self) -> list[MatrixPitch]:
         frequencies = []
         multiples = self._multiples
@@ -102,6 +102,15 @@ class Matrix:
             if frequency.frequency
         ]
 
+    @property
+    def frequency_displays(self) -> list[str]:
+        return [
+            frequency.get_display(
+                self._pitch_type, self._tuning, self._display_format
+            )
+            for frequency in self.sorted_frequencies
+        ]
+
     def get_sorted_generated_frequencies(self) -> list[MatrixPitch]:
         return [
             frequency
@@ -114,22 +123,11 @@ class Matrix:
         multiplier_label = f"{multiplier} x {pitch}"
         return stylize(multiplier_label, "white", bold=False)
 
-    def _get_display_table(self) -> Table:
+    def _get_display_table(self, show_header=False, box=SIMPLE) -> Table:
         pitch_type = self._pitch_type
         title = f"Combination-Tone Matrix ({pitch_type.title()})"
         title = stylize(title, "cyan")
-        return Table(title=title, show_header=False, box=SIMPLE)
-
-    def _display_list(self):
-        frequencies = [
-            frequency.get_display(
-                self._pitch_type, self._tuning, self._display_format
-            )
-            for frequency in self.sorted_frequencies
-        ]
-        frequencies = ", ".join(frequencies)
-        console = Console(theme=Theme(inherit=False))
-        console.print(frequencies)
+        return Table(title=title, show_header=show_header, box=box)
 
     def _display_chord(self):
         table = self._get_display_table()
@@ -138,6 +136,22 @@ class Matrix:
                 self._pitch_type, self._tuning, self._display_format
             )
             table.add_row(frequency_display)
+        Console().print(table)
+
+    def _display_list(self):
+        frequencies = ", ".join(self.frequency_displays)
+        console = Console(theme=Theme(inherit=False))
+        console.print(frequencies)
+
+    def _display_melody(self):
+        table = self._get_display_table(show_header=True, box=MINIMAL)
+        labels = [
+            frequency._get_display_label(display_format=DisplayFormat.MELODY)
+            for frequency in self.sorted_frequencies
+        ]
+        for label in labels:
+            table.add_column(label, justify="center")
+        table.add_row(*self.frequency_displays)
         Console().print(table)
 
     def _display_table(self):
@@ -164,10 +178,12 @@ class Matrix:
 
     def display(self):
         display_format = self._display_format
-        if display_format == DisplayFormat.MELODY:
-            self._display_list()
-        elif display_format == DisplayFormat.CHORD:
+        if display_format == DisplayFormat.CHORD:
             self._display_chord()
+        elif display_format == DisplayFormat.LIST:
+            self._display_list()
+        elif display_format == DisplayFormat.MELODY:
+            self._display_melody()
         else:
             self._display_table()
 

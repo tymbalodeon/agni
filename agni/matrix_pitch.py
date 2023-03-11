@@ -24,8 +24,9 @@ class Tuning(StrEnum):
 
 
 class DisplayFormat(StrEnum):
-    MELODY = auto()
     CHORD = auto()
+    LIST = auto()
+    MELODY = auto()
     TABLE = auto()
 
 
@@ -125,15 +126,23 @@ class MatrixPitch:
     def _stylize_multiple(text: str) -> str:
         return stylize(text, "yellow")
 
-    def _get_bass_label(self) -> str:
+    def _get_bass_label(self, abbreviated=False) -> str:
+        if abbreviated:
+            return f"{self.bass_multiplier}B"
         return f"({self.bass_multiplier} x bass)"
 
-    def _get_melody_label(self) -> str:
+    def _get_melody_label(self, abbreviated=False) -> str:
+        if abbreviated:
+            return f"{self._melody_multiplier}M"
         return f"({self._melody_multiplier} x melody)"
 
-    def _get_display_label(self) -> str:
-        bass_multiplier = self._get_bass_label()
-        melody_multiplier = self._get_melody_label()
+    def _get_display_label(self, display_format=DisplayFormat.CHORD) -> str:
+        if display_format == DisplayFormat.MELODY:
+            abbreviated = True
+        else:
+            abbreviated = False
+        bass_multiplier = self._get_bass_label(abbreviated)
+        melody_multiplier = self._get_melody_label(abbreviated)
         if self._is_bass_frequency:
             bass_multiplier = self._stylize_base_frequency(bass_multiplier)
         elif self._is_melody_frequency:
@@ -142,7 +151,10 @@ class MatrixPitch:
             bass_multiplier = self._stylize_bass_multiple(bass_multiplier)
         elif self._is_melody_multiple:
             melody_multiplier = self._stylize_multiple(melody_multiplier)
-        return stylize(f"{bass_multiplier} + {melody_multiplier} = ", "white")
+        label = f"{bass_multiplier} + {melody_multiplier}"
+        if display_format == DisplayFormat.CHORD:
+            label = f"{label} = "
+        return stylize(label, "white")
 
     def get_display(
         self,

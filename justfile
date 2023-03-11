@@ -70,7 +70,7 @@ example *args:
         open "${pdf_files[@]}"
     fi
 
-# Install non-Python dependencies.
+# Install external dependencies.
 @install:
     ./install_dependencies.zsh
 
