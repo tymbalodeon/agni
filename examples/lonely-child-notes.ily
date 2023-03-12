@@ -1,7 +1,3 @@
-\version "2.24.1"
-
-\language "english"
-
 \header {
   title = "Lonely Child"
   composer = "Claude Vivier"

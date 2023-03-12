@@ -90,8 +90,30 @@ shell:
     #!/usr/bin/env zsh
     pdm run bpython
 
-# Update project dependencies and pre-commit hooks.
-update:
+# Update project dependencies, pre-commit hooks, and lilypond file versions (or just the latter if "lilypond").
+update *lilypond:
     #!/usr/bin/env zsh
-    pdm update
-    {{pre_commit}} autoupdate
+    if [ -z "{{lilypond}}" ]; then
+        pdm update
+        {{pre_commit}} autoupdate
+    fi
+    get_lilypond_version() {
+        version_text="$(lilypond --version)"
+        first_line="$(echo "${version_text}" | head -1)"
+        version_number="$(
+            echo "${first_line}" | grep -o "[0-9]\.[0-9]\{2\}\.[0-9]"
+        )"
+        echo "${version_number}"
+    }
+    current_lilypond_version="$(get_lilypond_version)"
+    for file in examples/**.ly; do
+        file_version="$(grep -o "${current_lilypond_version}" "${file}")"
+        [ -n "${file_version}" ]
+        if [ -n "${file_version}" ] \
+            && [ "${file_version}" != "${current_lilypond_version}" ]; then
+            convert-ly --current-version --edit "${file}"
+            rm -f "${file}"~
+        else
+            echo "\"${file}\" is already up to date."
+        fi
+    done

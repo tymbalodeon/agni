@@ -1,5 +1,7 @@
 \version "2.24.1"
 
+\language "english"
+
 \include "lonely-child-notes.ily"
 \include "lonely-child-text.ily"
 
