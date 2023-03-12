@@ -1,4 +1,4 @@
-\version "2.24.0"
+\version "2.24.1"
 
 \include "lonely-child-notes.ily"
 \include "lonely-child-text.ily"
