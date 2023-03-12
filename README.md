@@ -26,10 +26,14 @@ Commands:
 - `agni passage <input_file>`: Generate matrices for a given passage of bass
   and melody notes, and display or notate.
 
+### Input files
+
+Abjad's LilyPondParser does not support all of LilyPond's syntax. Please see [Abjad's
+documentation](https://abjad.github.io/api/abjad/parsers/parser.html#abjad.parsers.parser.LilyPondParser) for supported syntax that can be used in input files.
+
 ### Example (Lonely Child)
 
-Vivier's [_Lonely Child_](https://www.boosey.com/cr/music/Claude-Vivier-Lonely-Child/47752 "Lonely Child")
-is provided as an example.
+Vivier's [_Lonely Child_](https://www.boosey.com/cr/music/Claude-Vivier-Lonely-Child/47752 "Lonely Child") is provided as an example.
 
 - `just example --input`: View an input file containing only the soprano melody
   and bass accompaniment.
