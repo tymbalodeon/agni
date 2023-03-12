@@ -15,7 +15,8 @@ dependencies=(
 install_dependency() {
     case ${1} in
         "brew")
-            curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+            curl -fsSL \
+                "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
             ;;
         "just")
             brew install just
@@ -34,13 +35,42 @@ install_dependency() {
             brew install pnpm
             ;;
         "speedscope")
-            pnpm add -g speedscope
+            pnpm add --global speedscope
             ;;
         "cargo")
             curl https://sh.rustup.rs -sSf | sh
             ;;
         "checkexec")
             cargo install checkexec
+            ;;
+    esac
+}
+
+upgrade_dependency() {
+    case ${1} in
+        "just")
+            brew upgrade just
+            ;;
+        "lilypond")
+            brew upgrade lilypond
+            ;;
+        "pdm")
+            brew upgrade pdm
+            ;;
+        "pipx")
+            brew upgrade pipx
+            ;;
+        "pnpm")
+            brew upgrade pnpm
+            ;;
+        "speedscope")
+            pnpm update --global speedscope
+            ;;
+        "checkexec")
+            if command -v cargo install-update &>/dev/null; then
+                cargo install cargo-update
+            fi
+            cargo install-update checkexec
             ;;
     esac
 }
@@ -52,4 +82,14 @@ for dependency in "${dependencies[@]}"; do
         echo "Installing ${dependency}..."
         install_dependency "${dependency}"
     fi
+done
+
+IFS=" " read -r -A ARGS <<< "$@"
+
+if ! ((${ARGS[(I)*upgrade*]})); then
+    exit
+fi
+
+for dependency in "${dependencies[@]}"; do
+    upgrade_dependency "${dependency}"
 done

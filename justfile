@@ -70,9 +70,9 @@ example *args:
         open "${pdf_files[@]}"
     fi
 
-# Install external dependencies.
-@install:
-    ./install_dependencies.zsh
+# Install (or "upgrade") external dependencies.
+@install *upgrade:
+    ./install_dependencies.zsh {{upgrade}}
 
 # Run the py-spy profiler on a command and its <args> and open the results with speedscope.
 profile *args:

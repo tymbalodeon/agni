@@ -53,7 +53,7 @@ to facilitate development. Available commands:
 - `example *args*`: Run example if output is nonexistent or outdated (or if
   "--force-output"), then open input and output files (or only "--input" or
   "--output").
-- `install`: Install dependencies.
+- `install *upgrade`: Install (or "upgrade") external dependencies.
 - `profile *args`: Run the py-spy profiler on a command and its \<args\> and
   open the results with speedscope.
 - `shell`: Open a python shell with project dependencies available.
