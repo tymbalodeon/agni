@@ -20,11 +20,11 @@ The concept of a "Combination-Tone Matrix" comes from Bryan Christian's article,
 
 Commands:
 
-- `agni COMMAND -h`: See all available options for COMMAND.
-- `agni matrix <bass> <melody>`: Generate a single matrix for a given bass
-  and melody pitch, and display, notate, or play.
-- `agni passage <input_file>`: Generate matrices for a given passage of bass
-  and melody notes, and display or notate.
+- `agni COMMAND --help`: See all available options for COMMAND.
+- `agni matrix <bass> <melody>`: Generate a single matrix for a given bass and
+  melody pitch, and display, notate, or play.
+- `agni passage <input_file>`: Generate matrices for a given passage of bass and
+  melody notes, and display or notate.
 
 ### Input files
 
@@ -54,18 +54,20 @@ to facilitate development. Available commands:
   "--force-output"), then open input and output files (or only "--input" or
   "--output").
 - `install`: Install dependencies.
-- `profile *args`: Run the py-spy profiler on a command and its \<args\> and open
-  the results with speedscope.
+- `profile *args`: Run the py-spy profiler on a command and its \<args\> and
+  open the results with speedscope.
+- `shell`: Open a python shell with project dependencies available.
 - `try *args`: Try a command using the current state of the files without
   building.
-- `shell`: Open a python shell with project dependencies available.
+- `update *lilypond`: Update project dependencies, pre-commit hooks, and
+  lilypond file versions (or just the latter if "lilypond").
 
 ## Dependencies
 
-Most dependencies can be installed via [pdm](https://pdm.fming.dev/latest/)
-by running `pdm install`. The rest (listed below) can be installed by running
-the included script: `./install_dependencies`. Or, if `just` is already
-installed: `just install` to install the rest of the dependencies.
+Most dependencies can be installed via [pdm](https://pdm.fming.dev/latest/) by
+running `pdm install`. The rest (listed below) can be installed by running the
+included script: `./install_dependencies`. Or, if `just` is already installed:
+`just install` to install the rest of the dependencies.
 
 Required for generating pdfs:
 
