@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from functools import cached_property
 from pathlib import Path
 from statistics import mode
 from typing import cast
@@ -56,6 +57,7 @@ class Notation:
         tuning: Tuning,
         save: bool,
         as_chord: bool,
+        output_directory: Path,
         full_score: bool = False,
     ):
         if isinstance(input, Matrix):
@@ -71,6 +73,7 @@ class Notation:
         self._save = save
         self._as_chord = as_chord
         self._full_score = full_score
+        self._output_directory = output_directory
 
     @staticmethod
     def _get_first_staff_leaf(staff: Staff) -> Leaf | None:
@@ -482,31 +485,44 @@ class Notation:
         return [self._get_matrix_score(matrix) for matrix in self._matrices]
 
     @property
-    def lilypond_preamble(self) -> str:
-        passage = self._passage
-        if passage:
-            title = passage.title
-            composer = passage.composer
-        else:
+    def _scores(self) -> list[Score]:
+        if self._as_ensemble:
+            return [self._get_ensemble_score()]
+        return self._get_reference_score()
+
+    @cached_property
+    def _title(self) -> str:
+        if not self._passage:
             if self._number_of_matrices > 1:
                 matrix_display = "Matrices"
             else:
                 matrix_display = "Matrix"
-            title = f"Combination-Tone {matrix_display}"
-            composer = ""
+            return f"Combination-Tone {matrix_display}"
+        return self._passage.title
+
+    @cached_property
+    def _composer(self) -> str:
+        if not self._passage:
+            return ""
+        return self._passage.composer
+
+    @property
+    def _stencils(self) -> str:
         if self._full_score:
-            stencils = ""
-        else:
-            stencils = """
-                \\override TimeSignature.stencil = ##f
-                \\override BarLine.stencil = ##f
-                \\override Stem.stencil = ##f
-            """
+            return ""
+        return """
+            \\override TimeSignature.stencil = ##f
+            \\override BarLine.stencil = ##f
+            \\override Stem.stencil = ##f
+        """
+
+    @property
+    def _lilypond_preamble(self) -> str:
         return f"""
                     \\header {{
                         tagline = ##f
-                        title = "{title}"
-                        composer = "{composer}"
+                        title = "{self._title}"
+                        composer = "{self._composer}"
                     }}
 
                     \\paper {{
@@ -521,19 +537,31 @@ class Notation:
                         \\context {{
                             \\Score
                             \\numericTimeSignature
-                            {stencils}
+                            {self._stencils}
                         }}
                     }}
                 """
 
-    def notate(self):
+    @staticmethod
+    def _format_for_filename(text: str) -> str:
+        return text.lower().replace(" ", "-")
+
+    @property
+    def _output_type(self) -> str:
         if self._as_ensemble:
-            scores = [self._get_ensemble_score()]
-        else:
-            scores = self._get_reference_score()
-        lilypond_file = LilyPondFile([self.lilypond_preamble] + scores)
+            return "ensemble"
+        return "reference"
+
+    def notate(self):
+        lilypond_file = LilyPondFile([self._lilypond_preamble] + self._scores)
         if self._save:
-            pdf_file_path = Path("examples") / "matrix.pdf"
+            composer = self._format_for_filename(self._composer)
+            title = self._format_for_filename(self._title)
+            output_type = self._output_type
+            pdf_file_path = (
+                self._output_directory
+                / f"{composer}-{title}-{output_type}-matrices.pdf"
+            )
             with Progress() as progress:
                 progress.add_task("Engraving score...", total=None)
                 as_pdf(

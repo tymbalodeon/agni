@@ -69,6 +69,11 @@ save = Option(
 as_ensemble = Option(
     False, "--as-ensemble", help="Notate each note on its own staff."
 )
+output_directory = Option(
+    Path("examples"),
+    "--output-directory",
+    help="If saving, the directory in which to save the output file.",
+)
 display = Option(
     True, " /--no-display", help="Display the output in the terminal."
 )
@@ -93,6 +98,7 @@ def matrix(
     notate: bool = notate,
     save: bool = save,
     as_ensemble: bool = as_ensemble,
+    output_directory: Path = output_directory,
     display: bool = display,
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
@@ -107,7 +113,9 @@ def matrix(
         midi_input=midi_input,
     )
     if notate:
-        Notation(matrix, as_ensemble, tuning, save, as_chord).notate()
+        Notation(
+            matrix, as_ensemble, tuning, save, as_chord, output_directory
+        ).notate()
     if display:
         matrix.display()
     if play:
@@ -139,6 +147,7 @@ def passage(
         "--adjacent-duplicates/",
         help="Output adjacent duplicate matrices.",
     ),
+    output_directory: Path = output_directory,
     full_score: bool = Option(
         False,
         "--full-score",
@@ -167,6 +176,7 @@ def passage(
             tuning,
             save,
             as_chord,
+            output_directory,
             full_score,
         ).notate()
     if display:

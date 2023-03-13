@@ -47,7 +47,8 @@ build *pip:
 example *args:
     #!/usr/bin/env zsh
     input_file_name="examples/lonely-child"
-    output_pdf="examples/matrix.pdf"
+    reference_pdf="examples/claude-vivier-lonely-child-reference-matrices.pdf"
+    ensemble_pdf="examples/claude-vivier-lonely-child-ensemble-matrices.pdf"
     pdf_files=()
     if [ -z "{{args}}" ] || [[ "{{args}}" = *"--input"* ]]; then
         input_pdf="${input_file_name}.pdf"
@@ -58,13 +59,16 @@ example *args:
         pdf_files+="${input_pdf}"
     fi
     if [ -z "{{args}}" ] || [[ "{{args}}" = *"--output"* ]]; then
-        checkexec "${output_pdf}" "${input_file_name}"*.ily \
-            -- just try passage --notate --save --full-score
-        pdf_files+="${output_pdf}"
+        checkexec "${reference_pdf}" "${input_file_name}"*.ily \
+            -- just try passage --notate --save --no-display
+        checkexec "${ensemble_pdf}" "${input_file_name}"*.ily \
+            -- just try passage --notate --save --full-score --no-display
+        pdf_files+=("${reference_pdf}" "${ensemble_pdf}")
     fi
     if [[ "{{args}}" = *"--force-output"* ]]; then
+        just try passage --notate --save
         just try passage --notate --save --full-score
-        pdf_files+="${output_pdf}"
+        pdf_files+=("${reference_pdf}" "${ensemble_pdf}")
     fi
     if [ -n "${pdf_files[*]}" ]; then
         open "${pdf_files[@]}"
