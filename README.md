@@ -48,18 +48,18 @@ to facilitate development. Available commands:
 
 - `just`: Show available commands
 - `build *pip`: Build the project and install it using pipx, or optionally with
-  pip ("--pip").
-- `check *autoupdate`: Run pre-commit checks or autoupdate ("--autoupdate").
-- `example *args*`: Run examples if outdated (or "--force") and open (with
-  options: "--input", "--output", "--reference", "--ensemble").
-- `install *upgrade`: Install (or "upgrade") external dependencies.
+  pip (`--pip`).
+- `check *autoupdate`: Run pre-commit checks or autoupdate (`--autoupdate`).
+- `example *args*`: Run examples if outdated (or `--force`) and open (with
+  options: `--input`, `--output`, `--reference`, `--ensemble`).
+- `install *upgrade`: Install (or `upgrade`) external dependencies.
 - `profile *args`: Run the py-spy profiler on a command and its \<args\> and
   open the results with speedscope.
 - `shell`: Open a python shell with project dependencies available.
 - `try *args`: Try a command using the current state of the files without
   building.
 - `update *lilypond`: Update project dependencies, pre-commit hooks, and
-  lilypond file versions (or just the latter if "lilypond").
+  lilypond file versions (or just the latter if `lilypond`).
 
 ## Dependencies
 
