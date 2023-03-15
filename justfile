@@ -3,7 +3,7 @@
 
 pre_commit := "pdm run pre-commit"
 
-# Run pre-commit checks or autoupdate ("--autoupdate").
+# Run pre-commit checks or autoupdate ("autoupdate").
 check *autoupdate:
     #!/usr/bin/env zsh
     if [ "{{autoupdate}}" = "autoupdate" ]; then
