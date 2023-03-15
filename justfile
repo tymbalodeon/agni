@@ -43,14 +43,31 @@ build *pip:
         pipx install "${wheel}" --force --pip-args="--force-reinstall"
     fi
 
-# Run example if output is nonexistent or outdated (or if "--force-output"), then open input and output files (or only "--input" or "--output").
+# Run examples if outdated (or "--force") and open (with options: "--input", "--output", "--reference", "--ensemble").
 example *args:
     #!/usr/bin/env zsh
+    if [ -z "{{args}}" ]; then
+        input="true"
+        reference="true"
+        ensemble="true"
+    else
+        if [[ "{{args}}" = *"--input"* ]]; then
+                input="true"
+        fi
+        if [[ "{{args}}" = *"--output"* ]]; then
+                reference="true"
+                ensemble="true"
+        elif [[ "{{args}}" = *"--reference"* ]]; then
+                reference="true"
+        elif [[ "{{args}}" = *"--ensemble"* ]]; then
+                ensemble="true"
+        fi
+    fi
     input_file_name="examples/lonely-child"
     reference_pdf="examples/claude-vivier-lonely-child-reference-matrices.pdf"
     ensemble_pdf="examples/claude-vivier-lonely-child-ensemble-matrices.pdf"
     pdf_files=()
-    if [ -z "{{args}}" ] || [[ "{{args}}" = *"--input"* ]]; then
+    if [ -n "${input}" ]; then
         input_pdf="${input_file_name}.pdf"
         input_ly="${input_file_name}.ly"
         checkexec "${input_pdf}" examples/*.*ly \
@@ -58,17 +75,25 @@ example *args:
         mv "${input_file_name}-formatted.pdf" "${input_pdf}" 2>/dev/null
         pdf_files+="${input_pdf}"
     fi
-    if [ -z "{{args}}" ] || [[ "{{args}}" = *"--output"* ]]; then
+    if [ -n "${reference}" ]; then
         checkexec "${reference_pdf}" "${input_file_name}"*.ily \
             -- just try passage --notate --save --no-display
+        pdf_files+="${reference_pdf}"
+    fi
+    if [ -n "${ensemble}" ]; then
         checkexec "${ensemble_pdf}" "${input_file_name}"*.ily \
             -- just try passage --notate --save --full-score --no-display
-        pdf_files+=("${reference_pdf}" "${ensemble_pdf}")
+        pdf_files+="${ensemble_pdf}"
     fi
-    if [[ "{{args}}" = *"--force-output"* ]]; then
-        just try passage --notate --save
-        just try passage --notate --save --full-score
-        pdf_files+=("${reference_pdf}" "${ensemble_pdf}")
+    if [[ "{{args}}" = *"--force"* ]]; then
+        if [ -n "${reference}" ]; then
+            just try passage --notate --save
+            pdf_files+="${reference_pdf}"
+        fi
+        if [ -n "${ensemble}" ]; then
+            just try passage --notate --save --full-score
+            pdf_files+="${ensemble_pdf}"
+        fi
     fi
     if [ -n "${pdf_files[*]}" ]; then
         open "${pdf_files[@]}"
