@@ -211,7 +211,17 @@ class Notation:
             return None
         return cls._get_tie(metered_leaf.leaf)
 
-    def _get_note(self, frequency: float, duration=Duration(1, 4)) -> Note:
+    def _get_note(
+        self,
+        frequency: float,
+        duration: Duration | None = None,
+        is_base_frequency=False,
+    ) -> Note:
+        if not duration:
+            if is_base_frequency:
+                duration = Duration(1, 2)
+            else:
+                duration = Duration(1, 4)
         pitch = NamedPitch.from_hertz(frequency)
         if self._tuning == Tuning.EQUAL_TEMPERED:
             pitch_number = pitch.number
@@ -448,12 +458,6 @@ class Notation:
         return score
 
     @staticmethod
-    def _set_bass_and_melody_noteheads(notes: list[Note]) -> list[Note]:
-        for note in notes[:2]:
-            note.written_duration = Duration(1, 2)
-        return notes
-
-    @staticmethod
     def _get_note_name(note: Note) -> str | None:
         if not note.written_pitch:
             return None
@@ -467,9 +471,14 @@ class Notation:
         return Chord(f"<{chord_notes}>")
 
     def _get_matrix_notes(self, matrix: Matrix) -> list[Note]:
-        sorted_frequencies = matrix.sorted_frequencies_in_hertz
-        notes = [self._get_note(frequency) for frequency in sorted_frequencies]
-        notes = self._set_bass_and_melody_noteheads(notes)
+        notes = [
+            self._get_note(
+                frequency.frequency,
+                is_base_frequency=frequency.is_base_frequency,
+            )
+            for frequency in matrix.sorted_frequencies
+            if frequency.frequency
+        ]
         self._set_clefs(notes)
         return notes
 
@@ -517,6 +526,12 @@ class Notation:
         """
 
     @property
+    def _indent(self) -> str:
+        if self._full_score:
+            return ""
+        return "indent = 0"
+
+    @property
     def _lilypond_preamble(self) -> str:
         return f"""
                     \\header {{
@@ -534,6 +549,7 @@ class Notation:
                     }}
 
                     \\layout {{
+                        {self._indent}
                         \\context {{
                             \\Score
                             \\numericTimeSignature
