@@ -50,9 +50,8 @@ to facilitate development. Available commands:
 - `build *pip`: Build the project and install it using pipx, or optionally with
   pip ("--pip").
 - `check *autoupdate`: Run pre-commit checks or autoupdate ("--autoupdate").
-- `example *args*`: Run example if output is nonexistent or outdated (or if
-  "--force-output"), then open input and output files (or only "--input" or
-  "--output").
+- `example *args*`: Run examples if outdated (or "--force") and open (with
+  options: "--input", "--output", "--reference", "--ensemble").
 - `install *upgrade`: Install (or "upgrade") external dependencies.
 - `profile *args`: Run the py-spy profiler on a command and its \<args\> and
   open the results with speedscope.
