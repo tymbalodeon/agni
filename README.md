@@ -49,7 +49,7 @@ to facilitate development. Available commands:
 - `just`: Show available commands
 - `build *pip`: Build the project and install it using pipx, or optionally with
   pip (`--pip`).
-- `check *autoupdate`: Run pre-commit checks or autoupdate (`--autoupdate`).
+- `check *autoupdate`: Run pre-commit checks or autoupdate (`autoupdate`).
 - `example *args*`: Run examples if outdated (or `--force`) and open (with
   options: `--input`, `--output`, `--reference`, `--ensemble`).
 - `install *upgrade`: Install (or `upgrade`) external dependencies.
