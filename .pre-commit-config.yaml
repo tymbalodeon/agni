@@ -57,6 +57,16 @@ repos:
           - "*/__pypackages__/*,*/.venv/*"
           - --ignore-names
           - "_generate_next_value_"
+  - repo: local
+    hooks:
+      - id: coverage
+        name: coverage
+        entry: just coverage
+        args:
+          - --fail-under
+          - "35"
+        language: system
+        pass_filenames: false
   - repo: https://github.com/pdm-project/pdm
     rev: 2.4.8
     hooks:

@@ -1,6 +1,8 @@
 *.pdf
 *.pyc
 *.svg
+.DS_Store
+.coverage
 .pdm.toml
 __pycache__/
 __pypackages__/

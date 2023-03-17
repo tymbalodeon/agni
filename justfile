@@ -13,8 +13,7 @@ check *autoupdate:
     fi
 
 @_get_pyproject_value value:
-    printf "%s" \
-        "$(awk -F '[ =\"]+' '$1 == "{{value}}" { print $2 }' pyproject.toml)"
+    printf "$(awk -F '[ =\"]+' '$1 == "{{value}}" { print $2 }' pyproject.toml)"
 
 @_get_command_name:
     just _get_pyproject_value "name"
@@ -25,11 +24,24 @@ try *args:
     command="$(just _get_command_name)"
     pdm run "${command}" {{args}}
 
+# Clean Python cache.
+clean:
+    #!/usr/bin/env zsh
+    cached_files=(**/**.pyc(N))
+    if [ -z "${cached_files[*]}" ]; then
+        echo "No cached files found."
+        exit
+    fi
+    for file in "${cached_files[@]}"; do
+        rm "${file}"
+        echo "Removed ${file}."
+    done
+
 _get_wheel:
     #!/usr/bin/env zsh
     command="$(just _get_command_name)"
     version="$(just _get_pyproject_value "version")"
-    printf "%s" ./dist/"${command}"-"${version}"-py3-none-any.whl
+    printf "./dist/${command}-${version}-py3-none-any.whl"
 
 # Build the project and install it using pipx, or optionally with pip ("--pip").
 build *pip:
@@ -115,8 +127,7 @@ profile *args:
     speedscope "${output_file}"
 
 # Open a python shell with project dependencies available.
-shell:
-    #!/usr/bin/env zsh
+@shell:
     pdm run bpython
 
 # Update project dependencies, pre-commit hooks, and lilypond file versions (or just the latter if "lilypond").
@@ -146,3 +157,23 @@ update *lilypond:
             echo "\"${file}\" is already up to date."
         fi
     done
+
+coverage := "pdm run coverage"
+
+# Run coverage report.
+@coverage *args:
+    {{coverage}} report -m \
+        --omit "__pypackages__/*" \
+        --skip-covered \
+        --sort "cover" \
+        {{args}}
+
+# Run tests.
+test *args:
+    #!/usr/bin/env zsh
+    if [ -z "{{args}}" ]; then
+        args="tests"
+    else
+        args="{{args}}"
+    fi
+    {{coverage}} run -m pytest "${args}"

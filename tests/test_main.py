@@ -1,0 +1,24 @@
+from pytest import mark
+
+from tests.conftest import call_command
+from agni import __version__
+
+version = "0.2.0"
+
+
+def test_version():
+    assert __version__ == version
+
+
+@mark.parametrize("arg", ["--version", "-V"])
+def test_version_display(arg: str):
+    version_display = f"agni {version}\n"
+    output = call_command([arg])
+    assert output == version_display
+
+
+@mark.parametrize("arg", [None, "--help", "-h"])
+def test_help(arg: str):
+    help_text = "Agni: Create combination-tone matrices."
+    output = call_command([arg])
+    assert help_text in output
