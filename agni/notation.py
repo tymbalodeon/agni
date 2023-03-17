@@ -84,12 +84,12 @@ class Notation:
 
     @classmethod
     def _set_staff_instrument_name(
-        cls, staff: Staff, name: str | int | None = None, bold=False
+        cls, staff: Staff, name: str | int | None = None
     ):
         name = name or staff.name or ""
         if isinstance(name, str):
             name = name.title()
-        instrument_name = cls._make_markup(name, bold=bold)
+        instrument_name = cls._make_markup(name)
         first_leaf = cls._get_first_staff_leaf(staff)
         attach(InstrumentName(instrument_name), first_leaf)
         attach(ShortInstrumentName(instrument_name), first_leaf)
@@ -114,12 +114,10 @@ class Notation:
         return [bass, melody]
 
     @staticmethod
-    def _make_markup(text: str | int, bold=False) -> str:
+    def _make_markup(text: str | int) -> str:
         if isinstance(text, str) and "\\markup" in text:
             return text
         command = "\\markup"
-        if bold:
-            command = f"{command} \\bold"
         return f"{command} {{ {text} }}"
 
     @classmethod
@@ -510,7 +508,7 @@ class Notation:
             staff = next(iter(score.components), None)
             if staff:
                 name = index + 1
-                self._set_staff_instrument_name(staff, name=name, bold=True)
+                self._set_staff_instrument_name(staff, name=name)
         return scores
 
     @property
