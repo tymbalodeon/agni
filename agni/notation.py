@@ -83,9 +83,13 @@ class Notation:
         return leaves[0]
 
     @classmethod
-    def _set_staff_instrument_name(cls, staff: Staff):
-        instrument_name = staff.name or ""
-        instrument_name = instrument_name.title()
+    def _set_staff_instrument_name(
+        cls, staff: Staff, name: str | int | None = None, bold=False
+    ):
+        name = name or staff.name or ""
+        if isinstance(name, str):
+            name = name.title()
+        instrument_name = cls._make_markup(name, bold=bold)
         first_leaf = cls._get_first_staff_leaf(staff)
         attach(InstrumentName(instrument_name), first_leaf)
         attach(ShortInstrumentName(instrument_name), first_leaf)
@@ -110,7 +114,17 @@ class Notation:
         return [bass, melody]
 
     @staticmethod
+    def _make_markup(text: str | int, bold=False) -> str:
+        if isinstance(text, str) and "\\markup" in text:
+            return text
+        command = "\\markup"
+        if bold:
+            command = f"{command} \\bold"
+        return f"{command} {{ {text} }}"
+
+    @classmethod
     def _add_leaf_to_staff(
+        cls,
         staff_group: StaffGroup,
         instrument_name: str,
         leaf: Leaf,
@@ -134,7 +148,7 @@ class Notation:
             parent.append(component)
         else:
             staff = Staff([component], name=instrument_name)
-            instrument_name_markup = f"\\markup { {instrument_name} }"
+            instrument_name_markup = cls._make_markup(instrument_name)
             instrument_name_markup = instrument_name_markup.replace("'", "")
             first_leaf = staff[0]
             attach(InstrumentName(instrument_name_markup), first_leaf)
@@ -491,7 +505,13 @@ class Notation:
         return Score([Staff(components)])
 
     def _get_reference_score(self) -> list[Score]:
-        return [self._get_matrix_score(matrix) for matrix in self._matrices]
+        scores = [self._get_matrix_score(matrix) for matrix in self._matrices]
+        for index, score in enumerate(scores):
+            staff = next(iter(score.components), None)
+            if staff:
+                name = index + 1
+                self._set_staff_instrument_name(staff, name=name, bold=True)
+        return scores
 
     @property
     def _scores(self) -> list[Score]:

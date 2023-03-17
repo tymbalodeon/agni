@@ -69,10 +69,21 @@ example *args:
         if [[ "{{args}}" = *"--output"* ]]; then
                 reference="true"
                 ensemble="true"
-        elif [[ "{{args}}" = *"--reference"* ]]; then
-                reference="true"
-        elif [[ "{{args}}" = *"--ensemble"* ]]; then
-                ensemble="true"
+        else
+            if [[ "{{args}}" = *"--reference"* ]]; then
+                    reference="true"
+            fi
+            if [[ "{{args}}" = *"--ensemble"* ]]; then
+                    ensemble="true"
+            fi
+            if [[ "{{args}}" = *"--force"* ]]; then
+                force="true"
+                if [ -z "${reference}" ] \
+                    && [ -z "${ensemble}" ]; then
+                    reference="true"
+                    ensemble="true"
+                fi
+            fi
         fi
     fi
     input_file_name="examples/lonely-child"
@@ -97,7 +108,7 @@ example *args:
             -- just try passage --notate --save --full-score --no-display
         pdf_files+="${ensemble_pdf}"
     fi
-    if [[ "{{args}}" = *"--force"* ]]; then
+    if [ -n "${force}" ]; then
         if [ -n "${reference}" ]; then
             just try passage --notate --save
             pdf_files+="${reference_pdf}"
