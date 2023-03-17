@@ -23,16 +23,20 @@ from .matrix_pitch import (
 
 
 class Matrix:
+    DEFAULT_MULTIPLES = 4
+
     def __init__(
         self,
         bass: str | NamedPitch,
         melody: str | NamedPitch,
-        multiples: int,
+        multiples: int | None = None,
         pitch_type: PitchType = PitchType.HERTZ,
         tuning: Tuning = Tuning.MICROTONAL,
         display_format: DisplayFormat = DisplayFormat.TABLE,
         midi_input=False,
     ):
+        if not multiples:
+            multiples = self.DEFAULT_MULTIPLES
         self._multiples = range(multiples)
         self._midi_input = midi_input
         self._pitch_type = self._get_pitch_type(bass, midi_input, pitch_type)

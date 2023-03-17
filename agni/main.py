@@ -42,7 +42,9 @@ def callback(
 
 pitch_choices = escape("[hertz|midi|lilypond]")
 pitch_help = f"[bold yellow]{pitch_choices}[/bold yellow]"
-multiples = Option(4, help="Number of multiples to calculate.")
+multiples = Option(
+    Matrix.DEFAULT_MULTIPLES, help="Number of multiples to calculate."
+)
 pitch_type_option_name = "--pitch-type"
 pitch_type_help = (
     "Set the display type for pitches. (If none is provided, the same"
