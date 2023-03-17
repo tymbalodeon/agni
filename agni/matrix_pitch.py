@@ -31,7 +31,7 @@ class DisplayFormat(StrEnum):
 
 
 class DisplayColor(StrEnum):
-    BASE_FREQUENCY = "orange1"
+    BASE_FREQUENCY = "bright_white"
     BASS_MULTIPLE = "dark_orange3"
     MELODY_MULTIPLE = "yellow"
     LABEL = "white"
