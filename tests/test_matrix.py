@@ -35,3 +35,21 @@ def test_matrix_sorted_frequencies_in_hertz():
     ]
     matrix = Matrix(bass, melody)
     assert matrix.sorted_frequencies_in_hertz == expected_frequencies
+
+
+def test_matrix_command():
+    bass = "440"
+    melody = "466"
+    expected_text = """Combination-Tone Matrix (Hertz)
+
+             0 x melody   1 x melody   2 x melody   3 x melody
+  0 x bass                466.0        932.0        1,398.0
+  1 x bass   440.0        906.0        1,372.0      1,838.0
+  2 x bass   880.0        1,346.0      1,812.0      2,278.0
+  3 x bass   1,320.0      1,786.0      2,252.0      2,718.0
+    """
+    actual_output = call_command([matrix_command, bass, melody])
+    expected_lines = expected_text.split("\n")
+    actual_lines = actual_output.split("\n")
+    for display_line, expected_line in zip(expected_lines, actual_lines):
+        assert display_line.strip() == expected_line.strip()

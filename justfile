@@ -187,4 +187,4 @@ test *args:
     else
         args="{{args}}"
     fi
-    {{coverage}} run -m pytest "${args}"
+    {{coverage}} run -m pytest --ignore "__pypackages__/" "${args}"
