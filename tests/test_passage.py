@@ -1,4 +1,5 @@
 from pytest import mark
+
 from .conftest import call_command
 
 passage_command_name = "passage"

@@ -1,5 +1,5 @@
-from pytest import mark
 from abjad import Staff, StaffGroup
+from pytest import mark
 
 from agni.helpers import (
     InputPart,

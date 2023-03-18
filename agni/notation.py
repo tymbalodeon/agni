@@ -469,6 +469,18 @@ class Notation:
         attach(LilyPondLiteral(r"\compressMMRests"), score)
         return score
 
+    def _get_matrix_notes(self, matrix: Matrix) -> list[Note]:
+        notes = [
+            self._get_note(
+                frequency.frequency,
+                is_base_frequency=frequency.is_base_frequency,
+            )
+            for frequency in matrix.sorted_pitches
+            if frequency.frequency
+        ]
+        self._set_clefs(notes)
+        return notes
+
     @staticmethod
     def _get_note_name(note: Note) -> str | None:
         if not note.written_pitch:
@@ -481,18 +493,6 @@ class Notation:
         pitched_note_names = remove_none_values(note_names)
         chord_notes = " ".join(pitched_note_names)
         return Chord(f"<{chord_notes}>")
-
-    def _get_matrix_notes(self, matrix: Matrix) -> list[Note]:
-        notes = [
-            self._get_note(
-                frequency.frequency,
-                is_base_frequency=frequency.is_base_frequency,
-            )
-            for frequency in matrix.sorted_pitches
-            if frequency.frequency
-        ]
-        self._set_clefs(notes)
-        return notes
 
     def _get_matrix_score(self, matrix: Matrix) -> Score:
         notes = self._get_matrix_notes(matrix)
