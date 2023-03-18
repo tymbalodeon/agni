@@ -54,7 +54,11 @@ class MatrixPitch:
         self.frequency = frequency or None
 
     def __str__(self) -> str:
-        return f"MatrixPitch({self.frequency})"
+        if self.frequency:
+            frequency_display = f"{self.frequency:,}"
+        else:
+            frequency_display = self.frequency
+        return f"MatrixPitch({frequency_display})"
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, type(self)):
