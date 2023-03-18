@@ -172,7 +172,7 @@ update *lilypond:
 coverage := "pdm run coverage"
 
 # Run coverage report.
-@coverage *args:
+@coverage *args: test
     {{coverage}} report -m \
         --omit "__pypackages__/*" \
         --skip-covered \

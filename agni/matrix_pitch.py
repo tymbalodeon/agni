@@ -1,6 +1,7 @@
 from enum import StrEnum, auto
 from functools import cached_property
 from math import log
+from typing import Any
 
 from abjad import Duration, NamedPitch, Note, NumberedPitch, Tie, attach
 
@@ -51,6 +52,18 @@ class MatrixPitch:
         self._melody_multiplier = melody_multiplier
         frequency = bass_frequency + melody_frequency
         self.frequency = frequency or None
+
+    def __str__(self) -> str:
+        return f"MatrixPitch({self.frequency})"
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return (
+            other.bass_multiplier == self.bass_multiplier
+            and other._melody_multiplier == self._melody_multiplier
+            and other.frequency == self.frequency
+        )
 
     @staticmethod
     def get_sortable_frequency(matrix_pitch: "MatrixPitch") -> float:

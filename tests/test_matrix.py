@@ -1,15 +1,21 @@
 from pytest import mark
 
 from agni.matrix import Matrix
+from agni.matrix_pitch import MatrixPitch
 from tests.conftest import call_command
 
 matrix_command_name = "matrix"
+bass_frequency = 440.0
+melody_frequency = 466.0
 bass = "440"
 melody = "466"
-midi_bass = "69"
-midi_melody = "70"
+bass_midi = "69"
+melody_midi = "70"
+bass_lilypond = "a'"
+melody_lilypond = "bf'"
 matrix_command = [matrix_command_name, bass, melody]
-matrix_command_midi = [matrix_command_name, midi_bass, midi_melody]
+matrix_command_midi = [matrix_command_name, bass_midi, melody_midi]
+matrix_command_lilypond = [matrix_command_name, bass_lilypond, melody_lilypond]
 multiples_option = "--multiples"
 pitch_type_option = "--pitch-type"
 tuning_option = "--tuning"
@@ -42,7 +48,36 @@ def test_matrix_sorted_frequencies_in_hertz():
         2_718.0,
     ]
     matrix = Matrix(bass, melody)
-    assert matrix.sorted_frequencies_in_hertz == expected_frequencies
+    assert matrix.sorted_frequencies == expected_frequencies
+
+
+def test_matrix_get_sorted_generated_frequencies():
+    expected_multipliers = [
+        (2, 0),
+        (1, 1),
+        (0, 2),
+        (3, 0),
+        (2, 1),
+        (1, 2),
+        (0, 3),
+        (3, 1),
+        (2, 2),
+        (1, 3),
+        (3, 2),
+        (2, 3),
+        (3, 3),
+    ]
+    expected_pitches = [
+        MatrixPitch(
+            bass_frequency,
+            melody_frequency,
+            bass_multiplier,
+            melody_multiplier,
+        )
+        for bass_multiplier, melody_multiplier in expected_multipliers
+    ]
+    matrix = Matrix(bass, melody)
+    assert matrix.sorted_generated_pitches == expected_pitches
 
 
 def get_stripped_lines(text: str) -> list[str]:
@@ -67,6 +102,20 @@ def test_matrix_command():
     3 x bass   1,320.0      1,786.0      2,252.0      2,718.0
     """
     actual_output = call_command(matrix_command)
+    assert_lines_match(actual_output, expected_output)
+
+
+def test_matrix_command_lilypond():
+    expected_output = """\
+                    Combination-Tone Matrix (Lilypond)
+
+                0 x melody   1 x melody   2 x melody   3 x melody
+    0 x bass                bf'          bf''         f'''
+    1 x bass   a'           aqs''        f'''         bf'''
+    2 x bass   a''          e'''         aqs'''       dqf''''
+    3 x bass   e'''         a'''         cs''''       eqs''''
+    """
+    actual_output = call_command(matrix_command_lilypond)
     assert_lines_match(actual_output, expected_output)
 
 

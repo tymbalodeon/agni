@@ -393,7 +393,7 @@ class Notation:
         melody_note: MeteredLeaf | None = None,
         previous_note: MeteredLeaf | None = None,
     ):
-        for index, frequency in enumerate(matrix.sorted_frequencies):
+        for index, frequency in enumerate(matrix.sorted_pitches):
             matrix_note = self._get_matrix_note_from_melody_note(
                 frequency, melody_note
             )
@@ -488,7 +488,7 @@ class Notation:
                 frequency.frequency,
                 is_base_frequency=frequency.is_base_frequency,
             )
-            for frequency in matrix.sorted_frequencies
+            for frequency in matrix.sorted_pitches
             if frequency.frequency
         ]
         self._set_clefs(notes)

@@ -86,7 +86,7 @@ class Matrix:
             return NamedPitch(pitch).hertz
 
     @property
-    def frequencies(self) -> list[MatrixPitch]:
+    def pitches(self) -> list[MatrixPitch]:
         frequencies = []
         multiples = self._multiples
         for bass_multiplier in multiples:
@@ -101,33 +101,34 @@ class Matrix:
         return frequencies
 
     @cached_property
-    def sorted_frequencies(self) -> list[MatrixPitch]:
+    def sorted_pitches(self) -> list[MatrixPitch]:
         frequencies = sorted(
-            self.frequencies, key=MatrixPitch.get_sortable_frequency
+            self.pitches, key=MatrixPitch.get_sortable_frequency
         )
         return [frequency for frequency in frequencies if frequency.frequency]
 
     @cached_property
-    def sorted_frequencies_in_hertz(self) -> list[float]:
+    def sorted_frequencies(self) -> list[float]:
         return [
             frequency.frequency
-            for frequency in self.sorted_frequencies
+            for frequency in self.sorted_pitches
             if frequency.frequency
         ]
 
     @property
-    def frequency_displays(self) -> list[str]:
+    def display_pitches(self) -> list[str]:
         return [
             frequency.get_display(
                 self._pitch_type, self._tuning, self._display_format
             )
-            for frequency in self.sorted_frequencies
+            for frequency in self.sorted_pitches
         ]
 
-    def get_sorted_generated_frequencies(self) -> list[MatrixPitch]:
+    @property
+    def sorted_generated_pitches(self) -> list[MatrixPitch]:
         return [
             frequency
-            for frequency in self.sorted_frequencies
+            for frequency in self.sorted_pitches
             if frequency.frequency and not frequency.is_base_frequency
         ]
 
@@ -159,7 +160,7 @@ class Matrix:
 
     def _display_chord(self):
         table = self._get_display_table()
-        for frequency in reversed(self.sorted_frequencies):
+        for frequency in reversed(self.sorted_pitches):
             frequency_display = frequency.get_display(
                 self._pitch_type, self._tuning, self._display_format
             )
@@ -167,18 +168,18 @@ class Matrix:
         Console().print(table)
 
     def _display_list(self):
-        frequencies = ", ".join(self.frequency_displays)
+        frequencies = ", ".join(self.display_pitches)
         console = Console(theme=Theme(inherit=False))
         console.print(frequencies)
 
     def _display_melody(self):
         labels = [
             frequency._get_display_label(display_format=DisplayFormat.MELODY)
-            for frequency in self.sorted_frequencies
+            for frequency in self.sorted_pitches
         ]
         labeled_pitches = [
             Panel("\n".join(pitch), box=SIMPLE)
-            for pitch in zip(labels, self.frequency_displays)
+            for pitch in zip(labels, self.display_pitches)
         ]
         title = self._get_display_title()
         columns = Columns(labeled_pitches, title=title)
@@ -198,7 +199,7 @@ class Matrix:
                     self._tuning,
                     self._display_format,
                 )
-                for frequency in self.frequencies
+                for frequency in self.pitches
                 if frequency.bass_multiplier == multiple
             ]
             bass_label = [self._get_multiplier_label(multiple, "bass")]
@@ -219,7 +220,7 @@ class Matrix:
 
     def play(self):
         pattern = EventPattern(
-            frequency=SequencePattern(self.sorted_frequencies_in_hertz),
+            frequency=SequencePattern(self.sorted_frequencies),
             delta=0.05,
         )
         pattern.play()

@@ -47,7 +47,7 @@ class MatrixLeaf:
         if not bass or not melody or not duration:
             return []
         matrix = Matrix(bass.name, melody.name, self._multiples)
-        return matrix.get_sorted_generated_frequencies()
+        return matrix.sorted_generated_pitches
 
     @cached_property
     def instrument_names(self) -> list[str]:
