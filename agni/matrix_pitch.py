@@ -54,10 +54,10 @@ class MatrixPitch:
         self.frequency = frequency or None
 
     def __str__(self) -> str:
-        if self.frequency:
+        if self.frequency is not None:
             frequency_display = f"{self.frequency:,}"
         else:
-            frequency_display = self.frequency
+            frequency_display = str(self.frequency)
         return f"MatrixPitch({frequency_display})"
 
     def __eq__(self, other: Any) -> bool:
