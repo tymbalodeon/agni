@@ -28,7 +28,7 @@ def test_matrix_help(arg: str):
     assert matrix_help_text in output
 
 
-def test_matrix_sorted_frequencies_in_hertz():
+def test_matrix_sorted_frequencies():
     expected_frequencies = [
         440.0,
         466.0,
