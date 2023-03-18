@@ -2,7 +2,8 @@ from pytest import mark
 
 from agni.matrix import Matrix
 from agni.matrix_pitch import MatrixPitch
-from tests.conftest import call_command
+
+from .conftest import call_command
 
 matrix_command_name = "matrix"
 bass_frequency = 440.0

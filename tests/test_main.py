@@ -1,7 +1,8 @@
 from pytest import mark
 
 from agni import __version__
-from tests.conftest import call_command
+
+from .conftest import call_command
 
 version = "0.2.0"
 

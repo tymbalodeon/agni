@@ -64,7 +64,7 @@ repos:
         entry: just coverage
         args:
           - --fail-under
-          - "54"
+          - "57"
         language: system
         pass_filenames: false
   - repo: https://github.com/pdm-project/pdm
