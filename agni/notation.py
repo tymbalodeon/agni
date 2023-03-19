@@ -262,7 +262,7 @@ class Notation:
         return note.time_signature
 
     @staticmethod
-    def _get_clef_by_octave(octave: int) -> Clef:
+    def _get_clef(octave: int) -> Clef:
         if octave < 1:
             return Clef("bass_15")
         if octave < 2:
@@ -276,12 +276,13 @@ class Notation:
         return Clef("treble^15")
 
     @classmethod
-    def _set_clef(cls, note: Note) -> Clef | None:
-        written_pitch = note.written_pitch
-        if not written_pitch:
-            return None
-        octave = written_pitch.octave.number
-        clef = cls._get_clef_by_octave(octave)
+    def _set_clef(cls, note: Note, clef: Clef | None = None) -> Clef | None:
+        if clef is None:
+            written_pitch = note.written_pitch
+            if not written_pitch:
+                return None
+            octave = written_pitch.octave.number
+            clef = cls._get_clef(octave)
         attach(clef, note)
         return clef
 
@@ -294,9 +295,10 @@ class Notation:
             if not written_pitch:
                 continue
             octave = written_pitch.octave.number
-            new_clef = cls._get_clef_by_octave(octave)
+            new_clef = cls._get_clef(octave)
             if new_clef != current_clef:
-                cls._set_clef(note)
+                cls._set_clef(note, new_clef)
+            current_clef = new_clef
 
     @staticmethod
     def _get_staff_name(name: str | None) -> str:
@@ -439,7 +441,7 @@ class Notation:
             pitches = [note for note in written_pitches if note]
             octaves = [pitch.octave.number for pitch in pitches]
             octave = mode(octaves)
-            clef = cls._get_clef_by_octave(octave)
+            clef = cls._get_clef(octave)
             leaves = get_leaves(staff)
             if not leaves:
                 continue
