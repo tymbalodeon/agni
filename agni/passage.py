@@ -267,17 +267,17 @@ class Passage:
                         shorter_part.remaining_duration
                     )
             matrix_leaf = MatrixLeaf(
-                bass.named_pitch,
-                melody.named_pitch,
-                matrix_duration,
-                self._is_multi_measure_rest,
-                self._get_tie(decrement_durations),
-                self._tuplet,
-                self._is_start_of_tuplet,
-                self._multiples,
-                self._pitch_type,
-                self._tuning,
-                self._display_format,
+                _bass=bass.named_pitch,
+                _melody=melody.named_pitch,
+                duration=matrix_duration,
+                is_multi_measure_rest=self._is_multi_measure_rest,
+                tie=self._get_tie(decrement_durations),
+                tuplet=self._tuplet,
+                is_start_of_tuplet=self._is_start_of_tuplet,
+                _multiples=self._multiples,
+                _pitch_type=self._pitch_type,
+                _tuning=self._tuning,
+                _display_format=self._display_format,
             )
             leaves.append(matrix_leaf)
             for part, duration in decrement_durations.items():

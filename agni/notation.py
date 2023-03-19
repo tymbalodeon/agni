@@ -18,6 +18,7 @@ from abjad import (
     NamedPitch,
     Note,
     NumberedPitch,
+    Ottava,
     Rest,
     Score,
     ShortInstrumentName,
@@ -286,10 +287,30 @@ class Notation:
         attach(clef, note)
         return clef
 
+    @staticmethod
+    def _get_ottava_from_clef(clef: Clef | None) -> Ottava | None:
+        if clef is None:
+            return None
+        if clef == Clef("bass_15"):
+            return Ottava(n=-2)
+        if clef == Clef("bass_8"):
+            return Ottava(n=-1)
+        if clef == Clef("bass"):
+            return Ottava(n=0)
+        if clef == Clef("treble"):
+            return Ottava(n=0)
+        if clef == Clef("treble^8"):
+            return Ottava(n=1)
+        return Ottava(n=2)
+
     @classmethod
-    def _set_clefs(cls, notes: list[Note]):
+    def _set_clefs(cls, notes: list[Note], use_ottava=False):
         first_note = notes[0]
         current_clef = cls._set_clef(first_note)
+        if use_ottava:
+            current_ottava = cls._get_ottava_from_clef(current_clef)
+        else:
+            current_ottava = None
         for note in notes[1:]:
             written_pitch = note.written_pitch
             if not written_pitch:
@@ -297,7 +318,19 @@ class Notation:
             octave = written_pitch.octave.number
             new_clef = cls._get_clef(octave)
             if new_clef != current_clef:
-                cls._set_clef(note, new_clef)
+                if use_ottava:
+                    if "treble" in new_clef.name:
+                        clef = Clef("treble")
+                    else:
+                        clef = Clef("bass")
+                else:
+                    clef = new_clef
+                cls._set_clef(note, clef)
+            if use_ottava:
+                new_ottava = cls._get_ottava_from_clef(new_clef)
+                if new_ottava and new_ottava != current_ottava:
+                    attach(new_ottava, note)
+                current_ottava = new_ottava
             current_clef = new_clef
 
     @staticmethod
@@ -480,7 +513,7 @@ class Notation:
             for frequency in matrix.sorted_pitches
             if frequency.frequency
         ]
-        self._set_clefs(notes)
+        self._set_clefs(notes, use_ottava=True)
         return notes
 
     @staticmethod

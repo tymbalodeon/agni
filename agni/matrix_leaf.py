@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 
 from abjad import Duration, NamedPitch, Tuplet
@@ -8,19 +8,23 @@ from .matrix import Matrix
 from .matrix_pitch import DisplayFormat, MatrixPitch, PitchType, Tuning
 
 
+def get_default_duration() -> Duration:
+    return Duration((1, 4))
+
+
 @dataclass
 class MatrixLeaf:
     _bass: NamedPitch | None
     _melody: NamedPitch | None
-    duration: Duration | None
-    is_multi_measure_rest: bool
-    tie: bool
-    tuplet: Tuplet | None
-    is_start_of_tuplet: bool
-    _multiples: int
-    _pitch_type: PitchType
-    _tuning: Tuning
-    _display_format: DisplayFormat
+    duration: Duration | None = field(default_factory=get_default_duration)
+    is_multi_measure_rest: bool = False
+    tie: bool = False
+    tuplet: Tuplet | None = None
+    is_start_of_tuplet: bool = False
+    _multiples: int = Matrix.DEFAULT_MULTIPLES
+    _pitch_type: PitchType = PitchType.LILYPOND
+    _tuning: Tuning = Tuning.MICROTONAL
+    _display_format: DisplayFormat = DisplayFormat.TABLE
 
     @property
     def matrix(self) -> Matrix | None:
