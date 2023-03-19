@@ -164,7 +164,7 @@ class Notation:
             note = matrix_pitch.get_note(duration, matrix_leaf.tie)
             if not note:
                 continue
-            instrument_names = matrix_pitch.get_instrument_name()
+            instrument_names = matrix_pitch.instrument_name
             cls._add_leaf_to_staff(
                 staff_group,
                 instrument_names,
@@ -213,7 +213,7 @@ class Notation:
     def _get_tie(note: Leaf | None) -> Tie | None:
         if not note:
             return None
-        return next((tie for tie in get_indicators(note, prototype=Tie)), None)
+        return next(iter(get_indicators(note, prototype=Tie)), None)
 
     @classmethod
     def _get_melody_note_tie(
