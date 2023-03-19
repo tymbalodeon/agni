@@ -29,7 +29,8 @@ def test_matrix_help(arg: str):
 
 
 def test_matrix_sorted_frequencies():
-    expected_frequencies = [
+    matrix = Matrix(bass, melody)
+    expected_rounded_frequencies = [
         440.0,
         466.0,
         880.0,
@@ -46,8 +47,7 @@ def test_matrix_sorted_frequencies():
         2_278.0,
         2_718.0,
     ]
-    matrix = Matrix(bass, melody)
-    assert matrix.sorted_frequencies == expected_frequencies
+    assert matrix.sorted_frequencies == expected_rounded_frequencies
 
 
 def test_matrix_get_sorted_generated_frequencies():
