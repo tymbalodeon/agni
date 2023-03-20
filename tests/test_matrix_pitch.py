@@ -34,6 +34,32 @@ def test_matrix_pitch_eq():
         assert matrix_pitch == 440.0
 
 
+expected_is_base_multiples = [
+    (0, 0, False),
+    (0, 1, False),
+    (0, 2, True),
+    (1, 0, False),
+    (1, 1, False),
+    (1, 2, False),
+    (2, 0, True),
+]
+
+
+@mark.parametrize(
+    "bass_multiplier, melody_multiplier, expected_is_base_multiple",
+    expected_is_base_multiples,
+)
+def test_is_base_multiple(
+    bass_multiplier: int,
+    melody_multiplier: int,
+    expected_is_base_multiple: bool,
+):
+    matrix_pitch = MatrixPitch(
+        bass_frequency, melody_frequency, bass_multiplier, melody_multiplier
+    )
+    assert matrix_pitch.is_base_multiple is expected_is_base_multiple
+
+
 expected_lilypond_displays = [
     (0, 0, Tuning.MICROTONAL, ""),
     (1, 0, Tuning.MICROTONAL, "a'"),
