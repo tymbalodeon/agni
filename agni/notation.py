@@ -229,9 +229,12 @@ class Notation:
         frequency: float,
         duration: Duration | None = None,
         is_base_frequency=False,
+        is_base_multiple=False,
     ) -> Note:
         if not duration:
             if is_base_frequency:
+                duration = Duration(1, 1)
+            elif is_base_multiple:
                 duration = Duration(1, 2)
             else:
                 duration = Duration(1, 4)
@@ -263,7 +266,21 @@ class Notation:
         return note.time_signature
 
     @staticmethod
-    def _get_clef(octave: int) -> Clef:
+    def _get_octave(note: Note | None) -> int | None:
+        if note is None:
+            return None
+        written_pitch = note.written_pitch
+        if not written_pitch:
+            return None
+        return written_pitch.octave.number
+
+    @classmethod
+    def _get_clef(
+        cls, note: Note | None = None, octave: int | None = None
+    ) -> Clef | None:
+        octave = octave or cls._get_octave(note)
+        if not octave:
+            return None
         if octave < 1:
             return Clef("bass_15")
         if octave < 2:
@@ -277,13 +294,18 @@ class Notation:
         return Clef("treble^15")
 
     @classmethod
-    def _set_clef(cls, note: Note, clef: Clef | None = None) -> Clef | None:
+    def _set_clef(
+        cls, note: Note, clef: Clef | None = None, use_ottava=False
+    ) -> Clef | None:
         if clef is None:
-            written_pitch = note.written_pitch
-            if not written_pitch:
-                return None
-            octave = written_pitch.octave.number
-            clef = cls._get_clef(octave)
+            clef = cls._get_clef(note)
+        if use_ottava:
+            if clef and "bass" in clef.name:
+                clef = Clef("bass")
+            else:
+                clef = Clef("treble")
+        else:
+            clef = clef
         attach(clef, note)
         return clef
 
@@ -304,34 +326,29 @@ class Notation:
         return Ottava(n=2)
 
     @classmethod
+    def _set_ottava(
+        cls, note: Note, clef: Clef | None, current_ottava: Ottava | None
+    ):
+        new_ottava = cls._get_ottava_from_clef(clef)
+        if new_ottava and new_ottava != current_ottava:
+            attach(new_ottava, note)
+        return new_ottava
+
+    @classmethod
     def _set_clefs(cls, notes: list[Note], use_ottava=False):
         first_note = notes[0]
-        current_clef = cls._set_clef(first_note)
+        clef = cls._get_clef(first_note)
+        current_clef = cls._set_clef(first_note, clef, use_ottava=use_ottava)
+        current_ottava = None
         if use_ottava:
-            current_ottava = cls._get_ottava_from_clef(current_clef)
-        else:
-            current_ottava = None
+            current_ottava = cls._set_ottava(first_note, clef, current_ottava)
         for note in notes[1:]:
-            written_pitch = note.written_pitch
-            if not written_pitch:
-                continue
-            octave = written_pitch.octave.number
-            new_clef = cls._get_clef(octave)
-            if new_clef != current_clef:
-                if use_ottava:
-                    if "treble" in new_clef.name:
-                        clef = Clef("treble")
-                    else:
-                        clef = Clef("bass")
-                else:
-                    clef = new_clef
-                cls._set_clef(note, clef)
+            clef = cls._get_clef(note)
+            if clef != current_clef:
+                cls._set_clef(note, clef, use_ottava=use_ottava)
             if use_ottava:
-                new_ottava = cls._get_ottava_from_clef(new_clef)
-                if new_ottava and new_ottava != current_ottava:
-                    attach(new_ottava, note)
-                current_ottava = new_ottava
-            current_clef = new_clef
+                current_ottava = cls._set_ottava(note, clef, current_ottava)
+            current_clef = clef
 
     @staticmethod
     def _get_staff_name(name: str | None) -> str:
@@ -474,7 +491,7 @@ class Notation:
             pitches = [note for note in written_pitches if note]
             octaves = [pitch.octave.number for pitch in pitches]
             octave = mode(octaves)
-            clef = cls._get_clef(octave)
+            clef = cls._get_clef(octave=octave)
             leaves = get_leaves(staff)
             if not leaves:
                 continue
@@ -509,6 +526,7 @@ class Notation:
             self._get_note(
                 frequency.frequency,
                 is_base_frequency=frequency.is_base_frequency,
+                is_base_multiple=frequency.is_base_multiple,
             )
             for frequency in matrix.sorted_pitches
             if frequency.frequency

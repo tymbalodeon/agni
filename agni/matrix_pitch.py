@@ -101,6 +101,10 @@ class MatrixPitch:
             return True
         return False
 
+    @cached_property
+    def is_base_multiple(self) -> bool:
+        return self._is_bass_multiple or self._is_melody_multiple
+
     def _get_lilypond_display_pitch(self, tuning: Tuning) -> str:
         if not self.frequency:
             return ""

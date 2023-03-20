@@ -55,6 +55,10 @@ build *pip:
         pipx install "${wheel}" --force --pip-args="--force-reinstall"
     fi
 
+notate_reference_passage := "just try passage --notate --save --no-display"
+notate_ensemble_passage := "just try passage \
+    --notate --save --full-score --no-display"
+
 # Run examples if outdated (or "--force") and open (with options: "--input", "--output", "--reference", "--ensemble").
 example *args:
     #!/usr/bin/env zsh
@@ -100,21 +104,21 @@ example *args:
     fi
     if [ -n "${reference}" ]; then
         checkexec "${reference_pdf}" "${input_file_name}"*.ily \
-            -- just try passage --notate --save --no-display
+            -- {{notate_reference_passage}}
         pdf_files+="${reference_pdf}"
     fi
     if [ -n "${ensemble}" ]; then
         checkexec "${ensemble_pdf}" "${input_file_name}"*.ily \
-            -- just try passage --notate --save --full-score --no-display
+            -- {{notate_ensemble_passage}}
         pdf_files+="${ensemble_pdf}"
     fi
     if [ -n "${force}" ]; then
         if [ -n "${reference}" ]; then
-            just try passage --notate --save
+            {{notate_reference_passage}}
             pdf_files+="${reference_pdf}"
         fi
         if [ -n "${ensemble}" ]; then
-            just try passage --notate --save --full-score
+            -- {{notate_ensemble_passage}}
             pdf_files+="${ensemble_pdf}"
         fi
     fi
