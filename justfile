@@ -118,7 +118,7 @@ example *args:
             pdf_files+="${reference_pdf}"
         fi
         if [ -n "${ensemble}" ]; then
-            -- {{notate_ensemble_passage}}
+            {{notate_ensemble_passage}}
             pdf_files+="${ensemble_pdf}"
         fi
     fi
