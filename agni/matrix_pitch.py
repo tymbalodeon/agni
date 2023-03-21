@@ -53,7 +53,7 @@ class MatrixPitch:
         frequency = bass_frequency + melody_frequency
         self.frequency = frequency or None
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         if self.frequency is not None:
             frequency_display = f"{self.frequency:,}"
         else:

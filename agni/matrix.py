@@ -53,6 +53,9 @@ class Matrix:
     def __hash__(self) -> int:
         return hash((self.bass, self.melody))
 
+    def __repr__(self) -> str:
+        return f"Matrix({self.bass}, {self.melody})"
+
     @staticmethod
     def _get_pitch_type(
         bass: str | NamedPitch,
