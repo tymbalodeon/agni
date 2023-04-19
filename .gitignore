@@ -3,8 +3,7 @@
 *.svg
 .DS_Store
 .coverage
-.pdm.toml
+.pdm-python
 __pycache__/
-__pypackages__/
 dist/
 profiles/
