@@ -1,7 +1,7 @@
 [project]
 name = "agni"
 version = "0.2.0"
-description = """ \
+description = """\
     Music compositional tools inspired by the techniques of Claude Vivier \
 """
 readme = "README.md"
