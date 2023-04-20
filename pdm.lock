@@ -489,7 +489,7 @@ summary = "Measures the displayed width of unicode strings in a terminal"
 [metadata]
 lock_version = "4.2"
 groups = ["default", "dev"]
-content_hash = "sha256:9cf443d788824f357ce2e5f96d9397a6ff954f15694efcc34571e6b9b6cbe246"
+content_hash = "sha256:ff27300aed1bbf2be0c85e207c943cc310dacfb143a5bd2468bb258324bb14c1"
 
 [metadata.files]
 "abjad 3.16" = [
