@@ -308,3 +308,16 @@ def test_matrix_display_melody():
     """
     actual_output = call_command(matrix_command + [display_option, "melody"])
     assert_lines_match(actual_output, expected_output)
+
+def test_matrix_display_table():
+    expected_output = """\
+                    Combination-Tone Matrix (Hertz)
+
+                0 x melody   1 x melody   2 x melody   3 x melody
+    0 x bass                466.0        932.0        1,398.0
+    1 x bass   440.0        906.0        1,372.0      1,838.0
+    2 x bass   880.0        1,346.0      1,812.0      2,278.0
+    3 x bass   1,320.0      1,786.0      2,252.0      2,718.0
+    """
+    actual_output = call_command(matrix_command + [display_option, "table"])
+    assert_lines_match(actual_output, expected_output)
