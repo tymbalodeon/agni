@@ -11,7 +11,7 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
 dependencies = [
-    "typer>=0.9.0",
+    "typer[all]>=0.9.0",
     "abjad>=3.17",
     "supriya>=23.3b0",
     "abjad-ext-rmakers>=3.17",
