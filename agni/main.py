@@ -81,7 +81,7 @@ display = Option(
 )
 
 
-@agni.command()
+@agni.command(no_args_is_help=True)
 def matrix(
     bass: str = Argument(..., help=pitch_help),
     melody: str = Argument(..., help=pitch_help),
