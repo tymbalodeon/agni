@@ -171,7 +171,7 @@ class Matrix:
         Console().print(table)
 
     def _display_list(self):
-        frequencies = ", ".join(self.display_pitches)
+        frequencies = " ".join(self.display_pitches)
         console = Console(theme=Theme(inherit=False))
         console.print(frequencies)
 

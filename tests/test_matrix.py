@@ -283,8 +283,8 @@ def test_matrix_display_chord():
 
 def test_matrix_display_list():
     expected_output = (
-        "440.0, 466.0, 880.0, 906.0, 932.0, 1,320.0, 1,346.0, 1,372.0,"
-        " 1,398.0, 1,786.0, 1,812.0, 1,838.0, 2,252.0, 2,278.0, 2,718.0"
+        "440.0 466.0 880.0 906.0 932.0 1,320.0 1,346.0 1,372.0"
+        " 1,398.0 1,786.0 1,812.0 1,838.0 2,252.0 2,278.0 2,718.0"
     )
     actual_output = call_command(matrix_command + [display_option, "list"])
     actual_output = actual_output.replace("\n", "").strip()
@@ -308,6 +308,7 @@ def test_matrix_display_melody():
     """
     actual_output = call_command(matrix_command + [display_option, "melody"])
     assert_lines_match(actual_output, expected_output)
+
 
 def test_matrix_display_table():
     expected_output = """\
