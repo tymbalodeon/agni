@@ -126,7 +126,7 @@ example *args:
         open "${pdf_files[@]}"
     fi
 
-# Install (or "upgrade") external dependencies.
+# Install (or "--upgrade") external dependencies.
 @install *upgrade:
     ./install_dependencies.zsh {{upgrade}}
 

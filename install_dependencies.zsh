@@ -52,16 +52,17 @@ upgrade_dependency() {
             brew upgrade just
             ;;
         "lilypond")
-            brew upgrade lilypond
+            brew upgrade lilypond-unstable
             ;;
         "pdm")
             brew upgrade pdm
             ;;
         "pipx")
-            brew upgrade pipx
+            brew upgrade pipx &>/dev/null \
+            || python3 -m pip install --user pipx
             ;;
         "pnpm")
-            brew upgrade pnpm
+            pnpm add --global pnpm
             ;;
         "speedscope")
             pnpm update --global speedscope
@@ -86,7 +87,7 @@ done
 
 IFS=" " read -r -A ARGS <<< "$@"
 
-if ! ((${ARGS[(I)*upgrade*]})); then
+if ! ((${ARGS[(I)*--upgrade*]})); then
     exit
 fi
 
