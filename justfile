@@ -68,7 +68,7 @@ example *args:
         ensemble="true"
     else
         if [[ "{{args}}" = *"--input"* ]]; then
-                input="true"
+            input="true"
         fi
         if [[ "{{args}}" = *"--output"* ]]; then
                 reference="true"
@@ -94,8 +94,8 @@ example *args:
     reference_pdf="examples/claude-vivier-lonely-child-reference-matrices.pdf"
     ensemble_pdf="examples/claude-vivier-lonely-child-ensemble-matrices.pdf"
     pdf_files=()
+    input_pdf="${input_file_name}.pdf"
     if [ -n "${input}" ]; then
-        input_pdf="${input_file_name}.pdf"
         input_ly="${input_file_name}.ly"
         checkexec "${input_pdf}" examples/*.*ly \
             -- lilypond -o examples "${input_ly}"
@@ -113,6 +113,7 @@ example *args:
         pdf_files+="${ensemble_pdf}"
     fi
     if [ -n "${force}" ]; then
+        pdf_files+="${input_pdf}"
         if [ -n "${reference}" ]; then
             {{notate_reference_passage}}
             pdf_files+="${reference_pdf}"
