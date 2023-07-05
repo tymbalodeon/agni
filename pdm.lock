@@ -507,7 +507,7 @@ summary = "Measures the displayed width of unicode strings in a terminal"
 lock_version = "4.2"
 cross_platform = true
 groups = ["default", "dev"]
-content_hash = "sha256:65a9658bfa3934f2a175eb5498c0c3d5e7c0deeabeb7da467d2bb5cc4194acf2"
+content_hash = "sha256:1974c103de6410703254528a9b8e2485498c360f14c6949f94493a49d16121fd"
 
 [metadata.files]
 "abjad 3.18" = [
