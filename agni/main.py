@@ -55,7 +55,7 @@ tuning = Option(
 )
 display_format = Option(
     DisplayFormat.TABLE,
-    "--display",
+    "--display-format",
     help="Set the matrix display format.",
 )
 as_chord = Option(False, "--as-chord", help="Output matrix as a chord.")
@@ -77,7 +77,7 @@ output_directory = Option(
     help="If saving, the directory in which to save the output file.",
 )
 display = Option(
-    True, " /--no-display", help="Display the output in the terminal."
+    True, " /--no-display", help="Don't show the output in the terminal."
 )
 
 
@@ -105,6 +105,8 @@ def matrix(
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from two pitches."""
+    if as_chord and not notate:
+        display_format = DisplayFormat.CHORD
     matrix = Matrix(
         bass,
         melody,
@@ -114,21 +116,19 @@ def matrix(
         display_format,
         midi_input=midi_input,
     )
+    if display or not notate and not play:
+        matrix.display()
     if notate:
         Notation(
             matrix, as_ensemble, tuning, save, as_chord, output_directory
         ).notate()
-    if display:
-        matrix.display()
     if play:
         matrix.play()
 
 
-@agni.command()
+@agni.command(no_args_is_help=True)
 def passage(
-    input_file: Path = Argument(
-        Path("examples/lonely-child-notes.ily"), help="LilyPond input file."
-    ),
+    input_file: Path = Argument(None, help="LilyPond input file."),
     multiples: int = multiples,
     pitch_type: PitchType = Option(
         PitchType.LILYPOND,
@@ -158,6 +158,8 @@ def passage(
     display: bool = display,
 ):
     """Create combination-tone matrices for a two-voice passage."""
+    if as_chord and not notate:
+        display_format = DisplayFormat.CHORD
     if full_score:
         as_ensemble = True
         as_set = False
@@ -171,6 +173,8 @@ def passage(
         as_set,
         adjacent_duplicates,
     )
+    if display or not notate:
+        passage.display()
     if notate:
         Notation(
             passage,
@@ -181,5 +185,3 @@ def passage(
             output_directory,
             full_score,
         ).notate()
-    if display:
-        passage.display()

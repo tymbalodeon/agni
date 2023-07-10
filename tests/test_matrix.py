@@ -18,7 +18,7 @@ matrix_command_lilypond = [matrix_command_name, bass_lilypond, melody_lilypond]
 multiples_option = "--multiples"
 pitch_type_option = "--pitch-type"
 tuning_option = "--tuning"
-display_option = "--display"
+display_option = "--display-format"
 
 
 @mark.parametrize("arg", ["--help", "-h"])
