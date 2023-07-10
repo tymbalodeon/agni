@@ -12,7 +12,8 @@ from rich.table import Table
 from rich.theme import Theme
 from supriya.patterns import EventPattern, SequencePattern
 
-from .helpers import stylize
+from agni.helpers import stylize
+
 from .matrix_pitch import (
     DisplayColor,
     DisplayFormat,

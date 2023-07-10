@@ -1,18 +1,18 @@
 from pytest import mark
 
-from agni.matrix import Matrix
-from agni.matrix_pitch import MatrixPitch
+from agni.couleurs.matrix import Matrix
+from agni.couleurs.matrix_pitch import MatrixPitch
 
 from .conftest import bass_frequency, call_command, melody_frequency
 
-matrix_command_name = "matrix"
+matrix_command_name = ["couleurs", "matrix"]
 bass = "440"
 melody = "466"
 bass_midi = "69"
 melody_midi = "70"
 bass_lilypond = "a'"
 melody_lilypond = "bf'"
-matrix_command = [matrix_command_name, bass, melody]
+matrix_command = matrix_command_name + [bass, melody]
 matrix_command_midi = [matrix_command_name, bass_midi, melody_midi]
 matrix_command_lilypond = [matrix_command_name, bass_lilypond, melody_lilypond]
 multiples_option = "--multiples"
@@ -24,7 +24,7 @@ display_option = "--display-format"
 @mark.parametrize("arg", ["--help", "-h"])
 def test_matrix_help(arg: str):
     matrix_help_text = "Create combination-tone matrix from two pitches."
-    output = call_command([matrix_command_name, arg])
+    output = call_command(matrix_command_name + [arg])
     assert matrix_help_text in output
 
 

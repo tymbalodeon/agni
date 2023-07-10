@@ -2,7 +2,7 @@ from pytest import mark
 
 from .conftest import call_command
 
-passage_command_name = "passage"
+passage_command_name = ["couleurs", "passage"]
 
 
 @mark.parametrize("arg", ["--help", "-h"])
@@ -10,5 +10,6 @@ def test_passage_help(arg: str):
     passage_help_text = (
         " Create combination-tone matrices for a two-voice passage."
     )
-    output = call_command([passage_command_name, arg])
+    output = call_command(passage_command_name + [arg])
+    print(arg)
     assert passage_help_text in output
