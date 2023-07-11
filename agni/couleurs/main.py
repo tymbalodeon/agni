@@ -3,13 +3,10 @@ from pathlib import Path
 from rich.markup import escape
 from typer import Argument, Option, Typer
 
-from agni import __version__
-
 from .matrix import Matrix
 from .matrix_pitch import DisplayFormat, PitchType, Tuning
 from .notation import Notation
 from .passage import Passage
-from typer import Typer
 
 couleurs = Typer(
     no_args_is_help=True,

@@ -20,6 +20,6 @@ def test_version_display(arg: str):
 
 @mark.parametrize("arg", [None, "--help", "-h"])
 def test_help(arg: str):
-    help_text = "Agni: Use compositional techniques inspired by Claude Vivier."
+    help_text = "Agni: Compositional techniques inspired by Claude Vivier."
     output = call_command([arg])
     assert help_text in output
