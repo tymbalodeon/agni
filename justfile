@@ -24,15 +24,19 @@ try *args:
     command="$(just _get_command_name)"
     pdm run "${command}" {{args}}
 
-# Clean Python cache.
-clean:
+# Clean Python cache or generated pdfs.
+clean *pdfs:
     #!/usr/bin/env zsh
-    cached_files=(**/**.pyc(N))
-    if [ -z "${cached_files[*]}" ]; then
-        echo "No cached files found."
+    if [ "{{pdfs}}" = "pdfs" ]; then
+        files=(**/**.pdf(N))
+    else
+        files=(**/**.pyc(N))
+    fi
+    if [ -z "${files[*]}" ]; then
+        echo "No files found."
         exit
     fi
-    for file in "${cached_files[@]}"; do
+    for file in "${files[@]}"; do
         rm "${file}"
         echo "Removed ${file}."
     done
@@ -55,9 +59,20 @@ build *pip:
         pipx install "${wheel}" --force --pip-args="--force-reinstall"
     fi
 
-notate_reference_passage := "just try passage --notate --save --no-display"
-notate_ensemble_passage := "just try passage \
-    --notate --save --full-score --no-display"
+notate_reference_passage := """
+just try couleurs \
+    passage examples/lonely-child-notes.ily \
+    --no-display \
+    --notate \
+    --save"""
+
+notate_ensemble_passage := """
+just try couleurs \
+    passage examples/lonely-child-notes.ily \
+    --full-score \
+    --no-display \
+    --notate \
+    --save"""
 
 # Run examples if outdated (or "--force") and open (with options: "--input", "--output", "--reference", "--ensemble").
 example *args:
@@ -124,7 +139,11 @@ example *args:
         fi
     fi
     if [ -n "${pdf_files[*]}" ]; then
-        open "${pdf_files[@]}"
+        for file in "${pdf_files[@]}"; do
+            if [ -f "${file}" ]; then
+                open "${pdf_files[@]}" 2>/dev/null
+            fi
+        done
     fi
 
 # Install (or "--upgrade") external dependencies.

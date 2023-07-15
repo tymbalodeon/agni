@@ -1,15 +1,13 @@
 from pathlib import Path
 
+from rich import print
 from rich.markup import escape
-from typer import Argument, Option, Typer
-
-from agni import __version__
+from typer import Argument, Exit, Option, Typer
 
 from .matrix import Matrix
 from .matrix_pitch import DisplayFormat, PitchType, Tuning
 from .notation import Notation
 from .passage import Passage
-from typer import Typer
 
 couleurs = Typer(
     no_args_is_help=True,
@@ -136,6 +134,17 @@ def passage(
     display: bool = display,
 ):
     """Create combination-tone matrices for a two-voice passage."""
+    message = ""
+    exit = False
+    if input_file is None:
+        message = "Please provide an input file"
+        exit = True
+    elif not input_file.exists():
+        message = f"{input_file} does not exist"
+        exit = True
+    if exit:
+        print(message)
+        raise Exit()
     if as_chord and not notate:
         display_format = DisplayFormat.CHORD
     if full_score:
