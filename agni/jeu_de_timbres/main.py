@@ -6,3 +6,18 @@ jeu_de_timbres = Typer(
     context_settings={"help_option_names": ["-h", "--help"]},
     add_completion=False,
 )
+
+
+@jeu_de_timbres.command()
+def orion():
+    pass
+
+
+@jeu_de_timbres.command()
+def zipangu():
+    pass
+
+
+@jeu_de_timbres.command()
+def zipangu():
+    pass
