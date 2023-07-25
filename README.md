@@ -20,10 +20,11 @@ The concept of a "Combination-Tone Matrix" comes from Bryan Christian's article,
 
 Commands:
 
-- `agni COMMAND --help`: See all available options for COMMAND.
-- `agni matrix <bass> <melody>`: Generate a single matrix for a given bass and
+_Currently commands are implemented for recreating Vivier's "couleurs" only._
+
+- `agni couleurs matrix <bass> <melody>`: Generate a single matrix for a given bass and
   melody pitch, and display, notate, or play.
-- `agni passage <input_file>`: Generate matrices for a given passage of bass and
+- `agni couleurs passage <input_file>`: Generate matrices for a given passage of bass and
   melody notes, and display or notate.
 
 ### Input files
