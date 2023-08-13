@@ -9,7 +9,7 @@ repos:
       - id: trailing-whitespace
       - id: check-merge-conflict
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.9.0
+    rev: v3.10.1
     hooks:
       - id: pyupgrade
         args:
@@ -32,14 +32,14 @@ repos:
           - --profile=black
           - --line-length=79
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 23.7.0
     hooks:
       - id: black
         args:
           - --preview
           - --line-length=79
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+    rev: 6.1.0
     hooks:
       - id: flake8
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -68,7 +68,7 @@ repos:
         language: system
         pass_filenames: false
   - repo: https://github.com/pdm-project/pdm
-    rev: 2.8.0a2
+    rev: 2.8.2
     hooks:
       - id: pdm-export
         args:
