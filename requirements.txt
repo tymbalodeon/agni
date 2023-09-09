@@ -13,7 +13,7 @@ cfgv==3.4.0
 charset-normalizer==3.2.0
 click==8.1.6
 colorama==0.4.6
-coverage==7.3.1
+coverage==7.3.0
 curtsies==0.4.2
 cwcwidth==0.1.8
 distlib==0.3.7
@@ -36,10 +36,10 @@ pathspec==0.11.2
 platformdirs==3.10.0
 pluggy==1.2.0
 ply==3.11
-pre-commit==3.4.0
+pre-commit==3.3.3
 py-spy==0.3.14
 pygments==2.16.1
-pytest==7.4.2
+pytest==7.4.0
 pyxdg==0.28
 pyyaml==6.0.1
 requests==2.31.0
