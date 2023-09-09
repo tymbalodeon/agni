@@ -169,6 +169,7 @@ profile *args:
 update *lilypond:
     #!/usr/bin/env zsh
     if [ -z "{{lilypond}}" ]; then
+        pdm self update
         pdm update
         {{pre_commit}} autoupdate
     fi
