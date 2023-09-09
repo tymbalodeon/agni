@@ -1,0 +1,5 @@
+{
+	"devDependencies": {
+		"@typescript-eslint/typescript-estree": "^6.6.0"
+	}
+}
