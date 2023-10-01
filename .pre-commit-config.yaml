@@ -9,7 +9,7 @@ repos:
       - id: trailing-whitespace
       - id: check-merge-conflict
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.10.1
+    rev: v3.13.0
     hooks:
       - id: pyupgrade
         args:
@@ -68,7 +68,7 @@ repos:
         language: system
         pass_filenames: false
   - repo: https://github.com/pdm-project/pdm
-    rev: 2.9.2
+    rev: 2.9.3
     hooks:
       - id: pdm-export
         args:

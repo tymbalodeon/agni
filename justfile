@@ -148,7 +148,7 @@ example *args:
 
 # Install (or "--upgrade") external dependencies.
 @install *upgrade:
-    ./install_dependencies.zsh {{upgrade}}
+    ./install_dependencies.sh {{upgrade}}
 
 # Run the py-spy profiler on a command and its <args> and open the results with speedscope.
 profile *args:
@@ -166,7 +166,7 @@ profile *args:
     pdm run bpython
 
 # Update project dependencies, pre-commit hooks, and lilypond file versions (or just the latter if "lilypond").
-update *lilypond:
+update *lilypond: (install "--upgrade")
     #!/usr/bin/env zsh
     if [ -z "{{lilypond}}" ]; then
         pdm update
