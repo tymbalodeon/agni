@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: check-builtin-literals
       - id: check-toml
@@ -9,7 +9,7 @@ repos:
       - id: trailing-whitespace
       - id: check-merge-conflict
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.14.0
+    rev: v3.15.0
     hooks:
       - id: pyupgrade
         args:
@@ -32,7 +32,7 @@ repos:
           - --profile=black
           - --line-length=79
   - repo: https://github.com/psf/black
-    rev: 23.9.1
+    rev: 23.10.0
     hooks:
       - id: black
         args:
@@ -43,12 +43,12 @@ repos:
     hooks:
       - id: flake8
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
+    rev: v1.6.1
     hooks:
       - id: mypy
         args: [--ignore-missing-imports]
   - repo: https://github.com/jendrikseipp/vulture
-    rev: v2.9.1
+    rev: v2.10
     hooks:
       - id: vulture
         args:
