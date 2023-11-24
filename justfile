@@ -149,6 +149,8 @@ example *args:
 # Install (or "--upgrade") external dependencies.
 @install *upgrade:
     ./install_dependencies.sh {{upgrade}}
+    command -v rtx &>/dev/null && rtx local python@3.11 &>/dev/null
+    pdm install
 
 # Run the py-spy profiler on a command and its <args> and open the results with speedscope.
 profile *args:
