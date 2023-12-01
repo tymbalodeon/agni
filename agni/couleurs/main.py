@@ -16,6 +16,17 @@ couleurs = Typer(
     add_completion=False,
 )
 
+
+def get_display_format_from_input(
+    as_chord: bool, display_format: DisplayFormat
+) -> DisplayFormat:
+    if display_format == DisplayFormat.DEFAULT:
+        if as_chord:
+            return DisplayFormat.CHORD
+        return DisplayFormat.TABLE
+    return display_format
+
+
 pitch_choices = escape("[hertz|midi|lilypond]")
 pitch_help = f"[bold yellow]{pitch_choices}[/bold yellow]"
 multiples = Option(
@@ -30,7 +41,7 @@ tuning = Option(
     Tuning.MICROTONAL, "--tuning", help="Set the tuning to quantize to."
 )
 display_format = Option(
-    DisplayFormat.TABLE,
+    DisplayFormat.DEFAULT,
     "--display-format",
     help="Set the matrix display format.",
 )
@@ -81,8 +92,7 @@ def matrix(
     play: bool = Option(False, "--play", help="Play matrix."),
 ):
     """Create combination-tone matrix from two pitches."""
-    if as_chord and not notate:
-        display_format = DisplayFormat.CHORD
+    display_format = get_display_format_from_input(as_chord, display_format)
     matrix = Matrix(
         bass,
         melody,
@@ -95,6 +105,7 @@ def matrix(
     if display or not notate and not play:
         matrix.display()
     if notate:
+        as_chord = as_chord or display_format == DisplayFormat.CHORD
         Notation(
             matrix, as_ensemble, tuning, save, as_chord, output_directory
         ).notate()
@@ -145,8 +156,7 @@ def passage(
     if exit:
         print(message)
         raise Exit()
-    if as_chord and not notate:
-        display_format = DisplayFormat.CHORD
+    display_format = get_display_format_from_input(as_chord, display_format)
     if full_score:
         as_ensemble = True
         as_set = False

@@ -25,6 +25,7 @@ class Tuning(StrEnum):
 
 
 class DisplayFormat(StrEnum):
+    DEFAULT = auto()
     CHORD = auto()
     LIST = auto()
     MELODY = auto()
