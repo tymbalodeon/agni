@@ -3,9 +3,8 @@
 
 [metadata]
 groups = ["default", "dev"]
-cross_platform = true
-static_urls = false
-lock_version = "4.3"
+strategy = ["cross_platform"]
+lock_version = "4.4"
 content_hash = "sha256:1974c103de6410703254528a9b8e2485498c360f14c6949f94493a49d16121fd"
 
 [[package]]
@@ -523,7 +522,7 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "7.4.2"
+version = "7.4.3"
 requires_python = ">=3.7"
 summary = "pytest: simple powerful testing with Python"
 dependencies = [
@@ -533,8 +532,8 @@ dependencies = [
     "pluggy<2.0,>=0.12",
 ]
 files = [
-    {file = "pytest-7.4.2-py3-none-any.whl", hash = "sha256:1d881c6124e08ff0a1bb75ba3ec0bfd8b5354a01c194ddd5a0a870a48d99b002"},
-    {file = "pytest-7.4.2.tar.gz", hash = "sha256:a766259cfab564a2ad52cb1aae1b881a75c3eb7e34ca3779697c23ed47c47069"},
+    {file = "pytest-7.4.3-py3-none-any.whl", hash = "sha256:0d009c083ea859a71b76adf7c1d502e4bc170b80a8ef002da5806527b9591fac"},
+    {file = "pytest-7.4.3.tar.gz", hash = "sha256:d989d136982de4e3b29dabcc838ad581c64e8ed52c11fbe86ddebd9da0818cd5"},
 ]
 
 [[package]]
@@ -746,7 +745,7 @@ files = [
 
 [[package]]
 name = "supriya"
-version = "23.7b0"
+version = "23.10b0"
 requires_python = ">=3.8"
 summary = "A Python API for SuperCollider"
 dependencies = [
@@ -754,14 +753,14 @@ dependencies = [
     "uqbar>=0.6.9",
 ]
 files = [
-    {file = "supriya-23.7b0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:0184188a5399f0d508bb8489ee195b1a9a641b9c01e2e1a2790b7368056575d7"},
-    {file = "supriya-23.7b0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:df002372a1441ab500f4d9d257b08dff11e530c6833ca7abed8d154654b607e1"},
-    {file = "supriya-23.7b0-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:4952770a31b0165963620c54d0f6199b62af1a31e08b567b83b5c4e2518fe738"},
-    {file = "supriya-23.7b0-cp311-cp311-musllinux_1_1_i686.whl", hash = "sha256:683a54f3b79b2145e8ac15259f74166904340e7b48673628ba59d9cdaf90fce2"},
-    {file = "supriya-23.7b0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:2d8d12bc8d0bfab3465122100eef95042fe481b22dfb41c6c045202f79f70d85"},
-    {file = "supriya-23.7b0-cp311-cp311-win32.whl", hash = "sha256:105b263cadd2cef7d0e0305c2107c3c3df8de4fd6128e9a2554504ef990f31ab"},
-    {file = "supriya-23.7b0-cp311-cp311-win_amd64.whl", hash = "sha256:52c10583a4f3cc1b28b6e85341ec5db25163e5031c542061c1b0e0215e5e6974"},
-    {file = "supriya-23.7b0.tar.gz", hash = "sha256:28d32d42a93fa493d2d9d8941f975eed1d036390bab2a733f042fff3722f5f84"},
+    {file = "supriya-23.10b0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:f12c8136b4f833dfe43ae0c9222270b188a950250af6a690151c8129c436e0ec"},
+    {file = "supriya-23.10b0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a58dc20a47f0142d16f8e9136629ce019780b63d497973f698742cb7edd4c18a"},
+    {file = "supriya-23.10b0-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:f5fb0eb8609cd033dc3d1b885c45fe65c2c88062659a2866896f7bd211e2e748"},
+    {file = "supriya-23.10b0-cp311-cp311-musllinux_1_1_i686.whl", hash = "sha256:7f6ae3903ae7a58c50d2c0487e03399c128384f18f3fb309d7e07a6cf0689f99"},
+    {file = "supriya-23.10b0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:039772e56dcec4de67d6c24df092cfc0de8db4c9ca09d44cd90b92d352b2d4b4"},
+    {file = "supriya-23.10b0-cp311-cp311-win32.whl", hash = "sha256:b8e3293dbae1ac86a0effb9df5ac039fa63227fe05339f5564ac4ab7407575a4"},
+    {file = "supriya-23.10b0-cp311-cp311-win_amd64.whl", hash = "sha256:4a4def1e91312e5d6a7b7895b4daa022a410323627c569505d812858d65dd833"},
+    {file = "supriya-23.10b0.tar.gz", hash = "sha256:0f6cdd0acabebe3041638eced3248a1eafb669b1aed44ac5b15854b360b8ac54"},
 ]
 
 [[package]]
