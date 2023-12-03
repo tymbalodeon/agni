@@ -22,7 +22,9 @@ check *autoupdate:
 try *args:
     #!/usr/bin/env zsh
     command="$(just _get_command_name)"
-    pdm run "${command}" {{args}}
+    pdm run "${command}" {{args}} || \
+        just install pdm run "${command}" {{args}}
+
 
 # Clean Python cache or generated pdfs.
 clean *pdfs:
