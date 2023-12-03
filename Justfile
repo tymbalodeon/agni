@@ -53,10 +53,12 @@ build *pip: install
     #!/usr/bin/env zsh
     pdm build
     wheel="$(just _get_wheel)"
+    pdm run python -m ensurepip --upgrade --default-pip
     if [ "{{pip}}" = "--pip" ]; then
         pdm run python -m pip install --user "${wheel}" --force-reinstall
     else
-        pdm run python -m pipx install "${wheel}" \
+        pdm run python -m pip install pipx \
+        && pdm run python -m pipx install "${wheel}" \
             --force --pip-args="--force-reinstall"
     fi
 
