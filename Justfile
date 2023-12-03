@@ -25,7 +25,6 @@ try *args:
     pdm run "${command}" {{args}} || \
         just install pdm run "${command}" {{args}}
 
-
 # Clean Python cache or generated pdfs.
 clean *pdfs:
     #!/usr/bin/env zsh
