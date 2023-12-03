@@ -214,6 +214,6 @@ test *args:
     {{coverage}} run -m pytest "${args}"
 
 # Create a new virtual environment, overwriting an existing one if present.
-venv:
+@venv:
     rm -f .pdm-python
     pdm venv create --force
