@@ -48,9 +48,8 @@ _get_wheel:
     printf "./dist/${command}-${version}-py3-none-any.whl"
 
 # Build the project and install it using pipx, or optionally with pip ("--pip").
-build *pip:
+build *pip: install
     #!/usr/bin/env zsh
-    pdm install
     pdm build
     wheel="$(just _get_wheel)"
     if [ "{{pip}}" = "--pip" ]; then
@@ -148,8 +147,7 @@ example *args:
 
 # Install (or "--upgrade") external dependencies.
 @install *upgrade:
-    ./install_dependencies.sh {{upgrade}}
-    command -v rtx &>/dev/null && rtx local python@3.11 &>/dev/null
+    ./install_dependencies.zsh {{upgrade}}
     pdm install
 
 # Run the py-spy profiler on a command and its <args> and open the results with speedscope.

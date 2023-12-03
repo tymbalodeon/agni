@@ -12,6 +12,11 @@ dependencies=(
     "checkexec"
 )
 
+thoth_install_lilypond() {
+    command -v thoth &>/dev/null \
+        && thoth lilypond install latest-stable \
+}
+
 install_dependency() {
     case ${1} in
         "brew")
@@ -22,7 +27,7 @@ install_dependency() {
             brew install just
             ;;
         "lilypond")
-            brew install lilypond
+            thoth_install_lilypond || brew install lilypond
             ;;
         "pdm")
             brew install pdm
@@ -52,7 +57,7 @@ upgrade_dependency() {
             brew upgrade just
             ;;
         "lilypond")
-            brew upgrade lilypond-unstable
+            thoth_install_lilypond || brew upgrade lilypond
             ;;
         "pdm")
             brew upgrade pdm
@@ -68,7 +73,8 @@ upgrade_dependency() {
             pnpm update --global speedscope
             ;;
         "checkexec")
-            if command -v cargo install-update &>/dev/null; then
+            if [ -z "$(cargo --list \
+                        | grep install-update &>/dev/null)" ]; then
                 cargo install cargo-update
             fi
             cargo install-update checkexec
@@ -77,9 +83,7 @@ upgrade_dependency() {
 }
 
 for dependency in "${dependencies[@]}"; do
-    if command -v "${dependency}" &>/dev/null; then
-        echo "\"${dependency}\" installed."
-    else
+    if !command -v "${dependency}" &>/dev/null; then
         echo "Installing ${dependency}..."
         install_dependency "${dependency}"
     fi
