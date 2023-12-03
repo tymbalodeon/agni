@@ -55,9 +55,10 @@ build *pip: install
     pdm build
     wheel="$(just _get_wheel)"
     if [ "{{pip}}" = "--pip" ]; then
-        pip install --user "${wheel}" --force-reinstall
+        pdm run python -m pip install --user "${wheel}" --force-reinstall
     else
-        pipx install "${wheel}" --force --pip-args="--force-reinstall"
+        pdm run python -m pipx install "${wheel}" \
+            --force --pip-args="--force-reinstall"
     fi
 
 notate_reference_passage := """

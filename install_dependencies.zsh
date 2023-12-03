@@ -1,15 +1,15 @@
 #!/usr/bin/env zsh
 
 dependencies=(
-    "brew"
-    "just"
-    "lilypond"
-    "pdm"
+    # "brew"
+    # "just"
+    # "lilypond"
+    # "pdm"
     "pipx"
-    "pnpm"
-    "speedscope"
-    "cargo"
-    "checkexec"
+    # "pnpm"
+    # "speedscope"
+    # "cargo"
+    # "checkexec"
 )
 
 thoth_install_lilypond() {
@@ -33,8 +33,9 @@ install_dependency() {
             brew install pdm
             ;;
         "pipx")
-            brew install pipx
-            pipx ensurepath
+            pdm run python -m ensurepip --default-pip \
+                && pdm run python -m pip install pipx && \
+                pdm run python -m pipx ensurepath
             ;;
         "pnpm")
             brew install pnpm
@@ -63,8 +64,7 @@ upgrade_dependency() {
             brew upgrade pdm
             ;;
         "pipx")
-            brew upgrade pipx &>/dev/null \
-            || python3 -m pip install --user pipx
+            python3 -m pip install --user --upgrade pipx
             ;;
         "pnpm")
             pnpm add --global pnpm
@@ -83,7 +83,7 @@ upgrade_dependency() {
 }
 
 for dependency in "${dependencies[@]}"; do
-    if !command -v "${dependency}" &>/dev/null; then
+    if ! command -v "${dependency}" &>/dev/null; then
         echo "Installing ${dependency}..."
         install_dependency "${dependency}"
     fi
