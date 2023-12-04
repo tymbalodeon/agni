@@ -4,7 +4,7 @@
 # Run pre-commit checks or "--update" pre-commit hooks.
 check *update:
     #!/usr/bin/env nu
-    let update = "{{update}}";
+    let update = "{{update}}"
 
     if ($update | is-empty) {
         pdm run pre-commit run --all-files
@@ -23,11 +23,14 @@ _get_pyproject_value value:
 
 # Try a command using the current state of the files without building.
 try *args:
-    #!/usr/bin/env zsh
-    command="$(just _get_command_name)"
-    pdm run "${command}" {{args}} \
-    || just install \
-        && pdm run "${command}" {{args}}
+    #!/usr/bin/env nu
+    let command = just _get_command_name
+
+    try {
+        pdm run $command {{args}}
+    } catch {
+        just install; pdm run $command {{args}}
+    }
 
 # Clean Python cache or generated pdfs.
 clean *pdfs:
