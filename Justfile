@@ -1,17 +1,22 @@
 @_help:
     just --list
 
-# Run pre-commit checks or "update" pre-commit hooks.
+# Run pre-commit checks or "--update" pre-commit hooks.
 check *update:
-    #!/usr/bin/env zsh
-    if [ "{{update}}" = "--update" ]; then
-        pdm run pre-commit autoupdate
-    else
-        pdm run pre-commit run --all-files
-    fi
+    #!/usr/bin/env nu
+    let update = "{{update}}";
 
-@_get_pyproject_value value:
-    printf "$(awk -F '[ =\"]+' '$1 == "{{value}}" { print $2 }' pyproject.toml)"
+    if ($update | is-empty) {
+        pdm run pre-commit run --all-files
+    } else if $update == "--update" {
+        pdm run pre-commit autoupdate
+    } else {
+        echo $"Unrecognized argument: \"($update)\""
+    }
+
+_get_pyproject_value value:
+    #!/usr/bin/env nu
+    open pyproject.toml | get project.{{value}}
 
 @_get_command_name:
     just _get_pyproject_value "name"
