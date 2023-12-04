@@ -165,14 +165,20 @@ example *args:
 
 # Run the py-spy profiler on a command and its <args> and open the results with speedscope.
 profile *args:
-    #!/usr/bin/env zsh
-    output_directory="profiles"
-    mkdir -p "${output_directory}"
-    output_file="${output_directory}/profile.json"
-    command="$(just _get_command_name)"
-    sudo py-spy record -f speedscope -o "${output_file}" \
-        -- pdm run python -m "${command}" {{args}}
-    speedscope "${output_file}"
+    #!/usr/bin/env nu
+    let output_directory = "profiles"
+    mkdir $output_directory
+
+    let output_file = $"($output_directory)/profile.json"
+
+    (
+        sudo pdm run py-spy record
+            --format speedscope
+            --output $output_file
+            -- pdm run python -m (just _get_command_name) {{args}}
+    )
+
+    speedscope $output_file
 
 # Open a python shell with project dependencies available.
 @shell:
@@ -180,31 +186,33 @@ profile *args:
 
 # Update project dependencies, pre-commit hooks, and lilypond file versions (or just the latter if "lilypond").
 update *lilypond: (install "--upgrade")
-    #!/usr/bin/env zsh
-    if [ -z "{{lilypond}}" ]; then
+    #!/usr/bin/env nu
+    let lilypond = "{{lilypond}}"
+
+    if  ($lilypond | is-empty) {
         pdm update
-        pdm run pre-commit autoupdate
-    fi
-    get_lilypond_version() {
-        version_text="$(lilypond --version)"
-        first_line="$(echo "${version_text}" | head -1)"
-        version_number="$(
-            echo "${first_line}" | grep -o "[0-9]\.[0-9]\{2\}\.[0-9]"
-        )"
-        echo "${version_number}"
+        just check --update
     }
-    current_lilypond_version="$(get_lilypond_version)"
-    for file in examples/**.ly; do
-        file_version="$(grep -o "${current_lilypond_version}" "${file}")"
-        [ -n "${file_version}" ]
-        if [ -n "${file_version}" ] \
-            && [ "${file_version}" != "${current_lilypond_version}" ]; then
-            convert-ly --current-version --edit "${file}"
-            rm -f "${file}"~
-        else
-            echo "\"${file}\" is already up to date."
-        fi
-    done
+    # get_lilypond_version() {
+    #     version_text="$(lilypond --version)"
+    #     first_line="$(echo "${version_text}" | head -1)"
+    #     version_number="$(
+    #         echo "${first_line}" | grep -o "[0-9]\.[0-9]\{2\}\.[0-9]"
+    #     )"
+    #     echo "${version_number}"
+    # }
+    # current_lilypond_version="$(get_lilypond_version)"
+    # for file in examples/**.ly; do
+    #     file_version="$(grep -o "${current_lilypond_version}" "${file}")"
+    #     [ -n "${file_version}" ]
+    #     if [ -n "${file_version}" ] \
+    #         && [ "${file_version}" != "${current_lilypond_version}" ]; then
+    #         convert-ly --current-version --edit "${file}"
+    #         rm -f "${file}"~
+    #     else
+    #         echo "\"${file}\" is already up to date."
+    #     fi
+    # done
 
 # Run coverage report.
 @coverage *args: test
