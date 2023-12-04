@@ -28,16 +28,6 @@ agni = "agni.main:agni"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.black]
-preview = true
-line-length = 79
-
-[tool.flake8]
-extend-ignore = "E203"
-
-[tool.isort]
-profile = "black"
-
 [tool.pdm.dev-dependencies]
 dev = [
     "pre-commit>=3.3.3",
@@ -53,27 +43,12 @@ dev = [
 
 [tool.ruff]
 exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
     ".git",
-    ".git-rewrite",
-    ".hg",
     ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pytype",
     ".ruff_cache",
-    ".svn",
-    ".tox",
     ".venv",
-    "__pypackages__",
-    "_build",
-    "buck-out",
     "build",
     "dist",
-    "node_modules",
-    "venv",
 ]
 line-length = 79
 indent-width = 4

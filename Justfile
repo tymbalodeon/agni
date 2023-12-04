@@ -41,6 +41,7 @@ clean *pdfs:
         rm "${file}"
         echo "Removed ${file}."
     done
+    pdm run ruff clean
 
 _get_wheel:
     #!/usr/bin/env zsh

@@ -31,13 +31,11 @@ repos:
         args:
           - --profile=black
           - --line-length=79
-  - repo: https://github.com/psf/black
-    rev: 23.11.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.6
     hooks:
-      - id: black
-        args:
-          - --preview
-          - --line-length=79
+      - id: ruff
+      - id: ruff-format
   - repo: https://github.com/PyCQA/flake8
     rev: 6.1.0
     hooks:
