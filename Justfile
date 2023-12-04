@@ -51,24 +51,25 @@ clean *pdfs:
     pdm run ruff clean
 
 _get_wheel:
-    #!/usr/bin/env zsh
-    command="$(just _get_command_name)"
-    version="$(just _get_pyproject_value "version")"
-    printf "./dist/${command}-${version}-py3-none-any.whl"
+    #!/usr/bin/env nu
+    let command = just _get_command_name
+    let version = just _get_pyproject_value version
+    echo $"./dist/($command)-($version)-py3-none-any.whl"
 
 # Build the project and install it using pipx, or optionally with pip ("--pip").
 build *pip: install
-    #!/usr/bin/env zsh
+    #!/usr/bin/env nu
     pdm build
-    wheel="$(just _get_wheel)"
     pdm run python -m ensurepip --upgrade --default-pip
-    if [ "{{pip}}" = "--pip" ]; then
-        pdm run python -m pip install --user "${wheel}" --force-reinstall
-    else
-        pdm run python -m pip install pipx \
-        && pdm run python -m pipx install "${wheel}" \
-            --force --pip-args="--force-reinstall"
-    fi
+
+    let wheel = just _get_wheel
+
+    if "{{pip}}" == "--pip" {
+        pdm run python -m pip install --user $wheel --force-reinstall
+    } else {
+        pdm run python -m pip install pipx
+        pdm run python -m pipx install $wheel --force --pip-args="--force-reinstall"
+    }
 
 notate_reference_passage := """
 just try couleurs \
