@@ -228,7 +228,7 @@ test *args:
 
 # Create a new virtual environment, overwriting an existing one if present.
 @venv:
-    rm -f .pdm-python
+    rm .pdm-python
     pdm venv create --force
 
 @lint:
@@ -236,3 +236,17 @@ test *args:
 
 @format:
     pdm run ruff format ./
+
+list *args:
+    #!/usr/bin/env nu
+    let args = "{{args}}" | split row " "
+
+    if ("--tree" in $args) or ("--graph" in $args) {
+        pdm list
+    } else {
+        (
+            pdm list
+                --fields name,version
+                --sort name
+        )
+    }
