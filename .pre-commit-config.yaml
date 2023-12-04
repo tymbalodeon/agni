@@ -8,43 +8,11 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-merge-conflict
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
-    hooks:
-      - id: pyupgrade
-        args:
-          - --py311-plus
-  - repo: https://github.com/myint/autoflake
-    rev: v2.2.1
-    hooks:
-      - id: autoflake
-        args:
-          - --recursive
-          - --in-place
-          - --remove-all-unused-imports
-          - --remove-unused-variables
-          - --remove-duplicate-keys
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        args:
-          - --profile=black
-          - --line-length=79
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.6
     hooks:
       - id: ruff
       - id: ruff-format
-  - repo: https://github.com/PyCQA/flake8
-    rev: 6.1.0
-    hooks:
-      - id: flake8
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.7.1
-    hooks:
-      - id: mypy
-        args: [--ignore-missing-imports]
   - repo: https://github.com/jendrikseipp/vulture
     rev: v2.10
     hooks:
@@ -52,7 +20,7 @@ repos:
         args:
           - ./
           - --exclude
-          - "*/__pypackages__/*,*/.venv/*"
+          - "*/.venv/*"
           - --ignore-names
           - "_generate_next_value_"
   - repo: local

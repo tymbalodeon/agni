@@ -2,7 +2,8 @@
 name = "agni"
 version = "0.2.0"
 description = """\
-    Music compositional tools inspired by the techniques of Claude Vivier \
+Music compositional tools \
+inspired by the techniques of Claude Vivier
 """
 authors = [
     {name = "Ben Rosen", email = "benjamin.j.rosen@gmail.com"},
@@ -10,6 +11,13 @@ authors = [
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
+keywords = [
+    "claude vivier",
+    "lilypond",
+    "music notation",
+    "music",
+    "spectral",
+]
 dependencies = [
     "typer[all]>=0.9.0",
     "abjad>=3.18",
@@ -17,16 +25,6 @@ dependencies = [
     "abjad-ext-rmakers>=3.18",
     "more-itertools>=9.1.0",
 ]
-
-[project.urls]
-repository = "https://github.com/tymbalodeon/agni"
-
-[project.scripts]
-agni = "agni.main:agni"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
 
 [tool.pdm.dev-dependencies]
 dev = [
@@ -40,6 +38,16 @@ dev = [
     "fb-sapp>=0.5.1",
     "ruff>=0.1.6",
 ]
+
+[project.urls]
+repository = "https://github.com/tymbalodeon/agni"
+
+[project.scripts]
+agni = "agni.main:agni"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 exclude = [
