@@ -1,15 +1,13 @@
 @_help:
     just --list
 
-pre_commit := "pdm run pre-commit"
-
-# Run pre-commit checks or "autoupdate".
-check *autoupdate:
+# Run pre-commit checks or "update" pre-commit hooks.
+check *update:
     #!/usr/bin/env zsh
-    if [ "{{autoupdate}}" = "autoupdate" ]; then
-        {{pre_commit}} autoupdate
+    if [ "{{update}}" = "--update" ]; then
+        pdm run pre-commit autoupdate
     else
-        {{pre_commit}} run --all-files
+        pdm run pre-commit run --all-files
     fi
 
 @_get_pyproject_value value:
@@ -22,8 +20,9 @@ check *autoupdate:
 try *args:
     #!/usr/bin/env zsh
     command="$(just _get_command_name)"
-    pdm run "${command}" {{args}} || \
-        just install pdm run "${command}" {{args}}
+    pdm run "${command}" {{args}} \
+    || just install \
+        && pdm run "${command}" {{args}}
 
 # Clean Python cache or generated pdfs.
 clean *pdfs:
@@ -175,7 +174,7 @@ update *lilypond: (install "--upgrade")
     #!/usr/bin/env zsh
     if [ -z "{{lilypond}}" ]; then
         pdm update
-        {{pre_commit}} autoupdate
+        pdm run pre-commit autoupdate
     fi
     get_lilypond_version() {
         version_text="$(lilypond --version)"
