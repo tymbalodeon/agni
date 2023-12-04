@@ -158,7 +158,7 @@ example *args:
         done
     fi
 
-# Install (or "--upgrade") external dependencies.
+# Install or "--upgrade" external dependencies.
 @install *upgrade:
     ./install_dependencies.zsh {{upgrade}}
     pdm install
