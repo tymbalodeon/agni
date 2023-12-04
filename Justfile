@@ -221,3 +221,9 @@ test *args:
 @venv:
     rm -f .pdm-python
     pdm venv create --force
+
+@lint:
+    pdm run ruff check ./
+
+@format:
+    pdm run ruff format ./

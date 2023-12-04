@@ -4,10 +4,9 @@
 .DS_Store
 .coverage
 .pdm-python
+.pyre/
 __pycache__/
+build/
 dist/
-examples/*
-!examples/lonely-child-notes.ily
-!examples/lonely-child-text.ily
-!examples/lonely-child.ly
+examples/*-matrices.ly
 profiles/

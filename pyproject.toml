@@ -18,15 +18,6 @@ dependencies = [
     "more-itertools>=9.1.0",
 ]
 
-[tool.pdm.dev-dependencies]
-dev = [
-    "pre-commit>=3.3.3",
-    "bpython>=0.24",
-    "py-spy>=0.3.14",
-    "pytest>=7.4.0",
-    "coverage>=7.2.7",
-]
-
 [project.urls]
 repository = "https://github.com/tymbalodeon/agni"
 
@@ -46,3 +37,43 @@ extend-ignore = "E203"
 
 [tool.isort]
 profile = "black"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pre-commit>=3.3.3",
+    "bpython>=0.24",
+    "py-spy>=0.3.14",
+    "pytest>=7.4.0",
+    "coverage>=7.2.7",
+    "pyre-check>=0.9.19",
+    "mypy>=1.7.1",
+    "fb-sapp>=0.5.1",
+    "ruff>=0.1.6",
+]
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+line-length = 79
+indent-width = 4
