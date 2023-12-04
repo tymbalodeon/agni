@@ -206,11 +206,9 @@ update *lilypond: (install "--upgrade")
         fi
     done
 
-coverage := "pdm run coverage"
-
 # Run coverage report.
 @coverage *args: test
-    {{coverage}} report -m \
+    pdm run coverage report -m \
         --omit "*/pdm/*" \
         --skip-covered \
         --sort "cover" \
@@ -218,13 +216,14 @@ coverage := "pdm run coverage"
 
 # Run tests.
 test *args:
-    #!/usr/bin/env zsh
-    if [ -z "{{args}}" ]; then
-        args="tests"
-    else
-        args="{{args}}"
-    fi
-    {{coverage}} run -m pytest "${args}"
+    #!/usr/bin/env nu
+    mut args = "{{args}}"
+
+    if ($args | is-empty) {
+        $args = tests
+    }
+
+    pdm run coverage run -m pytest $args
 
 # Create a new virtual environment, overwriting an existing one if present.
 @venv:
