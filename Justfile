@@ -16,46 +16,60 @@ let dependencies = [
 "
 
 # Install dependencies.
-install *dev:
+install pdm="--pdm":
     #!/usr/bin/env nu
     {{dependencies}}
+
     $dependencies | each {
         |dependency|
         nu $"./scripts/($dependency).nu" install
     }
-    pdm install
+
+    if "{{pdm}}" == "--pdm" {
+        pdm install
+    }
+
+    try {
+        pdm run pre-commit run --all-files
+    } catch {
+        just install; pdm run pre-commit run --all-files
+    }
 
 # Update dependencies.
-update:
+update: (install "--no-pdm")
     #!/usr/bin/env nu
     {{dependencies}}
+
     ./scripts/install_dependencies.zsh --update
+
     $dependencies | each {
         |dependency|
         nu $"./scripts/($dependency).nu" update
     }
+
     pdm update
     pdm run pre-commit autoupdate
 
 # Run pre-commit checks.
-@check:
-    pdm run pre-commit run --all-files
+check:
+    #!/usr/bin/env nu
+    try {
+        pdm run pre-commit run --all-files
+    } catch {
+        just install; pdm run pre-commit run --all-files
+    }
 
-@_get_pyproject_value value:
-    open pyproject.toml | get project.{{value}}
-
-@_get_command_name:
-    just _get_pyproject_value "name"
+get_pyproject_value := "open pyproject.toml | get project."
+command := "(" + get_pyproject_value + "name)"
+version := "(" + get_pyproject_value + "version)"
 
 # Try a command using the current state of the files without building.
 try *args:
     #!/usr/bin/env nu
-    let command = just _get_command_name
-
     try {
-        pdm run $command {{args}}
+        pdm run {{command}} {{args}}
     } catch {
-        just install; pdm run $command {{args}}
+        just install; pdm run {{command}} {{args}}
     }
 
 # Clean Python cache or generated pdfs.
@@ -78,9 +92,7 @@ clean *pdfs:
 
 _get_wheel:
     #!/usr/bin/env nu
-    let command = just _get_command_name
-    let version = just _get_pyproject_value version
-    echo $"./dist/($command)-($version)-py3-none-any.whl"
+    echo $"./dist/{{command}}-{{version}}-py3-none-any.whl"
 
 # Build the project and install it using pipx, or optionally with pip ("--pip").
 build *pip: install
@@ -197,7 +209,7 @@ profile *args:
         sudo pdm run py-spy record
             --format speedscope
             --output $output_file
-            -- pdm run python -m (just _get_command_name) {{args}}
+            -- pdm run python -m {{command}} {{args}}
     )
 
     speedscope $output_file
