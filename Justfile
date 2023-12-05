@@ -3,6 +3,14 @@ set shell := ["nu", "-c"]
 @_help:
     just --list
 
+_install_and_run *command:
+    #!/usr/bin/env nu
+    try {
+        {{command}}
+    } catch {
+        just install; {{command}}
+    }
+
 dependencies := "
 let dependencies = [
     pdm
@@ -14,14 +22,6 @@ let dependencies = [
     checkexec
 ]
 "
-
-_install_and_run *command:
-    #!/usr/bin/env nu
-    try {
-        {{command}}
-    } catch {
-        just install; {{command}}
-    }
 
 # Install dependencies.
 install pdm="--pdm":
@@ -171,7 +171,8 @@ just try couleurs \
     passage examples/lonely-child-notes.ily \
     --no-display \
     --notate \
-    --save"""
+    --save
+"""
 
 notate_ensemble_passage := """
 just try couleurs \
@@ -179,76 +180,87 @@ just try couleurs \
     --full-score \
     --no-display \
     --notate \
-    --save"""
+    --save
+"""
 
 # Run examples if outdated (or "--force") and open (with options: "--input", "--output", "--reference", "--ensemble").
 example *args:
-    #!/usr/bin/env zsh
-    if [ -z "{{args}}" ]; then
-        input="true"
-        reference="true"
-        ensemble="true"
-    else
-        if [[ "{{args}}" = *"--input"* ]]; then
-            input="true"
-        fi
-        if [[ "{{args}}" = *"--output"* ]]; then
-                reference="true"
-                ensemble="true"
-        else
-            if [[ "{{args}}" = *"--reference"* ]]; then
-                    reference="true"
-            fi
-            if [[ "{{args}}" = *"--ensemble"* ]]; then
-                    ensemble="true"
-            fi
-            if [[ "{{args}}" = *"--force"* ]]; then
-                force="true"
-                if [ -z "${reference}" ] \
-                    && [ -z "${ensemble}" ]; then
-                    reference="true"
-                    ensemble="true"
-                fi
-            fi
-        fi
-    fi
-    input_file_name="examples/lonely-child"
-    reference_pdf="examples/claude-vivier-lonely-child-reference-matrices.pdf"
-    ensemble_pdf="examples/claude-vivier-lonely-child-ensemble-matrices.pdf"
-    pdf_files=()
-    input_pdf="${input_file_name}.pdf"
-    if [ -n "${input}" ]; then
-        input_ly="${input_file_name}.ly"
-        checkexec "${input_pdf}" examples/*.*ly \
-            -- lilypond -o examples "${input_ly}"
-        mv "${input_file_name}-formatted.pdf" "${input_pdf}" 2>/dev/null
-        pdf_files+="${input_pdf}"
-    fi
-    if [ -n "${reference}" ]; then
-        checkexec "${reference_pdf}" "${input_file_name}"*.ily \
-            -- {{notate_reference_passage}}
-        pdf_files+="${reference_pdf}"
-    fi
-    if [ -n "${ensemble}" ]; then
-        checkexec "${ensemble_pdf}" "${input_file_name}"*.ily \
-            -- {{notate_ensemble_passage}}
-        pdf_files+="${ensemble_pdf}"
-    fi
-    if [ -n "${force}" ]; then
-        pdf_files+="${input_pdf}"
-        if [ -n "${reference}" ]; then
+    #!/usr/bin/env nu
+    let input = if (
+        "{{args}}" | is-empty
+    ) or (
+        "{{args}}" == "--input"
+    ) { true } else { false }
+
+    mut reference = if (
+        "{{args}}" | is-empty
+    ) or (
+        "{{args}}" in ["--output" "--reference"]
+    ) { true } else { false }
+
+    mut ensemble = if (
+        "{{args}}" | is-empty
+    ) or (
+        "{{args}}" in ["--output" "--ensemble"]
+    ) { true } else { false }
+
+    let force = if "{{args}}" == "--force" { true } else { false }
+
+    if "{{args}}" == "--force" {
+        reference = true
+        ensemble = true
+    }
+
+    let input_file_name = "examples/lonely-child"
+    let reference_pdf = "examples/claude-vivier-lonely-child-reference-matrices.pdf"
+    let ensemble_pdf = "examples/claude-vivier-lonely-child-ensemble-matrices.pdf"
+    let input_pdf = $"($input_file_name).pdf"
+    mut pdf_files = []
+
+    if $input {
+        let input_ly = $"($input_file_name).ly"
+        checkexec $input_pdf examples/*.*ly -- lilypond -o examples $input_ly
+
+        (
+            checkexec $input_pdf examples/*.*ly
+                -- mv $"($input_file_name)-formatted.pdf" $input_pdf
+        )
+
+        $pdf_files = ($pdf_files | append $input_pdf)
+    }
+
+    if $reference {
+        (
+            checkexec $reference_pdf $"($input_file_name)*.ily"
+                -- {{notate_reference_passage}}
+        )
+
+        $pdf_files = ($pdf_files | append $reference_pdf)
+    }
+
+    if $ensemble {
+        (
+            checkexec $ensemble_pdf $"($input_file_name)*.ily"
+                -- {{notate_ensemble_passage}}
+        )
+
+        $pdf_files = ($pdf_files | append $ensemble_pdf)
+    }
+
+    if $force {
+        $pdf_files = ($pdf_files | append $input_pdf)
+
+        if $reference {
             {{notate_reference_passage}}
-            pdf_files+="${reference_pdf}"
-        fi
-        if [ -n "${ensemble}" ]; then
+            $pdf_files = ($pdf_files | append $reference_pdf)
+        }
+
+        if $ensemble {
             {{notate_ensemble_passage}}
-            pdf_files+="${ensemble_pdf}"
-        fi
-    fi
-    if [ -n "${pdf_files[*]}" ]; then
-        for file in "${pdf_files[@]}"; do
-            if [ -f "${file}" ]; then
-                open "${pdf_files[@]}" 2>/dev/null
-            fi
-        done
-    fi
+            $pdf_files = ($pdf_files | append $ensemble_pdf)
+        }
+    }
+
+    if not ($pdf_files | is-empty) {
+        $pdf_files | each { |file| ^open $file } out+err> /dev/null
+    }
