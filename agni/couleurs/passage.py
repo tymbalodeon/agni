@@ -187,7 +187,7 @@ class Passage:
 
     @staticmethod
     def _get_next_hertz_values(
-        next_leaf_instructions: dict[Part, Duration | None]
+        next_leaf_instructions: dict[Part, Duration | None],
     ) -> set[float | None]:
         next_metered_leaves = [
             part.peek(duration)

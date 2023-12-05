@@ -1,21 +1,47 @@
+set shell := ["nu", "-c"]
+
 @_help:
     just --list
 
-# Run pre-commit checks or "--update" pre-commit hooks.
-check *update:
-    #!/usr/bin/env nu
-    let update = "{{update}}"
+dependencies := "
+let dependencies = [
+    pdm
+    pipx
+    pnpm
+    rtx
+    speedscope
+    cargo
+    checkexec
+]
+"
 
-    if ($update | is-empty) {
-        pdm run pre-commit run --all-files
-    } else if $update == "--update" {
-        pdm run pre-commit autoupdate
-    } else {
-        echo $"Unrecognized argument: \"($update)\""
+# Install dependencies.
+install *dev:
+    #!/usr/bin/env nu
+    {{dependencies}}
+    $dependencies | each {
+        |dependency|
+        nu $"./scripts/($dependency).nu" install
     }
+    pdm install
+
+# Update dependencies.
+update:
+    #!/usr/bin/env nu
+    {{dependencies}}
+    ./scripts/install_dependencies.zsh --update
+    $dependencies | each {
+        |dependency|
+        nu $"./scripts/($dependency).nu" update
+    }
+    pdm update
+    pdm run pre-commit autoupdate
+
+# Run pre-commit checks.
+@check:
+    pdm run pre-commit run --all-files
 
 _get_pyproject_value value:
-    #!/usr/bin/env nu
     open pyproject.toml | get project.{{value}}
 
 @_get_command_name:
@@ -158,10 +184,6 @@ example *args:
         done
     fi
 
-# Install or "--upgrade" external dependencies.
-@install *upgrade:
-    ./install_dependencies.zsh {{upgrade}}
-    pdm install
 
 # Run the py-spy profiler on a command and its <args> and open the results with speedscope.
 profile *args:
@@ -183,36 +205,6 @@ profile *args:
 # Open a python shell with project dependencies available.
 @shell:
     pdm run bpython
-
-# Update project dependencies, pre-commit hooks, and lilypond file versions (or just the latter if "lilypond").
-update *lilypond: (install "--upgrade")
-    #!/usr/bin/env nu
-    let lilypond = "{{lilypond}}"
-
-    if  ($lilypond | is-empty) {
-        pdm update
-        just check --update
-    }
-    # get_lilypond_version() {
-    #     version_text="$(lilypond --version)"
-    #     first_line="$(echo "${version_text}" | head -1)"
-    #     version_number="$(
-    #         echo "${first_line}" | grep -o "[0-9]\.[0-9]\{2\}\.[0-9]"
-    #     )"
-    #     echo "${version_number}"
-    # }
-    # current_lilypond_version="$(get_lilypond_version)"
-    # for file in examples/**.ly; do
-    #     file_version="$(grep -o "${current_lilypond_version}" "${file}")"
-    #     [ -n "${file_version}" ]
-    #     if [ -n "${file_version}" ] \
-    #         && [ "${file_version}" != "${current_lilypond_version}" ]; then
-    #         convert-ly --current-version --edit "${file}"
-    #         rm -f "${file}"~
-    #     else
-    #         echo "\"${file}\" is already up to date."
-    #     fi
-    # done
 
 # Run coverage report.
 @coverage *args: test
@@ -249,7 +241,7 @@ list *args:
     let args = "{{args}}" | split row " "
 
     if ("--tree" in $args) or ("--graph" in $args) {
-        pdm list
+        pdm list --tree
     } else {
         (
             pdm list

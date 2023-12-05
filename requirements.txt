@@ -79,7 +79,7 @@ pyyaml==6.0.1
 requests==2.31.0
 rich==13.5.2
 roman==4.1
-ruff==0.1.6
+ruff==0.1.7
 rx==1.6.3
 setuptools==68.0.0
 shellingham==1.5.0.post1
