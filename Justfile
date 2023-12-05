@@ -183,7 +183,7 @@ just try couleurs \
     --save
 """
 
-# Run examples if outdated (or "--force") and open (with options: "--input", "--output", "--reference", "--ensemble").
+# Run examples if outdated (or "--force") and open all (or "--input", "--output", "--reference", "--ensemble") pdfs.
 example *args:
     #!/usr/bin/env nu
     let input = if (
