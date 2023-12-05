@@ -13,10 +13,11 @@ _install_and_run *command:
 
 dependencies := "
 let dependencies = [
+    rtx
+    python
     pdm
     pipx
     pnpm
-    rtx
     speedscope
     cargo
     checkexec
@@ -151,6 +152,8 @@ build: (install "--no-pdm")
 # Clean Python cache or generated pdfs.
 clean *pdfs:
     #!/usr/bin/env zsh
+    # command that lists artifacts?
+    # pdm venv purge
     if [ "{{pdfs}}" = "pdfs" ]; then
         files=(**/**.pdf(N))
     else
