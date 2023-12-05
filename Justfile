@@ -25,18 +25,19 @@ install pdm="--pdm":
         nu $"./scripts/($dependency).nu" install
     }
 
+    try {
+        pdm run pre-commit install out+err> /dev/null
+    } catch {
+        pdm install; pdm run pre-commit install
+    }
+
     if "{{pdm}}" == "--pdm" {
         pdm install
     }
 
-    try {
-        pdm run pre-commit run --all-files
-    } catch {
-        just install; pdm run pre-commit run --all-files
-    }
 
 # Update dependencies.
-update: (install "--no-pdm")
+update pdm="--pdm": (install "--no-pdm")
     #!/usr/bin/env nu
     {{dependencies}}
 
@@ -47,10 +48,39 @@ update: (install "--no-pdm")
         nu $"./scripts/($dependency).nu" update
     }
 
-    pdm update
     pdm run pre-commit autoupdate
 
-# Run pre-commit checks.
+    if "{{pdm}}" == "--pdm" {
+        pdm update
+    }
+
+# Show dependencies as a list or "--tree".
+list tree="":
+    #!/usr/bin/env nu
+    if "{{tree}}" == "--tree" {
+        pdm list --tree
+    } else {
+        (
+            pdm list
+                --fields name,version
+                --sort name
+        )
+    }
+
+# Create a new virtual environment, overwriting an existing one if present.
+@venv:
+    rm -f .pdm-python
+    pdm venv create --force
+
+# Lint and apply fixes.
+@lint:
+    pdm run ruff check --fix ./
+
+# Format.
+@format:
+    pdm run ruff format ./
+
+# Run pre-commit hooks.
 check:
     #!/usr/bin/env nu
     try {
@@ -58,6 +88,10 @@ check:
     } catch {
         just install; pdm run pre-commit run --all-files
     }
+
+# Open a python shell with project dependencies available.
+@shell:
+    pdm run bpython
 
 get_pyproject_value := "open pyproject.toml | get project."
 command := "(" + get_pyproject_value + "name)"
@@ -71,6 +105,54 @@ try *args:
     } catch {
         just install; pdm run {{command}} {{args}}
     }
+
+# Run the py-spy profiler on a command and its <args> and open the results with speedscope.
+profile *args:
+    #!/usr/bin/env nu
+    let output_directory = "profiles"
+    mkdir $output_directory
+
+    let output_file = $"($output_directory)/profile.json"
+
+    (
+        sudo pdm run py-spy record
+            --format speedscope
+            --output $output_file
+            -- pdm run python -m {{command}} {{args}}
+    )
+
+    speedscope $output_file
+
+# Run coverage report.
+@coverage *args: test
+    pdm run coverage report -m \
+        --omit "*/pdm/*" \
+        --skip-covered \
+        --sort "cover" \
+        {{args}}
+
+# Run tests.
+test *args:
+    #!/usr/bin/env nu
+    mut args = "{{args}}"
+
+    if ($args | is-empty) {
+        $args = tests
+    }
+
+    pdm run coverage run -m pytest $args
+
+# Build the project and install it with pipx.
+build: (install "--no-pdm")
+    #!/usr/bin/env nu
+    pdm build
+
+    (
+        pdm run python -m pipx install
+            $"./dist/{{command}}-{{version}}-py3-none-any.whl"
+            --force
+            --pip-args "--force-reinstall"
+    )
 
 # Clean Python cache or generated pdfs.
 clean *pdfs:
@@ -89,25 +171,6 @@ clean *pdfs:
         echo "Removed ${file}."
     done
     pdm run ruff clean
-
-_get_wheel:
-    #!/usr/bin/env nu
-    echo $"./dist/{{command}}-{{version}}-py3-none-any.whl"
-
-# Build the project and install it using pipx, or optionally with pip ("--pip").
-build *pip: install
-    #!/usr/bin/env nu
-    pdm build
-    pdm run python -m ensurepip --upgrade --default-pip
-
-    let wheel = just _get_wheel
-
-    if "{{pip}}" == "--pip" {
-        pdm run python -m pip install --user $wheel --force-reinstall
-    } else {
-        pdm run python -m pip install pipx
-        pdm run python -m pipx install $wheel --force --pip-args="--force-reinstall"
-    }
 
 notate_reference_passage := """
 just try couleurs \
@@ -195,69 +258,3 @@ example *args:
             fi
         done
     fi
-
-
-# Run the py-spy profiler on a command and its <args> and open the results with speedscope.
-profile *args:
-    #!/usr/bin/env nu
-    let output_directory = "profiles"
-    mkdir $output_directory
-
-    let output_file = $"($output_directory)/profile.json"
-
-    (
-        sudo pdm run py-spy record
-            --format speedscope
-            --output $output_file
-            -- pdm run python -m {{command}} {{args}}
-    )
-
-    speedscope $output_file
-
-# Open a python shell with project dependencies available.
-@shell:
-    pdm run bpython
-
-# Run coverage report.
-@coverage *args: test
-    pdm run coverage report -m \
-        --omit "*/pdm/*" \
-        --skip-covered \
-        --sort "cover" \
-        {{args}}
-
-# Run tests.
-test *args:
-    #!/usr/bin/env nu
-    mut args = "{{args}}"
-
-    if ($args | is-empty) {
-        $args = tests
-    }
-
-    pdm run coverage run -m pytest $args
-
-# Create a new virtual environment, overwriting an existing one if present.
-@venv:
-    rm .pdm-python
-    pdm venv create --force
-
-@lint:
-    pdm run ruff check ./
-
-@format:
-    pdm run ruff format ./
-
-list *args:
-    #!/usr/bin/env nu
-    let args = "{{args}}" | split row " "
-
-    if ("--tree" in $args) or ("--graph" in $args) {
-        pdm list --tree
-    } else {
-        (
-            pdm list
-                --fields name,version
-                --sort name
-        )
-    }
