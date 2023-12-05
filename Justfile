@@ -41,7 +41,7 @@ update:
 @check:
     pdm run pre-commit run --all-files
 
-_get_pyproject_value value:
+@_get_pyproject_value value:
     open pyproject.toml | get project.{{value}}
 
 @_get_command_name:
