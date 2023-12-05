@@ -20,23 +20,10 @@ keywords = [
 ]
 dependencies = [
     "typer[all]>=0.9.0",
-    "abjad>=3.18",
-    "supriya>=23.6b0",
-    "abjad-ext-rmakers>=3.18",
-    "more-itertools>=9.1.0",
-]
-
-[tool.pdm.dev-dependencies]
-dev = [
-    "pre-commit>=3.3.3",
-    "bpython>=0.24",
-    "py-spy>=0.3.14",
-    "pytest>=7.4.0",
-    "coverage>=7.2.7",
-    "pyre-check>=0.9.19",
-    "mypy>=1.7.1",
-    "fb-sapp>=0.5.1",
-    "ruff>=0.1.6",
+    "abjad>=3.19",
+    "supriya>=23.10b0",
+    "abjad-ext-rmakers>=3.19",
+    "more-itertools>=10.1.0",
 ]
 
 [project.urls]
@@ -60,3 +47,16 @@ exclude = [
 ]
 line-length = 79
 indent-width = 4
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pre-commit>=3.5.0",
+    "bpython>=0.24",
+    "py-spy>=0.3.14",
+    "pytest>=7.4.3",
+    "coverage>=7.3.2",
+    "pyre-check>=0.9.15",
+    "mypy>=1.7.1",
+    "fb-sapp>=0.5.4",
+    "ruff>=0.1.7",
+]
