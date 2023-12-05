@@ -15,6 +15,14 @@ let dependencies = [
 ]
 "
 
+_install_and_run *command:
+    #!/usr/bin/env nu
+    try {
+        {{command}}
+    } catch {
+        just install; {{command}}
+    }
+
 # Install dependencies.
 install pdm="--pdm":
     #!/usr/bin/env nu
@@ -25,11 +33,7 @@ install pdm="--pdm":
         nu $"./scripts/($dependency).nu" install
     }
 
-    try {
-        pdm run pre-commit install out+err> /dev/null
-    } catch {
-        pdm install; pdm run pre-commit install
-    }
+    just _install_and_run pdm run pre-commit install out+err> /dev/null
 
     if "{{pdm}}" == "--pdm" {
         pdm install
@@ -74,40 +78,30 @@ list tree="":
 
 # Lint and apply fixes.
 @lint:
-    pdm run ruff check --fix ./
+    just _install_and_run pdm run ruff check --fix
 
 # Format.
 @format:
-    pdm run ruff format ./
+    just _install_and_run pdm run ruff format
 
 # Run pre-commit hooks.
-check:
-    #!/usr/bin/env nu
-    try {
-        pdm run pre-commit run --all-files
-    } catch {
-        just install; pdm run pre-commit run --all-files
-    }
+@check:
+    just _install_and_run pdm run pre-commit run --all-files
 
 # Open a python shell with project dependencies available.
 @shell:
-    pdm run bpython
+    just _install_and_run pdm run bpython
 
 get_pyproject_value := "open pyproject.toml | get project."
 command := "(" + get_pyproject_value + "name)"
 version := "(" + get_pyproject_value + "version)"
 
 # Try a command using the current state of the files without building.
-try *args:
-    #!/usr/bin/env nu
-    try {
-        pdm run {{command}} {{args}}
-    } catch {
-        just install; pdm run {{command}} {{args}}
-    }
+@try *args:
+    just _install_and_run pdm run {{command}} {{args}}
 
 # Run the py-spy profiler on a command and its <args> and open the results with speedscope.
-profile *args:
+profile *args: (install "--no-pdm")
     #!/usr/bin/env nu
     let output_directory = "profiles"
     mkdir $output_directory
@@ -115,7 +109,7 @@ profile *args:
     let output_file = $"($output_directory)/profile.json"
 
     (
-        sudo pdm run py-spy record
+        just _install_and_run sudo pdm run py-spy record
             --format speedscope
             --output $output_file
             -- pdm run python -m {{command}} {{args}}
@@ -125,7 +119,7 @@ profile *args:
 
 # Run coverage report.
 @coverage *args: test
-    pdm run coverage report -m \
+    just _install_and_run pdm run coverage report -m \
         --omit "*/pdm/*" \
         --skip-covered \
         --sort "cover" \
@@ -140,12 +134,12 @@ test *args:
         $args = tests
     }
 
-    pdm run coverage run -m pytest $args
+    just _install_and_run pdm run coverage run -m pytest $args
 
 # Build the project and install it with pipx.
 build: (install "--no-pdm")
     #!/usr/bin/env nu
-    pdm build
+    just _install_and_run pdm build
 
     (
         pdm run python -m pipx install
