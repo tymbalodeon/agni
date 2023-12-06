@@ -3,13 +3,14 @@ set shell := ["nu", "-c"]
 @_help:
     just --list
 
+[no-exit-message]
 _install_and_run *command:
     #!/usr/bin/env nu
-    try {
-        {{command}}
-    } catch {
-        just install; {{command}}
+    if (pdm list --json) == "[]" {
+        just install
     }
+
+    {{command}}
 
 # Add dependencies.
 @add *dependencies:
@@ -42,7 +43,7 @@ let dependencies = [
 "
 
 # Install dependencies.
-install pdm="--pdm":
+install project="--project":
     #!/usr/bin/env nu
     {{dependencies}}
 
@@ -51,14 +52,15 @@ install pdm="--pdm":
         nu $"./scripts/($dependency).nu" install
     }
 
-    if "{{pdm}}" == "--pdm" {
+    if "{{project}}" == "--project" {
         pdm install
     }
 
     just _install_and_run pdm run pre-commit install out+err> /dev/null
 
+
 # Update dependencies.
-update pdm="--pdm": (install "--no-pdm")
+update project="--project": (install "--no-project")
     #!/usr/bin/env nu
     {{dependencies}}
 
@@ -71,7 +73,7 @@ update pdm="--pdm": (install "--no-pdm")
 
     pdm run pre-commit autoupdate
 
-    if "{{pdm}}" == "--pdm" {
+    if "{{project}}" == "--project" {
         pdm update
     }
 
@@ -93,6 +95,7 @@ list tree="":
     pdm venv create --force
 
 # Format.
+[no-exit-message]
 @check:
     just _install_and_run pdm run pyright
 
@@ -121,7 +124,7 @@ version := "(" + get_pyproject_value + "version)"
     just _install_and_run pdm run {{command}} {{args}}
 
 # Run the py-spy profiler on a command and its <args> and open the results with speedscope.
-profile *args: (install "--no-pdm")
+profile *args: (install "--no-project")
     #!/usr/bin/env nu
     let output_directory = "profiles"
     mkdir $output_directory
@@ -157,9 +160,9 @@ test *args:
     just _install_and_run pdm run coverage run -m pytest $args
 
 # Build the project and install it with pipx.
-build: (install "--no-pdm")
+build: (install "--no-project")
     #!/usr/bin/env nu
-    just _install_and_run pdm build
+    pdm build
 
     (
         pdm run python -m pipx install

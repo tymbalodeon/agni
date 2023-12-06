@@ -1,5 +1,5 @@
 def "main install" [] {
-    rtx install
+    rtx install out+err> /dev/null
 }
 
 def "main update" [] {
