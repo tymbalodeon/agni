@@ -71,7 +71,7 @@ just example
 ## Installation
 
 ``` sh
-# Instal brew, just, and nu to be able to use `just` commands
+# Install brew, just, and nushell to be able to use `just` commands
 ./scripts/install_dependencies.zsh
 ```
 
