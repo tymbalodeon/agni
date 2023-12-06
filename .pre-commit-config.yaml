@@ -9,7 +9,7 @@ repos:
       - id: trailing-whitespace
       - id: check-merge-conflict
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.338
+    rev: v1.1.339
     hooks:
       - id: pyright
   - repo: https://github.com/astral-sh/ruff-pre-commit

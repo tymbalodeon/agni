@@ -39,7 +39,7 @@ ply==3.11
 pre-commit==3.5.0
 py-spy==0.3.14
 pygments==2.12.0
-pyright==1.1.338
+pyright==1.1.339
 pytest==7.4.3
 pyxdg==0.28
 pyyaml==6.0.1

@@ -172,42 +172,44 @@ build: (install "--no-pdm")
 clean *args:
     #!/usr/bin/env nu
     let args = "{{args}}" | split row " "
+    let all = "--all" in $args
+    let empty = "{{args}}" | is-empty
 
-    if ("{{args}}" | is-empty) or ("coverage" in $args) {
+    if $all or $empty or ("coverage" in $args) {
         rm --recursive --force .coverage
     }
 
-    if ("dist" in $args) { rm --recursive --force dist }
+    if $all or ("dist" in $args) { rm --recursive --force dist }
 
-    if ("{{args}}" | is-empty) or ("ds-store" in $args) {
+    if $all or $empty or ("ds-store" in $args) {
         rm --recursive --force **/.DS_Store
     }
 
-    if ("{{args}}" | is-empty) or ("lilypond" in $args) {
+    if $all or $empty or ("lilypond" in $args) {
         rm --recursive --force **/*-matrices.ly
     }
 
-    if ("{{args}}" | is-empty) or ("pdfs" in $args) {
+    if $all or $empty or ("pdfs" in $args) {
         rm --recursive --force **/*.pdf
     }
 
-    if ("{{args}}" | is-empty) or ("profiles" in $args) {
+    if $all or $empty or ("profiles" in $args) {
         rm --recursive --force profiles
     }
 
-    if ("{{args}}" | is-empty) or ("pycache" in $args) {
+    if $all or $empty or ("pycache" in $args) {
         rm --recursive --force **/__pycache__
     }
 
-    if ("{{args}}" | is-empty) or ("pytest" in $args) {
+    if $all or $empty or ("pytest" in $args) {
         rm --recursive --force .pytest_cache
     }
 
-    if ("{{args}}" | is-empty) or ("ruff" in $args) {
+    if $all or $empty or ("ruff" in $args) {
         pdm run ruff clean --quiet
     }
 
-    if ("venv" in $args) { pdm venv remove in-project --yes }
+    if $all or ("venv" in $args) { pdm venv remove in-project --yes }
 
 notate_reference_passage := """
 just try couleurs \
