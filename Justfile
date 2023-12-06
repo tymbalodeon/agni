@@ -168,7 +168,7 @@ build: (install "--no-project")
         pdm run python -m pipx install
             $"./dist/{{command}}-{{version}}-py3-none-any.whl"
             --force
-            --pip-args "--force-reinstall"
+            --pip-args="--force-reinstall"
     )
 
 # Clean Python cache or generated pdfs.
