@@ -36,10 +36,13 @@ agni = "agni.main:agni"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
 [tool.ruff]
 exclude = [
     ".git",
-    ".mypy_cache",
     ".ruff_cache",
     ".venv",
     "build",
@@ -55,8 +58,6 @@ dev = [
     "py-spy>=0.3.14",
     "pytest>=7.4.3",
     "coverage>=7.3.2",
-    "pyre-check>=0.9.15",
-    "mypy>=1.7.1",
-    "fb-sapp>=0.5.4",
     "ruff>=0.1.7",
+    "pyright>=1.1.338",
 ]

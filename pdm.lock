@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:e2628a1fc42e589628c29668d03ce83c6c82be2897eb6f7e407bbcea75cc47b7"
+content_hash = "sha256:9981c4b1d332c79bba18e1f712f0b7844d19f12c9fe8192a9acf630498c65b24"
 
 [[package]]
 name = "abjad"
@@ -44,52 +44,12 @@ files = [
 ]
 
 [[package]]
-name = "aniso8601"
-version = "7.0.0"
-summary = "A library for parsing ISO 8601 strings."
-files = [
-    {file = "aniso8601-7.0.0-py2.py3-none-any.whl", hash = "sha256:d10a4bf949f619f719b227ef5386e31f49a2b6d453004b21f02661ccc8670c7b"},
-    {file = "aniso8601-7.0.0.tar.gz", hash = "sha256:513d2b6637b7853806ae79ffaca6f3e8754bdd547048f5ccc1420aec4b714f1e"},
-]
-
-[[package]]
 name = "ansicon"
 version = "1.89.0"
 summary = "Python wrapper for loading Jason Hood's ANSICON"
 files = [
     {file = "ansicon-1.89.0-py2.py3-none-any.whl", hash = "sha256:f1def52d17f65c2c9682cf8370c03f541f410c1752d6a14029f97318e4b9dfec"},
     {file = "ansicon-1.89.0.tar.gz", hash = "sha256:e4d039def5768a47e4afec8e89e83ec3ae5a26bf00ad851f914d1240b444d2b1"},
-]
-
-[[package]]
-name = "appnope"
-version = "0.1.3"
-summary = "Disable App Nap on macOS >= 10.9"
-files = [
-    {file = "appnope-0.1.3-py2.py3-none-any.whl", hash = "sha256:265a455292d0bd8a72453494fa24df5a11eb18373a60c7c0430889f22548605e"},
-    {file = "appnope-0.1.3.tar.gz", hash = "sha256:02bd91c4de869fbb1e1c50aafc4098827a7a54ab2f39d9dcba6c9547ed920e24"},
-]
-
-[[package]]
-name = "asttokens"
-version = "2.4.1"
-summary = "Annotate AST trees with source code positions"
-dependencies = [
-    "six>=1.12.0",
-]
-files = [
-    {file = "asttokens-2.4.1-py2.py3-none-any.whl", hash = "sha256:051ed49c3dcae8913ea7cd08e46a606dba30b79993209636c4875bc1d637bc24"},
-    {file = "asttokens-2.4.1.tar.gz", hash = "sha256:b03869718ba9a6eb027e134bfdf69f38a236d681c83c160d510768af11254ba0"},
-]
-
-[[package]]
-name = "async-generator"
-version = "1.10"
-requires_python = ">=3.5"
-summary = "Async generators and context managers for Python 3.5+"
-files = [
-    {file = "async_generator-1.10-py3-none-any.whl", hash = "sha256:01c7bf666359b4967d2cda0000cc2e4af16a0ae098cbffcb8472fb9e8ad6585b"},
-    {file = "async_generator-1.10.tar.gz", hash = "sha256:6ebb3d106c12920aaae42ccb6f787ef5eefdcdd166ea3d628fa8476abe712144"},
 ]
 
 [[package]]
@@ -100,15 +60,6 @@ summary = "Internationalization utilities"
 files = [
     {file = "Babel-2.12.1-py3-none-any.whl", hash = "sha256:b4246fb7677d3b98f501a39d43396d3cafdc8eadb045f4a31be01863f655c610"},
     {file = "Babel-2.12.1.tar.gz", hash = "sha256:cc2d99999cd01d44420ae725a21c9e3711b3aadc7976d6147f622d8581963455"},
-]
-
-[[package]]
-name = "backcall"
-version = "0.2.0"
-summary = "Specifications for callback functions passed in to an API"
-files = [
-    {file = "backcall-0.2.0-py2.py3-none-any.whl", hash = "sha256:fbbce6a29f263178a1f7915c1940bde0ec2b2a967566fe1c65c1dfb7422bd255"},
-    {file = "backcall-0.2.0.tar.gz", hash = "sha256:5cbdbf27be5e7cfadb448baf0aa95508f91f2bbc6c6437cd9cd06e2a4c215e1e"},
 ]
 
 [[package]]
@@ -225,18 +176,6 @@ files = [
 ]
 
 [[package]]
-name = "click-log"
-version = "0.4.0"
-summary = "Logging integration for Click"
-dependencies = [
-    "click",
-]
-files = [
-    {file = "click-log-0.4.0.tar.gz", hash = "sha256:3970f8570ac54491237bcdb3d8ab5e3eef6c057df29f8c3d1151a51a9c23b975"},
-    {file = "click_log-0.4.0-py2.py3-none-any.whl", hash = "sha256:a43e394b528d52112af599f2fc9e4b7cf3c15f94e53581f74fa6867e68c91756"},
-]
-
-[[package]]
 name = "colorama"
 version = "0.4.6"
 requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
@@ -307,30 +246,6 @@ files = [
 ]
 
 [[package]]
-name = "dataclasses-json"
-version = "0.6.3"
-requires_python = ">=3.7,<4.0"
-summary = "Easily serialize dataclasses to and from JSON."
-dependencies = [
-    "marshmallow<4.0.0,>=3.18.0",
-    "typing-inspect<1,>=0.4.0",
-]
-files = [
-    {file = "dataclasses_json-0.6.3-py3-none-any.whl", hash = "sha256:4aeb343357997396f6bca1acae64e486c3a723d8f5c76301888abeccf0c45176"},
-    {file = "dataclasses_json-0.6.3.tar.gz", hash = "sha256:35cb40aae824736fdf959801356641836365219cfe14caeb115c39136f775d2a"},
-]
-
-[[package]]
-name = "decorator"
-version = "5.1.1"
-requires_python = ">=3.5"
-summary = "Decorators for Humans"
-files = [
-    {file = "decorator-5.1.1-py3-none-any.whl", hash = "sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"},
-    {file = "decorator-5.1.1.tar.gz", hash = "sha256:637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330"},
-]
-
-[[package]]
 name = "distlib"
 version = "0.3.7"
 summary = "Distribution utilities"
@@ -350,44 +265,6 @@ files = [
 ]
 
 [[package]]
-name = "executing"
-version = "2.0.1"
-requires_python = ">=3.5"
-summary = "Get the currently executing AST node of a frame, and other information"
-files = [
-    {file = "executing-2.0.1-py2.py3-none-any.whl", hash = "sha256:eac49ca94516ccc753f9fb5ce82603156e590b27525a8bc32cce8ae302eb61bc"},
-    {file = "executing-2.0.1.tar.gz", hash = "sha256:35afe2ce3affba8ee97f2d69927fa823b08b472b7b994e36a52a964b93d16147"},
-]
-
-[[package]]
-name = "fb-sapp"
-version = "0.5.4"
-summary = "Static Analysis Post-Processor for processing taint analysis results."
-dependencies = [
-    "Flask-Cors==3.0.10",
-    "Flask-GraphQL==2.0.1",
-    "Flask==2.1.2",
-    "Pygments==2.12.0",
-    "SQLAlchemy<1.4",
-    "click-log==0.4.0",
-    "click==8.1.3",
-    "graphene-sqlalchemy==2.3.0",
-    "graphene<3.0",
-    "ipython<8.4.0",
-    "munch==2.5.0",
-    "prompt-toolkit==3.0.29",
-    "pyre-extensions==0.0.27",
-    "traitlets==5.2.2.post1",
-    "typing-extensions==4.2.0",
-    "xxhash==3.0.0",
-    "zstd==1.5.2.5",
-]
-files = [
-    {file = "fb-sapp-0.5.4.tar.gz", hash = "sha256:55531c528b1f0e9d5b45ee87dc7f0c558de432f18a9822a41201247f69bc0fb5"},
-    {file = "fb_sapp-0.5.4-py3-none-any.whl", hash = "sha256:5684e63a4f473b834a4d171c2693593e9b0d7c7e71dc9c4da372f0c30ceef817"},
-]
-
-[[package]]
 name = "filelock"
 version = "3.12.2"
 requires_python = ">=3.7"
@@ -395,119 +272,6 @@ summary = "A platform independent file lock."
 files = [
     {file = "filelock-3.12.2-py3-none-any.whl", hash = "sha256:cbb791cdea2a72f23da6ac5b5269ab0a0d161e9ef0100e653b69049a7706d1ec"},
     {file = "filelock-3.12.2.tar.gz", hash = "sha256:002740518d8aa59a26b0c76e10fb8c6e15eae825d34b6fdf670333fd7b938d81"},
-]
-
-[[package]]
-name = "flask"
-version = "2.1.2"
-requires_python = ">=3.7"
-summary = "A simple framework for building complex web applications."
-dependencies = [
-    "Jinja2>=3.0",
-    "Werkzeug>=2.0",
-    "click>=8.0",
-    "itsdangerous>=2.0",
-]
-files = [
-    {file = "Flask-2.1.2-py3-none-any.whl", hash = "sha256:fad5b446feb0d6db6aec0c3184d16a8c1f6c3e464b511649c8918a9be100b4fe"},
-    {file = "Flask-2.1.2.tar.gz", hash = "sha256:315ded2ddf8a6281567edb27393010fe3406188bafbfe65a3339d5787d89e477"},
-]
-
-[[package]]
-name = "flask-cors"
-version = "3.0.10"
-summary = "A Flask extension adding a decorator for CORS support"
-dependencies = [
-    "Flask>=0.9",
-    "Six",
-]
-files = [
-    {file = "Flask-Cors-3.0.10.tar.gz", hash = "sha256:b60839393f3b84a0f3746f6cdca56c1ad7426aa738b70d6c61375857823181de"},
-    {file = "Flask_Cors-3.0.10-py2.py3-none-any.whl", hash = "sha256:74efc975af1194fc7891ff5cd85b0f7478be4f7f59fe158102e91abb72bb4438"},
-]
-
-[[package]]
-name = "flask-graphql"
-version = "2.0.1"
-summary = "Adds GraphQL support to your Flask application"
-dependencies = [
-    "flask>=0.7.0",
-    "graphql-core<3,>=2.1",
-    "graphql-server-core<2,>=1.1",
-]
-files = [
-    {file = "Flask-GraphQL-2.0.1.tar.gz", hash = "sha256:825578c044df436cd74503a38bbd31c919a90acda5e9b6e0e45736964bc5235d"},
-]
-
-[[package]]
-name = "graphene"
-version = "2.1.9"
-summary = "GraphQL Framework for Python"
-dependencies = [
-    "aniso8601<=7,>=3",
-    "graphql-core<3,>=2.1",
-    "graphql-relay<3,>=2",
-    "six<2,>=1.10.0",
-]
-files = [
-    {file = "graphene-2.1.9-py2.py3-none-any.whl", hash = "sha256:3d446eb1237c551052bc31155cf1a3a607053e4f58c9172b83a1b597beaa0868"},
-    {file = "graphene-2.1.9.tar.gz", hash = "sha256:b9f2850e064eebfee9a3ef4a1f8aa0742848d97652173ab44c82cc8a62b9ed93"},
-]
-
-[[package]]
-name = "graphene-sqlalchemy"
-version = "2.3.0"
-summary = "Graphene SQLAlchemy integration"
-dependencies = [
-    "SQLAlchemy<2,>=1.2",
-    "graphene<3,>=2.1.3",
-    "promise>=2.3",
-    "singledispatch<4,>=3.4.0.3",
-    "six<2,>=1.10.0",
-]
-files = [
-    {file = "graphene-sqlalchemy-2.3.0.tar.gz", hash = "sha256:2b1a9cf4ed44aec78140605f38061a79b51be5902400d10c3d19b2cf64046215"},
-    {file = "graphene_sqlalchemy-2.3.0-py2.py3-none-any.whl", hash = "sha256:97ed52bc0d01d757df50d25b5bdd490a2327778d41223d4e084d38a239925e8e"},
-]
-
-[[package]]
-name = "graphql-core"
-version = "2.3.2"
-summary = "GraphQL implementation for Python"
-dependencies = [
-    "promise<3,>=2.3",
-    "rx<2,>=1.6",
-    "six>=1.10.0",
-]
-files = [
-    {file = "graphql-core-2.3.2.tar.gz", hash = "sha256:aac46a9ac524c9855910c14c48fc5d60474def7f99fd10245e76608eba7af746"},
-    {file = "graphql_core-2.3.2-py2.py3-none-any.whl", hash = "sha256:44c9bac4514e5e30c5a595fac8e3c76c1975cae14db215e8174c7fe995825bad"},
-]
-
-[[package]]
-name = "graphql-relay"
-version = "2.0.1"
-summary = "Relay implementation for Python"
-dependencies = [
-    "graphql-core<3,>=2.2",
-    "promise<3,>=2.2",
-    "six>=1.12",
-]
-files = [
-    {file = "graphql-relay-2.0.1.tar.gz", hash = "sha256:870b6b5304123a38a0b215a79eace021acce5a466bf40cd39fa18cb8528afabb"},
-    {file = "graphql_relay-2.0.1-py3-none-any.whl", hash = "sha256:ac514cb86db9a43014d7e73511d521137ac12cf0101b2eaa5f0a3da2e10d913d"},
-]
-
-[[package]]
-name = "graphql-server-core"
-version = "1.2.0"
-summary = "GraphQL Server tools for powering your server"
-dependencies = [
-    "graphql-core<3,>=2.3",
-    "promise<3,>=2.3",
-]
-files = [
-    {file = "graphql-server-core-1.2.0.tar.gz", hash = "sha256:04ee90da0322949f7b49ff6905688e3a21a9efbd5a7d7835997e431a0afdbd11"},
 ]
 
 [[package]]
@@ -567,65 +331,6 @@ files = [
 ]
 
 [[package]]
-name = "intervaltree"
-version = "3.1.0"
-summary = "Editable interval tree data structure for Python 2 and 3"
-dependencies = [
-    "sortedcontainers<3.0,>=2.0",
-]
-files = [
-    {file = "intervaltree-3.1.0.tar.gz", hash = "sha256:902b1b88936918f9b2a19e0e5eb7ccb430ae45cde4f39ea4b36932920d33952d"},
-]
-
-[[package]]
-name = "ipython"
-version = "8.3.0"
-requires_python = ">=3.8"
-summary = "IPython: Productive Interactive Computing"
-dependencies = [
-    "appnope; sys_platform == \"darwin\"",
-    "backcall",
-    "colorama; sys_platform == \"win32\"",
-    "decorator",
-    "jedi>=0.16",
-    "matplotlib-inline",
-    "pexpect>4.3; sys_platform != \"win32\"",
-    "pickleshare",
-    "prompt-toolkit!=3.0.0,!=3.0.1,<3.1.0,>=2.0.0",
-    "pygments>=2.4.0",
-    "setuptools>=18.5",
-    "stack-data",
-    "traitlets>=5",
-]
-files = [
-    {file = "ipython-8.3.0-py3-none-any.whl", hash = "sha256:341456643a764c28f670409bbd5d2518f9b82c013441084ff2c2fc999698f83b"},
-    {file = "ipython-8.3.0.tar.gz", hash = "sha256:807ae3cf43b84693c9272f70368440a9a7eaa2e7e6882dad943c32fbf7e51402"},
-]
-
-[[package]]
-name = "itsdangerous"
-version = "2.1.2"
-requires_python = ">=3.7"
-summary = "Safely pass data to untrusted environments and back."
-files = [
-    {file = "itsdangerous-2.1.2-py3-none-any.whl", hash = "sha256:2c2349112351b88699d8d4b6b075022c0808887cb7ad10069318a8b0bc88db44"},
-    {file = "itsdangerous-2.1.2.tar.gz", hash = "sha256:5dbbc68b317e5e42f327f9021763545dc3fc3bfe22e6deb96aaf1fc38874156a"},
-]
-
-[[package]]
-name = "jedi"
-version = "0.19.1"
-requires_python = ">=3.6"
-summary = "An autocompletion tool for Python that can be used for text editors."
-dependencies = [
-    "parso<0.9.0,>=0.8.3",
-]
-files = [
-    {file = "jedi-0.19.1-py2.py3-none-any.whl", hash = "sha256:e983c654fe5c02867aef4cdfce5a2fbb4a50adc0af145f70504238f18ef5e7e0"},
-    {file = "jedi-0.19.1.tar.gz", hash = "sha256:cf0496f3651bc65d7174ac1b7d043eff454892c708a87d1b683e57b569927ffd"},
-]
-
-[[package]]
 name = "jinja2"
 version = "3.1.2"
 requires_python = ">=3.7"
@@ -648,32 +353,6 @@ dependencies = [
 files = [
     {file = "jinxed-1.2.0-py2.py3-none-any.whl", hash = "sha256:cfc2b2e4e3b4326954d546ba6d6b9a7a796ddcb0aef8d03161d005177eb0d48b"},
     {file = "jinxed-1.2.0.tar.gz", hash = "sha256:032acda92d5c57cd216033cbbd53de731e6ed50deb63eb4781336ca55f72cda5"},
-]
-
-[[package]]
-name = "libcst"
-version = "1.1.0"
-requires_python = ">=3.8"
-summary = "A concrete syntax tree with AST-like properties for Python 3.5, 3.6, 3.7, 3.8, 3.9, and 3.10 programs."
-dependencies = [
-    "pyyaml>=5.2",
-    "typing-extensions>=3.7.4.2",
-    "typing-inspect>=0.4.0",
-]
-files = [
-    {file = "libcst-1.1.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:d68c34e3038d3d1d6324eb47744cbf13f2c65e1214cf49db6ff2a6603c1cd838"},
-    {file = "libcst-1.1.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:9dffa1795c2804d183efb01c0f1efd20a7831db6a21a0311edf90b4100d67436"},
-    {file = "libcst-1.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:cc9b6ac36d7ec9db2f053014ea488086ca2ed9c322be104fbe2c71ca759da4bb"},
-    {file = "libcst-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:78b7a38ec4c1c009ac39027d51558b52851fb9234669ba5ba62283185963a31c"},
-    {file = "libcst-1.1.0-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:5297a16e575be8173185e936b7765c89a3ca69d4ae217a4af161814a0f9745a7"},
-    {file = "libcst-1.1.0-cp311-cp311-win_amd64.whl", hash = "sha256:7ccaf53925f81118aeaadb068a911fac8abaff608817d7343da280616a5ca9c1"},
-    {file = "libcst-1.1.0-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:75816647736f7e09c6120bdbf408456f99b248d6272277eed9a58cf50fb8bc7d"},
-    {file = "libcst-1.1.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:c8f26250f87ca849a7303ed7a4fd6b2c7ac4dec16b7d7e68ca6a476d7c9bfcdb"},
-    {file = "libcst-1.1.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2d37326bd6f379c64190a28947a586b949de3a76be00176b0732c8ee87d67ebe"},
-    {file = "libcst-1.1.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e3d8cf974cfa2487b28f23f56c4bff90d550ef16505e58b0dca0493d5293784b"},
-    {file = "libcst-1.1.0-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:82d1271403509b0a4ee6ff7917c2d33b5a015f44d1e208abb1da06ba93b2a378"},
-    {file = "libcst-1.1.0-cp312-cp312-win_amd64.whl", hash = "sha256:bca1841693941fdd18371824bb19a9702d5784cd347cb8231317dbdc7062c5bc"},
-    {file = "libcst-1.1.0.tar.gz", hash = "sha256:0acbacb9a170455701845b7e940e2d7b9519db35a86768d86330a0b0deae1086"},
 ]
 
 [[package]]
@@ -709,32 +388,6 @@ files = [
 ]
 
 [[package]]
-name = "marshmallow"
-version = "3.20.1"
-requires_python = ">=3.8"
-summary = "A lightweight library for converting complex datatypes to and from native Python datatypes."
-dependencies = [
-    "packaging>=17.0",
-]
-files = [
-    {file = "marshmallow-3.20.1-py3-none-any.whl", hash = "sha256:684939db93e80ad3561392f47be0230743131560a41c5110684c16e21ade0a5c"},
-    {file = "marshmallow-3.20.1.tar.gz", hash = "sha256:5d2371bbe42000f2b3fb5eaa065224df7d8f8597bc19a1bbfa5bfe7fba8da889"},
-]
-
-[[package]]
-name = "matplotlib-inline"
-version = "0.1.6"
-requires_python = ">=3.5"
-summary = "Inline Matplotlib backend for Jupyter"
-dependencies = [
-    "traitlets",
-]
-files = [
-    {file = "matplotlib-inline-0.1.6.tar.gz", hash = "sha256:f887e5f10ba98e8d2b150ddcf4702c1e5f8b3a20005eb0f74bfdbd360ee6f304"},
-    {file = "matplotlib_inline-0.1.6-py3-none-any.whl", hash = "sha256:f1f41aab5328aa5aaea9b16d083b128102f8712542f819fe7e6a420ff581b311"},
-]
-
-[[package]]
 name = "mdurl"
 version = "0.1.2"
 requires_python = ">=3.7"
@@ -752,42 +405,6 @@ summary = "More routines for operating on iterables, beyond itertools"
 files = [
     {file = "more-itertools-10.1.0.tar.gz", hash = "sha256:626c369fa0eb37bac0291bce8259b332fd59ac792fa5497b59837309cd5b114a"},
     {file = "more_itertools-10.1.0-py3-none-any.whl", hash = "sha256:64e0735fcfdc6f3464ea133afe8ea4483b1c5fe3a3d69852e6503b43a0b222e6"},
-]
-
-[[package]]
-name = "munch"
-version = "2.5.0"
-summary = "A dot-accessible dictionary (a la JavaScript objects)"
-dependencies = [
-    "six",
-]
-files = [
-    {file = "munch-2.5.0-py2.py3-none-any.whl", hash = "sha256:6f44af89a2ce4ed04ff8de41f70b226b984db10a91dcc7b9ac2efc1c77022fdd"},
-    {file = "munch-2.5.0.tar.gz", hash = "sha256:2d735f6f24d4dba3417fa448cae40c6e896ec1fdab6cdb5e6510999758a4dbd2"},
-]
-
-[[package]]
-name = "mypy"
-version = "1.7.1"
-requires_python = ">=3.8"
-summary = "Optional static typing for Python"
-dependencies = [
-    "mypy-extensions>=1.0.0",
-    "typing-extensions>=4.1.0",
-]
-files = [
-    {file = "mypy-1.7.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:4b901927f16224d0d143b925ce9a4e6b3a758010673eeded9b748f250cf4e8f7"},
-    {file = "mypy-1.7.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:2f7f6985d05a4e3ce8255396df363046c28bea790e40617654e91ed580ca7c51"},
-    {file = "mypy-1.7.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:944bdc21ebd620eafefc090cdf83158393ec2b1391578359776c00de00e8907a"},
-    {file = "mypy-1.7.1-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:9c7ac372232c928fff0645d85f273a726970c014749b924ce5710d7d89763a28"},
-    {file = "mypy-1.7.1-cp311-cp311-win_amd64.whl", hash = "sha256:f6efc9bd72258f89a3816e3a98c09d36f079c223aa345c659622f056b760ab42"},
-    {file = "mypy-1.7.1-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:6dbdec441c60699288adf051f51a5d512b0d818526d1dcfff5a41f8cd8b4aaf1"},
-    {file = "mypy-1.7.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:4fc3d14ee80cd22367caaaf6e014494415bf440980a3045bf5045b525680ac33"},
-    {file = "mypy-1.7.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2c6e4464ed5f01dc44dc9821caf67b60a4e5c3b04278286a85c067010653a0eb"},
-    {file = "mypy-1.7.1-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:d9b338c19fa2412f76e17525c1b4f2c687a55b156320acb588df79f2e6fa9fea"},
-    {file = "mypy-1.7.1-cp312-cp312-win_amd64.whl", hash = "sha256:204e0d6de5fd2317394a4eff62065614c4892d5a4d1a7ee55b765d7a3d9e3f82"},
-    {file = "mypy-1.7.1-py3-none-any.whl", hash = "sha256:f7c5d642db47376a0cc130f0de6d055056e010debdaf0707cd2b0fc7e7ef30ea"},
-    {file = "mypy-1.7.1.tar.gz", hash = "sha256:fcb6d9afb1b6208b4c712af0dafdc650f518836065df0d4fb1d800f5d6773db2"},
 ]
 
 [[package]]
@@ -824,16 +441,6 @@ files = [
 ]
 
 [[package]]
-name = "parso"
-version = "0.8.3"
-requires_python = ">=3.6"
-summary = "A Python Parser"
-files = [
-    {file = "parso-0.8.3-py2.py3-none-any.whl", hash = "sha256:c001d4636cd3aecdaf33cbb40aebb59b094be2a74c556778ef5576c175e19e75"},
-    {file = "parso-0.8.3.tar.gz", hash = "sha256:8c07be290bb59f03588915921e29e8a50002acaf2cdc5fa0e0114f91709fafa0"},
-]
-
-[[package]]
 name = "pathspec"
 version = "0.11.2"
 requires_python = ">=3.7"
@@ -841,27 +448,6 @@ summary = "Utility library for gitignore style pattern matching of file paths."
 files = [
     {file = "pathspec-0.11.2-py3-none-any.whl", hash = "sha256:1d6ed233af05e679efb96b1851550ea95bbb64b7c490b0f5aa52996c11e92a20"},
     {file = "pathspec-0.11.2.tar.gz", hash = "sha256:e0d8d0ac2f12da61956eb2306b69f9469b42f4deb0f3cb6ed47b9cce9996ced3"},
-]
-
-[[package]]
-name = "pexpect"
-version = "4.9.0"
-summary = "Pexpect allows easy control of interactive console applications."
-dependencies = [
-    "ptyprocess>=0.5",
-]
-files = [
-    {file = "pexpect-4.9.0-py2.py3-none-any.whl", hash = "sha256:7236d1e080e4936be2dc3e326cec0af72acf9212a7e1d060210e70a47e253523"},
-    {file = "pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f"},
-]
-
-[[package]]
-name = "pickleshare"
-version = "0.7.5"
-summary = "Tiny 'shelve'-like database with concurrency support"
-files = [
-    {file = "pickleshare-0.7.5-py2.py3-none-any.whl", hash = "sha256:9649af414d74d4df115d5d718f82acb59c9d418196b7b4290ed47a12ce62df56"},
-    {file = "pickleshare-0.7.5.tar.gz", hash = "sha256:87683d47965c1da65cdacaf31c8441d12b8044cdec9aca500cd78fc2c683afca"},
 ]
 
 [[package]]
@@ -911,63 +497,6 @@ files = [
 ]
 
 [[package]]
-name = "promise"
-version = "2.3"
-summary = "Promises/A+ implementation for Python"
-dependencies = [
-    "six",
-]
-files = [
-    {file = "promise-2.3.tar.gz", hash = "sha256:dfd18337c523ba4b6a58801c164c1904a9d4d1b1747c7d5dbf45b693a49d93d0"},
-]
-
-[[package]]
-name = "prompt-toolkit"
-version = "3.0.29"
-requires_python = ">=3.6.2"
-summary = "Library for building powerful interactive command lines in Python"
-dependencies = [
-    "wcwidth",
-]
-files = [
-    {file = "prompt_toolkit-3.0.29-py3-none-any.whl", hash = "sha256:62291dad495e665fca0bda814e342c69952086afb0f4094d0893d357e5c78752"},
-    {file = "prompt_toolkit-3.0.29.tar.gz", hash = "sha256:bd640f60e8cecd74f0dc249713d433ace2ddc62b65ee07f96d358e0b152b6ea7"},
-]
-
-[[package]]
-name = "psutil"
-version = "5.9.6"
-requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
-summary = "Cross-platform lib for process and system monitoring in Python."
-files = [
-    {file = "psutil-5.9.6-cp36-abi3-macosx_10_9_x86_64.whl", hash = "sha256:c69596f9fc2f8acd574a12d5f8b7b1ba3765a641ea5d60fb4736bf3c08a8214a"},
-    {file = "psutil-5.9.6-cp36-abi3-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:92e0cc43c524834af53e9d3369245e6cc3b130e78e26100d1f63cdb0abeb3d3c"},
-    {file = "psutil-5.9.6-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:748c9dd2583ed86347ed65d0035f45fa8c851e8d90354c122ab72319b5f366f4"},
-    {file = "psutil-5.9.6-cp37-abi3-win32.whl", hash = "sha256:a6f01f03bf1843280f4ad16f4bde26b817847b4c1a0db59bf6419807bc5ce05c"},
-    {file = "psutil-5.9.6-cp37-abi3-win_amd64.whl", hash = "sha256:6e5fb8dc711a514da83098bc5234264e551ad980cec5f85dabf4d38ed6f15e9a"},
-    {file = "psutil-5.9.6-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:daecbcbd29b289aac14ece28eca6a3e60aa361754cf6da3dfb20d4d32b6c7f57"},
-    {file = "psutil-5.9.6.tar.gz", hash = "sha256:e4b92ddcd7dd4cdd3f900180ea1e104932c7bce234fb88976e2a3b296441225a"},
-]
-
-[[package]]
-name = "ptyprocess"
-version = "0.7.0"
-summary = "Run a subprocess in a pseudo terminal"
-files = [
-    {file = "ptyprocess-0.7.0-py2.py3-none-any.whl", hash = "sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35"},
-    {file = "ptyprocess-0.7.0.tar.gz", hash = "sha256:5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220"},
-]
-
-[[package]]
-name = "pure-eval"
-version = "0.2.2"
-summary = "Safely evaluate AST nodes without side effects"
-files = [
-    {file = "pure_eval-0.2.2-py3-none-any.whl", hash = "sha256:01eaab343580944bc56080ebe0a674b39ec44a945e6d09ba7db3cb8cec289350"},
-    {file = "pure_eval-0.2.2.tar.gz", hash = "sha256:2b45320af6dfaa1750f543d714b6d1c520a1688dec6fd24d339063ce0aaa9ac3"},
-]
-
-[[package]]
 name = "py-spy"
 version = "0.3.14"
 summary = "Sampling profiler for Python programs "
@@ -992,39 +521,16 @@ files = [
 ]
 
 [[package]]
-name = "pyre-check"
-version = "0.9.15"
-requires_python = ">=3.6"
-summary = "A performant type checker for Python"
+name = "pyright"
+version = "1.1.338"
+requires_python = ">=3.7"
+summary = "Command line wrapper for pyright"
 dependencies = [
-    "async-generator",
-    "click>=8.0",
-    "dataclasses-json",
-    "intervaltree",
-    "libcst",
-    "psutil",
-    "pyre-extensions",
-    "tabulate",
-    "testslide>=2.7.0",
-    "typing-extensions",
+    "nodeenv>=1.6.0",
 ]
 files = [
-    {file = "pyre-check-0.9.15.tar.gz", hash = "sha256:48e93c9675ba0ff28ac7776969534c2d97cb19e3ba73ce88ae92206fe99e8bfe"},
-    {file = "pyre_check-0.9.15-py3-none-macosx_10_11_x86_64.whl", hash = "sha256:2d1a62cea859a6d0fd17ceda2fe0fdd51b8d0c5c0a0594ae72a42aea2bc2f46d"},
-    {file = "pyre_check-0.9.15-py3-none-manylinux1_x86_64.whl", hash = "sha256:5458250974ac553f7bbfe850af350fda79255c60769017094c1f31700d5419e4"},
-]
-
-[[package]]
-name = "pyre-extensions"
-version = "0.0.27"
-summary = "Type system extensions for use with the pyre type checker"
-dependencies = [
-    "typing-extensions",
-    "typing-inspect",
-]
-files = [
-    {file = "pyre-extensions-0.0.27.tar.gz", hash = "sha256:767607736d5d2da4db3377e016746776a195987fb3c61c7b38b442160e67771f"},
-    {file = "pyre_extensions-0.0.27-py3-none-any.whl", hash = "sha256:5ad4822ceaed43171a36391a95b70b928c222ca0776f4e689f6921081ecfb324"},
+    {file = "pyright-1.1.338-py3-none-any.whl", hash = "sha256:28231a3c81ec738b3e1b02489eea5b67fb425a9be0717a32b2e075984623b3ff"},
+    {file = "pyright-1.1.338.tar.gz", hash = "sha256:132aa74d2d58d4d27a5b922672b5b4d2be7f3931e7276a2b231d15af6e45daad"},
 ]
 
 [[package]]
@@ -1134,14 +640,6 @@ files = [
 ]
 
 [[package]]
-name = "rx"
-version = "1.6.3"
-summary = "Reactive Extensions (Rx) for Python"
-files = [
-    {file = "Rx-1.6.3.tar.gz", hash = "sha256:ca71b65d0fc0603a3b5cfaa9e33f5ba81e4aae10a58491133595088d7734b2da"},
-]
-
-[[package]]
 name = "setuptools"
 version = "68.0.0"
 requires_python = ">=3.7"
@@ -1162,19 +660,6 @@ files = [
 ]
 
 [[package]]
-name = "singledispatch"
-version = "3.7.0"
-requires_python = ">=2.6"
-summary = "Backport functools.singledispatch from Python 3.4 to Python 2.6-3.3."
-dependencies = [
-    "six",
-]
-files = [
-    {file = "singledispatch-3.7.0-py2.py3-none-any.whl", hash = "sha256:bc77afa97c8a22596d6d4fc20f1b7bdd2b86edc2a65a4262bdd7cc3cc19aa989"},
-    {file = "singledispatch-3.7.0.tar.gz", hash = "sha256:c1a4d5c1da310c3fd8fccfb8d4e1cb7df076148fd5d858a819e37fffe44f3092"},
-]
-
-[[package]]
 name = "six"
 version = "1.16.0"
 requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
@@ -1191,15 +676,6 @@ summary = "This package provides 29 stemmers for 28 languages generated from Sno
 files = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
     {file = "snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
-]
-
-[[package]]
-name = "sortedcontainers"
-version = "2.4.0"
-summary = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
-files = [
-    {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
-    {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
 ]
 
 [[package]]
@@ -1306,29 +782,6 @@ files = [
 ]
 
 [[package]]
-name = "sqlalchemy"
-version = "1.3.24"
-requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-summary = "Database Abstraction Library"
-files = [
-    {file = "SQLAlchemy-1.3.24.tar.gz", hash = "sha256:ebbb777cbf9312359b897bf81ba00dae0f5cb69fba2a18265dcc18a6f5ef7519"},
-]
-
-[[package]]
-name = "stack-data"
-version = "0.6.3"
-summary = "Extract data from python stack frames and tracebacks for informative displays"
-dependencies = [
-    "asttokens>=2.1.0",
-    "executing>=1.2.0",
-    "pure-eval",
-]
-files = [
-    {file = "stack_data-0.6.3-py3-none-any.whl", hash = "sha256:d5558e0c25a4cb0853cddad3d77da9891a08cb85dd9f9f91b9f8cd66e511e695"},
-    {file = "stack_data-0.6.3.tar.gz", hash = "sha256:836a778de4fec4dcd1dcd89ed8abff8a221f58308462e1c4aa2a3cf30148f0b9"},
-]
-
-[[package]]
 name = "supriya"
 version = "23.10b0"
 requires_python = ">=3.8"
@@ -1346,49 +799,6 @@ files = [
     {file = "supriya-23.10b0-cp311-cp311-win32.whl", hash = "sha256:b8e3293dbae1ac86a0effb9df5ac039fa63227fe05339f5564ac4ab7407575a4"},
     {file = "supriya-23.10b0-cp311-cp311-win_amd64.whl", hash = "sha256:4a4def1e91312e5d6a7b7895b4daa022a410323627c569505d812858d65dd833"},
     {file = "supriya-23.10b0.tar.gz", hash = "sha256:0f6cdd0acabebe3041638eced3248a1eafb669b1aed44ac5b15854b360b8ac54"},
-]
-
-[[package]]
-name = "tabulate"
-version = "0.9.0"
-requires_python = ">=3.7"
-summary = "Pretty-print tabular data"
-files = [
-    {file = "tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f"},
-    {file = "tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c"},
-]
-
-[[package]]
-name = "testslide"
-version = "2.7.1"
-summary = "A test framework for Python that makes mocking and iterating over code with tests a breeze"
-dependencies = [
-    "Pygments>=2.2.0",
-    "psutil>=5.6.7",
-    "typeguard<3.0",
-]
-files = [
-    {file = "TestSlide-2.7.1.tar.gz", hash = "sha256:d25890d5c383f673fac44a5f9e2561b7118d04f29f2c2b3d4f549e6db94cb34d"},
-]
-
-[[package]]
-name = "traitlets"
-version = "5.2.2.post1"
-requires_python = ">=3.7"
-summary = ""
-files = [
-    {file = "traitlets-5.2.2.post1-py3-none-any.whl", hash = "sha256:1530d04badddc6a73d50b7ee34667d4b96914da352109117b4280cb56523a51b"},
-    {file = "traitlets-5.2.2.post1.tar.gz", hash = "sha256:74803a1baa59af70f023671d86d5c7a834c931186df26d50d362ee6a1ff021fd"},
-]
-
-[[package]]
-name = "typeguard"
-version = "2.13.3"
-requires_python = ">=3.5.3"
-summary = "Run-time type checker for Python"
-files = [
-    {file = "typeguard-2.13.3-py3-none-any.whl", hash = "sha256:5e3e3be01e887e7eafae5af63d1f36c849aaa94e3a0112097312aabfa16284f1"},
-    {file = "typeguard-2.13.3.tar.gz", hash = "sha256:00edaa8da3a133674796cf5ea87d9f4b4c367d77476e185e80251cc13dfbb8c4"},
 ]
 
 [[package]]
@@ -1430,19 +840,6 @@ summary = "Backported and Experimental Type Hints for Python 3.7+"
 files = [
     {file = "typing_extensions-4.2.0-py3-none-any.whl", hash = "sha256:6657594ee297170d19f67d55c05852a874e7eb634f4f753dbd667855e07c1708"},
     {file = "typing_extensions-4.2.0.tar.gz", hash = "sha256:f1c24655a0da0d1b67f07e17a5e6b2a105894e6824b92096378bb3668ef02376"},
-]
-
-[[package]]
-name = "typing-inspect"
-version = "0.9.0"
-summary = "Runtime inspection utilities for typing module."
-dependencies = [
-    "mypy-extensions>=0.3.0",
-    "typing-extensions>=3.7.4",
-]
-files = [
-    {file = "typing_inspect-0.9.0-py3-none-any.whl", hash = "sha256:9ee6fc59062311ef8547596ab6b955e1b8aa46242d854bfc78f4f6b0eff35f9f"},
-    {file = "typing_inspect-0.9.0.tar.gz", hash = "sha256:b23fc42ff6f6ef6954e4852c1fb512cdd18dbea03134f91f856a95ccc9461f78"},
 ]
 
 [[package]]
@@ -1502,66 +899,4 @@ summary = "Measures the displayed width of unicode strings in a terminal"
 files = [
     {file = "wcwidth-0.2.6-py2.py3-none-any.whl", hash = "sha256:795b138f6875577cd91bba52baf9e445cd5118fd32723b460e30a0af30ea230e"},
     {file = "wcwidth-0.2.6.tar.gz", hash = "sha256:a5220780a404dbe3353789870978e472cfe477761f06ee55077256e509b156d0"},
-]
-
-[[package]]
-name = "werkzeug"
-version = "3.0.1"
-requires_python = ">=3.8"
-summary = "The comprehensive WSGI web application library."
-dependencies = [
-    "MarkupSafe>=2.1.1",
-]
-files = [
-    {file = "werkzeug-3.0.1-py3-none-any.whl", hash = "sha256:90a285dc0e42ad56b34e696398b8122ee4c681833fb35b8334a095d82c56da10"},
-    {file = "werkzeug-3.0.1.tar.gz", hash = "sha256:507e811ecea72b18a404947aded4b3390e1db8f826b494d76550ef45bb3b1dcc"},
-]
-
-[[package]]
-name = "xxhash"
-version = "3.0.0"
-requires_python = ">=3.6"
-summary = "Python binding for xxHash"
-files = [
-    {file = "xxhash-3.0.0-pp37-pypy37_pp73-macosx_10_9_x86_64.whl", hash = "sha256:485f172abc03f78afd4f38dbdbb5665f59c5487126fa4c3181c6582cda4de03b"},
-    {file = "xxhash-3.0.0-pp37-pypy37_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:035248b3d7ab6deb7b247278494d293b9faccfa853078319d25e2926f566b2f8"},
-    {file = "xxhash-3.0.0-pp37-pypy37_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b30ae90c0cfd10ffe852c6b0f263253782eea74a8189d5f2440f6595c1e8047e"},
-    {file = "xxhash-3.0.0-pp37-pypy37_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:8fd203d8a3c013e679722047ef4f061f690c6cff49380622444bca4c30f3bf23"},
-    {file = "xxhash-3.0.0-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:6d60059aaef12a01c0cc24f1d7aaaab7933ae9f4b7adfd9ebbd37dc7ceac1745"},
-    {file = "xxhash-3.0.0-pp38-pypy38_pp73-macosx_10_9_x86_64.whl", hash = "sha256:676c97bf7cc298b65eec0368c2cb5611d87a8e876930843311ca728f69292752"},
-    {file = "xxhash-3.0.0-pp38-pypy38_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2245c6e20e96e3f8fdfb61ad6bc5cde6ce8a1c2b93aa4a32a27bba7ab3aeaf12"},
-    {file = "xxhash-3.0.0-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2ae926a52d020085a2d7f69d0e2155cbf819ae409f2e5dbb345dd40a6462de32"},
-    {file = "xxhash-3.0.0-pp38-pypy38_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:0a2efdcb811be3edc520b78364c11a1e54f5d8e5db895a9ff2bcdd4a7ffa36a5"},
-    {file = "xxhash-3.0.0-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:885b3a851980056707ab99a2c19c35dfe2c2ba5f602066dbfcd8af45ea855760"},
-    {file = "xxhash-3.0.0.tar.gz", hash = "sha256:30b2d97aaf11fb122023f6b44ebb97c6955e9e00d7461a96415ca030b5ceb9c7"},
-]
-
-[[package]]
-name = "zstd"
-version = "1.5.2.5"
-summary = "ZSTD Bindings for Python"
-files = [
-    {file = "zstd-1.5.2.5-pp27-pypy_73-macosx_10_15_x86_64.whl", hash = "sha256:5600b3ef8cf494e5dfa01e159c6e4e0af37a1d396974a9fedd811721b4a9cac3"},
-    {file = "zstd-1.5.2.5-pp27-pypy_73-manylinux1_x86_64.whl", hash = "sha256:d8df1500f88d901f04ec173e64a4fb56234333b7536c952d88364262894e6a97"},
-    {file = "zstd-1.5.2.5-pp27-pypy_73-manylinux2010_x86_64.whl", hash = "sha256:2735d3a22dce8b6cf7d9df24a7af476fc5378b86fd252e6e5f741ec8f6334ebe"},
-    {file = "zstd-1.5.2.5-pp36-pypy36_pp73-macosx_10_15_x86_64.whl", hash = "sha256:3b606f1ee53ba3ff71341eb4eddc7904956fa2a5b5566fea57ab1f691cc44eb0"},
-    {file = "zstd-1.5.2.5-pp36-pypy36_pp73-manylinux1_x86_64.whl", hash = "sha256:1aa45b90aef21b5f5b76317be026c992805037f2b81273865739ba7add6627e8"},
-    {file = "zstd-1.5.2.5-pp36-pypy36_pp73-manylinux2010_x86_64.whl", hash = "sha256:19f06d8d200bcc28fc266ef4053cb77a1dd662dbd94ae9bcd1a357d189542a21"},
-    {file = "zstd-1.5.2.5-pp36-pypy36_pp73-win32.whl", hash = "sha256:cc891fed1d6b6fa7d6c97277d6b2463dfa108f61fdc8ad9e6159b7c840f5d592"},
-    {file = "zstd-1.5.2.5-pp37-pypy37_pp73-macosx_10_15_x86_64.whl", hash = "sha256:4bdcac9bf961ff0914745cbef73f9db5a57781771cf6ac82da672415f0ae9fdd"},
-    {file = "zstd-1.5.2.5-pp37-pypy37_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:40433361f19e349ef595177eeefd8b9f6119b5e581e46cc5069457110dd2b604"},
-    {file = "zstd-1.5.2.5-pp37-pypy37_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:84c755f9fb5fe0e1fd38f9720f19c085d957f82e51c1f629b4e2b9f8b3ff7299"},
-    {file = "zstd-1.5.2.5-pp37-pypy37_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3bc8e1d41813b8df2d86dbb77fdf45563858014fbfcac79a30550d474a9c339a"},
-    {file = "zstd-1.5.2.5-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:ec248525b377c02f03590efc9ad07b18a567bfcb8629c5136c172d8a4b9d3782"},
-    {file = "zstd-1.5.2.5-pp38-pypy38_pp73-macosx_10_15_x86_64.whl", hash = "sha256:0440339145a624703af10aee2329c357d5ea1040305b60852edefeade4f572d7"},
-    {file = "zstd-1.5.2.5-pp38-pypy38_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:299d260c21c5d3ec22d8b46b57ad62613d97d8caf82418f55a042d24fadd03aa"},
-    {file = "zstd-1.5.2.5-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:970e841d9a79a6828504bea0d322825ffd3641af9a80a988dc186a15668c5530"},
-    {file = "zstd-1.5.2.5-pp38-pypy38_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:9a811dc0bc737a99823ad3c993e2c01628323096b2db98d4d88f2da4e6d97fae"},
-    {file = "zstd-1.5.2.5-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:565cbb491544b72e40c7996e752d9c415b3382d112e289d87205ba8cbe6073c7"},
-    {file = "zstd-1.5.2.5-pp39-pypy39_pp73-macosx_10_15_x86_64.whl", hash = "sha256:4af294b5a0c636841dbc64a5947109e676a44032db8cc0015530252cea2302b0"},
-    {file = "zstd-1.5.2.5-pp39-pypy39_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c112d368ebf614e319b36cf0c398b4e4d9e6fb585a44d1cb15ec4e7e6e02587d"},
-    {file = "zstd-1.5.2.5-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:db839dc7af2dee800f409145d4280e2eac0c50cc361a0e3fc738f5ac51d18490"},
-    {file = "zstd-1.5.2.5-pp39-pypy39_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:185141ed40980f901487d76d9096d9dca335a0b0d79ca00437f3343deb81687f"},
-    {file = "zstd-1.5.2.5-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:4d5b9397bb63c4eb2a950b1b53a25842975fbe68435bd0b58733ade85fbf0ed8"},
-    {file = "zstd-1.5.2.5.tar.gz", hash = "sha256:3c429b166a3b324b0983bff53ae0928b9764c693a017f62ffb6b20e6135e338f"},
 ]

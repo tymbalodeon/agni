@@ -11,6 +11,23 @@ _install_and_run *command:
         just install; {{command}}
     }
 
+# Add dependencies.
+@add *dependencies:
+    pdm add {{dependencies}}
+
+# Add dev dependencies.
+@add-dev *dependencies:
+    pdm add --dev {{dependencies}}
+
+# Remove dependencies.
+remove *dependencies:
+    #!/usr/bin/env nu
+    try {
+        pdm remove {{dependencies}}
+    } catch {
+        pdm remove --dev {{dependencies}}
+    }
+
 dependencies := "
 let dependencies = [
     rtx
@@ -75,6 +92,10 @@ list tree="":
 @venv:
     pdm venv create --force
 
+# Format.
+@check:
+    just _install_and_run pdm run pyright
+
 # Lint and apply fixes.
 @lint:
     just _install_and_run pdm run ruff check --fix
@@ -84,7 +105,7 @@ list tree="":
     just _install_and_run pdm run ruff format
 
 # Run pre-commit hooks.
-@check:
+@pre-commit:
     just _install_and_run pdm run pre-commit run --all-files
 
 # Open a python shell with project dependencies available.
@@ -164,10 +185,6 @@ clean *args:
 
     if ("{{args}}" | is-empty) or ("lilypond" in $args) {
         rm --recursive --force **/*-matrices.ly
-    }
-
-    if ("{{args}}" | is-empty) or ("mypy" in $args) {
-        rm --recursive --force .mypy_cache
     }
 
     if ("{{args}}" | is-empty) or ("pdfs" in $args) {
