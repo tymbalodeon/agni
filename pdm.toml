@@ -1,3 +1,0 @@
-[install]
-cache = false
-cache_method = "hardlink"
