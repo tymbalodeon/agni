@@ -12,7 +12,7 @@ def "main install" [] {
 }
 
 def "main update" [] {
-    main install; pdm run python -m pip install --upgrade pipx
+    main install; pdm run python -m pip install --upgrade pip pipx
 }
 
 def main [] {}
