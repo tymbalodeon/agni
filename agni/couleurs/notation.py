@@ -133,6 +133,7 @@ class Notation:
     ):
         if tuplet and is_start_of_tuplet:
             multiplier = tuplet.multiplier
+            multiplier = f"{multiplier[1]}:{multiplier[0]}"
             component: Leaf | Tuplet = Tuplet(multiplier, components=[leaf])
         else:
             component = leaf
