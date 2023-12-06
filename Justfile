@@ -135,6 +135,7 @@ profile *args: (install "--no-project")
         just _install_and_run sudo pdm run py-spy record
             --format speedscope
             --output $output_file
+            --subprocesses
             -- pdm run python -m {{command}} {{args}}
     )
 
