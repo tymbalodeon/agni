@@ -162,7 +162,7 @@ test *args:
 # Build the project and install it with pipx.
 build: (install "--no-project")
     #!/usr/bin/env nu
-    pdm build
+    just _install_and_run pdm build
 
     (
         pdm run python -m pipx install
