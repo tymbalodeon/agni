@@ -172,7 +172,7 @@ build: (install "--no-project")
     )
 
 # Clean Python cache or generated pdfs.
-clean *args:
+clean *args: (install "--no-project")
     #!/usr/bin/env nu
     let args = "{{args}}" | split row " "
     let all = "--all" in $args
