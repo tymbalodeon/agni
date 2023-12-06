@@ -22,10 +22,18 @@ Commands:
 
 _Currently commands are implemented for recreating Vivier's "couleurs" only._
 
-- `agni couleurs matrix <bass> <melody>`: Generate a single matrix for a given bass and
-  melody pitch, and display, notate, or play.
-- `agni couleurs passage <input_file>`: Generate matrices for a given passage of bass and
-  melody notes, and display or notate.
+``` sh
+# Generate a single matrix for a given bass and melody pitch,
+# and display, notate, or play.
+agni couleurs matrix <bass> <melody>
+```
+
+
+``` sh
+# Generate matrices for a given passage of bass and melody notes,
+# and display or notate.
+agni couleurs passage <input_file>
+```
 
 ### Input files
 
@@ -36,45 +44,38 @@ documentation](https://abjad.github.io/api/abjad/parsers/parser.html#abjad.parse
 
 Vivier's [_Lonely Child_](https://www.boosey.com/cr/music/Claude-Vivier-Lonely-Child/47752 "Lonely Child") is provided as an example.
 
-- `just example --input`: View an input file containing only the soprano melody
-  and bass accompaniment.
-- `just example --output`: View the input score harmonized with the associated
-  matrices.
-- `just example`: View both.
+_To install `just`, see the "Installation" instructions below._
 
-## Tasks
+``` sh
+# View an input file containing only the soprano melody and bass accompaniment.
+just example --input
+```
 
-Task scripts are provided (using [`just`](https://just.systems/man/en/ "just"))
-to facilitate development. Available commands:
+``` sh
+# View the input score harmonized with the associated matrices.
+just example --output
+```
 
-- `just`: Show available commands
-- `build *pip`: Build the project and install it using pipx, or optionally with
-  pip (`--pip`).
-- `check *autoupdate`: Run pre-commit checks or autoupdate (`autoupdate`).
-- `example *args`: Run examples if outdated (or `--force`) and open (with
-  options: `--input`, `--output`, `--reference`, `--ensemble`).
-- `install *upgrade`: Install (or `upgrade`) external dependencies.
-- `profile *args`: Run the py-spy profiler on a command and its \<args\> and
-  open the results with speedscope.
-- `shell`: Open a python shell with project dependencies available.
-- `try *args`: Try a command using the current state of the files without
-  building.
-- `update *lilypond`: Update project dependencies, pre-commit hooks, and
-  lilypond file versions (or just the latter if `lilypond`).
+``` sh
+# View both
+just example
+```
 
-## Dependencies
+## Quickstart
 
-Most dependencies can be installed via [pdm](https://pdm.fming.dev/latest/) by
-running `pdm install`. The rest (listed below) can be installed by running the
-included script: `./install_dependencies`. Or, if `just` is already installed:
-`just install` to install the rest of the dependencies.
+``` sh
+# Install the necessary dependencies and run the application
+./scripts/install_dependencies.zsh && just try
+```
 
-Required for generating pdfs:
+## Installation
 
-- [LilyPond](https://lilypond.org/ "lilypond")
+``` sh
+# Instal brew, just, and nu to be able to use `just` commands
+./scripts/install_dependencies.zsh
+```
 
-Recommended for development using `justfile` commands:
-
-- [just](https://just.systems/man/en/ "just")
-- [checkexec](https://github.com/kurtbuilds/checkexec "checkexec")
-- [speedscope](https://github.com/jlfwong/speedscope "speedscope")
+``` sh
+# Display all available just commands
+just
+```
