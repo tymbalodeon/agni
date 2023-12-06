@@ -34,12 +34,11 @@ install pdm="--pdm":
         nu $"./scripts/($dependency).nu" install
     }
 
-    just _install_and_run pdm run pre-commit install out+err> /dev/null
-
     if "{{pdm}}" == "--pdm" {
         pdm install
     }
 
+    just _install_and_run pdm run pre-commit install out+err> /dev/null
 
 # Update dependencies.
 update pdm="--pdm": (install "--no-pdm")
@@ -74,7 +73,6 @@ list tree="":
 
 # Create a new virtual environment, overwriting an existing one if present.
 @venv:
-    rm -f .pdm-python
     pdm venv create --force
 
 # Lint and apply fixes.
@@ -150,24 +148,49 @@ build: (install "--no-pdm")
     )
 
 # Clean Python cache or generated pdfs.
-clean *pdfs:
-    #!/usr/bin/env zsh
-    # command that lists artifacts?
-    # pdm venv purge
-    if [ "{{pdfs}}" = "pdfs" ]; then
-        files=(**/**.pdf(N))
-    else
-        files=(**/**.pyc(N))
-    fi
-    if [ -z "${files[*]}" ]; then
-        echo "No files found."
-        exit
-    fi
-    for file in "${files[@]}"; do
-        rm "${file}"
-        echo "Removed ${file}."
-    done
-    pdm run ruff clean
+clean *args:
+    #!/usr/bin/env nu
+    let args = "{{args}}" | split row " "
+
+    if ("{{args}}" | is-empty) or ("coverage" in $args) {
+        rm --recursive --force .coverage
+    }
+
+    if ("dist" in $args) { rm --recursive --force dist }
+
+    if ("{{args}}" | is-empty) or ("ds-store" in $args) {
+        rm --recursive --force **/.DS_Store
+    }
+
+    if ("{{args}}" | is-empty) or ("lilypond" in $args) {
+        rm --recursive --force **/*-matrices.ly
+    }
+
+    if ("{{args}}" | is-empty) or ("mypy" in $args) {
+        rm --recursive --force .mypy_cache
+    }
+
+    if ("{{args}}" | is-empty) or ("pdfs" in $args) {
+        rm --recursive --force **/*.pdf
+    }
+
+    if ("{{args}}" | is-empty) or ("profiles" in $args) {
+        rm --recursive --force profiles
+    }
+
+    if ("{{args}}" | is-empty) or ("pycache" in $args) {
+        rm --recursive --force **/__pycache__
+    }
+
+    if ("{{args}}" | is-empty) or ("pytest" in $args) {
+        rm --recursive --force .pytest_cache
+    }
+
+    if ("{{args}}" | is-empty) or ("ruff" in $args) {
+        pdm run ruff clean --quiet
+    }
+
+    if ("venv" in $args) { pdm venv remove in-project --yes }
 
 notate_reference_passage := """
 just try couleurs \
