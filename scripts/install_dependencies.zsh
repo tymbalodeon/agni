@@ -3,7 +3,7 @@
 dependencies=(
     "brew"
     "just"
-    "nushell"
+    "nu"
 )
 
 install_dependency() {
@@ -17,7 +17,7 @@ install_dependency() {
         "just")
             brew install just
             ;;
-        "nushell")
+        "nu")
             brew install nushell
             ;;
     esac
@@ -31,7 +31,7 @@ upgrade_dependency() {
         "just")
             brew upgrade just
             ;;
-        "nushell")
+        "nu")
             brew upgrade nushell
             ;;
     esac
