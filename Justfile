@@ -135,6 +135,7 @@ profile *args: (install "--no-project")
         just _install_and_run sudo pdm run py-spy record
             --format speedscope
             --output $output_file
+            --subprocesses
             -- pdm run python -m {{command}} {{args}}
     )
 
@@ -162,17 +163,17 @@ test *args:
 # Build the project and install it with pipx.
 build: (install "--no-project")
     #!/usr/bin/env nu
-    pdm build
+    just _install_and_run pdm build
 
     (
         pdm run python -m pipx install
             $"./dist/{{command}}-{{version}}-py3-none-any.whl"
             --force
-            --pip-args "--force-reinstall"
+            --pip-args="--force-reinstall"
     )
 
 # Clean Python cache or generated pdfs.
-clean *args:
+clean *args: (install "--no-project")
     #!/usr/bin/env nu
     let args = "{{args}}" | split row " "
     let all = "--all" in $args

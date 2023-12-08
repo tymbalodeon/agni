@@ -1,3 +1,4 @@
+from typing import cast
 from abjad import Duration, Note, Tie
 from abjad.get import indicators as get_indicators
 from pytest import mark, raises
@@ -186,7 +187,7 @@ def test_get_note(
     matrix_pitch = MatrixPitch(
         bass_frequency, melody_frequency, bass_multiplier, melody_multiplier
     )
-    actual_note = matrix_pitch.get_note(duration, tie)
+    actual_note = cast(Note, matrix_pitch.get_note(duration, tie))
     actual_tie = next(iter(get_indicators(actual_note, prototype=Tie)), False)
     assert (
         actual_note is not None

@@ -10,6 +10,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.theme import Theme
+from supriya import Server
 from supriya.patterns import EventPattern, SequencePattern
 
 from agni.helpers import stylize
@@ -223,9 +224,8 @@ class Matrix:
             self._display_table()
 
     def play(self):
-        pattern = EventPattern(
+        EventPattern(
             frequency=SequencePattern(self.sorted_frequencies),
             delta=0.05,
-        )
-        pattern.play()
+        ).play(Server().boot())
         sleep(5)
