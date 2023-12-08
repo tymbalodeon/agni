@@ -30,15 +30,15 @@ remove *dependencies:
     }
 
 dependencies := "
-rtx
-python
-pdm
-pipx
-pnpm
-speedscope
-cargo
-checkexec
-gh
+    rtx
+    python
+    pdm
+    pipx
+    pnpm
+    speedscope
+    cargo
+    checkexec
+    gh
 "
 
 # Install dependencies
