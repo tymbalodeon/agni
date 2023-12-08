@@ -315,4 +315,7 @@ example *args:
     }
 
 @repo:
-    gh repo view --web
+    gh browse
+
+@issues:
+    gh issue list
