@@ -122,8 +122,20 @@ command := "(" + get_pyproject_value + "name)"
 version := "(" + get_pyproject_value + "version)"
 
 # Try a command using the current state of the files without building
-@try *args:
-    just _install_and_run pdm run {{command}} {{args}}
+try *args:
+    #!/usr/bin/env nu
+    let args = (
+        ["{{args}}"]
+        | split row " "
+        | each { |arg| $"\"($arg)\"" }
+        | str join " "
+    )
+
+    if $args == '""' {
+        just _install_and_run pdm run {{command}}
+    } else {
+        just _install_and_run pdm run {{command}} $"\"($args)\""
+    }
 
 # Run the py-spy profiler on a command and its <args> and open the results with speedscope
 profile *args: (install "--no-project")
