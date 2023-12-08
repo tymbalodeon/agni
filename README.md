@@ -63,7 +63,7 @@ You can also display pitches stacked as a "chord." Here is the same matrix,
 using midi number input, shown stacked as a chord:
 
 ``` sh
-> just try couleurs matrix 43 69 --display-format chord
+> agni couleurs matrix 43 69 --display-format chord
    Combination-Tone Matrix (Hertz)
 
   (3 x bass) + (3 x melody) = 336.0
@@ -87,7 +87,7 @@ You can also control the tuning quantization and number of multiples. Here is
 the same matrix quantized to equal temperament, calculated up to only 3 multiples:
 
 ``` sh
-> just try couleurs matrix 98 440 --tuning equal-tempered --multiples 3
+> agni couleurs matrix 98 440 --tuning equal-tempered --multiples 3
           Combination-Tone Matrix (Hertz)
 
              0 x melody   1 x melody   2 x melody
