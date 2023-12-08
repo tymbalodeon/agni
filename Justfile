@@ -59,7 +59,6 @@ install project="--project":
 
     just _install_and_run pdm run pre-commit install out+err> /dev/null
 
-
 # Update dependencies
 update project="--project": (install "--no-project")
     #!/usr/bin/env nu
