@@ -312,3 +312,6 @@ example *args:
     if not ($pdf_files | is-empty) {
         $pdf_files | each { |file| ^open $file } out+err> /dev/null
     }
+
+@repo:
+    gh repo view --web
