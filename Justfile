@@ -1,7 +1,16 @@
 set shell := ["nu", "-c"]
 
-@_help:
-    just --list
+_help *args:
+    #!/usr/bin/env nu
+    if "clean" in "{{args}}" {
+        if not (("--help" in "{{args}}") or ("-h" in "{{args}}")) {
+            exit
+        }
+
+        echo {{generated_files}}
+    } else {
+        just --list
+    }
 
 [no-exit-message]
 _install_and_run *command:
@@ -186,67 +195,74 @@ build: (install "--no-project")
             --pip-args="--force-reinstall"
     )
 
+generated_files := """
+[
+    [Option Removes];
+    [<default> \"<all EXCEPT dist and venv>\"]
+    [--all <all>]
+    [coverage .coverage]
+    [dist dist/]
+    [ds-store **/.DS_Store]
+    [lilypond **/*-matrices.ly]
+    [pdfs **/*.pdf]
+    [profiles profiles]
+    [pycache **/__pycache__]
+    [pytest .pytest_cache]
+    [ruff .ruff_cache]
+    [venv .venv]
+]
+"""
+
 # Clean generated files ("--all" or by name, as listed in "--help"/"-h")
-clean *args: (install "--no-project")
+clean *args: (_help "clean" args)
     #!/usr/bin/env nu
-    if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
-        echo [
-            [Option Removes];
-            ["<default>" "<all rules EXCEPT \"dist\" and \"venv\">"]
-            ["--all" "<all rules>"]
-            ["coverage" ".coverage"]
-            ["dist" "dist/"]
-            ["ds-store" "**/.DS_Store"]
-            ["lilypond" "**/*-matrices.ly"]
-            ["pdfs" "**/*.pdf"]
-            ["profiles" "profiles"]
-            ["pycache" "**/__pycache__"]
-            ["pytest" ".pytest_cache"]
-            ["ruff" ".ruff_cache"]
-        ]
-
-        exit
-    }
-
     let args = "{{args}}" | split row " "
     let all = "--all" in $args
     let empty = "{{args}}" | is-empty
+    let default_files_to_clean = [
+        coverage
+        ds-store
+        lilypond
+        pdfs
+        profiles
+        pycache
+        pytest
+        ruff
+    ]
 
-    if $all or $empty or ("coverage" in $args) {
-        rm --recursive --force .coverage
+    let files_to_clean = if (not $empty) and (not $all) {
+        $args
+    } else if $all {
+        $default_files_to_clean | append [dist venv] | sort
+    } else {
+        $default_files_to_clean
     }
+   
+    for file in $files_to_clean {
+        let files_list = (
+            {{generated_files}} 
+            | where Option == $file
+            | get Removes 
+        )
 
-    if $all or ("dist" in $args) { rm --recursive --force dist }
+        if ($files_list | is-empty) {
+            echo $"Unknown option: \"($file)\""
+            continue
+        }
 
-    if $all or $empty or ("ds-store" in $args) {
-        rm --recursive --force **/.DS_Store
+        if $file == "venv" and (
+            not (command -v pdm | is-empty)) and (
+            not (pdm run command -v pre-commit | is-empty)
+        ) {
+            echo "Uninstalling pre-commit..."
+            pdm run pre-commit uninstall
+        }
+
+        let files = $files_list | first
+    
+        echo $"Removing generated ($file) files..."
+        rm --recursive --force $files
     }
-
-    if $all or $empty or ("lilypond" in $args) {
-        rm --recursive --force **/*-matrices.ly
-    }
-
-    if $all or $empty or ("pdfs" in $args) {
-        rm --recursive --force **/*.pdf
-    }
-
-    if $all or $empty or ("profiles" in $args) {
-        rm --recursive --force profiles
-    }
-
-    if $all or $empty or ("pycache" in $args) {
-        rm --recursive --force **/__pycache__
-    }
-
-    if $all or $empty or ("pytest" in $args) {
-        rm --recursive --force .pytest_cache
-    }
-
-    if $all or $empty or ("ruff" in $args) {
-        pdm run ruff clean --quiet
-    }
-
-    if $all or ("venv" in $args) { pdm venv remove in-project --yes }
 
 # Open the repository page in the browser
 @repo:
