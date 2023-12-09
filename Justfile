@@ -137,7 +137,7 @@ run *args:
         just _install_and_run pdm run {{command}} $"\"($args)\""
     }
 
-# Profile a command and its <args> and view results ("--help"/"-h" for options)
+# Profile a command and its <args> and view results (see --help/-h for options)
 profile *args:
     #!/usr/bin/env nu
     if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
@@ -162,7 +162,7 @@ profile *args:
 
     speedscope $output_file
 
-# Run coverage report ("--help"/"-h" for options)
+# Run coverage report (see --help/-h for options)
 coverage *args:
     #!/usr/bin/env nu
     if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
@@ -180,7 +180,7 @@ coverage *args:
             {{args}}
     )
 
-# Run tests ("--help"/"-h" for options)
+# Run tests (see --help/-h for options)
 test *args:
     #!/usr/bin/env nu
     if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
@@ -226,7 +226,7 @@ generated_files := """
 ]
 """
 
-# Clean generated files ("--all" or by name, as listed in "--help"/"-h")
+# Clean generated files (see --help/-h for options)
 clean *args:
     #!/usr/bin/env nu
 
@@ -298,7 +298,7 @@ clean *args:
     gh issue list
 
 notate_reference_passage := """
-just try couleurs \
+just run couleurs \
     passage examples/lonely-child-notes.ily \
     --no-display \
     --notate \
@@ -306,7 +306,7 @@ just try couleurs \
 """
 
 notate_ensemble_passage := """
-just try couleurs \
+just run couleurs \
     passage examples/lonely-child-notes.ily \
     --full-score \
     --no-display \
@@ -314,84 +314,76 @@ just try couleurs \
     --save
 """
 
-# Run examples if outdated (or "--force") and open all (or "--input", "--output", "--reference", "--ensemble") pdfs.
+# Run using an example score (see --help/-h for options)
 example *args:
     #!/usr/bin/env nu
-    let input = if (
-        "{{args}}" | is-empty
-    ) or (
-        "{{args}}" == "--input"
-    ) { true } else { false }
 
-    mut reference = if (
-        "{{args}}" | is-empty
-    ) or (
-        "{{args}}" in ["--output" "--reference"]
-    ) { true } else { false }
-
-    mut ensemble = if (
-        "{{args}}" | is-empty
-    ) or (
-        "{{args}}" in ["--output" "--ensemble"]
-    ) { true } else { false }
-
-    let force = if "{{args}}" == "--force" { true } else { false }
-
-    if "{{args}}" == "--force" {
-        reference = true
-        ensemble = true
-    }
-
-    let input_file_name = "examples/lonely-child"
-    let reference_pdf = "examples/claude-vivier-lonely-child-reference-matrices.pdf"
-    let ensemble_pdf = "examples/claude-vivier-lonely-child-ensemble-matrices.pdf"
-    let input_pdf = $"($input_file_name).pdf"
-    mut pdf_files = []
-
-    if $input {
-        let input_ly = $"($input_file_name).ly"
-        checkexec $input_pdf examples/*.*ly -- lilypond -o examples $input_ly
-
-        (
-            checkexec $input_pdf examples/*.*ly
-                -- mv $"($input_file_name)-formatted.pdf" $input_pdf
+    # Generate matrices for the example score (Claude Vivier's "Lonely Child")
+    def example [
+        --input, # Open the compiled input file
+        --generated, # Open all generated files (reference and ensemble)
+        --reference, # Open the generated reference file
+        --ensemble, # Open the generated full score file
+        --force, # Force score generation even if the files are up to date
+    ] {
+        let default = (
+            [$input $generated $reference $ensemble]
+            | all { |arg| not $arg }
         )
 
-        $pdf_files = ($pdf_files | append $input_pdf)
-    }
+        let input_file_name = "examples/lonely-child"
+        let reference_pdf = "examples/claude-vivier-lonely-child-reference-matrices.pdf"
+        let ensemble_pdf = "examples/claude-vivier-lonely-child-ensemble-matrices.pdf"
+        let input_pdf = $"($input_file_name).pdf"
+        mut pdf_files = []
 
-    if $reference {
-        (
-            checkexec $reference_pdf $"($input_file_name)*.ily"
-                -- {{notate_reference_passage}}
-        )
+        if $default or $input {
+            let input_ly = $"($input_file_name).ly"
 
-        $pdf_files = ($pdf_files | append $reference_pdf)
-    }
+            if $force {
+                lilypond -o examples $input_ly
+                mv --force $"($input_file_name)-formatted.pdf" $input_pdf
+            } else {
+                checkexec $input_pdf $input_ly -- lilypond -o examples $input_ly
 
-    if $ensemble {
-        (
-            checkexec $ensemble_pdf $"($input_file_name)*.ily"
-                -- {{notate_ensemble_passage}}
-        )
+                (
+                    checkexec $input_pdf $input_ly
+                        -- mv $"($input_file_name)-formatted.pdf" $input_pdf
+                )
+            }
 
-        $pdf_files = ($pdf_files | append $ensemble_pdf)
-    }
+            $pdf_files = ($pdf_files | append $input_pdf)
+        }
 
-    if $force {
-        $pdf_files = ($pdf_files | append $input_pdf)
+        if $default or $reference or $generated {
+            if $force {
+                {{notate_reference_passage}}
+            } else {
+                (
+                    checkexec $reference_pdf $"($input_file_name)*.ily"
+                        -- {{notate_reference_passage}}
+                )
+            }
 
-        if $reference {
-            {{notate_reference_passage}}
             $pdf_files = ($pdf_files | append $reference_pdf)
         }
 
-        if $ensemble {
-            {{notate_ensemble_passage}}
+        if $default or $ensemble or $generated {
+            if $force {
+                {{notate_ensemble_passage}}
+            } else {
+                (
+                    checkexec $ensemble_pdf $"($input_file_name)*.ily"
+                        -- {{notate_ensemble_passage}}
+                )
+            }
+
             $pdf_files = ($pdf_files | append $ensemble_pdf)
+        }
+
+        for file in $pdf_files {
+            ^open $file
         }
     }
 
-    if not ($pdf_files | is-empty) {
-        $pdf_files | each { |file| ^open $file } out+err> /dev/null
-    }
+    example {{args}}
