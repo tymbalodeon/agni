@@ -166,7 +166,7 @@ profile *args:
 coverage *args:
     #!/usr/bin/env nu
     if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
-        pdm run coverage report -h
+        just _install_and_run pdm run coverage report -h
         exit
     } else {
         just test
@@ -184,7 +184,7 @@ coverage *args:
 test *args:
     #!/usr/bin/env nu
     if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
-        pdm run coverage run -m pytest -h
+        just _install_and_run pdm run coverage run -m pytest -h
         exit
     }
 
