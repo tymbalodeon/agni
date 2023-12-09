@@ -105,7 +105,7 @@ list tree="":
 @venv:
     pdm venv create --force
 
-# Format
+# Type-check
 [no-exit-message]
 @check:
     just _install_and_run pdm run pyright
@@ -130,8 +130,8 @@ get_pyproject_value := "open pyproject.toml | get project."
 command := "(" + get_pyproject_value + "name)"
 version := "(" + get_pyproject_value + "version)"
 
-# Try a command using the current state of the files without building
-try *args:
+# Run the application with <args>
+run *args:
     #!/usr/bin/env nu
     let args = (
         ["{{args}}"]
@@ -146,9 +146,16 @@ try *args:
         just _install_and_run pdm run {{command}} $"\"($args)\""
     }
 
-# Run the py-spy profiler on a command and its <args> and open the results with speedscope
-profile *args: (install "--no-project")
+# Profile a command and its <args> and view results ("--help"/"-h" for options)
+profile *args:
     #!/usr/bin/env nu
+    if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
+        pdm run py-spy record -h
+        exit
+    } else {
+        just install --no-project
+    }
+
     let output_directory = "profiles"
     mkdir $output_directory
 
@@ -164,21 +171,36 @@ profile *args: (install "--no-project")
 
     speedscope $output_file
 
-# Run coverage report
-@coverage *args: test
-    just _install_and_run pdm run coverage report -m \
-        --omit "*/pdm/*" \
-        --skip-covered \
-        --sort "cover" \
-        {{args}}
+# Run coverage report ("--help"/"-h" for options)
+coverage *args:
+    #!/usr/bin/env nu
+    if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
+        pdm run coverage report -h
+        exit
+    } else {
+        just test
+    }
 
-# Run tests
+    (
+        just _install_and_run pdm run coverage report -m \
+            --omit "*/pdm/*" \
+            --skip-covered \
+            --sort "cover" \
+            {{args}}
+    )
+
+# Run tests ("--help"/"-h" for options)
 test *args:
     #!/usr/bin/env nu
-    mut args = "{{args}}"
+    if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
+        pdm run coverage run -m pytest -h
+        exit
+    }
 
-    if ($args | is-empty) {
-        $args = tests
+    let args = if ("{{args}}" | is-empty) {
+        "tests"
+    } else {
+        "{{args}}"
     }
 
     just _install_and_run pdm run coverage run -m pytest $args
@@ -197,7 +219,7 @@ build: (install "--no-project")
 
 generated_files := """
 [
-    [Option Removes];
+    [Option "Files to clean"];
     [<default> \"<all EXCEPT dist and venv>\"]
     [--all <all>]
     [coverage .coverage]
@@ -216,6 +238,10 @@ generated_files := """
 # Clean generated files ("--all" or by name, as listed in "--help"/"-h")
 clean *args: (_help "clean" args)
     #!/usr/bin/env nu
+    if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
+        exit
+    }
+
     let args = "{{args}}" | split row " "
     let all = "--all" in $args
     let empty = "{{args}}" | is-empty
@@ -237,12 +263,12 @@ clean *args: (_help "clean" args)
     } else {
         $default_files_to_clean
     }
-   
+
     for file in $files_to_clean {
         let files_list = (
-            {{generated_files}} 
+            {{generated_files}}
             | where Option == $file
-            | get Removes 
+            | get "Files to clean"
         )
 
         if ($files_list | is-empty) {
@@ -259,7 +285,7 @@ clean *args: (_help "clean" args)
         }
 
         let files = $files_list | first
-    
+
         echo $"Removing generated ($file) files..."
         rm --recursive --force $files
     }
