@@ -41,7 +41,7 @@ dependencies := "
     gh
 "
 
-# Install dependencies
+# Install dependencies (optionally with "--no-project")
 install project="--project":
     #!/usr/bin/env nu
     let dependencies = [
@@ -59,7 +59,7 @@ install project="--project":
 
     just _install_and_run pdm run pre-commit install out+err> /dev/null
 
-# Update dependencies
+# Update dependencies (optionally with "--no-project")
 update project="--project": (install "--no-project")
     #!/usr/bin/env nu
     let dependencies = [
@@ -186,9 +186,28 @@ build: (install "--no-project")
             --pip-args="--force-reinstall"
     )
 
-# Clean Python cache or generated pdfs
+# Clean generated files ("--all" or by name, as listed in "--help"/"-h")
 clean *args: (install "--no-project")
     #!/usr/bin/env nu
+    if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
+        echo [
+            [Option Removes];
+            ["<default>" "<all rules EXCEPT \"dist\" and \"venv\">"]
+            ["--all" "<all rules>"]
+            ["coverage" ".coverage"]
+            ["dist" "dist/"]
+            ["ds-store" "**/.DS_Store"]
+            ["lilypond" "**/*-matrices.ly"]
+            ["pdfs" "**/*.pdf"]
+            ["profiles" "profiles"]
+            ["pycache" "**/__pycache__"]
+            ["pytest" ".pytest_cache"]
+            ["ruff" ".ruff_cache"]
+        ]
+
+        exit
+    }
+
     let args = "{{args}}" | split row " "
     let all = "--all" in $args
     let empty = "{{args}}" | is-empty
