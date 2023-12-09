@@ -1,16 +1,7 @@
 set shell := ["nu", "-c"]
 
-_help *args:
-    #!/usr/bin/env nu
-    if "clean" in "{{args}}" {
-        if not (("--help" in "{{args}}") or ("-h" in "{{args}}")) {
-            exit
-        }
-
-        echo {{generated_files}}
-    } else {
-        just --list
-    }
+@_help *args:
+    just --list
 
 [no-exit-message]
 _install_and_run *command:
@@ -220,7 +211,7 @@ build: (install "--no-project")
 generated_files := """
 [
     [Option "Files to clean"];
-    [<default> \"<all EXCEPT dist and venv>\"]
+    [<default> "<all EXCEPT dist and venv>"]
     [--all <all>]
     [coverage .coverage]
     [dist dist/]
@@ -236,59 +227,67 @@ generated_files := """
 """
 
 # Clean generated files ("--all" or by name, as listed in "--help"/"-h")
-clean *args: (_help "clean" args)
+clean *args:
     #!/usr/bin/env nu
-    if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
-        exit
-    }
 
-    let args = "{{args}}" | split row " "
-    let all = "--all" in $args
-    let empty = "{{args}}" | is-empty
-    let default_files_to_clean = [
-        coverage
-        ds-store
-        lilypond
-        pdfs
-        profiles
-        pycache
-        pytest
-        ruff
-    ]
-
-    let files_to_clean = if (not $empty) and (not $all) {
-        $args
-    } else if $all {
-        $default_files_to_clean | append [dist venv] | sort
-    } else {
-        $default_files_to_clean
-    }
-
-    for file in $files_to_clean {
-        let files_list = (
-            {{generated_files}}
-            | where Option == $file
-            | get "Files to clean"
-        )
-
-        if ($files_list | is-empty) {
-            echo $"Unknown option: \"($file)\""
-            continue
+    # Remove generated files
+    def clean [
+        --choices, # Display possible values for ...(files)
+        --all (-a), # Clean all files
+        ...files: string # Which files to clean (see --choices for available files)
+    ] {
+        if ($choices) {
+            echo {{generated_files}}
+            exit
         }
 
-        if $file == "venv" and (
-            not (command -v pdm | is-empty)) and (
-            not (pdm run command -v pre-commit | is-empty)
-        ) {
-            echo "Uninstalling pre-commit..."
-            pdm run pre-commit uninstall
+        let default_files_to_clean = [
+            coverage
+            ds-store
+            lilypond
+            pdfs
+            profiles
+            pycache
+            pytest
+            ruff
+        ]
+
+        let files_to_clean = if $all {
+            $default_files_to_clean | append [dist venv] | sort
+        } else if ($files | is-empty) {
+            $default_files_to_clean
+        } else {
+            $files
         }
 
-        let files = $files_list | first
+        for file in $files_to_clean {
+            let files_list = (
+                {{generated_files}}
+                | where Option == $file
+                | get "Files to clean"
+            )
 
-        echo $"Removing generated ($file) files..."
-        rm --recursive --force $files
+            if ($files_list | is-empty) {
+                echo $"Unknown option: \"($file)\""
+                continue
+            }
+
+            if $file == "venv" and (
+                not (command -v pdm | is-empty)) and (
+                not (pdm run command -v pre-commit | is-empty)
+            ) {
+                echo "Uninstalling pre-commit..."
+                pdm run pre-commit uninstall
+            }
+
+            let files = $files_list | first
+
+            echo $"Removing generated ($file) files..."
+            rm --recursive --force $files
+        }
     }
+
+    clean {{args}}
 
 # Open the repository page in the browser
 @repo:
