@@ -377,7 +377,7 @@ example *args:
                 mv --force $"($input_file_name)-formatted.pdf" $input_pdf
             } else {
                 (
-                    checkexec $input_pdf $input_ly -- \
+                    checkexec $input_pdf $input_ly --
                         lilypond -o examples $input_ly
                 )
 
