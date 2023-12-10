@@ -1,7 +1,7 @@
 from abjad import NamedPitch
 from pytest import mark
 
-from agni.couleurs.matrix_leaf import MatrixLeaf
+from agni.matrix_leaf import MatrixLeaf
 
 from .conftest import bass_frequency, melody_frequency
 

@@ -2,7 +2,7 @@ from pytest import mark
 
 from .conftest import call_command
 
-passage_command_name = ["couleurs", "passage"]
+passage_command_name = ["passage"]
 
 
 @mark.parametrize("arg", ["--help", "-h"])

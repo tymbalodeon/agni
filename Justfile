@@ -323,7 +323,7 @@ clean *args:
     gh issue list
 
 notate_reference_passage := """
-just run couleurs \
+just run \
     passage examples/lonely-child-notes.ily \
     --no-display \
     --notate \
@@ -331,7 +331,7 @@ just run couleurs \
 """
 
 notate_ensemble_passage := """
-just run couleurs \
+just run \
     passage examples/lonely-child-notes.ily \
     --full-score \
     --no-display \

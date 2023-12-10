@@ -1,11 +1,11 @@
 from pytest import mark
 
-from agni.couleurs.matrix import Matrix
-from agni.couleurs.matrix_pitch import MatrixPitch
+from agni.matrix import Matrix
+from agni.matrix_pitch import MatrixPitch
 
 from .conftest import bass_frequency, call_command, melody_frequency
 
-matrix_command_name = ["couleurs", "matrix"]
+matrix_command_name = ["matrix"]
 bass = "440"
 melody = "466"
 bass_midi = "69"

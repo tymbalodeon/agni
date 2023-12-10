@@ -1,9 +1,10 @@
 from typing import cast
+
 from abjad import Duration, Note, Tie
 from abjad.get import indicators as get_indicators
 from pytest import mark, raises
 
-from agni.couleurs.matrix_pitch import MatrixPitch, Tuning
+from agni.matrix_pitch import MatrixPitch, Tuning
 
 from .conftest import bass_frequency, melody_frequency
 

@@ -26,7 +26,7 @@ Claude Vivier’s Bouchara"](https://mtosmt.org/issues/mto.14.20.2/mto.14.20.2.c
 Generate a single matrix for a bass frequency of 98 Hz and melody of 440 Hz:
 
 ``` sh
-> agni couleurs matrix 98 440
+> agni matrix 98 440
                 Combination-Tone Matrix (Hertz)
 
              0 x melody   1 x melody   2 x melody   3 x melody
@@ -41,7 +41,7 @@ displayed in the same format as the input. Specify the "pitch type" explicitly
 to change the output format to something dfferent:
 
 ``` sh
-> agni couleurs matrix 98 440 --pitch-type lilypond
+> agni matrix 98 440 --pitch-type lilypond
                Combination-Tone Matrix (Lilypond)
 
              0 x melody   1 x melody   2 x melody   3 x melody
@@ -55,7 +55,7 @@ The output can also be shown in various forms. For example, you can display the
 pitches as a "list," which makes it easy to copy the output into a LilyPond document:
 
 ``` sh
-> agni couleurs matrix g, "a'" --display-format list
+> agni matrix g, "a'" --display-format list
 g, g d' a' cqs'' eqf'' fs'' a'' b'' cqs''' d''' e''' f''' gqf''' gqs'''
 ```
 
@@ -63,7 +63,7 @@ You can also display pitches stacked as a "chord." Here is the same matrix,
 using midi number input, shown stacked as a chord:
 
 ``` sh
-> agni couleurs matrix 43 69 --display-format chord
+> agni matrix 43 69 --display-format chord
    Combination-Tone Matrix (Hertz)
 
   (3 x bass) + (3 x melody) = 336.0
@@ -87,7 +87,7 @@ You can also control the tuning quantization and number of multiples. Here is
 the same matrix quantized to equal temperament, calculated up to only 3 multiples:
 
 ``` sh
-> agni couleurs matrix 98 440 --tuning equal-tempered --multiples 3
+> agni matrix 98 440 --tuning equal-tempered --multiples 3
           Combination-Tone Matrix (Hertz)
 
              0 x melody   1 x melody   2 x melody
