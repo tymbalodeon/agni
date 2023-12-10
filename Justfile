@@ -357,8 +357,15 @@ example *args:
         )
 
         let input_file_name = "examples/lonely-child"
-        let reference_pdf = "examples/claude-vivier-lonely-child-reference-matrices.pdf"
-        let ensemble_pdf = "examples/claude-vivier-lonely-child-ensemble-matrices.pdf"
+
+        let reference_pdf = (
+            "examples/claude-vivier-lonely-child-reference-matrices.pdf"
+        )
+
+        let ensemble_pdf = (
+            "examples/claude-vivier-lonely-child-ensemble-matrices.pdf"
+        )
+
         let input_pdf = $"($input_file_name).pdf"
         mut pdf_files = []
 
@@ -369,7 +376,10 @@ example *args:
                 lilypond -o examples $input_ly
                 mv --force $"($input_file_name)-formatted.pdf" $input_pdf
             } else {
-                checkexec $input_pdf $input_ly -- lilypond -o examples $input_ly
+                (
+                    checkexec $input_pdf $input_ly -- \
+                        lilypond -o examples $input_ly
+                )
 
                 (
                     checkexec $input_pdf $input_ly
