@@ -81,7 +81,7 @@ install project="--project":
 update project="--project": (install project)
     #!/usr/bin/env nu
 
-    ./scripts/install_dependencies.zsh --update
+    ./install-dependencies --update
 
     brew upgrade rtx
     rtx upgrade
