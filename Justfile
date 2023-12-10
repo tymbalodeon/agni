@@ -13,13 +13,9 @@ _install_and_run *command:
 
     {{command}}
 
-# Add dependencies
-@add *dependencies:
-    pdm add {{dependencies}}
-
-# Add dev dependencies
-@add-dev *dependencies:
-    pdm add --dev {{dependencies}}
+# Add dependencies using options as listed in --help/-h
+@add *args:
+    pdm add {{args}}
 
 # Remove dependencies
 remove *dependencies:
@@ -31,7 +27,7 @@ remove *dependencies:
         pdm remove --dev {{dependencies}}
     }
 
-# Install dependencies (optionally with "--no-project")
+# Install dependencies (optionally with --no-project)
 install project="--project":
     #!/usr/bin/env nu
 
@@ -77,7 +73,7 @@ install project="--project":
         just _install_and_run pdm run pre-commit install out+err> /dev/null
     }
 
-# Update dependencies (optionally with "--no-project")
+# Update dependencies (optionally with --no-project)
 update project="--project": (install project)
     #!/usr/bin/env nu
 
