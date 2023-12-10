@@ -135,14 +135,14 @@ just example
 
 ``` sh
 # Install the necessary dependencies and run the application
-./scripts/install_dependencies.zsh && just try
+./install-dependencies && just run
 ```
 
 ## Installation
 
 ``` sh
 # Install brew, just, and nushell to be able to use `just` commands
-./scripts/install_dependencies.zsh
+./install-dependencies
 ```
 
 ``` sh

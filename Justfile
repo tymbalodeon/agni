@@ -6,6 +6,7 @@ set shell := ["nu", "-c"]
 [no-exit-message]
 _install_and_run *command:
     #!/usr/bin/env nu
+
     if (pdm list --json) == "[]" {
         just install
     }
@@ -23,56 +24,74 @@ _install_and_run *command:
 # Remove dependencies
 remove *dependencies:
     #!/usr/bin/env nu
+
     try {
         pdm remove {{dependencies}}
     } catch {
         pdm remove --dev {{dependencies}}
     }
 
-dependencies := "
-    rtx
-    python
-    pdm
-    pipx
-    pnpm
-    speedscope
-    cargo
-    checkexec
-    gh
-"
-
 # Install dependencies (optionally with "--no-project")
 install project="--project":
     #!/usr/bin/env nu
-    let dependencies = [
-        {{dependencies}}
-    ]
 
-    $dependencies | each {
-        |dependency|
-        nu $"./scripts/($dependency).nu" install
+    def not_installed [command: string] {
+        (command -v $command | is-empty)
     }
+
+    def module_not_installed [command: string] {
+        (
+            pdm run python -m $command --help
+            | complete
+            | get exit_code
+            | into bool
+        )
+    }
+
+    if (not_installed rtx) { brew install rtx }
+    rtx instal out+err> /dev/null
+    if (not_installed pdm) { brew install pdm }
+
+    if (module_not_installed pip) {
+        pdm run python -m ensurepip --upgrade --default-pip
+    }
+
+    if (module_not_installed pipx) {
+        pdm run python -m pip install pipx;
+        pdm run python -m pipx ensurepath
+    }
+
+    if (not_installed pnpm) { brew install pnpm }
+    if (not_installed speedscope) { pnpm add --global speedscope }
+
+    if (not_installed cargo) {
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    }
+
+    if (not_installed cargo) { cargo install checkexec }
+
+    if (not_installed gh) { brew install gh }
 
     if "{{project}}" == "--project" {
         pdm install
+        just _install_and_run pdm run pre-commit install out+err> /dev/null
     }
 
-    just _install_and_run pdm run pre-commit install out+err> /dev/null
-
 # Update dependencies (optionally with "--no-project")
-update project="--project": (install "--no-project")
+update project="--project": (install project)
     #!/usr/bin/env nu
-    let dependencies = [
-        {{dependencies}}
-    ]
 
     ./scripts/install_dependencies.zsh --update
 
-    $dependencies | each {
-        |dependency|
-        nu $"./scripts/($dependency).nu" update
-    }
-
+    brew upgrade rtx
+    rtx upgrade
+    brew upgrade pdm
+    pdm run python -m pip install --upgrade pip pipx
+    brew upgrade pnpm
+    pnpm update --global speedscope
+    rustup update
+    cargo install-update checkexec
+    brew upgrade gh
     pdm run pre-commit autoupdate
 
     if "{{project}}" == "--project" {
@@ -82,6 +101,7 @@ update project="--project": (install "--no-project")
 # Show dependencies as a list or "--tree"
 list tree="":
     #!/usr/bin/env nu
+
     if "{{tree}}" == "--tree" {
         pdm list --tree
     } else {
@@ -124,6 +144,7 @@ version := "(" + get_pyproject_value + "version)"
 # Run the application with <args>
 run *args:
     #!/usr/bin/env nu
+
     let args = (
         ["{{args}}"]
         | split row " "
@@ -140,6 +161,7 @@ run *args:
 # Profile a command and its <args> and view results (see --help/-h for options)
 profile *args:
     #!/usr/bin/env nu
+
     if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
         pdm run py-spy record -h
         exit
@@ -165,6 +187,7 @@ profile *args:
 # Run coverage report (see --help/-h for options)
 coverage *args:
     #!/usr/bin/env nu
+
     if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
         just _install_and_run pdm run coverage report -h
         exit
@@ -183,6 +206,7 @@ coverage *args:
 # Run tests (see --help/-h for options)
 test *args:
     #!/usr/bin/env nu
+
     if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
         just _install_and_run pdm run coverage run -m pytest -h
         exit
@@ -199,6 +223,7 @@ test *args:
 # Build the project and install it with pipx
 build: (install "--no-project")
     #!/usr/bin/env nu
+
     just _install_and_run pdm build
 
     (
