@@ -63,23 +63,23 @@ You can also display pitches stacked as a "chord." Here is the same matrix,
 using midi number input, shown stacked as a chord:
 
 ``` sh
-> agni matrix 43 69 --display-format chord
-   Combination-Tone Matrix (Hertz)
+> agni matrix 43 69 --midi-input --display-format chord
+   Combination-Tone Matrix (Midi)
 
-  (3 x bass) + (3 x melody) = 336.0
-  (2 x bass) + (3 x melody) = 293.0
-  (3 x bass) + (2 x melody) = 267.0
-  (1 x bass) + (3 x melody) = 250.0
-  (2 x bass) + (2 x melody) = 224.0
-  (0 x bass) + (3 x melody) = 207.0
-  (3 x bass) + (1 x melody) = 198.0
-  (1 x bass) + (2 x melody) = 181.0
-  (2 x bass) + (1 x melody) = 155.0
-  (0 x bass) + (2 x melody) = 138.0
-  (3 x bass) + (0 x melody) = 129.0
-  (1 x bass) + (1 x melody) = 112.0
-  (2 x bass) + (0 x melody) = 86.0
+  (3 x bass) + (3 x melody) = 91.5
+  (2 x bass) + (3 x melody) = 90.5
+  (1 x bass) + (3 x melody) = 89.5
+  (0 x bass) + (3 x melody) = 88.0
+  (3 x bass) + (2 x melody) = 86.0
+  (2 x bass) + (2 x melody) = 84.5
+  (1 x bass) + (2 x melody) = 83.0
+  (0 x bass) + (2 x melody) = 81.0
+  (3 x bass) + (1 x melody) = 78.0
+  (2 x bass) + (1 x melody) = 75.5
+  (1 x bass) + (1 x melody) = 72.5
   (0 x bass) + (1 x melody) = 69.0
+  (3 x bass) + (0 x melody) = 62.0
+  (2 x bass) + (0 x melody) = 55.0
   (1 x bass) + (0 x melody) = 43.0
 ```
 
@@ -114,38 +114,28 @@ Vivier's [_Lonely Child_](
 https://www.boosey.com/cr/music/Claude-Vivier-Lonely-Child/47752 "Lonely Child"
 ) is provided as an example.
 
-_To install `just`, see the "Installation" instructions below._
+_(To install `just`, run `./install-dependencies`)_
+
+To compile the input score, generate matrices and harmonized score, and open PDFs:
 
 ``` sh
-# View an input file containing only the soprano melody and bass accompaniment.
-just example --input
-```
-
-``` sh
-# View the input score harmonized with the associated matrices.
-just example --output
-```
-
-``` sh
-# View both
-just example
+just example # --help
 ```
 
 ## Quickstart
 
+To install the necessary dependencies (and run the application):
+
 ``` sh
-# Install the necessary dependencies and run the application
-./install-dependencies && just run
+./install-dependencies # && just run
 ```
 
-## Installation
+## Development
+
+_Justfile_ commands are provided for convenience. To see all available commands,
+run:
 
 ``` sh
-# Install brew, just, and nushell to be able to use `just` commands
-./install-dependencies
-```
-
-``` sh
-# Display all available just commands
+# ./install-dependencies && \
 just
 ```
