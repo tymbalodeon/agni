@@ -13,7 +13,7 @@ from rich.theme import Theme
 from supriya import Server
 from supriya.patterns import EventPattern, SequencePattern
 
-from agni.helpers import stylize
+from .helpers import stylize
 
 from .matrix_pitch import (
     DisplayColor,

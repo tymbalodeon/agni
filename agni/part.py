@@ -21,7 +21,7 @@ from abjad.select import components as get_components
 from abjad.select import leaves as get_leaves
 from more_itertools import seekable
 
-from agni.helpers import InputPart, get_staff_by_name
+from .helpers import InputPart, get_staff_by_name
 
 
 @dataclass

@@ -3,7 +3,7 @@ from functools import cached_property
 
 from abjad import Duration, NamedPitch, Tuplet
 
-from agni.helpers import get_instrument_name
+from .helpers import get_instrument_name
 
 from .matrix import Matrix
 from .matrix_pitch import DisplayFormat, MatrixPitch, PitchType, Tuning

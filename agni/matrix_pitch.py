@@ -5,7 +5,7 @@ from typing import Any
 
 from abjad import Duration, NamedPitch, Note, NumberedPitch, Tie, attach
 
-from agni.helpers import get_instrument_name, stylize
+from .helpers import get_instrument_name, stylize
 
 
 class PitchType(StrEnum):
