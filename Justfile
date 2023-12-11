@@ -13,18 +13,20 @@ _install_and_run *command:
 
     {{command}}
 
-# Add dependencies using options as listed in --help/-h
+# Add (--dev) dependencies (see --help/-h for options)
 @add *args:
     pdm add {{args}}
 
-# Remove dependencies
+# Remove dependencies (see --help/-h for options)
 remove *dependencies:
     #!/usr/bin/env nu
 
-    try {
-        pdm remove {{dependencies}}
-    } catch {
-        pdm remove --dev {{dependencies}}
+    for $dependency in [{{dependencies}}] {
+        if (pdm list $dependency --include dev --json) != "[]" {
+            pdm remove --dev $dependency
+        } else if (pdm list $dependency --exclude dev --json) != "[]" {
+            pdm remove $dependency
+        }
     }
 
 # Install dependencies (optionally with --no-project)
