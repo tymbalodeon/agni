@@ -1,6 +1,6 @@
 set shell := ["nu", "-c"]
 
-@_help *args:
+@_help:
     just --list
 
 [no-exit-message]
