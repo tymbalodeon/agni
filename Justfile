@@ -18,14 +18,14 @@ _install_and_run *command:
     pdm add {{args}}
 
 # Remove dependencies (see --help/-h for options)
-remove *dependencies:
+remove *args:
     #!/usr/bin/env nu
 
-    for $dependency in [{{dependencies}}] {
-        if (pdm list $dependency --include dev --json) != "[]" {
-            pdm remove --dev $dependency
-        } else if (pdm list $dependency --exclude dev --json) != "[]" {
-            pdm remove $dependency
+    for $arg in [{{args}}] {
+        if (pdm list $arg --include dev --json) != "[]" {
+            pdm remove --dev $arg
+        } else if (pdm list $arg --exclude dev --json) != "[]" {
+            pdm remove $arg
         }
     }
 
@@ -46,9 +46,9 @@ install project="--project":
         )
     }
 
-    if (not_installed rtx) { brew install rtx }
-    rtx instal out+err> /dev/null
-    if (not_installed pdm) { brew install pdm }
+    brew bundle
+
+    rtx install out+err> /dev/null
 
     if (module_not_installed pip) {
         pdm run python -m ensurepip --upgrade --default-pip
@@ -59,7 +59,6 @@ install project="--project":
         pdm run python -m pipx ensurepath
     }
 
-    if (not_installed pnpm) { brew install pnpm }
     if (not_installed speedscope) { pnpm add --global speedscope }
 
     if (not_installed cargo) {
@@ -67,8 +66,6 @@ install project="--project":
     }
 
     if (not_installed cargo) { cargo install checkexec }
-
-    if (not_installed gh) { brew install gh }
 
     if "{{project}}" == "--project" {
         pdm install
@@ -79,17 +76,12 @@ install project="--project":
 update project="--project": (install project)
     #!/usr/bin/env nu
 
-    ./install-dependencies --update
-
-    brew upgrade rtx
+    brew bundle
     rtx upgrade
-    brew upgrade pdm
     pdm run python -m pip install --upgrade pip pipx
-    brew upgrade pnpm
     pnpm update --global speedscope
     rustup update
     cargo install-update checkexec
-    brew upgrade gh
     pdm run pre-commit autoupdate
 
     if "{{project}}" == "--project" {

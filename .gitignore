@@ -6,6 +6,7 @@
 .pdm-python
 .pyre/
 __pycache__/
+Brewfile.lock.json
 build/
 dist/
 examples/*-matrices.ly

@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:87dca6b661336cc1fe9818d81683295178f8b2ea887423135106fb5e109f3cc3"
+content_hash = "sha256:82f94390e8c6f4eab35b15e9870169910c37dc02a2d9237331155d50c77f8968"
 
 [[package]]
 name = "abjad"
