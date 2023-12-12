@@ -21,10 +21,35 @@ _install_and_run *command:
 remove *args:
     #!/usr/bin/env nu
 
+    def is-a-dependency [
+        dependency: string
+        --dev
+    ] {
+        let dependencies = if $dev {
+          pdm export --pyproject --dev --no-default 
+        } else {
+          pdm export --pyproject --prod
+        }
+
+        $dependency in (
+            $dependencies
+            | lines 
+            | filter { 
+                |line| 
+
+                (
+                    not ($line | str starts-with "#")
+                    and (not ($line | is-empty))
+                )
+            }
+            | each { |line| $line | split row ">=" | first }
+        )
+    }
+
     for $arg in [{{args}}] {
-        if (pdm list $arg --include dev --json) != "[]" {
+        if (is-a-dependency $arg --dev) {
             pdm remove --dev $arg
-        } else if (pdm list $arg --exclude dev --json) != "[]" {
+        } else if (is-a-dependency $arg) {
             pdm remove $arg
         }
     }
@@ -33,11 +58,11 @@ remove *args:
 install project="--project":
     #!/usr/bin/env nu
 
-    def not_installed [command: string] {
+    def not-installed [command: string] {
         (command -v $command | is-empty)
     }
 
-    def module_not_installed [command: string] {
+    def module-not-installed [command: string] {
         (
             pdm run python -m $command --help
             | complete
@@ -50,11 +75,11 @@ install project="--project":
 
     rtx install out+err> /dev/null
 
-    if (module_not_installed pip) {
+    if (module-not-installed pip) {
         pdm run python -m ensurepip --upgrade --default-pip
     }
 
-    if (module_not_installed pipx) {
+    if (module-not-installed pipx) {
         pdm run python -m pip install pipx;
         pdm run python -m pipx ensurepath
     }
