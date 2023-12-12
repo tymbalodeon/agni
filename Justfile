@@ -26,16 +26,16 @@ remove *args:
         --dev
     ] {
         let dependencies = if $dev {
-          pdm export --pyproject --dev --no-default 
+          pdm export --pyproject --dev --no-default
         } else {
           pdm export --pyproject --prod
         }
 
         $dependency in (
             $dependencies
-            | lines 
-            | filter { 
-                |line| 
+            | lines
+            | filter {
+                |line|
 
                 (
                     not ($line | str starts-with "#")
@@ -113,19 +113,40 @@ update project="--project": (install project)
         pdm update
     }
 
-# Show dependencies as a list or "--tree"
-list tree="":
+# Show application dependencies (see --help/-h for options)
+dependencies *args:
     #!/usr/bin/env nu
 
-    if "{{tree}}" == "--tree" {
-        pdm list --tree
-    } else {
-        (
-            pdm list
-                --fields name,version
-                --sort name
-        )
+    # Show application dependencies
+    def show-dependencies [
+        --dev # Show only development dependencies
+        --prod # Show only production dependencies
+        --installed # Show installed dependencies
+        --tree # Show installed dependencies as a tree
+    ] {
+        if $installed {
+            if $tree {
+                pdm list --tree
+            } else {
+                (
+                    pdm list
+                        --fields name,version
+                        --sort name
+                )
+            }
+        } else {
+            if $dev {
+                pdm export --pyproject --no-default
+            } else if $prod {
+                pdm export --pyproject --prod
+            } else {
+                pdm export --pyproject
+            }
+        }
     }
+
+    show-dependencies {{args}}
+
 
 # Create a new virtual environment, overwriting an existing one if present
 @venv:
