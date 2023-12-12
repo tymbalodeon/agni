@@ -21,6 +21,13 @@ _install_and_run *command:
 remove *args:
     #!/usr/bin/env nu
 
+    if ("{{args}}" | str contains "--help") or (
+        "{{args}}" | str contains "-h"
+    ) {
+        pdm remove --help
+        exit
+    }
+
     def is-a-dependency [
         dependency: string
         --dev
@@ -84,13 +91,13 @@ install project="--project":
         pdm run python -m pipx ensurepath
     }
 
-    if (not_installed speedscope) { pnpm add --global speedscope }
+    if (not-installed speedscope) { pnpm add --global speedscope }
 
-    if (not_installed cargo) {
+    if (not-installed cargo) {
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
     }
 
-    if (not_installed cargo) { cargo install checkexec }
+    if (not-installed cargo) { cargo install checkexec }
 
     if "{{project}}" == "--project" {
         pdm install
