@@ -61,8 +61,8 @@ remove *args:
         }
     }
 
-# Install dependencies (optionally with --no-project)
-install project="--project":
+# Install dependencies (--quiet)
+install verbose="--verbose":
     #!/usr/bin/env nu
 
     def not-installed [command: string] {
@@ -78,9 +78,20 @@ install project="--project":
         )
     }
 
-    brew bundle
+    if "{{verbose}}" == "--verbose" {
+        brew bundle
+    } else {
+        brew bundle out+err> /dev/null
+    }
 
-    rtx install out+err> /dev/null
+    if (
+        rtx outdated --log-level error
+        | complete
+        | get exit_code
+        | into bool
+    ) {
+        rtx install
+    }
 
     if (module-not-installed pip) {
         pdm run python -m ensurepip --upgrade --default-pip
@@ -99,13 +110,16 @@ install project="--project":
 
     if (not-installed cargo) { cargo install checkexec }
 
-    if "{{project}}" == "--project" {
+    if "{{verbose}}" == "--verbose" {
         pdm install
+        just _install_and_run pdm run pre-commit install
+    } else {
         just _install_and_run pdm run pre-commit install out+err> /dev/null
     }
 
-# Update dependencies (optionally with --no-project)
-update project="--project": (install project)
+
+# Update dependencies
+update: (install "--quiet")
     #!/usr/bin/env nu
 
     brew bundle
@@ -115,10 +129,7 @@ update project="--project": (install project)
     rustup update
     cargo install-update checkexec
     pdm run pre-commit autoupdate
-
-    if "{{project}}" == "--project" {
-        pdm update
-    }
+    pdm update
 
 # Show application dependencies (see --help/-h for options)
 dependencies *args:
@@ -209,7 +220,7 @@ profile *args:
         pdm run py-spy record -h
         exit
     } else {
-        just install --no-project
+        just install --quiet
     }
 
     let output_directory = "profiles"
@@ -264,7 +275,7 @@ test *args:
     just _install_and_run pdm run coverage run -m pytest $args
 
 # Build the project and install it with pipx
-build: (install "--no-project")
+build: (install "--quiet")
     #!/usr/bin/env nu
 
     just _install_and_run pdm build
