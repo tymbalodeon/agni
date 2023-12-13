@@ -218,7 +218,6 @@ dependencies *args:
 
     show-dependencies {{args}}
 
-
 # Create a new virtual environment, overwriting an existing one if present
 @venv:
     pdm venv create --force
