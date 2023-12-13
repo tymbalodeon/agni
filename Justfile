@@ -192,20 +192,16 @@ install *args:
             if (not-installed cargo) { cargo install checkexec }
         }
 
-        if not $quiet {
-            if not $prod {
-                pdm install
-            } else if $prod {
+        if $quiet and (not $prod) {
+            just _install_and_run pdm run pre-commit install out+err> /dev/null
+        } else if not $quiet {
+            if $prod {
                 pdm install --prod
+            } else {
+                pdm install 
+                just _install_and_run pdm run pre-commit install
             }
         }
-
-        if $quiet {
-            just _install_and_run pdm run pre-commit install out+err> /dev/null
-        } else {
-            just _install_and_run pdm run pre-commit install
-        }
-    }
 
     install {{args}}
 
@@ -217,10 +213,10 @@ update *args:
     def update [
         --prod # Update production dependencies
     ] {
-        if not $prod {
-            just install --quiet
-        } else if $prod {
+        if $prod {
             just install --quiet --prod
+        } else {
+            just install --quiet
         }
 
         mut brewfiles = ["Brewfile.prod"]
@@ -288,11 +284,13 @@ dependencies *args:
                 list-dependencies --include-version --prod
             } else {
                 let prod_dependencies = (
-                    indent (just dependencies --prod)
+                    indent (list-dependencies --prod)
                 )
+
                 let dev_dependencies = (
-                    indent (just dependencies --dev)
+                    indent (list-dependencies --dev)
                 )
+
                 [
                     Production:
                     ($prod_dependencies)
