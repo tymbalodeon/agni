@@ -19,8 +19,8 @@ _install_and_run *command:
 
 use-list-dependencies := """
     def list-dependencies [
-        --dev 
-        --prod 
+        --dev
+        --prod
         --include-version
     ] {
         let export = if $dev {
@@ -44,8 +44,8 @@ use-list-dependencies := """
 
         if not $include_version {
             $dependencies = (
-                $dependencies 
-                | each { |dependency| $dependency | split row ">=" | first } 
+                $dependencies
+                | each { |dependency| $dependency | split row ">=" | first }
             )
         }
 
@@ -73,7 +73,7 @@ remove *args:
         let dependencies = if $dev {
             list-dependencies --dev
         } else {
-            list-dependencies 
+            list-dependencies
         }
 
         $dependency in $dependencies
@@ -92,7 +92,7 @@ install arg="--verbose":
     #!/usr/bin/env nu
 
     def indent [text: string] {
-        $text 
+        $text
         | lines
         | each { |line| $"\t($line)" }
         | str join "\n"
@@ -101,20 +101,7 @@ install arg="--verbose":
     if ("{{arg}}" | str contains "--help") or (
         "{{arg}}" | str contains "-h"
     ) {
-        let prod_dependencies = (
-            indent (just dependencies --prod)
-        )
-        let dev_dependencies = (
-            indent (just dependencies --dev)
-        )
-
-        echo "Install dependencies"
-        echo
-        echo "Production:"
-        echo $prod_dependencies
-        echo
-        echo "Development:"
-        echo $dev_dependencies
+        just dependencies
 
         exit
     }
@@ -190,6 +177,13 @@ dependencies *args:
 
     {{use-list-dependencies}}
 
+    def indent [text: string] {
+        $text
+        | lines
+        | each { |line| $"\t($line)" }
+        | str join "\n"
+    }
+
     # Show application dependencies
     def show-dependencies [
         --dev # Show only development dependencies
@@ -211,7 +205,22 @@ dependencies *args:
             } else if $prod {
                 list-dependencies --include-version --prod
             } else {
-                list-dependencies --include-version
+                let prod_dependencies = (
+                    indent (just dependencies --prod)
+                )
+                let dev_dependencies = (
+                    indent (just dependencies --dev)
+                )
+                [
+                    "Install dependencies"
+                    ""
+                    Production:
+                    ($prod_dependencies)
+                    ""
+                    Development:
+                    ($dev_dependencies)
+                ]
+                | str join "\n"
             }
         }
     }
