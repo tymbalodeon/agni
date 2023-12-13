@@ -125,11 +125,34 @@ install *args:
         --dev # Install development dependencies
         --prod # Install production dependencies
         --quiet # Don't display output
+        --dry-run # Display dependencies without installing
     ] {
-        if $quiet {
-            brew bundle
-        } else {
-            brew bundle out+err> /dev/null
+        let all = (not $dev) and (not $prod)
+
+        if $dry_run and $all {
+            just dependencies
+        } else if $dry_run and $dev {
+            just dependencies --dev
+        } else if $dry_run and $prod {
+            just dependencies --prod
+        }
+
+        if $dry_run {
+            exit
+        }
+
+        mut brewfiles = ["Brewfile.prod"]
+
+        if $all or $dev {
+            $brewfiles = ($brewfiles | append "Brewfile.dev")
+        }
+
+        for file in $brewfiles {
+            if $quiet {
+                brew bundle --no-upgrade --file $file out+err> /dev/null
+            } else {
+                brew bundle --no-upgrade --file $file
+            }
         }
 
         if (
@@ -141,28 +164,43 @@ install *args:
             rtx install
         }
 
-        if (module-not-installed pip) {
-            pdm run python -m ensurepip --upgrade --default-pip
+        if $all or $dev {
+            if (module-not-installed pip) {
+                pdm run python -m ensurepip --upgrade --default-pip
+            }
+
+            if (module-not-installed pipx) {
+                pdm run python -m pip install pipx;
+                pdm run python -m pipx ensurepath
+            }
+
+            if (not-installed speedscope) { pnpm add --global speedscope }
+
+            if (not-installed cargo) {
+                curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+            }
+
+            if (not-installed cargo) { cargo install checkexec }
         }
 
-        if (module-not-installed pipx) {
-            pdm run python -m pip install pipx;
-            pdm run python -m pipx ensurepath
+        if $quiet and $all {
+            pdm install out+err> /dev/null
+        } else if $quiet and $prod {
+            pdm install --prod out+err> /dev/null
+        } else if $quiet and $dev {
+            pdm install --dev out+err> /dev/null
+        } else if $all {
+            pdm install
+        } else if $prod {
+            pdm install --prod
+        } else if $dev {
+            pdm install --dev
         }
-
-        if (not-installed speedscope) { pnpm add --global speedscope }
-
-        if (not-installed cargo) {
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-        }
-
-        if (not-installed cargo) { cargo install checkexec }
 
         if $quiet {
-            pdm install
-            just _install_and_run pdm run pre-commit install
-        } else {
             just _install_and_run pdm run pre-commit install out+err> /dev/null
+        } else {
+            just _install_and_run pdm run pre-commit install
         }
     }
 
