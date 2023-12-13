@@ -19,25 +19,48 @@ _help:
 @source recipe:
     just --show {{ recipe }}
 
-# Change the Python version used by the application
-python version: && (install "--minimal")
+# Specify the Python version to be used by the application
+python *args:
     #!/usr/bin/env nu
 
-    # Change the Python version used by the application
+    # Specify the Python version to be used by the application and re-create
+    # the virtual environment if not already using that version
     def python [
-        version: string # Python version to use
+        --installed # Show installed Python versions
+        --latest # Show the latest available Python version
+        --use: string # Python version to use
     ] {
-        let version = if "{{ version }}" == "latest" {
+        if $latest {
+            rtx latest python
+            exit
+        }
+
+        if $installed {
+            rtx list python
+            exit
+        }
+
+        if ($use | is-empty) {
+            ^python -V
+            exit
+        }
+
+        let version = if $use == "latest" {
             (rtx latest python)
         } else {
-            "{{ version }}"
+            $use
+        }
+
+        if ((^python -V) | split row " "  | last) == $version {
+            exit
         }
 
         rtx local $"python@($version)"
         pdm venv create --force (rtx where $"python@($version)")
+        just install --minimal
     }
 
-    python {{ version }}
+    python {{ args }}
 
 [no-exit-message]
 _install_and_run *command:
