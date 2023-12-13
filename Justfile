@@ -17,15 +17,15 @@ _install_and_run *command:
 
     {{command}}
 
-# Add (--dev) dependencies (see --help/-h for options)
+# Add dependencies (see --help/-h for options)
 add *args:
     #!/usr/bin/env nu
 
     # Add dependencies
     def add [
-    ...dependencies: string,
-     --dev # Add dependencies to the development group
-    ] {
+        ...dependencies: string,
+        --dev # Add dependencies to the development group
+    ]: {
         if $dev {
             pdm add --dev $dependencies
         } else {
@@ -101,26 +101,11 @@ remove *args:
         }
     }
 
-    remove {{args}} 
+    remove {{args}}
 
-# Install dependencies (--quiet)
+# Install dependencies (see --help/-h for options)
 install *args:
     #!/usr/bin/env nu
-
-    if ("{{args}}" | str contains "--help") or (
-        "{{args}}" | str contains "-h"
-    ) {
-        let args = (
-            "{{args}}"
-            | str replace "--help" ""
-            | str replace "-h" ""
-        )
-
-        echo "Install dependencies\n"
-        just dependencies $args
-
-        exit
-    }
 
     def not-installed [command: string] {
         (command -v $command | is-empty)
@@ -135,44 +120,53 @@ install *args:
         )
     }
 
-    if ("{{args}}" | str contains "--quiet") {
-        brew bundle
-    } else {
-        brew bundle out+err> /dev/null
+    # Install dependencies
+    def install [
+        --dev # Install development dependencies
+        --prod # Install production dependencies
+        --quiet # Don't display output
+    ] {
+        if $quiet {
+            brew bundle
+        } else {
+            brew bundle out+err> /dev/null
+        }
+
+        if (
+            rtx outdated --log-level error
+            | complete
+            | get exit_code
+            | into bool
+        ) {
+            rtx install
+        }
+
+        if (module-not-installed pip) {
+            pdm run python -m ensurepip --upgrade --default-pip
+        }
+
+        if (module-not-installed pipx) {
+            pdm run python -m pip install pipx;
+            pdm run python -m pipx ensurepath
+        }
+
+        if (not-installed speedscope) { pnpm add --global speedscope }
+
+        if (not-installed cargo) {
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+        }
+
+        if (not-installed cargo) { cargo install checkexec }
+
+        if $quiet {
+            pdm install
+            just _install_and_run pdm run pre-commit install
+        } else {
+            just _install_and_run pdm run pre-commit install out+err> /dev/null
+        }
     }
 
-    if (
-        rtx outdated --log-level error
-        | complete
-        | get exit_code
-        | into bool
-    ) {
-        rtx install
-    }
-
-    if (module-not-installed pip) {
-        pdm run python -m ensurepip --upgrade --default-pip
-    }
-
-    if (module-not-installed pipx) {
-        pdm run python -m pip install pipx;
-        pdm run python -m pipx ensurepath
-    }
-
-    if (not-installed speedscope) { pnpm add --global speedscope }
-
-    if (not-installed cargo) {
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    }
-
-    if (not-installed cargo) { cargo install checkexec }
-
-    if ("{{args}}" | str contains "--quiet") {
-        pdm install
-        just _install_and_run pdm run pre-commit install
-    } else {
-        just _install_and_run pdm run pre-commit install out+err> /dev/null
-    }
+    install {{args}}
 
 # Update dependencies
 update: (install "--quiet")
