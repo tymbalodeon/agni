@@ -21,6 +21,7 @@ _install_and_run *command:
 add *args:
     #!/usr/bin/env nu
 
+    # Add dependencies
     def add [
     ...dependencies: string,
      --dev # Add dependencies to the development group
@@ -76,13 +77,6 @@ remove *args:
 
     {{use-list-dependencies}}
 
-    if ("{{args}}" | str contains "--help") or (
-        "{{args}}" | str contains "-h"
-    ) {
-        pdm remove --help
-        exit
-    }
-
     def is-a-dependency [
         dependency: string
         --dev
@@ -96,13 +90,18 @@ remove *args:
         $dependency in $dependencies
     }
 
-    for $arg in [{{args}}] {
-        if (is-a-dependency $arg --dev) {
-            pdm remove --dev $arg
-        } else if (is-a-dependency $arg) {
-            pdm remove $arg
+    # Remove dependencies
+    def remove [...dependencies: string] {
+        for $dependency in [$dependencies] {
+            if (is-a-dependency $dependency --dev) {
+                pdm remove --dev $dependency
+            } else if (is-a-dependency $dependency) {
+                pdm remove $dependency
+            }
         }
     }
+
+    remove {{args}} 
 
 # Install dependencies (--quiet)
 install *args:
