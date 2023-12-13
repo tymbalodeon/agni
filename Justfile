@@ -3,6 +3,10 @@ set shell := ["nu", "-c"]
 @_help:
     just --list
 
+# Display the source code for a recipe
+@source recipe:
+    just --dry-run {{recipe}}
+
 [no-exit-message]
 _install_and_run *command:
     #!/usr/bin/env nu
@@ -14,8 +18,21 @@ _install_and_run *command:
     {{command}}
 
 # Add (--dev) dependencies (see --help/-h for options)
-@add *args:
-    pdm add {{args}}
+add *args:
+    #!/usr/bin/env nu
+
+    def add [
+    ...dependencies: string,
+     --dev # Add dependencies to the development group
+    ] {
+        if $dev {
+            pdm add --dev $dependencies
+        } else {
+            pdm add $dependencies
+        }
+    }
+
+    add {{args}}
 
 use-list-dependencies := """
     def list-dependencies [
