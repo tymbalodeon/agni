@@ -6,7 +6,11 @@ _help:
     (
         just --list
              --list-heading
-                "Available recipes: (run `<recipe> --help/-h` for more info)\n"
+                [
+                    "Available recipes:"
+                    "(run `<recipe> --help/-h` for more info)\n"
+                ]
+                | str join " "
     )
 
 # Display the source code for a recipe
