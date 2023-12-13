@@ -17,9 +17,47 @@ _install_and_run *command:
 @add *args:
     pdm add {{args}}
 
+use-list-dependencies := """
+    def list-dependencies [
+        --dev 
+        --prod 
+        --include-version
+    ] {
+        let export = if $dev {
+            pdm export --pyproject --no-default
+        } else if $prod {
+            pdm export --pyproject --prod
+        } else {
+            pdm export --pyproject
+        }
+
+        mut dependencies = $export
+            | lines
+            | filter {
+                |line|
+
+                (
+                    (not ($line | is-empty))
+                    and (not ($line | str starts-with "#"))
+                )
+            }
+
+        if not $include_version {
+            $dependencies = (
+                $dependencies 
+                | each { |dependency| $dependency | split row ">=" | first } 
+            )
+        }
+
+        $dependencies | str join "\n"
+    }
+"""
+
 # Remove dependencies (see --help/-h for options)
 remove *args:
     #!/usr/bin/env nu
+
+    {{use-list-dependencies}}
 
     if ("{{args}}" | str contains "--help") or (
         "{{args}}" | str contains "-h"
@@ -33,24 +71,12 @@ remove *args:
         --dev
     ] {
         let dependencies = if $dev {
-          pdm export --pyproject --dev --no-default
+            list-dependencies --dev
         } else {
-          pdm export --pyproject --prod
+            list-dependencies 
         }
 
-        $dependency in (
-            $dependencies
-            | lines
-            | filter {
-                |line|
-
-                (
-                    not ($line | str starts-with "#")
-                    and (not ($line | is-empty))
-                )
-            }
-            | each { |line| $line | split row ">=" | first }
-        )
+        $dependency in $dependencies
     }
 
     for $arg in [{{args}}] {
@@ -62,8 +88,16 @@ remove *args:
     }
 
 # Install dependencies (--quiet)
-install verbose="--verbose":
+install arg="--verbose":
     #!/usr/bin/env nu
+
+    if ("{{arg}}" | str contains "--help") or (
+        "{{arg}}" | str contains "-h"
+    ) {
+        echo "Install dependencies:"
+        just dependencies
+        exit
+    }
 
     def not-installed [command: string] {
         (command -v $command | is-empty)
@@ -78,7 +112,7 @@ install verbose="--verbose":
         )
     }
 
-    if "{{verbose}}" == "--verbose" {
+    if "{{arg}}" == "--verbose" {
         brew bundle
     } else {
         brew bundle out+err> /dev/null
@@ -110,13 +144,12 @@ install verbose="--verbose":
 
     if (not-installed cargo) { cargo install checkexec }
 
-    if "{{verbose}}" == "--verbose" {
+    if "{{arg}}" == "--verbose" {
         pdm install
         just _install_and_run pdm run pre-commit install
     } else {
         just _install_and_run pdm run pre-commit install out+err> /dev/null
     }
-
 
 # Update dependencies
 update: (install "--quiet")
@@ -135,6 +168,8 @@ update: (install "--quiet")
 dependencies *args:
     #!/usr/bin/env nu
 
+    {{use-list-dependencies}}
+
     # Show application dependencies
     def show-dependencies [
         --dev # Show only development dependencies
@@ -142,23 +177,21 @@ dependencies *args:
         --installed # Show installed dependencies
         --tree # Show installed dependencies as a tree
     ] {
-        if $installed {
-            if $tree {
-                pdm list --tree
-            } else {
-                (
-                    pdm list
-                        --fields name,version
-                        --sort name
-                )
-            }
+        if $tree {
+            pdm list --tree
+        } else if $installed {
+            (
+                pdm list
+                    --fields name,version
+                    --sort name
+            )
         } else {
             if $dev {
-                pdm export --pyproject --no-default
+                list-dependencies --include-version --dev
             } else if $prod {
-                pdm export --pyproject --prod
+                list-dependencies --include-version --prod
             } else {
-                pdm export --pyproject
+                list-dependencies --include-version
             }
         }
     }
