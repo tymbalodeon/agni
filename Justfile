@@ -91,11 +91,31 @@ remove *args:
 install arg="--verbose":
     #!/usr/bin/env nu
 
+    def indent [text: string] {
+        $text 
+        | lines
+        | each { |line| $"\t($line)" }
+        | str join "\n"
+    }
+
     if ("{{arg}}" | str contains "--help") or (
         "{{arg}}" | str contains "-h"
     ) {
-        echo "Install dependencies:"
-        just dependencies
+        let prod_dependencies = (
+            indent (just dependencies --prod)
+        )
+        let dev_dependencies = (
+            indent (just dependencies --dev)
+        )
+
+        echo "Install dependencies"
+        echo
+        echo "Production:"
+        echo $prod_dependencies
+        echo
+        echo "Development:"
+        echo $dev_dependencies
+
         exit
     }
 
