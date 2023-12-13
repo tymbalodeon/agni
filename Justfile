@@ -138,17 +138,12 @@ install *args:
 
     # Install dependencies
     def install [
-        --dev # Install development dependencies
-        --prod # Install production dependencies
+        --prod # Install production dependencies only
         --quiet # Don't display output
         --dry-run # Display dependencies without installing
     ] {
-        let all = (not $dev) and (not $prod)
-
-        if $dry_run and $all {
+        if $dry_run and (not $prod) {
             just dependencies
-        } else if $dry_run and $dev {
-            just dependencies --dev
         } else if $dry_run and $prod {
             just dependencies --prod
         }
@@ -160,7 +155,7 @@ install *args:
         if not $quiet {
             mut brewfiles = ["Brewfile.prod"]
 
-            if $all or $dev {
+            if not $prod {
                 $brewfiles = ($brewfiles | append "Brewfile.dev")
             }
 
@@ -178,7 +173,7 @@ install *args:
             rtx install
         }
 
-        if $all or $dev {
+        if not $prod {
             if (module-not-installed pip) {
                 pdm run python -m ensurepip --upgrade --default-pip
             }
@@ -198,12 +193,10 @@ install *args:
         }
 
         if not $quiet {
-            if $all {
+            if not $prod {
                 pdm install
             } else if $prod {
                 pdm install --prod
-            } else if $dev {
-                pdm install --dev
             }
         }
 
@@ -222,22 +215,17 @@ update *args:
 
     # Update dependencies
     def update [
-        --dev # Update development dependencies
         --prod # Update production dependencies
     ] {
-        let all = (not $dev) and (not $prod)
-
-        if $all {
+        if not $prod {
             just install --quiet
-        } else if $dev {
-            just install --quiet --dev
         } else if $prod {
             just install --quiet --prod
         }
 
         mut brewfiles = ["Brewfile.prod"]
 
-        if $all or $dev {
+        if not $prod {
             $brewfiles = ($brewfiles | append "Brewfile.dev")
         }
 
@@ -247,16 +235,14 @@ update *args:
 
         rtx upgrade
 
-        if $all or $dev {
+        if not $prod {
             pdm run python -m pip install --upgrade pip pipx
             pnpm update --global speedscope
             rustup update
             cargo install-update checkexec
         }
 
-        if $dev {
-            pdm update --dev
-        } else if $prod {
+        if $prod {
             pdm update --prod
         } else {
             pdm update
