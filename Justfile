@@ -19,11 +19,31 @@ _help:
 @source recipe:
     just --show {{ recipe }}
 
+# Change the Python version used by the application
+python version: && (install "--minimal")
+    #!/usr/bin/env nu
+
+    # Change the Python version used by the application
+    def python [
+        version: string # Python version to use
+    ] {
+        let version = if "{{ version }}" == "latest" {
+            (rtx latest python)
+        } else {
+            "{{ version }}"
+        }
+
+        rtx local $"python@($version)"
+        pdm venv create --force (rtx where $"python@($version)")
+    }
+
+    python {{ version }}
+
 [no-exit-message]
 _install_and_run *command:
     #!/usr/bin/env nu
 
-    if (pdm list --json) == "[]" {
+    if (pdm list --include default --include dev --json) == "[]" {
         just install
     }
 
@@ -139,7 +159,7 @@ install *args:
     # Install dependencies
     def install [
         --prod # Install production dependencies only
-        --quiet # Don't display output
+        --minimal # Install only dependencies necessary for other commands
         --dry-run # Display dependencies without installing
     ] {
         if $dry_run and (not $prod) {
@@ -152,7 +172,7 @@ install *args:
             exit
         }
 
-        if not $quiet {
+        if not $minimal {
             mut brewfiles = ["Brewfile.prod"]
 
             if not $prod {
@@ -179,7 +199,7 @@ install *args:
             }
 
             if (module-not-installed pipx) {
-                pdm run python -m pip install pipx;
+                pdm run python -m pip install --upgrade pip pipx;
                 pdm run python -m pipx ensurepath
             }
 
@@ -192,9 +212,9 @@ install *args:
             if (not-installed cargo) { cargo install checkexec }
         }
 
-        if $quiet and (not $prod) {
+        if $minimal and (not $prod) {
             just _install_and_run pdm run pre-commit install out+err> /dev/null
-        } else if not $quiet {
+        } else if not $minimal {
             if $prod {
                 pdm install --prod
             } else {
@@ -215,9 +235,9 @@ update *args:
         --prod # Update production dependencies
     ] {
         if $prod {
-            just install --quiet --prod
+            just install --minimal --prod
         } else {
-            just install --quiet
+            just install --minimal
         }
 
         mut brewfiles = ["Brewfile.prod"]
@@ -306,10 +326,6 @@ dependencies *args:
 
     show-dependencies {{ args }}
 
-# Create a new virtual environment, overwriting an existing one if present
-@venv:
-    pdm venv create --force
-
 # Type-check
 [no-exit-message]
 @check:
@@ -360,7 +376,7 @@ profile *args:
         pdm run py-spy record -h
         exit
     } else {
-        just install --quiet
+        just install --minimal
     }
 
     let output_directory = "profiles"
@@ -415,7 +431,7 @@ test *args:
     just _install_and_run pdm run coverage run -m pytest $args
 
 # Build the project and install it with pipx
-build: (install "--quiet")
+build: (install "--minimal")
     #!/usr/bin/env nu
 
     just _install_and_run pdm build
