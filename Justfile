@@ -198,10 +198,11 @@ install *args:
             if $prod {
                 pdm install --prod
             } else {
-                pdm install 
+                pdm install
                 just _install_and_run pdm run pre-commit install
             }
         }
+    }
 
     install {{args}}
 
