@@ -5,4 +5,4 @@ if ! command -v "brew" &>/dev/null; then
         "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 fi
 
-brew bundle
+brew bundle --no-upgrade --file Brewfile.prod
