@@ -17,7 +17,7 @@ _help:
 
 # Display the source code for a recipe
 @source recipe:
-    just --dry-run {{recipe}}
+    just --show {{ recipe }}
 
 [no-exit-message]
 _install_and_run *command:
@@ -27,7 +27,7 @@ _install_and_run *command:
         just install
     }
 
-    {{command}}
+    {{ command }}
 
 # Add dependencies
 add *args:
@@ -45,7 +45,7 @@ add *args:
         }
     }
 
-    add {{args}}
+    add {{ args }}
 
 use-list-dependencies := """
     def list-dependencies [
@@ -91,7 +91,7 @@ use-list-dependencies := """
 remove *args:
     #!/usr/bin/env nu
 
-    {{use-list-dependencies}}
+    {{ use-list-dependencies }}
 
     def is-a-dependency [
         dependency: string
@@ -117,7 +117,7 @@ remove *args:
         }
     }
 
-    remove {{args}}
+    remove {{ args }}
 
 # Install dependencies
 install *args:
@@ -204,7 +204,7 @@ install *args:
         }
     }
 
-    install {{args}}
+    install {{ args }}
 
 # Update dependencies
 update *args:
@@ -248,13 +248,13 @@ update *args:
         pdm run pre-commit autoupdate
     }
 
-    update {{args}}
+    update {{ args }}
 
 # Show application dependencies
 dependencies *args:
     #!/usr/bin/env nu
 
-    {{use-list-dependencies}}
+    {{ use-list-dependencies }}
 
     def indent [text: string] {
         $text
@@ -304,7 +304,7 @@ dependencies *args:
         }
     }
 
-    show-dependencies {{args}}
+    show-dependencies {{ args }}
 
 # Create a new virtual environment, overwriting an existing one if present
 @venv:
@@ -340,23 +340,23 @@ run *args:
     #!/usr/bin/env nu
 
     let args = (
-        ["{{args}}"]
+        ["{{ args }}"]
         | split row " "
         | each { |arg| $"\"($arg)\"" }
         | str join " "
     )
 
     if $args == '""' {
-        just _install_and_run pdm run {{command}}
+        just _install_and_run pdm run {{ command }}
     } else {
-        just _install_and_run pdm run {{command}} $"\"($args)\""
+        just _install_and_run pdm run {{ command }} $"\"($args)\""
     }
 
 # Profile a command and its <args> and view results
 profile *args:
     #!/usr/bin/env nu
 
-    if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
+    if ("--help" in "{{ args }}") or ("-h" in "{{ args }}") {
         pdm run py-spy record -h
         exit
     } else {
@@ -373,7 +373,7 @@ profile *args:
             --format speedscope
             --output $output_file
             --subprocesses
-            -- pdm run python -m {{command}} {{args}}
+            -- pdm run python -m {{ command }} {{ args }}
     )
 
     speedscope $output_file
@@ -382,7 +382,7 @@ profile *args:
 coverage *args:
     #!/usr/bin/env nu
 
-    if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
+    if ("--help" in "{{ args }}") or ("-h" in "{{ args }}") {
         just _install_and_run pdm run coverage report -h
         exit
     } else {
@@ -394,22 +394,22 @@ coverage *args:
             --omit "*/pdm/*" \
             --skip-covered \
             --sort "cover" \
-            {{args}}
+            {{ args }}
     )
 
 # Run tests
 test *args:
     #!/usr/bin/env nu
 
-    if ("--help" in "{{args}}") or ("-h" in "{{args}}") {
+    if ("--help" in "{{ args }}") or ("-h" in "{{ args }}") {
         just _install_and_run pdm run coverage run -m pytest -h
         exit
     }
 
-    let args = if ("{{args}}" | is-empty) {
+    let args = if ("{{ args }}" | is-empty) {
         "tests"
     } else {
-        "{{args}}"
+        "{{ args }}"
     }
 
     just _install_and_run pdm run coverage run -m pytest $args
@@ -422,7 +422,7 @@ build: (install "--quiet")
 
     (
         pdm run python -m pipx install
-            $"./dist/{{command}}-{{version}}-py3-none-any.whl"
+            $"./dist/{{ command }}-{{ version }}-py3-none-any.whl"
             --force
             --pip-args="--force-reinstall"
     )
@@ -456,7 +456,7 @@ clean *args:
         ...files: string # Which files to clean (see --choices for available files)
     ] {
         if ($choices) {
-            echo {{generated_files}}
+            echo {{ generated_files }}
             exit
         }
 
@@ -481,7 +481,7 @@ clean *args:
 
         for file in $files_to_clean {
             let files_list = (
-                {{generated_files}}
+                {{ generated_files }}
                 | where Option == $file
                 | get "Files to clean"
             )
@@ -506,7 +506,7 @@ clean *args:
         }
     }
 
-    clean {{args}}
+    clean {{ args }}
 
 # Open the repository page in the browser
 @repo:
@@ -523,7 +523,6 @@ just run \
     --notate \
     --save
 """
-
 notate_ensemble_passage := """
 just run \
     passage examples/lonely-child-notes.ily \
@@ -586,11 +585,11 @@ example *args:
 
         if $default or $reference or $generated {
             if $force {
-                {{notate_reference_passage}}
+                {{ notate_reference_passage }}
             } else {
                 (
                     checkexec $reference_pdf $"($input_file_name)*.ily"
-                        -- {{notate_reference_passage}}
+                        -- {{ notate_reference_passage }}
                 )
             }
 
@@ -599,11 +598,11 @@ example *args:
 
         if $default or $ensemble or $generated {
             if $force {
-                {{notate_ensemble_passage}}
+                {{ notate_ensemble_passage }}
             } else {
                 (
                     checkexec $ensemble_pdf $"($input_file_name)*.ily"
-                        -- {{notate_ensemble_passage}}
+                        -- {{ notate_ensemble_passage }}
                 )
             }
 
@@ -615,4 +614,4 @@ example *args:
         }
     }
 
-    example {{args}}
+    example {{ args }}
