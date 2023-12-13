@@ -88,20 +88,20 @@ remove *args:
     }
 
 # Install dependencies (--quiet)
-install arg="--verbose":
+install *args:
     #!/usr/bin/env nu
 
-    def indent [text: string] {
-        $text
-        | lines
-        | each { |line| $"\t($line)" }
-        | str join "\n"
-    }
-
-    if ("{{arg}}" | str contains "--help") or (
-        "{{arg}}" | str contains "-h"
+    if ("{{args}}" | str contains "--help") or (
+        "{{args}}" | str contains "-h"
     ) {
-        just dependencies
+        let args = (
+            "{{args}}"
+            | str replace "--help" ""
+            | str replace "-h" ""
+        )
+
+        echo "Install dependencies\n"
+        just dependencies $args
 
         exit
     }
@@ -119,7 +119,7 @@ install arg="--verbose":
         )
     }
 
-    if "{{arg}}" == "--verbose" {
+    if ("{{args}}" | str contains "--quiet") {
         brew bundle
     } else {
         brew bundle out+err> /dev/null
@@ -151,7 +151,7 @@ install arg="--verbose":
 
     if (not-installed cargo) { cargo install checkexec }
 
-    if "{{arg}}" == "--verbose" {
+    if ("{{args}}" | str contains "--quiet") {
         pdm install
         just _install_and_run pdm run pre-commit install
     } else {
@@ -212,8 +212,6 @@ dependencies *args:
                     indent (just dependencies --dev)
                 )
                 [
-                    "Install dependencies"
-                    ""
                     Production:
                     ($prod_dependencies)
                     ""
