@@ -145,16 +145,14 @@ install *args:
             exit
         }
 
-        mut brewfiles = ["Brewfile.prod"]
+        if not $quiet {
+            mut brewfiles = ["Brewfile.prod"]
 
-        if $all or $dev {
-            $brewfiles = ($brewfiles | append "Brewfile.dev")
-        }
+            if $all or $dev {
+                $brewfiles = ($brewfiles | append "Brewfile.dev")
+            }
 
-        for file in $brewfiles {
-            if $quiet {
-                brew bundle --no-upgrade --file $file out+err> /dev/null
-            } else {
+            for file in $brewfiles {
                 brew bundle --no-upgrade --file $file
             }
         }
@@ -187,18 +185,14 @@ install *args:
             if (not-installed cargo) { cargo install checkexec }
         }
 
-        if $quiet and $all {
-            pdm install out+err> /dev/null
-        } else if $quiet and $prod {
-            pdm install --prod out+err> /dev/null
-        } else if $quiet and $dev {
-            pdm install --dev out+err> /dev/null
-        } else if $all {
-            pdm install
-        } else if $prod {
-            pdm install --prod
-        } else if $dev {
-            pdm install --dev
+        if not $quiet {
+            if $all {
+                pdm install
+            } else if $prod {
+                pdm install --prod
+            } else if $dev {
+                pdm install --dev
+            }
         }
 
         if $quiet {
@@ -219,8 +213,6 @@ update *args:
         --dev # Update development dependencies
         --prod # Update production dependencies
     ] {
-        echo "Installing dependencies..."
-
         let all = (not $dev) and (not $prod)
 
         if $all {
