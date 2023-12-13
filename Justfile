@@ -1,7 +1,13 @@
 set shell := ["nu", "-c"]
 
-@_help:
-    just --list
+_help:
+    #!/usr/bin/env nu
+
+    (
+        just --list
+             --list-heading
+                "Available recipes: (run `<recipe> --help/-h` for more info)\n"
+    )
 
 # Display the source code for a recipe
 @source recipe:
@@ -17,7 +23,7 @@ _install_and_run *command:
 
     {{command}}
 
-# Add dependencies (see --help/-h for options)
+# Add dependencies
 add *args:
     #!/usr/bin/env nu
 
@@ -75,7 +81,7 @@ use-list-dependencies := """
     }
 """
 
-# Remove dependencies (see --help/-h for options)
+# Remove dependencies
 remove *args:
     #!/usr/bin/env nu
 
@@ -107,7 +113,7 @@ remove *args:
 
     remove {{args}}
 
-# Install dependencies (see --help/-h for options)
+# Install dependencies
 install *args:
     #!/usr/bin/env nu
 
@@ -255,7 +261,7 @@ update *args:
 
     update {{args}}
 
-# Show application dependencies (see --help/-h for options)
+# Show application dependencies
 dependencies *args:
     #!/usr/bin/env nu
 
@@ -355,7 +361,7 @@ run *args:
         just _install_and_run pdm run {{command}} $"\"($args)\""
     }
 
-# Profile a command and its <args> and view results (see --help/-h for options)
+# Profile a command and its <args> and view results
 profile *args:
     #!/usr/bin/env nu
 
@@ -381,7 +387,7 @@ profile *args:
 
     speedscope $output_file
 
-# Run coverage report (see --help/-h for options)
+# Run coverage report
 coverage *args:
     #!/usr/bin/env nu
 
@@ -400,7 +406,7 @@ coverage *args:
             {{args}}
     )
 
-# Run tests (see --help/-h for options)
+# Run tests
 test *args:
     #!/usr/bin/env nu
 
@@ -448,7 +454,7 @@ generated_files := """
 ]
 """
 
-# Clean generated files (see --help/-h for options)
+# Clean generated files
 clean *args:
     #!/usr/bin/env nu
 
@@ -536,7 +542,7 @@ just run \
     --save
 """
 
-# Run using an example score (see --help/-h for options)
+# Run using an example score
 example *args:
     #!/usr/bin/env nu
 
