@@ -63,7 +63,11 @@ use-list-dependencies := """
         if not $include_version {
             $dependencies = (
                 $dependencies
-                | each { |dependency| $dependency | split row ">=" | first }
+                | each {
+                    |dependency|
+
+                    $dependency | split row ">=" | first
+                }
             )
         }
 
@@ -207,17 +211,57 @@ install *args:
     install {{args}}
 
 # Update dependencies
-update: (install "--quiet")
+update *args:
     #!/usr/bin/env nu
 
-    brew bundle
-    rtx upgrade
-    pdm run python -m pip install --upgrade pip pipx
-    pnpm update --global speedscope
-    rustup update
-    cargo install-update checkexec
-    pdm run pre-commit autoupdate
-    pdm update
+    # Update dependencies
+    def update [
+        --dev # Update development dependencies
+        --prod # Update production dependencies
+    ] {
+        echo "Installing dependencies..."
+
+        let all = (not $dev) and (not $prod)
+
+        if $all {
+            just install --quiet
+        } else if $dev {
+            just install --quiet --dev
+        } else if $prod {
+            just install --quiet --prod
+        }
+
+        mut brewfiles = ["Brewfile.prod"]
+
+        if $all or $dev {
+            $brewfiles = ($brewfiles | append "Brewfile.dev")
+        }
+
+        for file in $brewfiles {
+            brew bundle --file $file
+        }
+
+        rtx upgrade
+
+        if $all or $dev {
+            pdm run python -m pip install --upgrade pip pipx
+            pnpm update --global speedscope
+            rustup update
+            cargo install-update checkexec
+        }
+
+        if $dev {
+            pdm update --dev
+        } else if $prod {
+            pdm update --prod
+        } else {
+            pdm update
+        }
+
+        pdm run pre-commit autoupdate
+    }
+
+    update {{args}}
 
 # Show application dependencies (see --help/-h for options)
 dependencies *args:
