@@ -66,11 +66,31 @@ python *args:
 _install_and_run *command:
     #!/usr/bin/env nu
 
-    if (pdm list --include default --include dev --json) == "[]" {
-        just install
-    }
+    let command = (
+        "{{ command }}"
+        | split row --regex "(sudo pdm run |pdm run )"
+        | last
+        | split words
+        | filter { |arg| $arg != "pdm" }
+        | first
+    )
 
-    {{ command }}
+    if $command == "{{ application_command }}" {
+        try {
+            {{ command }}
+        } catch {
+            just install --prod
+            {{ command }}
+        }
+    } else {
+        if not (
+            $command in (pdm list --fields name --csv --include dev)
+        ) {
+            just install
+        }
+
+        {{ command }}
+    }
 
 # Add dependencies
 add *args:
@@ -181,21 +201,22 @@ install *args:
 
     # Install dependencies
     def install [
-        --prod # Install production dependencies only
-        --minimal # Install only dependencies necessary for other commands
+        --app # (Build and) install the application
         --dry-run # Display dependencies without installing
+        --minimal # Install only dependencies necessary for other commands
+        --prod # Install production dependencies only
     ] {
-        if $dry_run and (not $prod) {
-            just dependencies
-        } else if $dry_run and $prod {
-            just dependencies --prod
-        }
-
         if $dry_run {
+            if $app or $prod {
+                just dependencies --prod
+            } else {
+                just dependencies
+            }
+
             exit
         }
 
-        if not $minimal {
+        if (not $minimal) and (not $app) {
             mut brewfiles = ["Brewfile.prod"]
 
             if not $prod {
@@ -244,6 +265,17 @@ install *args:
                 pdm install
                 just _install_and_run pdm run pre-commit install
             }
+        }
+
+        if $app {
+            just build
+
+            (
+                pdm run python -m pipx install
+                    $"./dist/{{ application_command }}-{{ version }}-py3-none-any.whl"
+                    --force
+                    --pip-args="--force-reinstall"
+            )
         }
     }
 
@@ -322,17 +354,17 @@ dependencies *args:
                     --sort name
             )
         } else {
-            if $dev {
+            let dependencies = if $dev {
                 list-dependencies --include-version --dev
             } else if $prod {
                 list-dependencies --include-version --prod
             } else {
                 let prod_dependencies = (
-                    indent (list-dependencies --prod)
+                    indent (list-dependencies --include-version --prod)
                 )
 
                 let dev_dependencies = (
-                    indent (list-dependencies --dev)
+                    indent (list-dependencies --include-version --dev)
                 )
 
                 [
@@ -344,6 +376,15 @@ dependencies *args:
                 ]
                 | str join "\n"
             }
+
+            if (command -v bat | is-empty) {
+                just install
+            }
+
+            let bat_command = (
+                "bat --language pip --plain --theme gruvbox-dark"
+            )
+            zsh -c $"echo \"($dependencies)\" | ($bat_command)"
         }
     }
 
@@ -416,7 +457,7 @@ shell *args:
     shell {{ args }}
 
 get_pyproject_value := "open pyproject.toml | get project."
-command := "(" + get_pyproject_value + "name)"
+application_command := "(" + get_pyproject_value + "name)"
 version := "(" + get_pyproject_value + "version)"
 
 # Run the application
@@ -431,9 +472,9 @@ run *args:
     )
 
     if $args == '""' {
-        just _install_and_run pdm run {{ command }}
+        just _install_and_run pdm run {{ application_command }}
     } else {
-        just _install_and_run pdm run {{ command }} $"\"($args)\""
+        just _install_and_run pdm run {{ application_command }} $"\"($args)\""
     }
 
 # Profile a command and view results
@@ -456,7 +497,7 @@ profile *args:
                 --format speedscope
                 --output $output_file
                 --subprocesses
-                -- pdm run python -m {{ command }} $args
+                -- pdm run python -m {{ application_command }} $args
         )
 
         speedscope $output_file
@@ -508,22 +549,8 @@ build *args:
     #!/usr/bin/env nu
 
     # Build and install the application
-    def build [
-        --no-install # Don't install application after building
-    ] {
-        just install --minimal
-        just _install_and_run pdm build
-
-        if $no-install {
-            exit
-        }
-
-        (
-            pdm run python -m pipx install
-                $"./dist/{{ command }}-{{ version }}-py3-none-any.whl"
-                --force
-                --pip-args="--force-reinstall"
-        )
+    def build [] {
+        pdm build
     }
 
     build {{ args }}

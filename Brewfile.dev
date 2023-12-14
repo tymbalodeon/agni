@@ -1,3 +1,4 @@
+brew "bat"
 brew "gh"
 brew "just"
 brew "nushell"

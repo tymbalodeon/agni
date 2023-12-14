@@ -15,6 +15,21 @@ https://www.boosey.com/cr/music/Claude-Vivier-Kopernikus/47743 "Kopernikus"):
 >
 > \- Claude Vivier
 
+## Installation and Usage
+
+To install the app, run:
+
+``` sh
+./install-dependencies \
+&& just install --app
+```
+
+Then run the app with:
+
+```sh
+agni
+```
+
 ## Combination-Tone Matrix
 
 The concept of a "Combination-Tone Matrix" comes from Bryan Christian's article,
@@ -114,20 +129,11 @@ Vivier's [_Lonely Child_](
 https://www.boosey.com/cr/music/Claude-Vivier-Lonely-Child/47752 "Lonely Child"
 ) is provided as an example.
 
-_(To install `just`, run `./install-dependencies`)_
-
 To compile the input score, generate matrices and harmonized score, and open PDFs:
 
 ``` sh
+# ./install-dependencies && \
 just example # --help
-```
-
-## Quickstart
-
-To install the necessary dependencies (and run the application):
-
-``` sh
-./install-dependencies # && just run
 ```
 
 ## Development
