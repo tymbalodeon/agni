@@ -351,30 +351,75 @@ dependencies *args:
 
 # Type-check
 [no-exit-message]
-@check:
-    just _install_and_run pdm run pyright
+type-check *args:
+    #!/usr/bin/env nu
+
+    # Type-check
+    def type-check [
+        ...files: string # Files to check
+    ] {
+        just _install_and_run pdm run pyright $files
+    }
+
+    type-check {{ args }}
 
 # Lint and apply fixes
-@lint:
-    just _install_and_run pdm run ruff check --fix
+lint *args:
+    #!/usr/bin/env nu
+
+    def lint [] {
+        just _install_and_run pdm run ruff check --fix
+    }
+
+    lint {{ args }}
+
+alias format := fmt
 
 # Format
-@format:
-    just _install_and_run pdm run ruff format
+fmt *args:
+    #!/usr/bin/env nu
+
+    # Format
+    def fmt [] {
+        just --unstable --fmt
+        just _install_and_run pdm run ruff format
+    }
+
+    fmt {{ args }}
 
 # Run pre-commit hooks
-@pre-commit:
-    just _install_and_run pdm run pre-commit run --all-files
+pre-commit *args:
+    #!/usr/bin/env nu
 
-# Open a python shell with project dependencies available
-@shell:
-    just _install_and_run pdm run bpython
+    # Run pre-commit hook by name or all hooks
+    def pre-commit [
+        hook?: string # The hook to run
+    ] {
+        if not ($hook | is-empty) {
+            just _install_and_run pdm run pre-commit run $hook
+        } else {
+            just _install_and_run pdm run pre-commit run --all-files
+        }
+    }
+
+    pre-commit {{ args }}
+
+# Open an interactive python shell
+shell *args:
+    #!/usr/bin/env nu
+
+    # Open an interactive python shell
+    def shell [] {
+        just _install_and_run pdm run bpython
+    }
+
+    shell {{ args }}
 
 get_pyproject_value := "open pyproject.toml | get project."
 command := "(" + get_pyproject_value + "name)"
 version := "(" + get_pyproject_value + "version)"
 
-# Run the application with <args>
+# Run the application
 run *args:
     #!/usr/bin/env nu
 
@@ -391,67 +436,62 @@ run *args:
         just _install_and_run pdm run {{ command }} $"\"($args)\""
     }
 
-# Profile a command and its <args> and view results
+# Profile a command and view results
 profile *args:
     #!/usr/bin/env nu
 
-    if ("--help" in "{{ args }}") or ("-h" in "{{ args }}") {
-        pdm run py-spy record -h
-        exit
-    } else {
+    # Profile a command and view results
+    def profile [
+        ...args: string # Arguments to the command being profiled
+    ] {
         just install --minimal
+
+        let output_directory = "profiles"
+        mkdir $output_directory
+
+        let output_file = $"($output_directory)/profile.json"
+
+        (
+            just _install_and_run sudo pdm run py-spy record
+                --format speedscope
+                --output $output_file
+                --subprocesses
+                -- pdm run python -m {{ command }} $args
+        )
+
+        speedscope $output_file
     }
 
-    let output_directory = "profiles"
-    mkdir $output_directory
-
-    let output_file = $"($output_directory)/profile.json"
-
-    (
-        just _install_and_run sudo pdm run py-spy record
-            --format speedscope
-            --output $output_file
-            --subprocesses
-            -- pdm run python -m {{ command }} {{ args }}
-    )
-
-    speedscope $output_file
+    profile {{ args }}
 
 # Run coverage report
 coverage *args:
     #!/usr/bin/env nu
 
-    if ("--help" in "{{ args }}") or ("-h" in "{{ args }}") {
-        just _install_and_run pdm run coverage report -h
-        exit
-    } else {
+    # Run coverage report
+    def coverage [] {
         just test
+
+        (
+            just _install_and_run pdm run coverage report -m
+                --skip-covered
+                --sort "cover"
+                {{ args }}
+        )
     }
 
-    (
-        just _install_and_run pdm run coverage report -m \
-            --omit "*/pdm/*" \
-            --skip-covered \
-            --sort "cover" \
-            {{ args }}
-    )
+    coverage {{ args }}
 
 # Run tests
 test *args:
     #!/usr/bin/env nu
 
-    if ("--help" in "{{ args }}") or ("-h" in "{{ args }}") {
-        just _install_and_run pdm run coverage run -m pytest -h
-        exit
+    # Run tests
+    def test [] {
+        just _install_and_run pdm run coverage run -m pytest tests
     }
 
-    let args = if ("{{ args }}" | is-empty) {
-        "tests"
-    } else {
-        "{{ args }}"
-    }
-
-    just _install_and_run pdm run coverage run -m pytest $args
+    test {{ args }}
 
 # Build the project and install it with pipx
 build: (install "--minimal")
