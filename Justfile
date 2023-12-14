@@ -503,18 +503,30 @@ test *args:
 
     test {{ args }}
 
-# Build the project and install it with pipx
-build: (install "--minimal")
+# Build and install the application
+build *args:
     #!/usr/bin/env nu
 
-    just _install_and_run pdm build
+    # Build and install the application
+    def build [
+        --no-install # Don't install application after building
+    ] {
+        just install --minimal
+        just _install_and_run pdm build
 
-    (
-        pdm run python -m pipx install
-            $"./dist/{{ command }}-{{ version }}-py3-none-any.whl"
-            --force
-            --pip-args="--force-reinstall"
-    )
+        if $no-install {
+            exit
+        }
+
+        (
+            pdm run python -m pipx install
+                $"./dist/{{ command }}-{{ version }}-py3-none-any.whl"
+                --force
+                --pip-args="--force-reinstall"
+        )
+    }
+
+    build {{ args }}
 
 generated_files := """
 [
