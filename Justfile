@@ -172,7 +172,7 @@ install *args:
 
     def module-not-installed [command: string] {
         (
-            pdm run python -m $command --help
+            pdm run python -m $command --help err> /dev/null
             | complete
             | get exit_code
             | into bool
