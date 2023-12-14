@@ -51,7 +51,7 @@ python *args:
             $use
         }
 
-        if ((^python -V) | split row " "  | last) == $version {
+        if $version in ((^python -V) | split row " "  | last)  {
             exit
         }
 
