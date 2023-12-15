@@ -350,7 +350,7 @@ update *args:
             pdm update
         }
 
-        pdm run pre-commit autoupdate
+        just pre-commit --update
     }
 
     update {{ args }}
@@ -461,10 +461,16 @@ fmt *args:
 pre-commit *args:
     #!/usr/bin/env nu
 
-    # Run pre-commit hook by name or all hooks
+    # Run pre-commit hook by name, all hooks, or update all hooks
     def pre-commit [
         hook?: string # The hook to run
+        --update # Update all pre-commit hooks
     ] {
+        if $update {
+            just _install_and_run pdm run pre-commit autoupdate
+            exit
+        }
+
         if not ($hook | is-empty) {
             just _install_and_run pdm run pre-commit run $hook
         } else {
