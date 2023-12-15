@@ -663,6 +663,7 @@ just run \
     --notate \
     --save
 """
+
 notate_ensemble_passage := """
 just run \
     passage examples/lonely-child-notes.ily \
