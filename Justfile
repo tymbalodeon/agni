@@ -78,7 +78,7 @@ _install_and_run *command:
         | first
     )
 
-    if $command == "{{ application-command }}" {
+    if $command == {{ application-command }} {
         try {
             {{ command }}
         } catch {
