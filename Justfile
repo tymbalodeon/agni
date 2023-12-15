@@ -652,6 +652,10 @@ clean *args:
 @issues:
     gh issue list
 
+# Create repository issue interactively
+@issue:
+    gh issue create
+
 notate_reference_passage := """
 just run \
     passage examples/lonely-child-notes.ily \
