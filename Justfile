@@ -669,9 +669,25 @@ clean *args:
 @issues:
     gh issue list
 
-# Create repository issue interactively
-@issue:
-    gh issue create
+# Create repository issue interactively or view issue by <id>
+issue *args:
+    #!/usr/bin/env nu
+
+    # Create repository issue interactively or view issue by <id>
+    def issue [
+        id?: string # The ID of the issue to view
+        --web # View the issue in the browser
+    ] {
+        if $id == null {
+            gh issue create
+        } else if $web {
+            gh issue view $id --web
+        } else {
+            gh issue view $id
+        }
+    }
+
+    issue {{ args }}
 
 notate_reference_passage := """
 just run \
