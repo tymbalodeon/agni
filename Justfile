@@ -70,8 +70,8 @@ _install_and_run *command:
     #!/usr/bin/env nu
 
     let command = (
-        "{{ command }}"
-        | split row --regex "(sudo pdm run |pdm run )"
+        echo `{{ command }}`
+        | split row --regex "sudo pdm run |pdm run "
         | last
         | split words
         | filter { |arg| $arg != "pdm" }
@@ -482,7 +482,7 @@ run *args:
     if $args == '""' {
         just _install_and_run pdm run {{ application-command }}
     } else {
-        just _install_and_run pdm run {{ application-command }} $"\"($args)\""
+        just _install_and_run pdm run {{ application-command }} $"`($args)`"
     }
 
 # Profile a command and view results
