@@ -15,16 +15,34 @@ _help:
             )
     )
 
+alias source := src
 # Display the source code for a recipe
-@source recipe:
-    just --show {{ recipe }}
+src recipe *args="_":
+    #!/usr/bin/env nu
+
+    # Display the source code for a recipe. If no args are provided, display
+    # the raw `just` code, otherwise display the code with the args provided
+    # to `just` applied. Pass `""` as args to see the code when no args are
+    # provided to a recipe.
+    def src [
+        recipe: string # The recipe command
+        ...args: string # Arguments to the recipe
+    ] {
+        if "_" in $args {
+            just --show $recipe
+        } else {
+            just --dry-run $recipe $args
+        }
+    }
+
+    src {{ recipe }} `{{ args }}`
 
 # Specify the Python version to be used by the application
 python *args:
     #!/usr/bin/env nu
 
-    # Specify the Python version to be used by the application and re-create
-    # the virtual environment if not already using that version
+    # Specify the Python version to be used by the application and re-create the
+    # virtual environment if not already using that version
     def python [
         --installed # Show installed Python versions
         --latest # Show the latest available Python version
@@ -427,7 +445,6 @@ lint *args:
     lint {{ args }}
 
 alias format := fmt
-
 # Format
 fmt *args:
     #!/usr/bin/env nu
