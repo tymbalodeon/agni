@@ -62,6 +62,9 @@ python *args:
 
     python {{ args }}
 
+get-pyproject-value := "open pyproject.toml | get project."
+application-command := "(" + get-pyproject-value + "name)"
+
 [no-exit-message]
 _install_and_run *command:
     #!/usr/bin/env nu
@@ -75,7 +78,7 @@ _install_and_run *command:
         | first
     )
 
-    if $command == "{{ application_command }}" {
+    if $command == "{{ application-command }}" {
         try {
             {{ command }}
         } catch {
@@ -182,6 +185,14 @@ remove *args:
 
     remove {{ args }}
 
+_application-version:
+    #!/usr/bin/env nu
+
+    open agni/__init__.py
+    | split row " "
+    | last
+    | str replace --all '"' ""
+
 # Install dependencies
 install *args:
     #!/usr/bin/env nu
@@ -256,10 +267,10 @@ install *args:
             if (not-installed cargo) { cargo install checkexec }
         }
 
-        if $minimal and (not $prod) {
+        if $minimal {
             just _install_and_run pdm run pre-commit install out+err> /dev/null
-        } else if not $minimal {
-            if $prod {
+        } else {
+            if $app or $prod {
                 pdm install --prod
             } else {
                 pdm install
@@ -269,10 +280,11 @@ install *args:
 
         if $app {
             just build
+            let application_version = (just _application-version)
 
             (
                 pdm run python -m pipx install
-                    $"./dist/{{ application_command }}-{{ version }}-py3-none-any.whl"
+                    $"./dist/{{ application-command }}-($application_version)-py3-none-any.whl"
                     --force
                     --pip-args="--force-reinstall"
             )
@@ -456,10 +468,6 @@ shell *args:
 
     shell {{ args }}
 
-get_pyproject_value := "open pyproject.toml | get project."
-application_command := "(" + get_pyproject_value + "name)"
-version := "(" + get_pyproject_value + "version)"
-
 # Run the application
 run *args:
     #!/usr/bin/env nu
@@ -472,9 +480,9 @@ run *args:
     )
 
     if $args == '""' {
-        just _install_and_run pdm run {{ application_command }}
+        just _install_and_run pdm run {{ application-command }}
     } else {
-        just _install_and_run pdm run {{ application_command }} $"\"($args)\""
+        just _install_and_run pdm run {{ application-command }} $"\"($args)\""
     }
 
 # Profile a command and view results
@@ -497,7 +505,7 @@ profile *args:
                 --format speedscope
                 --output $output_file
                 --subprocesses
-                -- pdm run python -m {{ application_command }} $args
+                -- pdm run python -m {{ application-command }} $args
         )
 
         speedscope $output_file
