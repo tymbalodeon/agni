@@ -744,9 +744,9 @@ release *target:
     ] {
         let current_version = just _get-application-version | split row "."
 
-        mut major = $current_version.0 | into int
-        mut minor = $current_version.1 | into int
-        mut patch = $current_version.2 | into int
+        mut major = ($current_version.0 | into int)
+        mut minor = ($current_version.1 | into int)
+        mut patch = ($current_version.2 | into int)
 
         if $target in [major minor patch] {
             if $target == "major" {
