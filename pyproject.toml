@@ -4,25 +4,17 @@ dynamic = ["version"]
 description = """\
 Music compositional tools inspired by the techniques of Claude Vivier
 """
-authors = [
-    {name = "Ben Rosen", email = "benjamin.j.rosen@gmail.com"},
-]
+authors = [{ name = "Ben Rosen", email = "benjamin.j.rosen@gmail.com" }]
 readme = "README.md"
-license = {text = "MIT"}
-keywords = [
-    "claude vivier",
-    "lilypond",
-    "music notation",
-    "music",
-    "spectral",
-]
+license = { text = "MIT" }
+keywords = ["claude vivier", "lilypond", "music notation", "music", "spectral"]
 requires-python = ">=3.11"
 dependencies = [
-    "typer[all]>=0.9.0",
-    "abjad>=3.19",
-    "supriya>=23.10b0",
-    "abjad-ext-rmakers>=3.19",
-    "more-itertools>=10.1.0",
+  "typer[all]>=0.9.0",
+  "abjad>=3.19",
+  "supriya>=23.10b0",
+  "abjad-ext-rmakers>=3.19",
+  "more-itertools>=10.1.0",
 ]
 
 [project.urls]
@@ -40,13 +32,7 @@ venvPath = "."
 venv = ".venv"
 
 [tool.ruff]
-exclude = [
-    ".git",
-    ".ruff_cache",
-    ".venv",
-    "build",
-    "dist",
-]
+exclude = [".git", ".ruff_cache", ".venv", "build", "dist"]
 line-length = 79
 indent-width = 4
 
@@ -56,11 +42,11 @@ path = "agni/__init__.py"
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "bpython>=0.24",
-    "py-spy>=0.3.14",
-    "ruff>=0.1.7",
-    "pyright>=1.1.339",
-    "pre-commit>=3.5.0",
-    "coverage>=7.3.2",
-    "pytest>=7.4.3",
+  "bpython>=0.24",
+  "py-spy>=0.3.14",
+  "ruff>=0.1.7",
+  "pyright>=1.1.339",
+  "pre-commit>=3.5.0",
+  "coverage>=7.3.2",
+  "pytest>=7.4.3",
 ]

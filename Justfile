@@ -37,16 +37,16 @@ src recipe *args="_":
 
     src {{ recipe }} `{{ args }}`
 
-# Specify the Python version to be used by the application
+# Manage project Python version
 python *args:
     #!/usr/bin/env nu
 
-    # Specify the Python version to be used by the application and re-create the
-    # virtual environment if not already using that version
+    # Manage project Python version
     def python [
         --installed # Show installed Python versions
         --latest # Show the latest available Python version
-        --use: string # Python version to use
+        --path # Show the path of the currently used Python
+        --use: string # Specify a new Python version to use
     ] {
         if $latest {
             rtx latest python
@@ -55,6 +55,11 @@ python *args:
 
         if $installed {
             rtx list python
+            exit
+        }
+
+        if $path {
+            rtx which python
             exit
         }
 
@@ -464,8 +469,22 @@ pre-commit *args:
     # Run pre-commit hook by name, all hooks, or update all hooks
     def pre-commit [
         hook?: string # The hook to run
+        --hooks # Display all hook ids
         --update # Update all pre-commit hooks
     ] {
+        if $hooks {
+            echo (
+                grep id .pre-commit-config.yaml
+                | str replace --all --regex "- +id:" ""
+                | lines
+                | each { |line| ($line | str trim) }
+                | sort
+                | str join "\n"
+            )
+
+            exit
+        }
+
         if $update {
             just _install_and_run pdm run pre-commit autoupdate
             exit
