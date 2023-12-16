@@ -39,8 +39,21 @@ src recipe *args="_":
 
 # Search available `just` commands
 [no-exit-message]
-@search:
-    just --list --color never | fzf
+search *regex:
+    #!/usr/bin/env nu
+
+    # Search available `just` commands, interactively, or by regex
+    def search [
+        regex?: string # Regex pattern to match
+    ] {
+        if ($regex | is-empty) {
+            just --list | fzf
+        } else {
+            just | grep --color=always --extended-regexp $regex
+        }
+    }
+
+    search {{ regex }}
 
 # Manage project Python version
 python *args:
