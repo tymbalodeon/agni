@@ -368,6 +368,26 @@ dependencies *args:
         | str join "\n"
     }
 
+    def get-brew-dependencies [--dev] {
+        let brewfile = if $dev {
+            "Brewfile.dev"
+        } else {
+            "Brewfile.prod"
+        }
+
+        mut dependencies = indent (
+            brew bundle list --file $brewfile
+            | lines
+            | str join "\n"
+        )
+
+        if not $dev {
+            $dependencies = "Production build:\n" + $dependencies
+        }
+
+        $dependencies
+    }
+
     # Show application dependencies
     def show-dependencies [
         --dev # Show only development dependencies
@@ -387,7 +407,11 @@ dependencies *args:
             let dependencies = if $dev {
                 list-dependencies --include-version --dev
             } else if $prod {
-                list-dependencies --include-version --prod
+                (
+                    (list-dependencies --include-version --prod)
+                    + "\n\n"
+                    + (get-brew-dependencies)
+                )
             } else {
                 let prod_dependencies = (
                     indent (list-dependencies --include-version --prod)
@@ -397,12 +421,23 @@ dependencies *args:
                     indent (list-dependencies --include-version --dev)
                 )
 
+                let brew_prod_dependencies = (
+                    get-brew-dependencies
+                )
+
+                let brew_dev_dependencies = (
+                    get-brew-dependencies --dev
+                )
+
                 [
                     Production:
-                    ($prod_dependencies)
+                    $prod_dependencies
+                    ""
+                    $brew_prod_dependencies
                     ""
                     Development:
-                    ($dev_dependencies)
+                    $dev_dependencies
+                    $brew_dev_dependencies
                 ]
                 | str join "\n"
             }
