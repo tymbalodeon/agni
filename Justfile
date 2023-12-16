@@ -37,6 +37,11 @@ src recipe *args="_":
 
     src {{ recipe }} `{{ args }}`
 
+# Search available `just` commands
+[no-exit-message]
+@search:
+    just --list --color never | fzf
+
 # Manage project Python version
 python *args:
     #!/usr/bin/env nu

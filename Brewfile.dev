@@ -1,4 +1,5 @@
 brew "bat"
+brew "fzf"
 brew "gh"
 brew "just"
 brew "nushell"
