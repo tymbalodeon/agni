@@ -744,6 +744,28 @@ issue *args:
 
     issue {{ args }}
 
+# Show project statistics
+stats *args:
+    #!/usr/bin/env nu
+
+    # Show project statistics
+    def stats [
+        --code # Show stats about the project code
+        --git # Show stats related to git activity
+    ] {
+        let default = not ([$code $git] | any { |arg| $arg })
+
+        if $default or $git {
+            onefetch
+        }
+
+        if $default or $code {
+            tokei --sort code
+        }
+    }
+
+    stats {{ args }}
+
 notate_reference_passage := """
 just run \
     passage examples/lonely-child-notes.ily \
