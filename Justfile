@@ -221,7 +221,7 @@ remove *args:
 
     remove {{ args }}
 
-_application-version:
+_get-application-version:
     #!/usr/bin/env nu
 
     open agni/__init__.py
@@ -316,7 +316,7 @@ install *args:
 
         if $app {
             just build
-            let application_version = (just _application-version)
+            let application_version = (just _get-application-version)
 
             (
                 pdm run python -m pipx install
@@ -733,6 +733,31 @@ clean *args:
     }
 
     clean {{ args }}
+
+release target:
+    #!/usr/bin/env nu
+
+    let current_version = just _get-application-version | split row "."
+
+    mut major = $current_version.0 | into int
+    mut minor = $current_version.1 | into int
+    mut patch = $current_version.2 | into int
+
+    let new_version = if "{{ target }}" in [major minor patch] {
+        if "{{ target }}" == "major" {
+           $major += 1
+        } else if "{{ target }}" == "minor" {
+           $minor += 1
+        } else if "{{ target }}" == "patch" {
+           $patch += 1
+        }
+
+        [$major $minor $patch] | str join "."
+    } else {
+        "{{ target }}"
+    }
+
+    $new_version
 
 # Open the repository page in the browser
 @repo:
