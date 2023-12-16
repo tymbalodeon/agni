@@ -734,30 +734,41 @@ clean *args:
 
     clean {{ args }}
 
-release target:
+# Release a new version of the application
+release *target:
     #!/usr/bin/env nu
 
-    let current_version = just _get-application-version | split row "."
+    # Release a new version of the application
+    def release [
+        target = "patch" # Type of release to target (major, minor, or patch)
+    ] {
+        let current_version = just _get-application-version | split row "."
 
-    mut major = $current_version.0 | into int
-    mut minor = $current_version.1 | into int
-    mut patch = $current_version.2 | into int
+        mut major = $current_version.0 | into int
+        mut minor = $current_version.1 | into int
+        mut patch = $current_version.2 | into int
 
-    let new_version = if "{{ target }}" in [major minor patch] {
-        if "{{ target }}" == "major" {
-           $major += 1
-        } else if "{{ target }}" == "minor" {
-           $minor += 1
-        } else if "{{ target }}" == "patch" {
-           $patch += 1
+        if $target in [major minor patch] {
+            if $target == "major" {
+                $major += 1
+                $minor = 0
+                $patch = 0
+            } else if $target == "minor" {
+                $minor += 1
+                $patch = 0
+            } else if $target == "patch" {
+               $patch += 1
+            }
+
+            let new_version = ([$major $minor $patch] | str join ".")
+            echo $"($current_version | str join ".") --> ($new_version)"
+        } else {
+            just release --help
         }
-
-        [$major $minor $patch] | str join "."
-    } else {
-        "{{ target }}"
     }
 
-    $new_version
+    release {{ target }}
+
 
 # Open the repository page in the browser
 @repo:
@@ -767,11 +778,11 @@ release target:
 @issues:
     gh issue list
 
-# Create repository issue interactively or view issue by <id>
+# Create issue interactively or view issue by <id>
 issue *args:
     #!/usr/bin/env nu
 
-    # Create repository issue interactively or view issue by <id>
+    # Create issue interactively or view issue by <id>
     def issue [
         id?: string # The ID of the issue to view
         --web # View the issue in the browser
