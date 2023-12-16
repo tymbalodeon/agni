@@ -761,7 +761,7 @@ release *target:
             }
 
             let new_version = ([$major $minor $patch] | str join ".")
-            echo $"($current_version | str join ".") --> ($new_version)"
+            $"($current_version | str join ".") --> ($new_version)"
         } else {
             just release --help
         }
