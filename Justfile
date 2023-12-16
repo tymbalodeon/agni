@@ -45,25 +45,20 @@ python *args:
     def python [
         --installed # Show installed Python versions
         --latest # Show the latest available Python version
-        --path # Show the path of the currently used Python
+        --path # Show the path of the current Python
         --use: string # Specify a new Python version to use
+        --version # (default) Show the current Python version
     ] {
         if $latest {
             rtx latest python
             exit
-        }
-
-        if $installed {
+        } else if $installed {
             rtx list python
             exit
-        }
-
-        if $path {
+        } else if $path {
             rtx which python
             exit
-        }
-
-        if ($use | is-empty) {
+        } else if $version or ($use | is-empty) {
             ^python -V
             exit
         }
@@ -491,7 +486,7 @@ pre-commit *args:
         }
 
         if not ($hook | is-empty) {
-            just _install_and_run pdm run pre-commit run $hook
+            just _install_and_run pdm run pre-commit run $hook --all-files
         } else {
             just _install_and_run pdm run pre-commit run --all-files
         }
