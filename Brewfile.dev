@@ -1,6 +1,7 @@
 brew "bat"
 brew "fzf"
 brew "gh"
+brew "git-cliff"
 brew "just"
 brew "nushell"
 brew "onefetch"
