@@ -114,22 +114,15 @@ _install_and_run *command:
         | first
     )
 
-    if $command == {{ application-command }} {
-        try {
-            {{ command }}
-        } catch {
+    if not ($command in (pdm list --fields name --csv)) {
+        if $command == {{ application-command }} {
             just install --prod
-            {{ command }}
-        }
-    } else {
-        if not (
-            $command in (pdm list --fields name --csv --include dev)
-        ) {
+        } else {
             just install
         }
-
-        {{ command }}
     }
+
+    {{ command }}
 
 # Add dependencies
 add *args:
