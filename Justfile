@@ -503,6 +503,20 @@ fmt *args:
 
     fmt {{ args }}
 
+# Run checks
+check *args:
+    #!/usr/bin/env nu
+
+    def check [
+        --links # Check that all links in the project are valid
+    ] {
+        if $links {
+            lychee ./
+        }
+    }
+
+    check {{ args }}
+
 # Run pre-commit hooks
 pre-commit *args:
     #!/usr/bin/env nu
