@@ -217,7 +217,7 @@ remove *args:
 _get-application-version:
     #!/usr/bin/env nu
 
-    open agni/__init__.py
+    open $"{{ application-command }}/__init__.py"
     | split row " "
     | last
     | str replace --all '"' ""
