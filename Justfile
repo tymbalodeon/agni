@@ -114,22 +114,15 @@ _install_and_run *command:
         | first
     )
 
-    if $command == {{ application-command }} {
-        try {
-            {{ command }}
-        } catch {
+    if not ($command in (pdm list --fields name --csv)) {
+        if $command == {{ application-command }} {
             just install --prod
-            {{ command }}
-        }
-    } else {
-        if not (
-            $command in (pdm list --fields name --csv --include dev)
-        ) {
+        } else {
             just install
         }
-
-        {{ command }}
     }
+
+    {{ command }}
 
 # Add dependencies
 add *args:
@@ -221,7 +214,7 @@ remove *args:
 
     remove {{ args }}
 
-_application-version:
+_get-application-version:
     #!/usr/bin/env nu
 
     open agni/__init__.py
@@ -316,7 +309,7 @@ install *args:
 
         if $app {
             just build
-            let application_version = (just _application-version)
+            let application_version = (just _get-application-version)
 
             (
                 pdm run python -m pipx install
@@ -734,6 +727,42 @@ clean *args:
 
     clean {{ args }}
 
+# Release a new version of the application
+release *target:
+    #!/usr/bin/env nu
+
+    # Release a new version of the application
+    def release [
+        target = "patch" # Type of release to target (major, minor, or patch)
+    ] {
+        let current_version = just _get-application-version | split row "."
+
+        mut major = ($current_version.0 | into int)
+        mut minor = ($current_version.1 | into int)
+        mut patch = ($current_version.2 | into int)
+
+        if $target in [major minor patch] {
+            if $target == "major" {
+                $major += 1
+                $minor = 0
+                $patch = 0
+            } else if $target == "minor" {
+                $minor += 1
+                $patch = 0
+            } else if $target == "patch" {
+               $patch += 1
+            }
+
+            let new_version = ([$major $minor $patch] | str join ".")
+            $"($current_version | str join ".") --> ($new_version)"
+        } else {
+            just release --help
+        }
+    }
+
+    release {{ target }}
+
+
 # Open the repository page in the browser
 @repo:
     gh browse
@@ -742,11 +771,11 @@ clean *args:
 @issues:
     gh issue list
 
-# Create repository issue interactively or view issue by <id>
+# Create issue interactively or view issue by <id>
 issue *args:
     #!/usr/bin/env nu
 
-    # Create repository issue interactively or view issue by <id>
+    # Create issue interactively or view issue by <id>
     def issue [
         id?: string # The ID of the issue to view
         --web # View the issue in the browser
