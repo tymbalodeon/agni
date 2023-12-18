@@ -56,3 +56,9 @@ repos:
     rev: v0.38.0
     hooks:
     -   id: markdownlint-fix
+-   repo: local
+    hooks:
+    -   id: lychee
+        entry: lychee ./
+        language: system
+        name: lychee
