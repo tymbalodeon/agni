@@ -1,72 +1,77 @@
+---
 repos:
--   repo: https://gitlab.com/vojko.pribudic/pre-commit-update
-    rev: v0.1.0
-    hooks:
-    -   id: pre-commit-update
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
-    -   id: check-builtin-literals
-    -   id: check-toml
-    -   id: check-yaml
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
-    -   id: check-merge-conflict
--   repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.341
-    hooks:
-    -   id: pyright
--   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.8
-    hooks:
-    -   id: ruff
-        args:
-        -   --fix
-    -   id: ruff-format
--   repo: https://github.com/jendrikseipp/vulture
-    rev: v2.10
-    hooks:
-    -   id: vulture
-        args:
-        -   ./
-        -   --exclude
-        -   '*/.venv/*'
-        -   --ignore-names
-        -   _generate_next_value_
--   repo: local
-    hooks:
-    -   id: coverage
-        entry: just coverage
-        language: system
-        name: coverage
-        pass_filenames: false
-        args:
-        -   --fail-under
-        -   '61'
--   repo: https://github.com/pdm-project/pdm
-    rev: 2.11.1
-    hooks:
-    -   id: pdm-export
-        files: ^pdm.lock$
-        args:
-        -   -o
-        -   requirements.txt
-        -   --without-hashes
--   repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.38.0
-    hooks:
-    -   id: markdownlint-fix
--   repo: local
-    hooks:
-    -   id: lychee
-        entry: lychee ./
-        language: system
-        name: lychee
--   repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.1
-    hooks:
-    -   id: gitleaks
--   repo: https://github.com/crate-ci/committed
-    rev: v1.0.20
-    hooks:
-      - id: committed
+    - repo: https://gitlab.com/vojko.pribudic/pre-commit-update
+      rev: v0.1.0
+      hooks:
+          - id: pre-commit-update
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: check-builtin-literals
+          - id: check-toml
+          - id: check-yaml
+          - id: end-of-file-fixer
+          - id: trailing-whitespace
+          - id: check-merge-conflict
+    - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+      rev: 0.2.3
+      hooks:
+          - id: yamlfmt
+    - repo: https://github.com/RobertCraigie/pyright-python
+      rev: v1.1.341
+      hooks:
+          - id: pyright
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.1.8
+      hooks:
+          - id: ruff
+            args:
+                - --fix
+          - id: ruff-format
+    - repo: https://github.com/jendrikseipp/vulture
+      rev: v2.10
+      hooks:
+          - id: vulture
+            args:
+                - ./
+                - --exclude
+                - '*/.venv/*'
+                - --ignore-names
+                - _generate_next_value_
+    - repo: local
+      hooks:
+          - id: coverage
+            entry: just coverage
+            language: system
+            name: coverage
+            pass_filenames: false
+            args:
+                - --fail-under
+                - '61'
+    - repo: https://github.com/pdm-project/pdm
+      rev: 2.11.1
+      hooks:
+          - id: pdm-export
+            files: ^pdm.lock$
+            args:
+                - -o
+                - requirements.txt
+                - --without-hashes
+    - repo: https://github.com/igorshubovych/markdownlint-cli
+      rev: v0.38.0
+      hooks:
+          - id: markdownlint-fix
+    - repo: local
+      hooks:
+          - id: lychee
+            entry: lychee ./
+            language: system
+            name: lychee
+    - repo: https://github.com/gitleaks/gitleaks
+      rev: v8.18.1
+      hooks:
+          - id: gitleaks
+    - repo: https://github.com/crate-ci/committed
+      rev: v1.0.20
+      hooks:
+          - id: committed
