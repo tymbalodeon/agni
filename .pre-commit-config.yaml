@@ -75,9 +75,13 @@ repos:
           - id: pdm-export
             files: ^pdm.lock$
             args:
-                - -o
+                - --output
                 - requirements.txt
                 - --without-hashes
+    - repo: https://github.com/pdm-project/pdm
+      rev: 2.11.1
+      hooks:
+          - id: pdm-lock-check
     - repo: https://github.com/crate-ci/committed
       rev: v1.0.20
       hooks:
