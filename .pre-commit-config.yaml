@@ -49,7 +49,7 @@ repos:
                 - --ignore-names
                 - _generate_next_value_
     - repo: https://github.com/RobertCraigie/pyright-python
-      rev: v1.1.341
+      rev: v1.1.342
       hooks:
           - id: pyright
     - repo: https://github.com/astral-sh/ruff-pre-commit

@@ -403,43 +403,97 @@ dependencies *args:
     def show-dependencies [
         --dev # Show only development dependencies
         --prod # Show only production dependencies
-        --installed # Show installed dependencies
-        --tree # Show installed dependencies as a tree
+        --installed # Show installed dependencies (python dependencies only)
+        --tree # Show installed dependencies as a tree (python dependencies only)
+        --licenses # Show dependency licenses
+        --sort-by-license # [If --licenses] Sort by license
     ] {
         if $tree {
             pdm list --tree
-        } else if $installed {
+            exit
+        }
+
+        if $installed {
             (
                 pdm list
                     --fields name,version
                     --sort name
             )
-        } else {
-            let dependencies = if $dev {
-                list-dependencies --include-version --dev
+
+            exit
+        }
+
+        if $licenses {
+            mut dependencies = (
+                if $dev {
+                    pdm list --fields name,licenses --json --include dev
+                } else if $prod {
+                    pdm list --fields name,licenses --json --exclude dev
+                } else {
+                    pdm list --fields name,licenses --json
+                }
+                | from json
+                | rename name license
+            )
+
+            let brew_dependencies = if $dev {
+                brew bundle list --file Brewfile.dev | lines
             } else if $prod {
-                (
-                    (list-dependencies --include-version --prod)
-                    + "\n\n"
-                    + (get-brew-dependencies)
-                )
+                brew bundle list --file Brewfile.prod | lines
             } else {
-                let prod_dependencies = (
-                    indent (list-dependencies --include-version --prod)
+                (
+                    (brew bundle list --file Brewfile.prod)
+                    + "\n"
+                    + (brew bundle list --file Brewfile.dev)
                 )
+                | lines
+            }
 
-                let dev_dependencies = (
-                    indent (list-dependencies --include-version --dev)
+            $dependencies = (
+                $dependencies
+                | append (
+                    brew info $brew_dependencies --json
+                    | from json
+                    | select name license
                 )
+            )
 
-                let brew_prod_dependencies = (
-                    get-brew-dependencies
-                )
+            $dependencies = if $sort_by_license {
+                $dependencies | sort-by license
+            } else {
+                $dependencies | sort-by name
+            }
 
-                let brew_dev_dependencies = (
-                    get-brew-dependencies --dev
-                )
+            echo $dependencies
+            exit
+        }
 
+        let dependencies = if $dev {
+            list-dependencies --include-version --dev
+        } else if $prod {
+            (
+                (list-dependencies --include-version --prod)
+                + "\n\n"
+                + (get-brew-dependencies)
+            )
+        } else {
+            let prod_dependencies = (
+                indent (list-dependencies --include-version --prod)
+            )
+
+            let dev_dependencies = (
+                indent (list-dependencies --include-version --dev)
+            )
+
+            let brew_prod_dependencies = (
+                get-brew-dependencies
+            )
+
+            let brew_dev_dependencies = (
+                get-brew-dependencies --dev
+            )
+
+            (
                 [
                     Production:
                     $prod_dependencies
@@ -451,17 +505,17 @@ dependencies *args:
                     $brew_dev_dependencies
                 ]
                 | str join "\n"
-            }
-
-            if (command -v bat | is-empty) {
-                just install
-            }
-
-            let bat_command = (
-                "bat --language pip --plain --theme gruvbox-dark"
             )
-            zsh -c $"echo \"($dependencies)\" | ($bat_command)"
         }
+
+        if (command -v bat | is-empty) {
+            just install
+        }
+
+        let bat_command = (
+            "bat --language pip --plain --theme gruvbox-dark"
+        )
+        zsh -c $"echo \"($dependencies)\" | ($bat_command)"
     }
 
     show-dependencies {{ args }}
