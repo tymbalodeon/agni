@@ -520,59 +520,8 @@ dependencies *args:
 
     show-dependencies {{ args }}
 
-# Type-check
-[no-exit-message]
-type-check *args:
-    #!/usr/bin/env nu
-
-    # Type-check
-    def type-check [
-        ...files: string # Files to check
-    ] {
-        just _install_and_run pdm run pyright $files
-    }
-
-    type-check {{ args }}
-
-# Lint and apply fixes
-lint *args:
-    #!/usr/bin/env nu
-
-    def lint [] {
-        just _install_and_run pdm run ruff check --fix
-    }
-
-    lint {{ args }}
-
-alias format := fmt
-# Format
-fmt *args:
-    #!/usr/bin/env nu
-
-    # Format
-    def fmt [] {
-        just --unstable --fmt
-        just _install_and_run pdm run ruff format
-    }
-
-    fmt {{ args }}
-
-# Run checks
-check *args:
-    #!/usr/bin/env nu
-
-    def check [
-        --links # Check that all links in the project are valid
-    ] {
-        if $links {
-            lychee ./
-        }
-    }
-
-    check {{ args }}
-
 # Run pre-commit hooks
-pre-commit *args:
+check *args:
     #!/usr/bin/env nu
 
     # Run pre-commit hook by name, all hooks, or update all hooks
