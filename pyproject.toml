@@ -42,11 +42,9 @@ path = "agni/__init__.py"
 
 [tool.pdm.dev-dependencies]
 dev = [
-  "bpython>=0.24",
-  "py-spy>=0.3.14",
-  "ruff>=0.1.7",
-  "pyright>=1.1.339",
-  "pre-commit>=3.5.0",
-  "coverage>=7.3.2",
-  "pytest>=7.4.3",
+    "bpython>=0.24",
+    "py-spy>=0.3.14",
+    "pre-commit>=3.5.0",
+    "coverage>=7.3.2",
+    "pytest>=7.4.3",
 ]

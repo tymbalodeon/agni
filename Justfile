@@ -203,8 +203,10 @@ remove *args:
     }
 
     # Remove dependencies
-    def remove [...dependencies: string] {
-        for $dependency in [$dependencies] {
+    def remove [
+        ...dependencies: string # Dependencies to remove
+    ] {
+        for $dependency in $dependencies {
             if (is-a-dependency $dependency --dev) {
                 pdm remove --dev $dependency
             } else if (is-a-dependency $dependency) {
@@ -682,16 +684,16 @@ generated_files := """
     [Option "Files to clean"];
     [<default> "<all EXCEPT dist and venv>"]
     [--all <all>]
-    [coverage .coverage]
-    [dist dist/]
+    [brew Brewfile*json]
+    [coverage .coverage/]
+    [dist [dist/ .pdm-build/]]
     [ds-store **/.DS_Store]
     [lilypond **/*-matrices.ly]
     [pdfs **/*.pdf]
-    [profiles profiles]
-    [pycache **/__pycache__]
-    [pytest .pytest_cache]
-    [ruff .ruff_cache]
-    [venv .venv]
+    [profiles profiles/]
+    [pycache **/__pycache__/]
+    [pytest .pytest_cache/]
+    [venv [.pdm-python .venv/]]
 ]
 """
 
@@ -701,12 +703,12 @@ clean *args:
 
     # Remove generated files
     def clean [
-        --choices, # Display possible values for ...(files)
+        --options, # Display possible values for ...(files)
         --all (-a), # Clean all files
-        ...files: string # Which files to clean (see --choices for available files)
+        ...files: string # Which files to clean (see --options for available files)
     ] {
-        if ($choices) {
-            echo {{ generated_files }}
+        if ($options) {
+            echo ({{ generated_files }} | table --expand)
             exit
         }
 
@@ -718,7 +720,6 @@ clean *args:
             profiles
             pycache
             pytest
-            ruff
         ]
 
         let files_to_clean = if $all {
@@ -734,6 +735,7 @@ clean *args:
                 {{ generated_files }}
                 | where Option == $file
                 | get "Files to clean"
+                | flatten
             )
 
             if ($files_list | is-empty) {
@@ -745,14 +747,12 @@ clean *args:
                 not (command -v pdm | is-empty)) and (
                 not (pdm run command -v pre-commit | is-empty)
             ) {
-                echo "Uninstalling pre-commit..."
                 pdm run pre-commit uninstall
             }
 
-            let files = $files_list | first
-
-            echo $"Removing generated ($file) files..."
-            rm --recursive --force $files
+            for glob in ($files_list) {
+                rm --recursive --force $glob
+            }
         }
     }
 
