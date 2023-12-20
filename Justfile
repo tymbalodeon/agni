@@ -16,6 +16,7 @@ _help:
     )
 
 alias source := src
+
 # Display the source code for a recipe
 src recipe *args="_":
     #!/usr/bin/env nu
@@ -792,7 +793,6 @@ release *target:
 
     release {{ target }}
 
-
 # Open the repository page in the browser
 @repo:
     gh browse
@@ -850,7 +850,6 @@ just run \
     --notate \
     --save
 """
-
 notate_ensemble_passage := """
 just run \
     passage examples/lonely-child-notes.ily \

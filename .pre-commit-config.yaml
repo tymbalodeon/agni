@@ -24,6 +24,13 @@ repos:
           - id: name-tests-test
           - id: requirements-txt-fixer
           - id: trailing-whitespace
+    - repo: local
+      hooks:
+          - id: just-format
+            entry: just --unstable --fmt
+            language: system
+            name: just-format
+            pass_filenames: false
     - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
       rev: 0.2.3
       hooks:
