@@ -4,19 +4,50 @@ repos:
       rev: v0.1.0
       hooks:
           - id: pre-commit-update
+    - repo: https://github.com/gitleaks/gitleaks
+      rev: v8.18.1
+      hooks:
+          - id: gitleaks
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v4.5.0
       hooks:
+          - id: check-added-large-files
+          - id: check-ast
           - id: check-builtin-literals
+          - id: check-case-conflict
+          - id: check-docstring-first
+          - id: check-executables-have-shebangs
+          - id: check-merge-conflict
           - id: check-toml
           - id: check-yaml
           - id: end-of-file-fixer
+          - id: name-tests-test
+          - id: requirements-txt-fixer
           - id: trailing-whitespace
-          - id: check-merge-conflict
     - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
       rev: 0.2.3
       hooks:
           - id: yamlfmt
+    - repo: https://github.com/igorshubovych/markdownlint-cli
+      rev: v0.38.0
+      hooks:
+          - id: markdownlint-fix
+    - repo: local
+      hooks:
+          - id: lychee
+            entry: lychee ./
+            language: system
+            name: lychee
+    - repo: https://github.com/jendrikseipp/vulture
+      rev: v2.10
+      hooks:
+          - id: vulture
+            args:
+                - ./
+                - --exclude
+                - '*/.venv/*'
+                - --ignore-names
+                - _generate_next_value_
     - repo: https://github.com/RobertCraigie/pyright-python
       rev: v1.1.341
       hooks:
@@ -28,16 +59,6 @@ repos:
             args:
                 - --fix
           - id: ruff-format
-    - repo: https://github.com/jendrikseipp/vulture
-      rev: v2.10
-      hooks:
-          - id: vulture
-            args:
-                - ./
-                - --exclude
-                - '*/.venv/*'
-                - --ignore-names
-                - _generate_next_value_
     - repo: local
       hooks:
           - id: coverage
@@ -57,20 +78,6 @@ repos:
                 - -o
                 - requirements.txt
                 - --without-hashes
-    - repo: https://github.com/igorshubovych/markdownlint-cli
-      rev: v0.38.0
-      hooks:
-          - id: markdownlint-fix
-    - repo: local
-      hooks:
-          - id: lychee
-            entry: lychee ./
-            language: system
-            name: lychee
-    - repo: https://github.com/gitleaks/gitleaks
-      rev: v8.18.1
-      hooks:
-          - id: gitleaks
     - repo: https://github.com/crate-ci/committed
       rev: v1.0.20
       hooks:
