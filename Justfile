@@ -39,11 +39,11 @@ src recipe *args="_":
 
 # Search available `just` commands
 [no-exit-message]
-search *regex:
+find *regex:
     #!/usr/bin/env nu
 
-    # Search available `just` commands, interactively, or by regex
-    def search [
+    # Search available `just` commands interactively, or by <regex>
+    def find [
         regex?: string # Regex pattern to match
     ] {
         if ($regex | is-empty) {
@@ -53,7 +53,7 @@ search *regex:
         }
     }
 
-    search {{ regex }}
+    find {{ regex }}
 
 # Manage project Python version
 python *args:
