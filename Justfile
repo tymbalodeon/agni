@@ -578,10 +578,10 @@ pre-commit *args:
     # Run pre-commit hook by name, all hooks, or update all hooks
     def pre-commit [
         hook?: string # The hook to run
-        --hooks # Display all hook ids
+        --list # List all hook ids
         --update # Update all pre-commit hooks
     ] {
-        if $hooks {
+        if $list {
             echo (
                 grep id .pre-commit-config.yaml
                 | str replace --all --regex "- +id:" ""
