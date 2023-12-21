@@ -759,7 +759,7 @@ clean *args:
     clean {{ args }}
 
 # Release a new version of the application
-release *args: && build
+release *args: && (install "--app")
     #!/usr/bin/env nu
 
     # Release a new version of the application
