@@ -759,7 +759,7 @@ clean *args:
     clean {{ args }}
 
 # Release a new version of the application
-release *args:
+release *args: check && build
     #!/usr/bin/env nu
 
     # Release a new version of the application
@@ -781,7 +781,19 @@ release *args:
                 | str join " "
             )
 
-            exit
+            exit 1
+        }
+
+        if not ((git branch --show-current) == "main") {
+            echo "Can only release from the main branch."
+
+            exit 1
+        }
+
+        if not (git status --short | is-empty) {
+            echo "Please commit all changes before releasing."
+
+            exit 1
         }
 
         if $target == "major" {
@@ -805,7 +817,11 @@ release *args:
             | save --force $file
         )
 
-        $"($current_version) --> ($new_version)"
+        git ciff --unreleased --tag $new_version --prepend CHANGELOG.md
+        git add $file CHANGELOG.md
+        git commit -m $"chore\(release\): bump version to ($new_version)"
+        git tag --annotate $"v($new_version)"
+        git push --follow-tags
     }
 
     release {{ args }}
