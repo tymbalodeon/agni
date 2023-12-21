@@ -786,13 +786,11 @@ release *args: check && build
 
         if not ((git branch --show-current) == "main") {
             echo "Can only release from the main branch."
-
             exit 1
         }
 
         if not (git status --short | is-empty) {
             echo "Please commit all changes before releasing."
-
             exit 1
         }
 
