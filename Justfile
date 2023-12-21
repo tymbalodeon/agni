@@ -759,39 +759,56 @@ clean *args:
     clean {{ args }}
 
 # Release a new version of the application
-release *target:
+release *args:
     #!/usr/bin/env nu
 
     # Release a new version of the application
     def release [
-        target = "patch" # Type of release to target (major, minor, or patch)
+        target: string # Type of release to target (major, minor, or patch)
     ] {
-        let current_version = just _get-application-version | split row "."
+        let current_version_numbers = just _get-application-version | split row "."
 
-        mut major = ($current_version.0 | into int)
-        mut minor = ($current_version.1 | into int)
-        mut patch = ($current_version.2 | into int)
+        mut major = ($current_version_numbers.0 | into int)
+        mut minor = ($current_version_numbers.1 | into int)
+        mut patch = ($current_version_numbers.2 | into int)
 
-        if $target in [major minor patch] {
-            if $target == "major" {
-                $major += 1
-                $minor = 0
-                $patch = 0
-            } else if $target == "minor" {
-                $minor += 1
-                $patch = 0
-            } else if $target == "patch" {
-               $patch += 1
-            }
+        if not ($target in [major minor patch]) {
+            echo (
+                [
+                    $"\"($target)\" is not a valid release target."
+                     "<target> must be one of: {major, minor, patch}"
+                ]
+                | str join " "
+            )
 
-            let new_version = ([$major $minor $patch] | str join ".")
-            $"($current_version | str join ".") --> ($new_version)"
-        } else {
-            just release --help
+            exit
         }
+
+        if $target == "major" {
+            $major += 1
+            $minor = 0
+            $patch = 0
+        } else if $target == "minor" {
+            $minor += 1
+            $patch = 0
+        } else if $target == "patch" {
+           $patch += 1
+        }
+
+        let new_version = ([$major $minor $patch] | str join ".")
+        let file = $"{{ application-command }}/__init__.py"
+        let current_version = $current_version_numbers | str join "."
+
+        (
+            open $file
+            | str replace $current_version $new_version
+            | save --force $file
+        )
+
+        $"($current_version) --> ($new_version)"
     }
 
-    release {{ target }}
+    release {{ args }}
 
 # Open the repository page in the browser
 @repo:
