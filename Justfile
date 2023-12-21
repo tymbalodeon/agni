@@ -822,8 +822,8 @@ release *args: && build
 
         git-cliff --unreleased --tag $new_version --prepend CHANGELOG.md
         git add $files CHANGELOG.md
-        git commit -m $"chore\(release\): bump version to ($new_version)"
-        git tag --annotate $"v($new_version)"
+        git commit --message $"chore\(release\): bump version to ($new_version)"
+        git tag $"v($new_version)"
         git push --follow-tags
     }
 
