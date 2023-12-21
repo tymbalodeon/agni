@@ -808,17 +808,20 @@ release *args: && build
         }
 
         let new_version = ([$major $minor $patch] | str join ".")
-        let file = $"{{ application-command }}/__init__.py"
+        let init_file = $"{{ application-command }}/__init__.py"
         let current_version = $current_version_numbers | str join "."
+        let files = [$init_file tests/main_test.py]
 
-        (
-            open $file
-            | str replace $current_version $new_version
-            | save --force $file
-        )
+        for file in $files {
+            (
+                open $file
+                | str replace $current_version $new_version
+                | save --force $file
+            )
+        }
 
         git-cliff --unreleased --tag $new_version --prepend CHANGELOG.md
-        git add $file CHANGELOG.md
+        git add $files CHANGELOG.md
         git commit -m $"chore\(release\): bump version to ($new_version)"
         git tag --annotate $"v($new_version)"
         git push --follow-tags
