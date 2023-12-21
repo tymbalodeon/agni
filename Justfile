@@ -817,7 +817,7 @@ release *args: && build
             | save --force $file
         )
 
-        git ciff --unreleased --tag $new_version --prepend CHANGELOG.md
+        git-ciff --unreleased --tag $new_version --prepend CHANGELOG.md
         git add $file CHANGELOG.md
         git commit -m $"chore\(release\): bump version to ($new_version)"
         git tag --annotate $"v($new_version)"
