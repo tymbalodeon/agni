@@ -759,7 +759,7 @@ clean *args:
     clean {{ args }}
 
 # Release a new version of the application
-release *args: check && build
+release *args: && build
     #!/usr/bin/env nu
 
     # Release a new version of the application
@@ -793,6 +793,8 @@ release *args: check && build
             echo "Please commit all changes before releasing."
             exit 1
         }
+
+        just check
 
         if $target == "major" {
             $major += 1
