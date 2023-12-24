@@ -759,7 +759,7 @@ clean *args:
     clean {{ args }}
 
 # Release a new version of the application
-release *args: && (install "--app")
+release *args:
     #!/usr/bin/env nu
 
     # Release a new version of the application
@@ -795,7 +795,9 @@ release *args: && (install "--app")
             exit 1
         }
 
-        just check
+        if not $preview {
+            just check
+        }
 
         if $target == "major" {
             $major += 1
@@ -832,6 +834,7 @@ release *args: && (install "--app")
         git commit --message $"chore\(release\): bump version to ($new_version)"
         git tag $"v($new_version)"
         git push --follow-tags
+        just install --app
     }
 
     release {{ args }}
