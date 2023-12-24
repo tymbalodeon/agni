@@ -131,7 +131,7 @@ add *args:
 
     # Add dependencies
     def add [
-        ...dependencies: string,
+        ...dependencies: string, # Dependencies to add
         --dev # Add dependencies to the development group
     ]: {
         if $dev {
