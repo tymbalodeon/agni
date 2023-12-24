@@ -6,3 +6,4 @@ if ! command -v "brew" &>/dev/null; then
 fi
 
 brew bundle --no-upgrade --file Brewfile.prod
+brew bundle --no-upgrade --file Brewfile.dev
