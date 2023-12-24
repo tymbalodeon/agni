@@ -765,6 +765,7 @@ release *args: && (install "--app")
     # Release a new version of the application
     def release [
         target: string # Type of release to target (major, minor, or patch)
+        --preview # Preview new additions to the CHANGELOG without modifyiing anything
     ] {
         let current_version_numbers = just _get-application-version | split row "."
 
@@ -808,6 +809,12 @@ release *args: && (install "--app")
         }
 
         let new_version = ([$major $minor $patch] | str join ".")
+
+        if $preview {
+            git-cliff --unreleased --tag $new_version
+            exit
+        }
+
         let init_file = $"{{ application-command }}/__init__.py"
         let current_version = $current_version_numbers | str join "."
         let files = [$init_file tests/main_test.py]
