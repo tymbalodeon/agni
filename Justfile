@@ -697,7 +697,7 @@ generated_files := """
 ]
 """
 
-# Clean generated files
+# Remove generated files
 clean *args:
     #!/usr/bin/env nu
 
