@@ -1,2 +1,2 @@
 brew "pdm"
-brew "rtx"
+brew "mise"

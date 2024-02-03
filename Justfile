@@ -69,13 +69,13 @@ python *args:
         --version # (default) Show the current Python version
     ] {
         if $latest {
-            rtx latest python
+            mise latest python
             exit
         } else if $installed {
-            rtx list python
+            mise list python
             exit
         } else if $path {
-            rtx which python
+            mise which python
             exit
         } else if $version or ($use | is-empty) {
             ^python -V
@@ -83,7 +83,7 @@ python *args:
         }
 
         let version = if $use == "latest" {
-            (rtx latest python)
+            (mise latest python)
         } else {
             $use
         }
@@ -92,8 +92,8 @@ python *args:
             exit
         }
 
-        rtx local $"python@($version)"
-        pdm venv create --force (rtx where $"python@($version)")
+        mise local $"python@($version)"
+        pdm venv create --force (mise where $"python@($version)")
         just install --minimal
     }
 
@@ -272,12 +272,12 @@ install *args:
         }
 
         if (
-            rtx outdated --log-level error
+            mise outdated --log-level error
             | complete
             | get exit_code
             | into bool
         ) {
-            rtx install
+            mise install
         }
 
         if not $prod {
@@ -349,7 +349,7 @@ update *args:
             brew bundle --file $file
         }
 
-        rtx upgrade
+        mise upgrade
 
         if not $prod {
             pdm run python -m pip install --upgrade pip pipx
