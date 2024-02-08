@@ -325,12 +325,14 @@ install *args:
 
     install {{ args }}
 
+alias update := upgrade
+
 # Update dependencies
-update *args:
+upgrade *args:
     #!/usr/bin/env nu
 
     # Update dependencies
-    def update [
+    def upgrade [
         --prod # Update production dependencies
     ] {
         if $prod {
@@ -364,10 +366,10 @@ update *args:
             pdm update
         }
 
-        just pre-commit --update
+        just check --update
     }
 
-    update {{ args }}
+    upgrade {{ args }}
 
 # Show application dependencies
 dependencies *args:
