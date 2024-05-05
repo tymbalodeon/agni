@@ -56,49 +56,6 @@ find *regex:
 
     find {{ regex }}
 
-# Manage project Python version
-python *args:
-    #!/usr/bin/env nu
-
-    # Manage project Python version
-    def python [
-        --installed # Show installed Python versions
-        --latest # Show the latest available Python version
-        --path # Show the path of the current Python
-        --use: string # Specify a new Python version to use
-        --version # (default) Show the current Python version
-    ] {
-        if $latest {
-            mise latest python
-            exit
-        } else if $installed {
-            mise list python
-            exit
-        } else if $path {
-            mise which python
-            exit
-        } else if $version or ($use | is-empty) {
-            ^python -V
-            exit
-        }
-
-        let version = if $use == "latest" {
-            (mise latest python)
-        } else {
-            $use
-        }
-
-        if $version in ((^python -V) | split row " "  | last)  {
-            exit
-        }
-
-        mise local $"python@($version)"
-        pdm venv create --force (mise where $"python@($version)")
-        just install --minimal
-    }
-
-    python {{ args }}
-
 get-pyproject-value := "open pyproject.toml | get project."
 application-command := "(" + get-pyproject-value + "name)"
 
@@ -107,7 +64,7 @@ _install_and_run *command:
     #!/usr/bin/env nu
 
     let command = (
-        echo `{{ command }}`
+        print `{{ command }}`
         | split row --regex "sudo pdm run |pdm run "
         | last
         | split words
@@ -135,9 +92,9 @@ add *args:
         --dev # Add dependencies to the development group
     ]: {
         if $dev {
-            pdm add --dev $dependencies
+            pdm add --dev ...$dependencies
         } else {
-            pdm add $dependencies
+            pdm add ...$dependencies
         }
     }
 
@@ -259,27 +216,6 @@ install *args:
             exit
         }
 
-        if (not $minimal) and (not $app) {
-            mut brewfiles = ["Brewfile.prod"]
-
-            if not $prod {
-                $brewfiles = ($brewfiles | append "Brewfile.dev")
-            }
-
-            for file in $brewfiles {
-                brew bundle --no-upgrade --file $file
-            }
-        }
-
-        if (
-            mise outdated --log-level error
-            | complete
-            | get exit_code
-            | into bool
-        ) {
-            mise install
-        }
-
         if not $prod {
             if (module-not-installed pip) {
                 pdm run python -m ensurepip --upgrade --default-pip
@@ -341,18 +277,6 @@ upgrade *args:
             just install --minimal
         }
 
-        mut brewfiles = ["Brewfile.prod"]
-
-        if not $prod {
-            $brewfiles = ($brewfiles | append "Brewfile.dev")
-        }
-
-        for file in $brewfiles {
-            brew bundle --file $file
-        }
-
-        mise upgrade
-
         if not $prod {
             pdm run python -m pip install --upgrade pip pipx
             pnpm update --global speedscope
@@ -382,26 +306,6 @@ dependencies *args:
         | lines
         | each { |line| $"\t($line)" }
         | str join "\n"
-    }
-
-    def get-brew-dependencies [--dev] {
-        let brewfile = if $dev {
-            "Brewfile.dev"
-        } else {
-            "Brewfile.prod"
-        }
-
-        mut dependencies = indent (
-            brew bundle list --file $brewfile
-            | lines
-            | str join "\n"
-        )
-
-        if not $dev {
-            $dependencies = "Production build:\n" + $dependencies
-        }
-
-        $dependencies
     }
 
     # Show application dependencies
@@ -441,35 +345,13 @@ dependencies *args:
                 | rename name license
             )
 
-            let brew_dependencies = if $dev {
-                brew bundle list --file Brewfile.dev | lines
-            } else if $prod {
-                brew bundle list --file Brewfile.prod | lines
-            } else {
-                (
-                    (brew bundle list --file Brewfile.prod)
-                    + "\n"
-                    + (brew bundle list --file Brewfile.dev)
-                )
-                | lines
-            }
-
-            $dependencies = (
-                $dependencies
-                | append (
-                    brew info $brew_dependencies --json
-                    | from json
-                    | select name license
-                )
-            )
-
             $dependencies = if $sort_by_license {
                 $dependencies | sort-by license
             } else {
                 $dependencies | sort-by name
             }
 
-            echo $dependencies
+            print $dependencies
             exit
         }
 
@@ -479,7 +361,6 @@ dependencies *args:
             (
                 (list-dependencies --include-version --prod)
                 + "\n\n"
-                + (get-brew-dependencies)
             )
         } else {
             let prod_dependencies = (
@@ -490,24 +371,13 @@ dependencies *args:
                 indent (list-dependencies --include-version --dev)
             )
 
-            let brew_prod_dependencies = (
-                get-brew-dependencies
-            )
-
-            let brew_dev_dependencies = (
-                get-brew-dependencies --dev
-            )
-
             (
                 [
                     Production:
                     $prod_dependencies
                     ""
-                    $brew_prod_dependencies
-                    ""
                     Development:
                     $dev_dependencies
-                    $brew_dev_dependencies
                 ]
                 | str join "\n"
             )
@@ -520,7 +390,7 @@ dependencies *args:
         let bat_command = (
             "bat --language pip --plain --theme gruvbox-dark"
         )
-        zsh -c $"echo \"($dependencies)\" | ($bat_command)"
+        zsh -c $"print \"($dependencies)\" | ($bat_command)"
     }
 
     show-dependencies {{ args }}
@@ -530,13 +400,13 @@ check *args:
     #!/usr/bin/env nu
 
     # Run pre-commit hook by name, all hooks, or update all hooks
-    def pre-commit [
+    def check [
         hook?: string # The hook to run
         --list # List all hook ids
         --update # Update all pre-commit hooks
     ] {
         if $list {
-            echo (
+            print (
                 grep id .pre-commit-config.yaml
                 | str replace --all --regex "- +id:" ""
                 | lines
@@ -545,22 +415,23 @@ check *args:
                 | str join "\n"
             )
 
-            exit
+            return
         }
 
         if $update {
-            just _install_and_run pdm run pre-commit autoupdate
-            exit
+            pdm run pre-commit autoupdate
+
+            return
         }
 
         if not ($hook | is-empty) {
-            just _install_and_run pdm run pre-commit run $hook --all-files
+            pdm run pre-commit run $hook --all-files
         } else {
-            just _install_and_run pdm run pre-commit run --all-files
+            pdm run pre-commit run --all-files
         }
     }
 
-    pre-commit {{ args }}
+    check {{ args }}
 
 # Open an interactive python shell
 shell *args:
@@ -686,7 +557,6 @@ generated_files := """
     [Option "Files to clean"];
     [<default> "<all EXCEPT dist and venv>"]
     [--all <all>]
-    [brew Brewfile*json]
     [coverage .coverage/]
     [dist [dist/ .pdm-build/]]
     [ds-store **/.DS_Store]
@@ -710,7 +580,7 @@ clean *args:
         ...files: string # Which files to clean (see --options for available files)
     ] {
         if ($options) {
-            echo ({{ generated_files }} | table --expand)
+            print ({{ generated_files }} | table --expand)
             exit
         }
 
@@ -741,7 +611,7 @@ clean *args:
             )
 
             if ($files_list | is-empty) {
-                echo $"Unknown option: \"($file)\""
+                print $"Unknown option: \"($file)\""
                 continue
             }
 
@@ -776,7 +646,7 @@ release *args:
         mut patch = ($current_version_numbers.2 | into int)
 
         if not ($target in [major minor patch]) {
-            echo (
+            print (
                 [
                     $"\"($target)\" is not a valid release target."
                      "<target> must be one of: {major, minor, patch}"
@@ -788,12 +658,12 @@ release *args:
         }
 
         if not ((git branch --show-current) == "main") {
-            echo "Can only release from the main branch."
+            print "Can only release from the main branch."
             exit 1
         }
 
         if not (git status --short | is-empty) {
-            echo "Please commit all changes before releasing."
+            print "Please commit all changes before releasing."
             exit 1
         }
 

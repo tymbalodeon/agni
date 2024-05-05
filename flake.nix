@@ -1,10 +1,15 @@
 {
   description = "agni";
-
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
   outputs = {nixpkgs, ...}: let
-    supportedSystems = ["x86_64-linux" "aarch64-darwin" "x86_64-darwin" "aarch64-linux"];
+    supportedSystems = [
+      "aarch64-darwin"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "x86_64-linux"
+    ];
+
     forEachSupportedSystem = f:
       nixpkgs.lib.genAttrs supportedSystems (system:
         f {
@@ -14,10 +19,20 @@
     devShells = forEachSupportedSystem ({pkgs}: {
       default = pkgs.mkShell {
         packages = with pkgs; [
+          lychee
+          nodePackages.pnpm
           pdm
           python311
           python311Packages.pre-commit-hooks
         ];
+
+        env = {
+          PNPM_HOME = "~/.pnpm";
+        };
+
+        shellHook = ''
+          export PATH="''${PNPM_HOME}:''${PATH}"
+        '';
       };
     });
   };
