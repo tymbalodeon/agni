@@ -19,6 +19,7 @@
     devShells = forEachSupportedSystem ({pkgs}: {
       default = pkgs.mkShell {
         packages = with pkgs; [
+          git-cliff
           lychee
           nodePackages.pnpm
           pdm
