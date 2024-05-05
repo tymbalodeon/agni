@@ -1,8 +1,9 @@
 *.pdf
 *.pyc
 *.svg
-.DS_Store
 .coverage
+.direnv
+.DS_Store
 .pdm-python
 .pyre/
 __pycache__/

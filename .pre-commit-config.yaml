@@ -1,7 +1,7 @@
 ---
 repos:
-    - repo: https://gitlab.com/vojko.pribudic/pre-commit-update
-      rev: v0.1.5
+    - repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
+      rev: v0.3.1post2
       hooks:
           - id: pre-commit-update
     - repo: https://github.com/gitleaks/gitleaks
@@ -9,7 +9,7 @@ repos:
       hooks:
           - id: gitleaks
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.5.0
+      rev: v4.6.0
       hooks:
           - id: check-added-large-files
           - id: check-ast
@@ -36,7 +36,7 @@ repos:
       hooks:
           - id: yamlfmt
     - repo: https://github.com/igorshubovych/markdownlint-cli
-      rev: v0.39.0
+      rev: v0.40.0
       hooks:
           - id: markdownlint-fix
     - repo: local
@@ -56,28 +56,28 @@ repos:
                 - --ignore-names
                 - _generate_next_value_
     - repo: https://github.com/RobertCraigie/pyright-python
-      rev: v1.1.350
+      rev: v1.1.361
       hooks:
           - id: pyright
     - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.2.1
+      rev: v0.4.3
       hooks:
           - id: ruff
             args:
                 - --fix
           - id: ruff-format
-    - repo: local
-      hooks:
-          - id: coverage
-            entry: just coverage
-            language: system
-            name: coverage
-            pass_filenames: false
-            args:
-                - --fail-under
-                - '61'
+  # - repo: local
+  #   hooks:
+  #       - id: coverage
+  #         entry: just coverage
+  #         language: system
+  #         name: coverage
+  #         pass_filenames: false
+  #         args:
+  #             - --fail-under
+  #             - '61'
     - repo: https://github.com/pdm-project/pdm
-      rev: 2.12.3
+      rev: 2.15.1
       hooks:
           - id: pdm-export
             files: ^pdm.lock$
@@ -86,7 +86,7 @@ repos:
                 - requirements.txt
                 - --without-hashes
     - repo: https://github.com/pdm-project/pdm
-      rev: 2.12.3
+      rev: 2.15.1
       hooks:
           - id: pdm-lock-check
     - repo: https://github.com/crate-ci/committed

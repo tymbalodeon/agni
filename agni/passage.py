@@ -264,9 +264,9 @@ class Passage:
             else:
                 matrix_duration = shorter_part.matrix_duration
                 if self._leaves_are_notes_of_different_durations:
-                    decrement_durations[
-                        longer_part
-                    ] = shorter_part.remaining_duration
+                    decrement_durations[longer_part] = (
+                        shorter_part.remaining_duration
+                    )
             matrix_leaf = MatrixLeaf(
                 _bass=bass.named_pitch,
                 _melody=melody.named_pitch,
