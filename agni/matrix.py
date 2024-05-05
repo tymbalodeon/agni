@@ -224,8 +224,7 @@ class Matrix:
             self._display_table()
 
     def play(self):
-        EventPattern(
-            frequency=SequencePattern(self.sorted_frequencies),
-            delta=0.05,
-        ).play(Server().boot())
+        EventPattern(frequency=SequencePattern(self.sorted_frequencies)).play(
+            Server().boot()
+        )
         sleep(5)

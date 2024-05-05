@@ -16,10 +16,6 @@ class PitchType(StrEnum):
 
 
 class Tuning(StrEnum):
-    @staticmethod
-    def _generate_next_value_(name, *_):
-        return name.lower().replace("_", "-")
-
     EQUAL_TEMPERED = auto()
     MICROTONAL = auto()
 
