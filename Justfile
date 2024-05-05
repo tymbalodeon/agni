@@ -64,7 +64,7 @@ _install_and_run *command:
     #!/usr/bin/env nu
 
     let command = (
-        print `{{ command }}`
+        echo `{{ command }}`
         | split row --regex "sudo pdm run |pdm run "
         | last
         | split words
@@ -419,15 +419,15 @@ check *args:
         }
 
         if $update {
-            pdm run pre-commit autoupdate
+            just _install_and_run pdm run pre-commit autoupdate
 
             return
         }
 
         if not ($hook | is-empty) {
-            pdm run pre-commit run $hook --all-files
+            just _install_and_run pdm run pre-commit run $hook --all-files
         } else {
-            pdm run pre-commit run --all-files
+            just _install_and_run pdm run pre-commit run --all-files
         }
     }
 
