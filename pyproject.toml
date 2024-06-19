@@ -12,7 +12,7 @@ requires-python = ">=3.11"
 dependencies = [
     "typer[all]>=0.9.0",
     "abjad>=3.19",
-    "supriya>=23.10b0",
+    "supriya==24.3b2",
     "abjad-ext-rmakers>=3.19",
     "more-itertools>=10.1.0",
 ]

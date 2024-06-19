@@ -3,72 +3,65 @@
 
 abjad==3.19
 abjad-ext-rmakers==3.19
-aiohttp==3.9.1; sys_platform != "win32" or implementation_name != "pypy"
-aiosignal==1.3.1; sys_platform != "win32" or implementation_name != "pypy"
-alabaster==0.7.13
+alabaster==0.7.16
 ansicon==1.89.0; platform_system == "Windows"
-attrs==23.1.0; sys_platform != "win32" or implementation_name != "pypy"
-babel==2.14.0
-black==23.12.0
+babel==2.15.0
+black==24.4.2
 blessed==1.20.0
 bpython==0.24
-certifi==2023.11.17
+certifi==2024.6.2
 cfgv==3.4.0
 charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6; sys_platform == "win32" or platform_system == "Windows"
-coverage==7.5.1
+coverage==7.5.3
 curtsies==0.4.2
 cwcwidth==0.1.9
 distlib==0.3.8
-docutils==0.20.1
-filelock==3.13.1
-frozenlist==1.4.0; sys_platform != "win32" or implementation_name != "pypy"
-greenlet==3.0.2
-identify==2.5.33
-idna==3.6
+docutils==0.21.2
+filelock==3.15.1
+greenlet==3.0.3
+identify==2.5.36
+idna==3.7
 imagesize==1.4.1
 iniconfig==2.0.0
-Jinja2==3.1.2
+jinja2==3.1.4
 jinxed==1.2.1; platform_system == "Windows"
 markdown-it-py==3.0.0
-MarkupSafe==2.1.3
+markupsafe==2.1.5
 mdurl==0.1.2
-more-itertools==10.2.0
-multidict==6.0.4; sys_platform != "win32" or implementation_name != "pypy"
+more-itertools==10.3.0
 mypy-extensions==1.0.0
-nodeenv==1.8.0
-packaging==23.2
+nodeenv==1.9.1
+packaging==24.1
 pathspec==0.12.1
-platformdirs==4.1.0
+platformdirs==4.2.2
 pluggy==1.5.0
 ply==3.11
-pre-commit==3.7.0
+pre-commit==3.7.1
 py-spy==0.3.14
-pygments==2.17.2
-pytest==8.2.0
+pygments==2.18.0
+pytest==8.2.2
 pyxdg==0.28
 pyyaml==6.0.1
-requests==2.31.0
-rich==13.7.0
-roman==4.1
-setuptools==69.0.2
+requests==2.32.3
+rich==13.7.1
+roman==4.2
 shellingham==1.5.4
 six==1.16.0
 snowballstemmer==2.2.0
-Sphinx==7.2.6
-sphinxcontrib-applehelp==1.0.7
-sphinxcontrib-devhelp==1.0.5
-sphinxcontrib-htmlhelp==2.0.4
+sphinx==7.3.7
+sphinxcontrib-applehelp==1.0.8
+sphinxcontrib-devhelp==1.0.6
+sphinxcontrib-htmlhelp==2.0.5
 sphinxcontrib-jsmath==1.0.1
-sphinxcontrib-qthelp==1.0.6
-sphinxcontrib-serializinghtml==1.1.9
+sphinxcontrib-qthelp==1.0.7
+sphinxcontrib-serializinghtml==1.1.10
 supriya==24.3b2
 typer==0.12.3
-typing-extensions==4.9.0
-Unidecode==1.3.7
+typing-extensions==4.12.2
+unidecode==1.3.8
 uqbar==0.7.4
-urllib3==2.1.0
-virtualenv==20.25.0
-wcwidth==0.2.12
-yarl==1.9.4; sys_platform != "win32" or implementation_name != "pypy"
+urllib3==2.2.2
+virtualenv==20.26.2
+wcwidth==0.2.13
