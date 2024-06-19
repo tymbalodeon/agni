@@ -448,18 +448,7 @@ shell *args:
 run *args:
     #!/usr/bin/env nu
 
-    let args = (
-        ["{{ args }}"]
-        | split row " "
-        | each { |arg| $"\"($arg)\"" }
-        | str join " "
-    )
-
-    if $args == '""' {
-        just _install_and_run pdm run {{ application-command }}
-    } else {
-        just _install_and_run pdm run {{ application-command }} $"`($args)`"
-    }
+    just _install_and_run pdm run {{ application-command }} {{ args }}
 
 # Profile a command and view results
 profile *args:
