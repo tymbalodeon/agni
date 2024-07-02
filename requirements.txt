@@ -14,7 +14,7 @@ cfgv==3.4.0
 charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6; sys_platform == "win32" or platform_system == "Windows"
-coverage==7.5.3
+coverage==7.5.4
 curtsies==0.4.2
 cwcwidth==0.1.9
 distlib==0.3.8

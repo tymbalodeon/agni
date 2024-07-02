@@ -222,7 +222,7 @@ def test_matrix_tuning_equal_tempered():
     3 x bass   1,320        1,786        2,252        2,718
     """
     actual_output = call_command(
-        matrix_command + [tuning_option, "equal-tempered"]
+        matrix_command + [tuning_option, "equal_tempered"]
     )
     assert_lines_match(actual_output, expected_output)
 
