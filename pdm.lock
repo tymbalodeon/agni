@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:fd2b2955277f7e41704557a7ecafc5e47f6a2678342abfa5e98b450156e64588"
+content_hash = "sha256:7e739ad646fd2caa3036b36aa22231ca5001696a3d35314d6a76269ba78569c4"
 
 [[package]]
 name = "abjad"
@@ -33,6 +33,20 @@ dependencies = [
 ]
 files = [
     {file = "abjad-ext-rmakers-3.19.tar.gz", hash = "sha256:84c3b2c7357cbfa9d8294503bf86adcf7ef08278dac60742dc8a1019f168f6aa"},
+]
+
+[[package]]
+name = "abjad"
+version = "3.19"
+extras = ["all"]
+requires_python = ">=3.10"
+summary = "Abjad is a Python API for building LilyPond files."
+groups = ["default"]
+dependencies = [
+    "abjad==3.19",
+]
+files = [
+    {file = "abjad-3.19.tar.gz", hash = "sha256:23db7739150a14594c7d726c0335e10b39750786bdfd9366bd25f6fd1e384cfb"},
 ]
 
 [[package]]

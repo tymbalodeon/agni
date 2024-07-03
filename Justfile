@@ -1,5 +1,3 @@
-set shell := ["nu", "-c"]
-
 _help:
     #!/usr/bin/env nu
 
@@ -83,22 +81,8 @@ _install_and_run *command:
     {{ command }}
 
 # Add dependencies
-add *args:
-    #!/usr/bin/env nu
-
-    # Add dependencies
-    def add [
-        ...dependencies: string, # Dependencies to add
-        --dev # Add dependencies to the development group
-    ]: {
-        if $dev {
-            pdm add --dev ...$dependencies
-        } else {
-            pdm add ...$dependencies
-        }
-    }
-
-    add {{ args }}
+@add *args:
+    ./scripts/add.nu {{ args }}
 
 use-list-dependencies := """
     def list-dependencies [
