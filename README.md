@@ -1,10 +1,8 @@
 # Agni
 
-Music compositional tools inspired by the techniques of [Claude Vivier](
-https://www.boosey.com/composer/Claude+Vivier "Claude Vivier").
+Music compositional tools inspired by the techniques of [Claude Vivier](https://www.boosey.com/composer/Claude+Vivier "Claude Vivier").
 
-"Agni" is a character from Vivier's opera [_Kopernikus_](
-https://www.boosey.com/cr/music/Claude-Vivier-Kopernikus/47743 "Kopernikus"):
+"Agni" is a character from Vivier's opera [_Kopernikus_](https://www.boosey.com/cr/music/Claude-Vivier-Kopernikus/47743 "Kopernikus"):
 
 > The main character is Agni; mystical beings borrowed from stories (represented
 > by the other six singers) gravitate around her: Lewis Carroll, Merlin, a witch,
@@ -19,7 +17,7 @@ https://www.boosey.com/cr/music/Claude-Vivier-Kopernikus/47743 "Kopernikus"):
 
 To install the app, run:
 
-``` sh
+```sh
 ./install-dependencies \
 && just install --app
 ```
@@ -34,13 +32,13 @@ agni
 
 The concept of a "Combination-Tone Matrix" comes from Bryan Christian's article,
 ["Combination-Tone Class Sets and Redefining the Role of les Couleurs in
-Claude Vivier’s Bouchara"](https://mtosmt.org/issues/mto.14.20.2/mto.14.20.2.christian.html).
+Claude Vivier’s Bouchara"](https://mtosmt.org/issues/mto.14.20.2/mto.14.20.2.christian.pdf).
 
 ### Matrix
 
 Generate a single matrix for a bass frequency of 98 Hz and melody of 440 Hz:
 
-``` sh
+```sh
 > agni matrix 98 440
                 Combination-Tone Matrix (Hertz)
 
@@ -55,7 +53,7 @@ By default, numeric input is assumed to be in Hertz, and the output will be
 displayed in the same format as the input. Specify the "pitch type" explicitly
 to change the output format to something dfferent:
 
-``` sh
+```sh
 > agni matrix 98 440 --pitch-type lilypond
                Combination-Tone Matrix (Lilypond)
 
@@ -69,7 +67,7 @@ to change the output format to something dfferent:
 The output can also be shown in various forms. For example, you can display the
 pitches as a "list," which makes it easy to copy the output into a LilyPond document:
 
-``` sh
+```sh
 > agni matrix g, "a'" --display-format list
 g, g d' a' cqs'' eqf'' fs'' a'' b'' cqs''' d''' e''' f''' gqf''' gqs'''
 ```
@@ -77,7 +75,7 @@ g, g d' a' cqs'' eqf'' fs'' a'' b'' cqs''' d''' e''' f''' gqf''' gqs'''
 You can also display pitches stacked as a "chord." Here is the same matrix,
 using midi number input, shown stacked as a chord:
 
-``` sh
+```sh
 > agni matrix 43 69 --midi-input --display-format chord
    Combination-Tone Matrix (Midi)
 
@@ -101,7 +99,7 @@ using midi number input, shown stacked as a chord:
 You can also control the tuning quantization and number of multiples. Here is
 the same matrix quantized to equal temperament, calculated up to only 3 multiples:
 
-``` sh
+```sh
 > agni matrix 98 440 --tuning equal-tempered --multiples 3
           Combination-Tone Matrix (Hertz)
 
@@ -119,19 +117,15 @@ output to PDF via LilyPond.
 #### Input Files
 
 Abjad's LilyPondParser does not support all of LilyPond's syntax. Please see [Abjad's
-documentation](
-https://abjad.github.io/api/abjad/parsers/parser.html#abjad.parsers.parser.LilyPondParser
-) for supported syntax that can be used in input files.
+documentation](https://abjad.github.io/api/abjad/parsers/parser.html#abjad.parsers.parser.LilyPondParser) for supported syntax that can be used in input files.
 
 #### Example (Claude Vivier's Lonely Child)
 
-Vivier's [_Lonely Child_](
-https://www.boosey.com/cr/music/Claude-Vivier-Lonely-Child/47752 "Lonely Child"
-) is provided as an example.
+Vivier's [_Lonely Child_](https://www.boosey.com/cr/music/Claude-Vivier-Lonely-Child/47752 "Lonely Child") is provided as an example.
 
 To compile the input score, generate matrices and harmonized score, and open PDFs:
 
-``` sh
+```sh
 # ./install-dependencies && \
 just example # --help
 ```
@@ -141,7 +135,7 @@ just example # --help
 _Justfile_ commands are provided for convenience. To see all available commands,
 run:
 
-``` sh
+```sh
 # ./install-dependencies && \
 just
 ```
