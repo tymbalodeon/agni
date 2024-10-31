@@ -1,50 +1,11 @@
+# generic
 [project]
-name = "agni"
-dynamic = ["version"]
-description = """\
-Music compositional tools inspired by the techniques of Claude Vivier
-"""
-authors = [{ name = "Ben Rosen", email = "benjamin.j.rosen@gmail.com" }]
-readme = "README.md"
-license = { text = "MIT" }
-keywords = ["claude vivier", "lilypond", "music notation", "music", "spectral"]
-requires-python = ">=3.11"
-dependencies = [
-    "typer[all]>=0.12.3",
-    "abjad>=3.19",
-    "supriya==24.3b2",
-    "abjad-ext-rmakers>=3.19",
-    "more-itertools>=10.3.0",
-]
+name = "environments"
+version = "0.1.0"
+requires-python = "==3.12.*"
 
-[project.urls]
-repository = "https://github.com/tymbalodeon/agni"
-
-[project.scripts]
-agni = "agni.main:agni"
-
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
-[tool.pyright]
-venvPath = "."
-venv = ".venv"
-
-[tool.ruff]
-exclude = [".git", ".ruff_cache", ".venv", "build", "dist"]
-line-length = 79
-indent-width = 4
-
-[tool.pdm.version]
-source = "file"
-path = "agni/__init__.py"
+[tool.pdm]
+distribution = false
 
 [tool.pdm.dev-dependencies]
-dev = [
-    "bpython>=0.24",
-    "py-spy>=0.3.14",
-    "pre-commit>=3.5.0",
-    "coverage>=7.3.2",
-    "pytest>=7.4.3",
-]
+dev = ["pre-commit-update>=0.3.3.post1"]

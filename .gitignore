@@ -1,14 +1,21 @@
-*.pdf
-*.pyc
-*.svg
-.DS_Store
-.coverage
+.config
 .direnv
 .envrc
 .pdm-python
-.pyre/
+.venv
+
+ python
+
+*.pyc
+.coverage
 __pycache__/
 build/
 dist/
-examples/*-matrices.ly
-profiles/
+
+# python
+
+*.pyc
+.coverage
+__pycache__/
+build/
+dist/

@@ -1,95 +1,22 @@
----
 repos:
-    - repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
-      rev: v0.3.3post1
-      hooks:
-          - id: pre-commit-update
-    - repo: https://github.com/gitleaks/gitleaks
-      rev: v8.18.4
-      hooks:
-          - id: gitleaks
-    - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.6.0
-      hooks:
-          - id: check-added-large-files
-          - id: check-ast
-          - id: check-builtin-literals
-          - id: check-case-conflict
-          - id: check-docstring-first
-          - id: check-executables-have-shebangs
-          - id: check-merge-conflict
-          - id: check-toml
-          - id: check-yaml
-          - id: end-of-file-fixer
-          - id: name-tests-test
-          - id: requirements-txt-fixer
-          - id: trailing-whitespace
-    - repo: local
-      hooks:
-          - id: just-format
-            entry: just --unstable --fmt
-            language: system
-            name: just-format
-            pass_filenames: false
-    - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-      rev: 0.2.3
-      hooks:
-          - id: yamlfmt
-    - repo: https://github.com/igorshubovych/markdownlint-cli
-      rev: v0.41.0
-      hooks:
-          - id: markdownlint-fix
-    - repo: local
-      hooks:
-          - id: lychee
-            entry: lychee ./
-            language: system
-            name: lychee
-    - repo: https://github.com/jendrikseipp/vulture
-      rev: v2.11
-      hooks:
-          - id: vulture
-            args:
-                - ./
-                - --exclude
-                - '*/.venv/*'
-                - --ignore-names
-                - _generate_next_value_
-    - repo: https://github.com/RobertCraigie/pyright-python
-      rev: v1.1.373
-      hooks:
-          - id: pyright
-    - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.5.5
-      hooks:
-          - id: ruff
-            args:
-                - --fix
-          - id: ruff-format
-  # - repo: local
-  #   hooks:
-  #       - id: coverage
-  #         entry: just coverage
-  #         language: system
-  #         name: coverage
-  #         pass_filenames: false
-  #         args:
-  #             - --fail-under
-  #             - '61'
-    - repo: https://github.com/pdm-project/pdm
-      rev: 2.17.1
-      hooks:
-          - id: pdm-export
-            files: ^pdm.lock$
-            args:
-                - --output
-                - requirements.txt
-                - --without-hashes
-    - repo: https://github.com/pdm-project/pdm
-      rev: 2.17.1
-      hooks:
-          - id: pdm-lock-check
-    - repo: https://github.com/crate-ci/committed
-      rev: v1.0.20
-      hooks:
-          - id: committed
+  # python
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-json
+      - id: check-toml
+      - id: pretty-format-json
+        args:
+          - --autofix
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        types:
+          - json
+  - repo: local
+    hooks:
+      - id: taplo
+        name: taplo
+        entry: taplo format
+        language: system

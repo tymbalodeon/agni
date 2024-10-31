@@ -2,11 +2,11 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1722062969,
-        "narHash": "sha256-QOS0ykELUmPbrrUGmegAUlpmUFznDQeR4q7rFhl8eQg=",
+        "lastModified": 1730200266,
+        "narHash": "sha256-l253w0XMT8nWHGXuXqyiIC/bMvh1VRszGXgdpQlfhvU=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "b73c2221a46c13557b1b3be9c2070cc42cf01eb3",
+        "rev": "807e9154dcb16384b1b765ebe9cd2bba2ac287fd",
         "type": "github"
       },
       "original": {
@@ -16,9 +16,26 @@
         "type": "github"
       }
     },
+    "nushell-syntax": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1692935709,
+        "narHash": "sha256-paayZP6P+tzGnla7k+HrF+dcTKUyU806MTtUeurhvdg=",
+        "owner": "stevenxxiu",
+        "repo": "sublime_text_nushell",
+        "rev": "66b00ff639dc8cecb688a0e1d81d13613b772f66",
+        "type": "github"
+      },
+      "original": {
+        "owner": "stevenxxiu",
+        "repo": "sublime_text_nushell",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "nushell-syntax": "nushell-syntax"
       }
     }
   },

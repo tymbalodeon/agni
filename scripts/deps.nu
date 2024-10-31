@@ -1,131 +1,68 @@
 #!/usr/bin/env nu
 
-export def list-dependencies [
-    --dev
-    --prod
-    --include-version
-] {
-    let export = if $dev {
-        pdm export --pyproject --no-default
-    } else if $prod {
-        pdm export --pyproject --prod
-    } else {
-        pdm export --pyproject
-    }
+use ./environment.nu list_nix_folder
 
-    mut dependencies = $export
-        | lines
-        | filter {
-            |line|
-
-            (
-                (not ($line | is-empty))
-                and (not ($line | str starts-with "#"))
-            )
-        }
-
-    if not $include_version {
-        $dependencies = (
-            $dependencies
-            | each {
-                |dependency|
-
-                $dependency | split row ">=" | first
-            }
-        )
-    }
-
-    $dependencies | str join "\n"
+def get_flake_dependencies [flake: string] {
+  $flake
+  | rg --multiline "packages = .+(\n|\\[|[^;])+\\]"
+  | lines
+  | drop nth 0
+  | filter {|line| "[" not-in $line and "]" not-in $line}
+  | str trim
 }
 
-def indent [text: string] {
-    $text
-    | lines
-    | each { |line| $"\t($line)" }
-    | str join "\n"
+export def merge_flake_dependencies [...flakes: string] {
+  $flakes
+  | each {
+      |flake|
+
+      get_flake_dependencies $flake
+    }
+  | flatten
+  | uniq
+  | sort
+  | to text
 }
 
-# Show application dependencies
-def show-dependencies [
-    --dev # Show only development dependencies
-    --prod # Show only production dependencies
-    --installed # Show installed dependencies (python dependencies only)
-    --tree # Show installed dependencies as a tree (python dependencies only)
-    --licenses # Show dependency licenses
-    --sort-by-license # [If --licenses] Sort by license
+# List dependencies
+def main [
+  dependency?: string # Search for a dependency
+  --environment: string # List only dependencies for $environment
 ] {
-    if $tree {
-        pdm list --tree
-        exit
-    }
+  let environment_files = (
+    "flake.nix" ++ (list_nix_folder | get name)
+  )
 
-    if $installed {
-        (
-            pdm list
-                --fields name,version
-                --sort name
-        )
-
-        exit
-    }
-
-    if $licenses {
-        mut dependencies = (
-            if $dev {
-                pdm list --fields name,licenses --json --include dev
-            } else if $prod {
-                pdm list --fields name,licenses --json --exclude dev
-            } else {
-                pdm list --fields name,licenses --json
-            }
-            | from json
-            | rename name license
-        )
-
-        $dependencies = if $sort_by_license {
-            $dependencies | sort-by license
-        } else {
-            $dependencies | sort-by name
-        }
-
-        print $dependencies
-        exit
-    }
-
-    let dependencies = if $dev {
-        list-dependencies --include-version --dev
-    } else if $prod {
-        (
-            (list-dependencies --include-version --prod)
-            + "\n\n"
-        )
-    } else {
-        let prod_dependencies = (
-            indent (list-dependencies --include-version --prod)
-        )
-
-        let dev_dependencies = (
-            indent (list-dependencies --include-version --dev)
-        )
+  let environment_files = if ($environment | is-empty) {
+    $environment_files
+  } else {
+    $environment_files
+    | filter {
+        |file|
 
         (
-            [
-                Production:
-                $prod_dependencies
-                ""
-                Development:
-                $dev_dependencies
-            ]
-            | str join "\n"
-        )
-    }
+          $file
+          | path basename
+          | path parse
+          | get stem
+          | str replace --regex "^flake$" "generic"
+        ) == $environment
+      }
+  }
 
-    if (command -v bat | is-empty) {
-        just install
-    }
+  let flakes = (
+    $environment_files
+    | each {|flake| open $flake}
+  )
 
-    let bat_command = (
-        "bat --language pip --plain --theme gruvbox-dark"
-    )
-    zsh -c $"print \"($dependencies)\" | ($bat_command)"
+  let dependencies = (merge_flake_dependencies ...$flakes)
+
+  if ($dependency | is-empty) {
+    print --no-newline $dependencies
+  } else {
+    try {
+      $dependencies
+      | rg --color always $dependency
+    }
+  }
 }
