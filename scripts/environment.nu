@@ -117,9 +117,9 @@ def copy_files [
       http_get $file.download_url
       | save --force $path
 
-      let parent = ($path | path parse | get parent)
-
-      if ($parent | is-empty) {
+      if $environment != "generic" and (
+        $path | path parse | get parent | is-empty
+      ) {
         let extension = ($path | path parse | get extension)
 
         let comment = if $extension == "kdl" {
@@ -252,25 +252,27 @@ def create_environment_recipe [environment: string recipe: string] {
 }
 
 def sort_environment_sections [
-  file: list
+  sections: list
   indicator: string
 ] {
-  let file = (
-    $file
+  let sections = (
+    $sections
     | to text
     | split row $indicator
     | str trim
   )
 
-  let generic = ($file | first)
+  let generic = ($sections | first)
 
   $generic
   | append (
-      $file
+      $sections
       | drop nth 0
       | sort
     )
   | str join $"\n\n($indicator) "
+  | append "\n"
+  | str join
 }
 
 export def merge_justfiles [
@@ -285,7 +287,7 @@ export def merge_justfiles [
           open $main_justfile
           | split row "mod"
           | drop nth 0
-          | prepend mod
+          | each {|module| $module | prepend mod | str join}
           | str join
         )
       | to text
@@ -329,7 +331,7 @@ export def merge_justfiles [
           )
         | str join "\n\n"
       )
-    | str replace "mod?" "mod"
+    | str replace --all "mod?" "mod"
   )
 
   rm $main_justfile_without_environment
@@ -470,7 +472,7 @@ def save_gitignore [gitignore: string] {
 
 def is_up_to_date [update: bool environment: string file: string] {
   not $update and (
-    (get_environment_comment $environment | str trim) in $file 
+    (get_environment_comment $environment | str trim) in $file
   )
 }
 
@@ -624,7 +626,7 @@ def "main add" [
   --update
 ] {
   if ($environments | is-empty) {
-    print "Please specify an environment to add. Available environments:\n"    
+    print "Please specify an environment to add. Available environments:\n"
 
     return (
       main list
@@ -946,7 +948,7 @@ def "main update" [
 
 # View the contents of a remote environment file
 def "main view" [
-  environment: string 
+  environment: string
   file: string
 ] {
   let files = (
