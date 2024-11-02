@@ -1,3 +1,3 @@
-from .main import agni
+from agni.main import agni
 
 agni()

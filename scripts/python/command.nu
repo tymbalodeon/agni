@@ -1,7 +1,6 @@
 #!/usr/bin/env nu
 
-def main [] {
-  return (
-    open pyproject.toml | get project.name
-  )
+export def main [] {
+  open pyproject.toml 
+  | get project.name
 }

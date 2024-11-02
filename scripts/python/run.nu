@@ -4,8 +4,8 @@ use ./command.nu
 
 def main [...args: string] {
     if "help" in $args {
-        return (help main)
+        help main
+    } else {
+        uv run (command) ...$args
     }
-
-    pdm run (command) ...$args
 }
