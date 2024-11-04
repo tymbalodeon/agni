@@ -28,18 +28,18 @@ source = { editable = "." }
 dependencies = [
     { name = "abjad" },
     { name = "abjad-ext-rmakers" },
+    { name = "cyclopts" },
     { name = "more-itertools" },
     { name = "supriya" },
-    { name = "typer" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "abjad", specifier = ">=3.19" },
     { name = "abjad-ext-rmakers", specifier = ">=3.19" },
+    { name = "cyclopts", specifier = ">=2.9.9" },
     { name = "more-itertools", specifier = ">=10.3.0" },
     { name = "supriya", specifier = "==24.3b2" },
-    { name = "typer", specifier = ">=0.12.3" },
 ]
 
 [[package]]
@@ -49,6 +49,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a6/f8/d9c74d0daf3f742840fd818d69cfae176fa332022fd44e3469487d5a9420/alabaster-1.0.0.tar.gz", hash = "sha256:c00dca57bca26fa62a6d7d0a9fcce65f3e026e9bfe33e9c538fd3fbb2144fd9e", size = 24210 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7e/b3/6b4067be973ae96ba0d615946e314c5ae35f9f993eca561b356540bb0c2b/alabaster-1.0.0-py3-none-any.whl", hash = "sha256:fc6786402dc3fcb2de3cabd5fe455a2db534b371124f1f21de8731783dec828b", size = 13929 },
+]
+
+[[package]]
+name = "attrs"
+version = "24.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/0f/aafca9af9315aee06a89ffde799a10a582fe8de76c563ee80bbcdc08b3fb/attrs-24.2.0.tar.gz", hash = "sha256:5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346", size = 792678 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6a/21/5b6702a7f963e95456c0de2d495f67bf5fd62840ac655dc451586d23d39a/attrs-24.2.0-py3-none-any.whl", hash = "sha256:81921eb96de3191c8258c199618104dd27ac608d9366f5e35d011eae1867ede2", size = 63001 },
 ]
 
 [[package]]
@@ -170,6 +179,31 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93a6792e2acffb9d9d5cb0a5cfd8802644b7b1c9a02e4/colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44", size = 27697 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6", size = 25335 },
+]
+
+[[package]]
+name = "cyclopts"
+version = "2.9.9"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "attrs" },
+    { name = "docstring-parser", marker = "python_full_version < '4.0'" },
+    { name = "rich" },
+    { name = "rich-rst" },
+    { name = "typing-extensions", marker = "python_full_version < '4.0'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/61/b6/51022d8b673087262c4bcd1e64c1db3a8ab01510033f7f82a561998e3499/cyclopts-2.9.9.tar.gz", hash = "sha256:11d7bb59be253329ff49a1b9a634676c7ae708605d4975090783b99d081c1a0b", size = 45179 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/08/7c/f1af5b44f581df05009ecc9b15395532fc18c7aa7292b5e98501af25c2db/cyclopts-2.9.9-py3-none-any.whl", hash = "sha256:d0ce956c70f3070e5bc16824ecb5ebba155be45ef4aadbb78ac4753dd99367e3", size = 51062 },
+]
+
+[[package]]
+name = "docstring-parser"
+version = "0.16"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/08/12/9c22a58c0b1e29271051222d8906257616da84135af9ed167c9e28f85cb3/docstring_parser-0.16.tar.gz", hash = "sha256:538beabd0af1e2db0146b6bd3caa526c35a34d61af9fd2887f3a8a27a739aa6e", size = 26565 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/7c/e9fcff7623954d86bdc17782036cbf715ecab1bec4847c008557affe1ca8/docstring_parser-0.16-py3-none-any.whl", hash = "sha256:bf0a1387354d3691d102edef7ec124f219ef639982d096e26e3b60aeffa90637", size = 36533 },
 ]
 
 [[package]]
@@ -372,21 +406,25 @@ wheels = [
 ]
 
 [[package]]
+name = "rich-rst"
+version = "1.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "docutils" },
+    { name = "rich" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b0/69/5514c3a87b5f10f09a34bb011bc0927bc12c596c8dae5915604e71abc386/rich_rst-1.3.1.tar.gz", hash = "sha256:fad46e3ba42785ea8c1785e2ceaa56e0ffa32dbe5410dec432f37e4107c4f383", size = 13839 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fd/bc/cc4e3dbc5e7992398dcb7a8eda0cbcf4fb792a0cdb93f857b478bf3cf884/rich_rst-1.3.1-py3-none-any.whl", hash = "sha256:498a74e3896507ab04492d326e794c3ef76e7cda078703aa592d1853d91098c1", size = 11621 },
+]
+
+[[package]]
 name = "roman"
 version = "4.2"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/2d/be/4fa4fbe13def6194e76270bd213d8924346e0a30be8e006d898359db1a00/roman-4.2.tar.gz", hash = "sha256:05f335a1b2b0824f827ed42fff84b35909aab9013799145ed4508bdd4fa3b385", size = 7339 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/87/e7/9206aa493875e116272aa71d152c6ea1570cad7395a904fea11050a47fbd/roman-4.2-py3-none-any.whl", hash = "sha256:dc3564330fba3cd06b108edc694500609830169e3479706eb1ee7f0c197e4b6c", size = 5479 },
-]
-
-[[package]]
-name = "shellingham"
-version = "1.5.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/58/15/8b3609fd3830ef7b27b655beb4b4e9c62313a4e8da8c676e142cc210d58e/shellingham-1.5.4.tar.gz", hash = "sha256:8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de", size = 10310 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e0/f9/0595336914c5619e5f28a1fb793285925a8cd4b432c9da0a987836c7f822/shellingham-1.5.4-py2.py3-none-any.whl", hash = "sha256:7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686", size = 9755 },
 ]
 
 [[package]]
@@ -503,21 +541,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e3/55/a63ac5be516e68ebd15e06bfdd2652ec12b311908cd39c5b3d4af980d05f/supriya-24.3b2-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:0a36b1d302364b4bc0e52c3e7ae0cb96dfe081f3aedd30df49a10b917f9a719a", size = 2865996 },
     { url = "https://files.pythonhosted.org/packages/a9/01/5aaf9d82ce7cdc2245bdb69eca678e22b6afd47b007804824b97ddce8f85/supriya-24.3b2-cp312-cp312-win32.whl", hash = "sha256:beab16d748984ed984714b0141921e2c6ec3fa678707397ff814e9f2bf2759ec", size = 1159407 },
     { url = "https://files.pythonhosted.org/packages/96/9c/4c0ce2a222bc3865d163b340b0586eceb9ddc4e08097c2fb4bf6d1e96dfc/supriya-24.3b2-cp312-cp312-win_amd64.whl", hash = "sha256:bdfa3ff291c48eea37173ea2907418f4fc2abbcc9a504bded8138665b4ed5656", size = 1168893 },
-]
-
-[[package]]
-name = "typer"
-version = "0.12.5"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "click" },
-    { name = "rich" },
-    { name = "shellingham" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c5/58/a79003b91ac2c6890fc5d90145c662fd5771c6f11447f116b63300436bc9/typer-0.12.5.tar.gz", hash = "sha256:f592f089bedcc8ec1b974125d64851029c3b1af145f04aca64d69410f0c9b722", size = 98953 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/2b/886d13e742e514f704c33c4caa7df0f3b89e5a25ef8db02aa9ca3d9535d5/typer-0.12.5-py3-none-any.whl", hash = "sha256:62fe4e471711b147e3365034133904df3e235698399bc4de2b36c8579298d52b", size = 47288 },
 ]
 
 [[package]]
