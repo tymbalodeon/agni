@@ -29,10 +29,50 @@ def get_display_format_from_input(
     return display_format
 
 
+pitch_type = """
+pitch_type: PitchType
+    Set the display type for pitches. (If none is provided, the same type as the input pitches is used.)
+"""
+
+docstring = f"""Create combination-tone matrix from two pitches.
+
+Parameters
+----------
+bass: str
+    [hertz|midi|lilypond]
+melody: str
+    [hertz|midi|lilypond]
+multiples: Matrix
+    Number of multiples to calculate
+{pitch_type}
+tuning: Tuning
+    Set the tunint to quantize to
+midi_input: False
+    Set the input type (applies to numeric input only)
+display_format: DisplayFormat
+    Set the matrix display format
+as_chord: False
+    Output matrix as a chord
+notate: False
+    Notate matrix in a PDF score
+save: False
+    Save the notated score as a named file instead of an Abjad temporary score
+as_ensemble: False
+    Notate each matrix note on its own staff
+output_directory: Path
+    If saving, the directory in which to save the output file
+display: True
+    Set the matrix display format
+play: False
+    Play matrix
+"""
+
+
 @agni.command()
 def matrix(
     bass: str,
     melody: str,
+    /,
     multiples=Matrix.DEFAULT_MULTIPLES,
     pitch_type=PitchType.LILYPOND,
     tuning=Tuning.MICROTONAL,
@@ -46,39 +86,6 @@ def matrix(
     display=True,
     play=False,
 ):
-    """Create combination-tone matrix from two pitches.
-
-    Parameters
-    ----------
-    bass: str
-        [hertz|midi|lilypond]
-    melody: str
-        [hertz|midi|lilypond]
-    multiples: Matrix
-        Number of multiples to calculate
-    pitch_type: PitchType
-        Set the display type for pitches. (If none is provided, the same type as the input pitches is used.)
-    tuning: Tuning
-        Set the tunint to quantize to
-    midi_input: False
-        Set the input type (applies to numeric input only)
-    display_format: DisplayFormat
-        Set the matrix display format
-    as_chord: False
-        Output matrix as a chord
-    notate: False
-        Notate matrix in a PDF score
-    save: False
-        Save the notated score as a named file instead of an Abjad temporary score
-    as_ensemble: False
-        Notate each matrix note on its own staff
-    output_directory: Path
-        If saving, the directory in which to save the output file
-    display: True
-        Set the matrix display format
-    play: False
-        Play matrix
-    """
     display_format = get_display_format_from_input(as_chord, display_format)
     matrix = Matrix(
         bass,
@@ -98,6 +105,9 @@ def matrix(
         ).notate()
     if play:
         matrix.play()
+
+
+matrix.__doc__ = docstring
 
 
 @agni.command()
