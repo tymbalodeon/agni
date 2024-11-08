@@ -51,6 +51,7 @@
               bat
               cocogitto
               deadnix
+              delta
               eza
               flake-checker
               fzf

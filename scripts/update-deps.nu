@@ -3,5 +3,5 @@
 # Update dependencies
 def main [] {
     nix flake update
-    pdm update
+    uv sync --upgrade
 }

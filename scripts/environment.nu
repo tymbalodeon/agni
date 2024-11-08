@@ -4,13 +4,33 @@ def get_base_url [] {
   "https://api.github.com/repos/tymbalodeon/environments/contents/src"
 }
 
-def http_get [url: string] {
+def http_get [url: string --raw] {
   try {
-    http get $url
+    if $raw {
+      http get --raw $url
+    } else {
+      http get $url
+    }
   } catch {
       |error|
 
-      print "Network error (most likely too many requests). Please try again later."
+      try {
+        print --raw (
+          $error.debug
+          | split row --regex '\{|\}|,'
+          | str trim
+          | filter {|line| $line | str starts-with "msg: "}
+          | first
+          | split row "msg: "
+          | last
+          | str replace --all '\"' "'"
+          | str replace --all '"' ''
+          | str replace --all "'" '"'
+        )
+      } catch {
+        print $error.raw
+      }
+
       exit 1
   }
 }
@@ -45,6 +65,14 @@ def get_environment_files [environment: string] {
         $path
         | get parent
       )
+  }
+}
+
+def get_comment_character [extension: string] {
+  if $extension == "kdl" {
+    "//"
+  } else {
+    "#"
   }
 }
 
@@ -117,20 +145,19 @@ def copy_files [
       http_get $file.download_url
       | save --force $path
 
+      if ($path | path parse | get extension) == "nu" {
+        chmod +x $path
+      }
+
       if $environment != "generic" and (
         $path | path parse | get parent | is-empty
       ) {
         let extension = ($path | path parse | get extension)
-
-        let comment = if $extension == "kdl" {
-          "//"
-        } else {
-          "#"
-        }
+        let comment_character = (get_comment_character $extension)
 
         let tagged_contents = (
           open --raw $path
-          | prepend $"($comment) ($environment)\n"
+          | prepend $"($comment_character) ($environment)\n"
           | str join
         )
 
@@ -185,6 +212,7 @@ def get_environment_file [
     html: string
   >
   file: string
+  --raw
 ] {
   let url = (get_environment_file_url $environment_files $file)
 
@@ -192,7 +220,11 @@ def get_environment_file [
     return ""
   }
 
-  http_get $url
+  if $raw {
+    http_get --raw $url
+  } else {
+    http_get $url
+  }
 }
 
 def get_temporary_file [extension?: string] {
@@ -224,7 +256,7 @@ def download_environment_file [
   let temporary_file = (get_temporary_file $extension)
 
   let file_contents = (
-    get_environment_file $environment_files $file
+    get_environment_file --raw $environment_files $file
   )
 
   $file_contents
@@ -347,6 +379,16 @@ def save_justfile [justfile: string] {
   save_file $justfile Justfile
 }
 
+def initialize_generic_file [filename: string] {
+  if not ($filename | path exists) {
+    let file = (
+      download_environment_file (get_environment_files generic) $filename
+    )
+
+    mv $file $filename
+  }
+}
+
 def copy_justfile [
   environment: string
   environment_files: table<
@@ -366,6 +408,8 @@ def copy_justfile [
   update: bool
 ] {
   let environment_identifier = $"mod ($environment)"
+
+  initialize_generic_file Justfile
 
   if not $update and $environment_identifier in (open Justfile) {
     return false
@@ -415,7 +459,7 @@ def merge_generic [main: string generic: string] {
     )
 }
 
-def get_environment_comment [environment: string] {
+def create_environment_comment [environment: string] {
   $"\n# ($environment)"
 }
 
@@ -424,7 +468,7 @@ export def merge_gitignores [
   new_environment_name: string
   environment_gitignore: string
 ] {
-  let environment_comment = (get_environment_comment $new_environment_name)
+  let environment_comment = (create_environment_comment $new_environment_name)
 
   if $environment_comment in $main_gitignore {
     return null
@@ -435,6 +479,12 @@ export def merge_gitignores [
   } else {
     $main_gitignore
     | append ($"($environment_comment)\n\n($environment_gitignore)")
+  }
+
+  let merged_gitignore = if $new_environment_name == "generic" {
+    restore_environment_comment $merged_gitignore .gitignore
+  } else {
+    $merged_gitignore
   }
 
   sort_environment_sections $merged_gitignore "#"
@@ -470,7 +520,7 @@ def save_gitignore [gitignore: string] {
 
 def is_up_to_date [update: bool environment: string file: string] {
   not $update and (
-    (get_environment_comment $environment | str trim) in $file
+    (create_environment_comment $environment | str trim) in $file
   )
 }
 
@@ -492,6 +542,8 @@ def copy_gitignore [
   >
   update: bool
 ] {
+  initialize_generic_file .gitignore
+
   if (is_up_to_date $update $environment (open .gitignore)) {
     return false
   }
@@ -529,6 +581,25 @@ def format_yaml_comment []: string -> string {
   | str replace --all --regex " +#" "  #"
 }
 
+def restore_environment_comment [
+  merged_data: list<string>
+  extension: string
+] {
+    $merged_data
+    | first
+    | append (
+      $merged_data
+      | drop nth 0
+      | each {
+          |item|
+
+          (get_comment_character $extension)
+          | append $item
+          | str join
+        }
+    )
+}
+
 export def merge_pre_commit_configs [
   main_config: string
   new_environment_name: string
@@ -541,7 +612,7 @@ export def merge_pre_commit_configs [
     if $new_environment_name == "generic" {
       merge_generic $main_config $environment_config
     } else {
-      let environment_comment = (get_environment_comment $new_environment_name)
+      let environment_comment = (create_environment_comment $new_environment_name)
 
       if $environment_comment in $main_config {
         return null
@@ -556,12 +627,12 @@ export def merge_pre_commit_configs [
         | str join
       )
     }
-  ) 
+  )
   | each {
-      |config| 
+      |config|
 
       let first_line = try {
-        $config 
+        $config
         | from yaml
 
         ""
@@ -573,7 +644,7 @@ export def merge_pre_commit_configs [
 
       let yaml = (
         if ($first_line | is-empty) {
-          $config 
+          $config
         } else {
           $config
           | lines
@@ -592,13 +663,7 @@ export def merge_pre_commit_configs [
     }
 
   let merged_pre_commit_config = if $new_environment_name == "generic" {
-    $merged_pre_commit_config
-    | first
-    | append (
-      $merged_pre_commit_config
-      | drop nth 0
-      | each {|item| "#" | append $item | str join}
-    )
+    restore_environment_comment $merged_pre_commit_config .yaml
   } else {
     $merged_pre_commit_config
   }
@@ -637,6 +702,8 @@ def copy_pre_commit_config [
   >
   update: bool
 ] {
+  initialize_generic_file .pre-commit-config.yaml
+
   if (is_up_to_date $update $environment (open --raw .pre-commit-config.yaml)) {
     return false
   }
@@ -663,6 +730,14 @@ def copy_pre_commit_config [
   return true
 }
 
+def get_available_environments [] {
+  main list
+  | lines
+  | filter {|environment| $environment != "generic"}
+  | each {|environment| $"– ($environment)"}
+  | to text
+}
+
 # Add environments to the project
 def "main add" [
   ...environments: string
@@ -671,13 +746,7 @@ def "main add" [
   if ($environments | is-empty) {
     print "Please specify an environment to add. Available environments:\n"
 
-    return (
-      main list
-      | lines
-      | filter {|environment| $environment != "generic"}
-      | each {|environment| $"– ($environment)"}
-      | to text
-    )
+    return (get_available_environments)
   }
 
   mut should_reload = false
@@ -712,6 +781,22 @@ def "main add" [
     if $update or $added {
       print $message
     }
+  }
+
+  if (
+    git rev-parse
+    | complete
+    | get exit_code
+    | into bool
+  ) {
+    git init
+    git add .
+  } else if (
+    git ls-tree --full-tree --name-only -r HEAD
+    | rg '^flake.nix$'
+    | is-empty
+  ) {
+    git add flake.nix
   }
 
   if $should_reload {
