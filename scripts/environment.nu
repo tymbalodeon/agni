@@ -116,7 +116,12 @@ def copy_files [
     | filter {
         |file|
 
-        $file.name not-in [.gitignore .pre-commit-config.yaml Justfile]
+        $file.name not-in [
+          .gitignore 
+          .pre-commit-config.yaml 
+          Justfile
+          pre-commit-update.nu
+        ]
       }
   )
 
@@ -303,6 +308,8 @@ def sort_environment_sections [
       | sort
     )
   | str join $"\n\n($indicator) "
+  | append "\n"
+  | str join
 }
 
 export def merge_justfiles [
@@ -478,7 +485,7 @@ export def merge_gitignores [
     merge_generic $main_gitignore $environment_gitignore
   } else {
     $main_gitignore
-    | append ($"($environment_comment)\n\n($environment_gitignore)")
+    | append ($"($environment_comment)\n($environment_gitignore)")
   }
 
   let merged_gitignore = if $new_environment_name == "generic" {
@@ -612,7 +619,9 @@ export def merge_pre_commit_configs [
     if $new_environment_name == "generic" {
       merge_generic $main_config $environment_config
     } else {
-      let environment_comment = (create_environment_comment $new_environment_name)
+      let environment_comment = (
+        create_environment_comment $new_environment_name
+      )
 
       if $environment_comment in $main_config {
         return null
@@ -628,39 +637,51 @@ export def merge_pre_commit_configs [
       )
     }
   )
-  | each {
-      |config|
 
-      let first_line = try {
-        $config
-        | from yaml
+  let merged_pre_commit_config = (
+    $merged_pre_commit_config
+    | first
+    | split row --regex $"\\s# ($new_environment_name)"
+    | first
+    | append ($merged_pre_commit_config | drop nth 0)
+  )
 
-        ""
-      } catch {
-        $config
-        | lines
-        | first
-      }
+  let merged_pre_commit_config = (
+    $merged_pre_commit_config
+    | each {
+        |config|
 
-      let yaml = (
-        if ($first_line | is-empty) {
+        let first_line = try {
           $config
-        } else {
+          | from yaml
+
+          ""
+        } catch {
           $config
           | lines
-          | drop nth 0
-          | to text
-        } | yamlfmt -
-      )
+          | first
+        }
 
-      if ($first_line | is-empty) {
-        $yaml
-      } else {
-        $first_line
-        | append $yaml
-        | to text
+        let yaml = (
+          if ($first_line | is-empty) {
+            $config
+          } else {
+            $config
+            | lines
+            | drop nth 0
+            | to text
+          } | yamlfmt -
+        )
+
+        if ($first_line | is-empty) {
+          $yaml
+        } else {
+          $first_line
+          | append $yaml
+          | to text
+        }
       }
-    }
+  )
 
   let merged_pre_commit_config = if $new_environment_name == "generic" {
     restore_environment_comment $merged_pre_commit_config .yaml
