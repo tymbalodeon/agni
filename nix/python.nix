@@ -1,6 +1,10 @@
 {pkgs}: {
   packages = with pkgs; [
-    uv
+    git-cliff
+    lychee
+    nodePackages.pnpm
+    pdm
     python311
+    python311Packages.pre-commit-hooks
   ];
 }
