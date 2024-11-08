@@ -21,9 +21,9 @@ def main [
 ] {
     for $dependency in $dependencies {
         if (is-a-dependency $dependency --dev) {
-            pdm remove --dev $dependency
+            uv remove --dev $dependency
         } else if (is-a-dependency $dependency) {
-            pdm remove $dependency
+            uv remove $dependency
         }
     }
 }

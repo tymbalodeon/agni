@@ -11,12 +11,12 @@ def main [
         [<default> "<all EXCEPT dist and venv>"]
         [--all <all>]
         [coverage .coverage/]
-        [dist [dist/ .pdm-build/]]
+        [dist [dist/]]
         [ds-store **/.DS_Store]
         [profiles profiles/]
         [pycache **/__pycache__/]
         [pytest .pytest_cache/]
-        [venv [.pdm-python .venv/]]
+        [venv [.venv/]]
     ]
 
     if ($options) {
@@ -54,10 +54,10 @@ def main [
         }
 
         if $file == "venv" and (
-            (command -v pdm | is-not-empty)) and (
-            (pdm run command -v pre-commit | is-not-empty)
+            (command -v uv | is-not-empty)) and (
+            (uv run command -v pre-commit | is-not-empty)
         ) {
-            pdm run pre-commit uninstall
+            uv run pre-commit uninstall
         }
 
         for glob in ($files_list) {

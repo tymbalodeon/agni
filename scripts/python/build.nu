@@ -12,6 +12,6 @@ def main [] {
         checkexec
             $"dist/(command)-(version)($extension)"
             $"(command)/**/*.py"
-            -- pdm build
+            -- uv build
     }
 }

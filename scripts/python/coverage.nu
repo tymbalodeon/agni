@@ -10,14 +10,14 @@ def main [
 
   if ($fail_under | is-not-empty) {
       (
-          pdm run coverage report -m
+          uv run coverage report -m
               --skip-covered
               --sort "cover"
               --fail-under $fail_under
       )
   } else {
       (
-          pdm run coverage report -m
+          uv run coverage report -m
               --skip-covered
               --sort "cover"
       )

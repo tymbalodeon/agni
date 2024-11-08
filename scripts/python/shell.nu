@@ -2,5 +2,5 @@
 
 # Open an interactive python shell
 def main [] {
-    pdm run bpython
+    uv run bpython
 }

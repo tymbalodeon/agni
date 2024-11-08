@@ -6,11 +6,11 @@ def list-dependencies [
     --include-version
 ] {
     let export = if $dev {
-        pdm export --pyproject --no-default
+        uv export --pyproject --no-default
     } else if $prod {
-        pdm export --pyproject --prod
+        uv export --pyproject --prod
     } else {
-        pdm export --pyproject
+        uv export --pyproject
     }
 
     mut dependencies = $export
@@ -55,16 +55,12 @@ def show-dependencies [
     --sort-by-license # [If --licenses] Sort by license
 ] {
     if $tree {
-        pdm list --tree
+        uv tree
         exit
     }
 
     if $installed {
-        (
-            pdm list
-                --fields name,version
-                --sort name
-        )
+        uv pip list
 
         exit
     }
@@ -72,11 +68,11 @@ def show-dependencies [
     if $licenses {
         mut dependencies = (
             if $dev {
-                pdm list --fields name,licenses --json --include dev
+                uv pip list
             } else if $prod {
-                pdm list --fields name,licenses --json --exclude dev
+                uv pip list 
             } else {
-                pdm list --fields name,licenses --json
+                uv pip list 
             }
             | from json
             | rename name license

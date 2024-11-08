@@ -7,5 +7,5 @@ def main [...args: string] {
         return (help main)
     }
 
-    pdm run (command) ...$args
+    uv run (command) ...$args
 }

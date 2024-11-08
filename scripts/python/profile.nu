@@ -10,11 +10,11 @@ def main [
   let output_file = $"($output_directory)/profile.json"
 
   (
-    sudo pdm run py-spy record
+    uv run py-spy record
         --format speedscope
         --output $output_file
         --subprocesses
-        -- pdm run python -m {{ application-command }} $args
+        -- uv run python -m {{ application-command }} $args
   )
 
   speedscope $output_file

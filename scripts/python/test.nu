@@ -2,5 +2,5 @@
 
 # Run tests
 def main [] {
-    pdm run coverage run -m pytest tests
+    uv run coverage run -m pytest tests
 }

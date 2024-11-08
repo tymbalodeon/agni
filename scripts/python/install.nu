@@ -11,7 +11,7 @@ def not-installed [command: string] {
 
 def module-not-installed [command: string] {
   return (
-    pdm run python -m $command --help err> /dev/null
+    uv run python -m $command --help err> /dev/null
     | complete
     | get exit_code
     | into bool
@@ -37,12 +37,12 @@ def install [
 
     if not $prod {
         if (module-not-installed pip) {
-            pdm run python -m ensurepip --upgrade --default-pip
+            uv run python -m ensurepip --upgrade --default-pip
         }
 
         if (module-not-installed pipx) {
-            pdm run python -m pip install --upgrade pip pipx;
-            pdm run python -m pipx ensurepath
+            uv run python -m pip install --upgrade pip pipx;
+            uv run python -m pipx ensurepath
         }
 
         if (not-installed speedscope) { pnpm add --global speedscope }
@@ -55,13 +55,13 @@ def install [
     }
 
     if $minimal {
-        pdm run pre-commit install out+err> /dev/null
+        uv run pre-commit install out+err> /dev/null
     } else {
-        if $app or $prod {
-            pdm install --prod
-        } else {
-            pdm install
-            pdm run pre-commit install
+        uv sync
+
+        if not $app and not $prod {
+            uv sync
+            uv run pre-commit install
         }
     }
 
@@ -69,8 +69,8 @@ def install [
         build
 
         (
-            pdm run python -m pipx install
-                $"./dist/($command)-($version)-py3-none-any.whl"
+            uv run python -m pipx install
+                $"./dist/(command)-(version)-py3-none-any.whl"
                 --force
                 --pip-args="--force-reinstall"
         )
