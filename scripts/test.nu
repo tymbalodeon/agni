@@ -7,7 +7,7 @@ def main [
   --function  # Match $search_term to $function only
 ] {
   let all_tests = try {
-    ls **/tests/**/test_*.nu 
+    ls **/tests/**/test_*.nu
     | get name
   } catch {
     return

@@ -70,9 +70,9 @@ def show-dependencies [
             if $dev {
                 uv pip list
             } else if $prod {
-                uv pip list 
+                uv pip list
             } else {
-                uv pip list 
+                uv pip list
             }
             | from json
             | rename name license

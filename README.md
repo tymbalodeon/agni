@@ -1,8 +1,10 @@
 # Agni
 
-Music compositional tools inspired by the techniques of [Claude Vivier](https://www.boosey.com/composer/Claude+Vivier "Claude Vivier").
+Music compositional tools inspired by the techniques of [Claude Vivier].
 
-"Agni" is a character from Vivier's opera [_Kopernikus_](https://www.boosey.com/cr/music/Claude-Vivier-Kopernikus/47743 "Kopernikus"):
+[Kopernikus]: https://www.boosey.com/cr/music/Claude-Vivier-Kopernikus/47743
+
+"Agni" is a character from Vivier's opera _[Kopernikus]_:
 
 > The main character is Agni; mystical beings borrowed from stories (represented
 > by the other six singers) gravitate around her: Lewis Carroll, Merlin, a witch,
@@ -30,9 +32,11 @@ agni
 
 ## Combination-Tone Matrix
 
+[Combination-Tone Class Sets and Redefining the Role of les Couleurs in Claude Vivier’s Bouchara]: https://mtosmt.org/issues/mto.14.20.2/mto.14.20.2.christian.pdf
+
 The concept of a "Combination-Tone Matrix" comes from Bryan Christian's article,
-["Combination-Tone Class Sets and Redefining the Role of les Couleurs in
-Claude Vivier’s Bouchara"](https://mtosmt.org/issues/mto.14.20.2/mto.14.20.2.christian.pdf).
+"[Combination-Tone Class Sets and Redefining the Role of les Couleurs in
+Claude Vivier’s Bouchara]".
 
 ### Matrix
 
@@ -116,12 +120,16 @@ output to PDF via LilyPond.
 
 #### Input Files
 
-Abjad's LilyPondParser does not support all of LilyPond's syntax. Please see [Abjad's
-documentation](https://abjad.github.io/api/abjad/parsers/parser.html#abjad.parsers.parser.LilyPondParser) for supported syntax that can be used in input files.
+[Abjad's documentation]: https://abjad.github.io/api/abjad/parsers/parser.html#abjad.parsers.parser.LilyPondParser
+
+Abjad's LilyPondParser does not support all of LilyPond's syntax. Please see
+[Abjad's documentation] for supported syntax that can be used in input files.
 
 #### Example (Claude Vivier's Lonely Child)
 
-Vivier's [_Lonely Child_](https://www.boosey.com/cr/music/Claude-Vivier-Lonely-Child/47752 "Lonely Child") is provided as an example.
+[Lonely Child]: https://www.boosey.com/cr/music/Claude-Vivier-Lonely-Child/47752
+
+Vivier's _[Lonely Child]_ is provided as an example.
 
 To compile the input score, generate matrices and harmonized score, and open PDFs:
 

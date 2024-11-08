@@ -117,8 +117,8 @@ def copy_files [
         |file|
 
         $file.name not-in [
-          .gitignore 
-          .pre-commit-config.yaml 
+          .gitignore
+          .pre-commit-config.yaml
           Justfile
           pre-commit-update.nu
         ]
