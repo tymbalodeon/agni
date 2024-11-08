@@ -556,12 +556,12 @@ export def merge_pre_commit_configs [
         | str join
       )
     }
-  )
+  ) 
   | each {
-      |config|
+      |config| 
 
       let first_line = try {
-        $config
+        $config 
         | from yaml
 
         ""
@@ -573,7 +573,7 @@ export def merge_pre_commit_configs [
 
       let yaml = (
         if ($first_line | is-empty) {
-          $config
+          $config 
         } else {
           $config
           | lines

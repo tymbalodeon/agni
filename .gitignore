@@ -4,14 +4,6 @@
 .pdm-python
 .venv
 
- python
-
-*.pyc
-.coverage
-__pycache__/
-build/
-dist/
-
 # python
 
 *.pyc
