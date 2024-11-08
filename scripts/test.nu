@@ -2,38 +2,52 @@
 
 # Run tests
 def main [
-  file?: string # Run tests in $file only
+  search_term?: string # Run tests matching $search_term only
+  --file  # Match $search_term to $file only
+  --function  # Match $search_term to $function only
 ] {
+  let all_tests = (ls **/tests/**/test_*.nu | get name)
 
-  let tests = try {
-    let glob = (
-      "**"
-      | path join (
-        if ($file | is-empty) {
-          "test_*.nu"
-        } else {
-          let file = if ($file | path parse | get extension) == "nu" {
-            $file
-          } else {
-            $"($file).nu"
+  let tests = (
+    if ($search_term | is-empty) {
+      $all_tests
+    } else if $file {
+      $all_tests
+      | filter {
+          |file|
+
+          try {
+            (
+              $file
+              | split row "test_"
+              | last
+              | split row "__"
+              | first
+            ) =~ $search_term
+          } catch {
+            false
           }
-
-          let file = if (($file | path basename) | str starts-with "test_") {
-            $file
-          } else {
-            $"test_($file)"
-          }
-
-          $file
         }
-      )
-    )
+    } else if $function {
+      $all_tests
+      | filter {
+          |file|
 
-    ls ($glob | into glob)
-    | get name
-  } catch {
-    return
-  }
+          try {
+            (
+              $file
+              | split row "__"
+              | last
+            ) =~ $search_term
+          } catch {
+            false
+          }
+        }
+    } else {
+      $all_tests
+      | filter {|file| $file =~ $search_term}
+    }
+  )
 
   for test in $tests {
     print --no-newline $"($test)..."

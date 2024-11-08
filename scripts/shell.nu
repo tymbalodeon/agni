@@ -4,4 +4,3 @@
 export def main [] {
     pdm run bpython
 }
-

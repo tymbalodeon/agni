@@ -2,21 +2,21 @@
 
 def notate_reference_passage [] {
   (
-    just run 
-        passage examples/lonely-child-notes.ily 
-        --no-display 
-        --notate 
+    just run
+        passage examples/lonely-child-notes.ily
+        --no-display
+        --notate
         --save
   )
 }
 
 def notate_ensemble_passage [] {
   (
-    just run 
+    just run
         passage examples/lonely-child-notes.ily
-        --full-score 
-        --no-display 
-        --notate 
+        --full-score
+        --no-display
+        --notate
         --save
   )
 }
