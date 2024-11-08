@@ -308,8 +308,6 @@ def sort_environment_sections [
       | sort
     )
   | str join $"\n\n($indicator) "
-  | append "\n"
-  | str join
 }
 
 export def merge_justfiles [
@@ -1088,11 +1086,18 @@ def "main remove" [...environments: string] {
 def "main update" [
   ...environments: string
 ] {
+  let new_environment_file = (
+    download_environment_file
+      (get_environment_files generic)
+      scripts/environment.nu
+  )
+
   let environments = (
     get_environments_to_process $environments (get_installed_environments)
   )
 
-  main add --update ...$environments
+  nu $new_environment_file add --update ...$environments
+  rm $new_environment_file
 }
 
 # View the contents of a remote environment file
