@@ -906,7 +906,7 @@ export def list-nix-folder [] {
 def get_installed_environments [] {
   let available_environments = (main list)
 
-  list_nix_folder
+  list-nix-folder
   | get name
   | path parse
   | get stem
