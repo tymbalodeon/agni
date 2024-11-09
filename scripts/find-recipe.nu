@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-export def find_recipe [] {
+export def choose-recipe [] {
   just --summary
   | split row " "
   | to text
@@ -19,7 +19,7 @@ def main [
   search_term?: string # Regex pattern to match
 ] {
   if ($search_term | is-empty) {
-    let command = (find_recipe)
+    let command = (choose-recipe)
 
     let out = (
       just $command
