@@ -21,7 +21,7 @@ def notate_ensemble_passage [] {
   )
 }
 
-def example [
+def main [
     --input, # Open the compiled input file
     --generated, # Open all generated files (reference and ensemble)
     --reference, # Open the generated reference file
