@@ -1,23 +1,28 @@
 #!/usr/bin/env nu
 
-def --wrapped cog-log [...args: string] {
-  let args = (
+export def parse-args [...args: string] {
+  (
     $args
     | window 2 --stride 2
     | filter {
         |arg|
 
         let value = ($arg | last)
-        let type = ($value | describe)
 
-        if $type == "string" {
-          $value | is-not-empty
-        } else if $type == "bool" {
+        try {
           $value
+          | into bool
+        } catch {
+          $value
+          | is-not-empty
         }
       }
     | flatten
-  )
+  ) | filter {|arg| $arg not-in ["false" "true"]}
+}
+
+def --wrapped cog-log [...args: string] {
+  let args = (parse-args ...$args)
 
   cog log ...$args
 }
@@ -43,8 +48,8 @@ def main [
       (
         cog-log
           --author $author
-          --breaking-change $breaking_change
-          --no-error $no_error
+          --breaking-change ($breaking_change | into string)
+          --no-error ($no_error | into string)
           --scope $scope
           --type $type
       )

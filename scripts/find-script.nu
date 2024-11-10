@@ -1,56 +1,52 @@
 #!/usr/bin/env nu
 
-export def main [recipe: string] {
-  mut environment = ""
-
-  let recipe = if "::" in $recipe {
-    let parts = ($recipe | split row "::")
-
-    $environment = ($parts | first)
-
-    $parts
-    | last
-  } else if "/" in $recipe {
-    let parts = ($recipe | split row "/")
-
-    $environment = ($parts | first)
-
-    $parts
-    | last
-  } else {
+export def get-script [recipe: string scripts: list<string>] {
+  let parts = (
     $recipe
-  }
+    | split row "::"
+    | split row "/"
+  )
 
-  let search_directory = "scripts"
-
-  let search_directory = if ($environment | is-empty) {
-    $search_directory
+  let environment = if ($parts | length) == 1 {
+    ""
   } else {
-    [$search_directory $environment]
-    | path join
-  }
-
-  let script = (
-    fd --exclude tests $recipe $search_directory
-    | lines
+    $parts
     | first
-  )
-
-  let script_parent = (
-    $script
-    | path parse
-    | get parent
-  )
-
-  let $environment = if ($environment | is-empty) and (
-    $script_parent != "scripts"
-  ) {
-    $script_parent
-    | path split
-    | get 1
-  } else {
-    $environment
   }
 
-  $script
+  let $recipe = ($parts | last)
+
+  let matching_scripts = (
+    $scripts
+    | filter {
+        |script| 
+
+        let path = ($script | path parse)
+        let parent = ($path | get parent)
+
+        if ($environment | is-empty) and (
+          $parent != "scripts"
+        ) or ($environment | is-not-empty) and (
+          $parent != $"scripts/($environment)"
+        ) {
+          return false
+        }
+
+        $path.stem == $recipe and $path.extension == "nu"
+      }
+  )
+
+  try {
+    $matching_scripts
+    | first
+  }
+}
+
+export def main [recipe: string] {
+  let scripts = (
+    fd --exclude tests "" scripts
+    | lines
+  )
+
+  get-script $recipe $scripts
 }

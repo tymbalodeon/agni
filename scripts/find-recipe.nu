@@ -20,11 +20,7 @@ def main [
 ] {
   if ($search_term | is-empty) {
     let command = (choose-recipe)
-
-    let out = (
-      just $command
-      | complete
-    )
+    let out = (just $command| complete)
 
     print (
       if $out.exit_code != 0 {

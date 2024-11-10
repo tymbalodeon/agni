@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-use ./environment.nu list-nix-folder
+use ./environment.nu list-nix-files
 
 def get-flake-dependencies [flake: string] {
   $flake
@@ -29,7 +29,7 @@ def main [
   dependency?: string # Search for a dependency
   --environment: string # List only dependencies for $environment
 ] {
-  let nix_files = "flake.nix" ++ (list-nix-folder | get name)
+  let nix_files = "flake.nix" ++ (list-nix-files)
 
   let nix_files = if ($environment | is-empty) {
     $nix_files
@@ -38,13 +38,18 @@ def main [
     | filter {
         |file|
 
-        (
+        let filename = (
           $file
           | path basename
           | path parse
           | get stem
-          | str replace --regex "^flake$" "generic"
-        ) == $environment
+        )
+
+        if $environment == "generic" {
+          $filename == "flake"
+        } else {
+          $filename == $environment
+        }
       }
   }
 

@@ -11,64 +11,69 @@ def main [
   --web # Open the remote repository website in the browser
 ] {
   let domain = (domain)
-
-  if $domain == "github" {
-    if $close {
-      gh issue close $issue_number
-    } else if $create {
-      gh issue create --editor
-    } else if $develop {
-      gh issue develop --checkout $issue_number
-    } else if ($issue_number | is-empty) {
-      if $web {
-        gh issue list --web
+  match (domain) {
+    "github" => {
+      if $close {
+        gh issue close $issue_number
+      } else if $create {
+        gh issue create --editor
+      } else if $develop {
+        gh issue develop --checkout $issue_number
+      } else if ($issue_number | is-empty) {
+        if $web {
+          gh issue list --web
+        } else {
+          gh issue list
+        }
+      } else if $web {
+        gh issue view $issue_number --web
       } else {
-        gh issue list
+        gh issue view $issue_number
       }
-    } else if $web {
-      gh issue view $issue_number --web
-    } else {
-      gh issue view $issue_number
     }
-  } else if $domain == "gitlab" {
-    if $close {
-      glab issue close $issue_number
-    } else if $create {
-      glab issue create
-    } else if $develop {
-      print "Feature not implemented for GitLab."
 
-      exit 1
-    } else if ($issue_number | is-empty) {
-      if $web {
-        print "`--web` not implemented for GitLab's `issue list`."
+    "gitlab" => {
+      if $close {
+        glab issue close $issue_number
+      } else if $create {
+        glab issue create
+      } else if $develop {
+        print "Feature not implemented for GitLab."
+
+        exit 1
+      } else if ($issue_number | is-empty) {
+        if $web {
+          print "`--web` not implemented for GitLab's `issue list`."
+        }
+
+        glab issue list
+      } else if $web {
+        glab issue view $issue_number --web
+      } else {
+        glab issue view $issue_number
       }
-
-      glab issue list
-    } else if $web {
-      glab issue view $issue_number --web
-    } else {
-      glab issue view $issue_number
     }
-  } else {
-    let repo_name = (pwd | path basename)
 
-    let todos = (
-      nb todo $repo_name
-      | lines
-      | each {
-          |line|
+    _ => {
+      let repo_name = (pwd | path basename)
 
-          $line
-          | ansi strip
-          | split row --regex '[\[\]0-9]'
-          | last
-          | str trim
-      }
-    )
+      let todos = (
+        nb todo $repo_name
+        | lines
+        | each {
+            |line|
 
-    let new_todo = if ($repo_name in $todos)
+            $line
+            | ansi strip
+            | split row --regex '[\[\]0-9]'
+            | last
+            | str trim
+        }
+      )
 
-    nb todo add --edit
+      let new_todo = if ($repo_name in $todos)
+
+      nb todo add --edit
+    }
   }
 }

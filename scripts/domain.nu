@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-export def parse_git_origin [origin: string --quiet] {
+export def parse-git-origin [origin: string --quiet] {
   let parsed_origin = if ($origin | str starts-with "git@") {
     $origin
     | parse "git@{domain}.com:{owner}/{repo}.git"
@@ -24,6 +24,6 @@ export def parse_git_origin [origin: string --quiet] {
 }
 
 export def main [] {
-  parse_git_origin (git remote get-url origin)
+  parse-git-origin (git remote get-url origin)
   | get domain
 }

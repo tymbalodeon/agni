@@ -2,8 +2,7 @@
 
 export def get-pre-commit-hook-names [config: record<repos: list<any>>] {
   $config
-  | get repos
-  | get hooks
+  | get repos.hooks
   | each {|hook| $hook | get id}
   | flatten
   | sort

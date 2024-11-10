@@ -897,17 +897,22 @@ def "main list" [
   list_environment_directory $environment $path $files
 }
 
-export def list-nix-folder [] {
-  mkdir nix
+export def list-nix-files [] {
+  let nix_directory = (
+    [(git rev-parse --show-toplevel) nix]
+    | path join
+  )
 
-  ls nix
+  mkdir $nix_directory
+
+  ls $nix_directory
+  | get name
 }
 
 def get_installed_environments [] {
   let available_environments = (main list)
 
-  list-nix-folder
-  | get name
+  list-nix-files
   | path parse
   | get stem
   | filter {|environment| $environment in $available_environments}
