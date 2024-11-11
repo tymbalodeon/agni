@@ -19,7 +19,7 @@ export def get-script [recipe: string scripts: list<string>] {
   let matching_scripts = (
     $scripts
     | filter {
-        |script| 
+        |script|
 
         let path = ($script | path parse)
         let parent = ($path | get parent)

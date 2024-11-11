@@ -859,8 +859,116 @@ def list_environment_directory [
   | to text
 }
 
-def "main diff" [a: string b: string] {
-  print "Implement me based on diff-env.nu"
+def color_yellow [text: string] {
+  $"(ansi y)($text)(ansi reset)"
+}
+
+def get_diff_files [
+  installed_environments: list<string>
+  environment?: string
+  --remote
+] {
+  let files = (get_environment_files $environment)
+
+  if not $remote and $environment in $installed_environments {
+    $files
+    | filter {|file| $file.path | path exists}
+  } else {
+    $files
+  }
+}
+
+def get_error_heading [] {
+  $"(ansi rb)error:(ansi reset)"
+}
+
+def diff_error_with_help [message: string] {
+  print $message
+  print (help main diff)
+
+  exit 1
+}
+
+def "main diff" [
+  environment_a?: string # Environment name (generic, if not specified; uses local files, if installed, else remote)
+  environment_b?: string # Environment name (uses local files, if installed, else remote)
+  --remote: string # Use remote files for $remote (replaces $b)
+  --remotes # Use remote files for both $a and $b
+] {
+  if ($remote | is-not-empty) and ($environment_b | is-not-empty) {
+    let message = (
+      [
+        (get_error_heading)
+        " the argument "
+        (color_yellow "'--remote: string'")
+        " cannot be used with "
+        (color_yellow "'b?: string'")
+        "\n"
+      ]
+      | str join
+    )
+
+    diff_error_with_help $message
+  }
+
+  if $remotes and $environment_a == "generic" {
+    let environment_a_arg = (color_yellow "'environment_a'")
+
+    let message = (
+      [
+        (get_error_heading)
+        " the argument "
+        (color_yellow "'--remotes'")
+        " requires either both "
+        $environment_a_arg
+        " and "
+        (color_yellow "'environment_b'")
+        " or "
+        $environment_a_arg
+        " not be \"generic\"\n"
+      ]
+      | str join
+    )
+
+    diff_error_with_help $message
+  }
+
+  let installed_environments = ("generic" ++ (get_installed_environments))
+
+  let a = if ($environment_a | is-empty) or (
+    $environment_b | is-empty
+  ) and (
+    $environment_a not-in $installed_environments
+  ) {
+    "generic"
+  } else {
+    $environment_a
+  }
+
+  let b = if ($remote | is-not-empty) {
+    $remote
+  } else if ($environment_b | is-not-empty) {
+    $environment_b
+  } else if ($environment_a | is-not-empty) {
+    $environment_a
+  } else {
+    $a
+  }
+
+  let $a_files = if $remotes {
+    get_diff_files --remote $installed_environments $a
+  } else {
+    get_diff_files $installed_environments $a
+  }
+
+  let $b_files = if $remotes or $a == $b {
+    get_diff_files --remote $installed_environments $b
+  } else {
+    get_diff_files $installed_environments $b
+  }
+
+  print $a_files
+  print $b_files
 }
 
 # List environment files

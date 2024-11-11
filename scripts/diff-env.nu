@@ -3,14 +3,14 @@
 const base_url = "https://raw.githubusercontent.com/tymbalodeon/environments/trunk"
 
 def main [
-  type?: string
+  environment?: string
   --file: string
   --update
 ] {
-  let type = if ($type | is-empty) {
+  let environment = if ($environment | is-empty) {
     "generic"
   } else {
-    $type
+    $environment
   }
 
   let local_files = (
@@ -40,7 +40,7 @@ def main [
       return
     }
 
-    if $local_file.type == "file" {
+    if $local_file.environment == "file" {
       if not (
         $file | is-empty
       ) and not (
@@ -53,7 +53,7 @@ def main [
         let official_file = (
           http get
             --raw
-            $"($base_url)/($type)/($local_file.name)"
+            $"($base_url)/($environment)/($local_file.name)"
         )
 
         let diff = (
@@ -83,7 +83,7 @@ def main [
     }
 
     for nested_file in (ls --all $local_file.name) {
-      get_diff $type $nested_file $file
+      get_diff $environment $nested_file $file
     }
   }
 }
