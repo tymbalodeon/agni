@@ -1109,6 +1109,7 @@ def "main remove" [
 def "main update" [
   ...environments: string
 ] {
+  return (main add --update ...(get_installed_environments))
   let new_environment_file = (
     download_environment_file
       (get_environment_files generic)

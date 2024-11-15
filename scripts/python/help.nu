@@ -1,17 +1,18 @@
 #!/usr/bin/env nu
 
+use ../filesystem.nu get-project-path
+use ../help.nu display-just-help
+
 # View help text
 def main [
   recipe?: string # View help text for recipe
 ] {
-  if ($recipe | is-empty) {
-    (
-      just
-        --color always
-        --justfile python.just
-        --list
-    )
-  } else {
-    nu $"../scripts/python/($recipe).nu" --help
- }
+  let environment = "python"
+
+  (
+    display-just-help
+      $recipe
+      (get-project-path $"just/($environment).just")
+      $environment
+  )
 }
