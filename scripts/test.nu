@@ -8,7 +8,7 @@ export def get-test [
 ] {
   if ($search_term | is-empty) {
     return $tests
-  } 
+  }
 
   $tests
   | filter {
