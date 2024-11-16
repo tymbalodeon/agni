@@ -18,7 +18,7 @@ export def parse-args [...args: string] {
         }
       }
     | flatten
-  ) | filter {|arg| $arg not-in ["false" "true"]}
+  ) | filter {$in not-in ["false" "true"]}
 }
 
 def --wrapped cog-log [...args: string] {

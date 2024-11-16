@@ -51,5 +51,5 @@
     ../scripts/python/test.nu {{ help }}
 
 # Update dependencies
-@update-deps *prod:
-    ../scripts/python/update-deps.nu {{ prod }}
+@update *prod:
+    ../scripts/python/update.nu {{ prod }}

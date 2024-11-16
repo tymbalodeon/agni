@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 
-use ./find-recipe.nu choose-recipe
-use ./find-script.nu
+use find-recipe.nu choose-recipe
+use find-script.nu
 
 # View the source code for a recipe. If no args are provided, display
 # the raw `just` code, otherwise display the code with the args provided
@@ -10,11 +10,12 @@ use ./find-script.nu
 def main [
   recipe?: string # The recipe command
 ] {
-  let recipe = if ($recipe | is-empty) {
-    choose-recipe
-  } else {
-    $recipe
+  let recipe = match $recipe {
+    null => (choose-recipe)
+    _ => $recipe
   }
 
-  bat (find-script $recipe)
+  try {
+    bat (find-script $recipe)
+  }
 }

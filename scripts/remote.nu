@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-use ./domain.nu
+use domain.nu
 
 # View remote repository
 def main [

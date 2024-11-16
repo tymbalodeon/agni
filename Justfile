@@ -17,10 +17,6 @@ alias deps := dependencies
 @dependencies *args:
     ./scripts/dependencies.nu {{ args }}
 
-# View the diff between environments
-@diff-env *args:
-    ./scripts/diff-env.nu {{ args }}
-
 # Manage environments
 @environment *args:
     ./scripts/environment.nu {{ args }}
@@ -112,7 +108,3 @@ mod python "just/python.just"
 # Alias for `python shell`
 @shell *args:
     just python shell {{ args }}
-
-# Alias for `python update-deps`
-@update-deps *args:
-    just python update-deps {{ args }}

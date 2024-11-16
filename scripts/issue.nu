@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-use ./domain.nu
+use domain.nu
 
 # View issues
 def main [
@@ -71,7 +71,12 @@ def main [
         }
       )
 
-      let new_todo = if ($repo_name in $todos)
+      # FIXME
+      let new_todo = if ($repo_name in $todos) {
+
+      } else {
+
+      }
 
       nb todo add --edit
     }

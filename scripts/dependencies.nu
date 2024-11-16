@@ -1,10 +1,10 @@
 #!/usr/bin/env nu
 
-use ./environment.nu list-nix-files
+use environment.nu list-nix-files
 
-def get-flake-dependencies [flake: string] {
-  $flake
-  | rg --multiline "packages = .+(\n|\\[|[^;])+\\]"
+def get-flake-dependencies []: string -> list<string> {
+  $in
+  | rg --multiline 'packages = .+(\n|\[|[^;])+\]'
   | lines
   | drop nth 0
   | filter {|line| "[" not-in $line and "]" not-in $line}
@@ -13,11 +13,7 @@ def get-flake-dependencies [flake: string] {
 
 export def merge-flake-dependencies [...flakes: string] {
   $flakes
-  | each {
-      |flake|
-
-      get-flake-dependencies $flake
-    }
+  | each {get-flake-dependencies}
   | flatten
   | uniq
   | sort
@@ -31,41 +27,39 @@ def main [
 ] {
   let nix_files = "flake.nix" ++ (list-nix-files)
 
-  let nix_files = if ($environment | is-empty) {
-    $nix_files
-  } else {
-    $nix_files
-    | filter {
-        |file|
+  let nix_files = match $environment {
+    null => $nix_files
 
-        let filename = (
-          $file
-          | path basename
-          | path parse
-          | get stem
-        )
+    _ => (
+      $nix_files
+      | filter {
+          |file|
 
-        if $environment == "generic" {
-          $filename == "flake"
-        } else {
-          $filename == $environment
+          let filename = (
+            $file
+            | path basename
+            | path parse
+            | get stem
+          )
+
+          match $environment {
+            "generic" => ($filename == "flake")
+            _ => ($filename == $environment)
+          }
         }
-      }
+    )
   }
 
-  let contents = (
-    $nix_files
-    | each {|flake| open $flake}
-  )
+  let dependencies = (merge-flake-dependencies ...($nix_files | each {open}))
 
-  let dependencies = (merge-flake-dependencies ...$contents)
+  match $dependency {
+    null => (print --no-newline $dependencies)
 
-  if ($dependency | is-empty) {
-    print --no-newline $dependencies
-  } else {
-    try {
-      $dependencies
-      | rg --color always $dependency
-    }
+    _ => (
+      try {
+        $dependencies
+        | rg --color always $dependency
+      }
+    )
   }
 }

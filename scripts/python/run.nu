@@ -2,10 +2,10 @@
 
 use ./command.nu
 
-def main [...args: string] {
-    if "help" in $args {
-        return (help main)
-    }
+def --wrapped main [...args: string] {
+  if $environment == "--self-help" {
+    return (help main)
+  }
 
-    uv run (command) ...$args
+  uv run (command) ...$args
 }
