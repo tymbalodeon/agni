@@ -3,7 +3,7 @@
 use ./command.nu
 
 def --wrapped main [...args: string] {
-  if $environment == "--self-help" {
+  if "--self-help" in $args {
     return (help main)
   }
 

@@ -13,7 +13,7 @@
 
 alias deps := dependencies
 
-# List dependencies
+# List dependencies (alias: `deps`)
 @dependencies *args:
     ./scripts/dependencies.nu {{ args }}
 
@@ -55,10 +55,6 @@ alias deps := dependencies
 # Run tests
 @test *args:
     ./scripts/test.nu {{ args }}
-
-# Update dependencies
-@update *help:
-    ./scripts/update.nu {{ help }}
 
 # View the source code for a recipe
 [no-cd]
@@ -108,3 +104,7 @@ mod python "just/python.just"
 # Alias for `python shell`
 @shell *args:
     just python shell {{ args }}
+
+# Alias for `python update`
+@update *args:
+    just python update {{ args }}

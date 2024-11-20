@@ -17,12 +17,31 @@ def get-base-url [] {
   "https://api.github.com/repos/tymbalodeon/environments/contents/src"
 }
 
-def http-get [url: string --raw] {
+def get-github-personal-access-token [] {
+  if not (".env" | path exists) {
+    return
+  }
+
   try {
-    if $raw {
-      http get --raw $url
-    } else {
-      http get $url
+    open .env
+    | parse '{key}={value}'
+    | get value
+    | first
+  }
+}
+
+def http-get [url: string --raw] {
+  let token = (get-github-personal-access-token)
+
+  let headers = match $token {
+    null => []
+    _ => [Authorization $"Bearer ($token)" X-GitHub-Api-Version "2022-11-28"]
+  }
+
+  try {
+    match $raw {
+      false => (http get --headers $headers $url)
+      _ => (http get --headers $headers --raw $url)
     }
   } catch {
       |error|
@@ -274,8 +293,7 @@ def download-environment-file [
   $temporary_file
 }
 
-def get-recipe-or-alias-name [
-]: [
+def get-recipe-or-alias-name []: [
   record<
     deps: record<
       attributes: list<any>,
@@ -889,20 +907,30 @@ def color-yellow [text: string] {
 
 def get-diff-files [
   installed_environments: list<string>
-  environment: string
-  --remote
+  environment: record<environment: string type: string>
+  directory: string
+  remote: bool
 ] {
-  let files = (get-environment-files $environment)
+  let files = (get-environment-files $environment.environment)
 
-  if not $remote and $environment in $installed_environments {
+  let files = match $environment.type {
+    "installed" => (
+      $files
+      | filter {|file| $file.path | path exists}
+    )
+
+    "remote" => $files
+  }
+
+  let files = (
     $files
-    | filter {|file| $file.path | path exists}
     | wrap file
-    | insert type local
-  } else {
-    $files
-    | wrap file
-    | insert type remote
+    | insert type $environment.type
+    | insert directory $directory
+  )
+
+  for file in $files {
+    get-diff-file $file $files.file
   }
 }
 
@@ -918,8 +946,24 @@ def diff-error-with-help [message: string] {
 }
 
 def get-diff-file [
-  type: string
-  path: string
+  file: record<
+    directory: string,
+    file: record<
+      name: string,
+      path: string,
+      sha: string,
+      size: int,
+       url: string,
+       html_url: string,
+       git_url: string,
+       download_url: string,
+       type: string,
+       self: string,
+       git: string,
+       html: string
+    >,
+     type: string
+  >
   files: table<
     name: string,
     path: string,
@@ -935,9 +979,22 @@ def get-diff-file [
     html: string
   >
 ] {
+  let directory = $file.directory
+  let path = $file.file.path
+  let type = $file.type
+
   match $type {
-    "local" => $path
-    "remote" => (download-environment-file $files $path)
+    "installed" => (cp $path $directory)
+
+    "remote" => {
+      let destination = ($directory | path join $path)
+      let parent = ($destination | path parse | get parent)
+
+      mkdir $parent
+
+      (get-environment-file --raw $files $path)
+      | save --force $destination
+    }
   }
 }
 
@@ -988,7 +1045,7 @@ def "main diff" [
 
   let installed_environments = ("generic" ++ (get-installed-environments))
 
-  let a = if ($environment_a | is-empty) or (
+  let a_environment = if ($environment_a | is-empty) or (
     $environment_b | is-empty
   ) and (
     $environment_a not-in $installed_environments
@@ -998,62 +1055,73 @@ def "main diff" [
     $environment_a
   }
 
-  let b = if ($remote | is-not-empty) {
+  let a_type = if ($environment_a | is-empty) {
+    "installed"
+  } else if $remotes or ($environment_a not-in $installed_environments) {
+    "remote"
+  } else {
+    "installed"
+  }
+
+  let a = {
+    environment: $a_environment
+    type: $a_type
+  }
+
+  let b_environment = if ($remote | is-not-empty) {
     $remote
   } else if ($environment_b | is-not-empty) {
     $environment_b
   } else if ($environment_a | is-not-empty) {
     $environment_a
   } else {
-    $a
+    $a_environment
   }
 
-  let $a_files = if $remotes {
-    geget-diff-files --remote $installed_environments $a
+  let b_type = if ($remote | is-not-empty) or $a_environment == $b_environment {
+    "remote"
+  } else if ($b_environment in $installed_environments) {
+    "installed"
   } else {
-    geget-diff-files $installed_environments $a
+    "remote"
   }
 
-  let $b_files = if $remotes or $a == $b {
-    geget-diff-files --remote $installed_environments $b
-  } else {
-    geget-diff-files $installed_environments $b
+  let b = {
+    environment: $b_environment
+    type: $b_type
   }
 
-  for item in $a_files {
-    let type = $item.type
-    let path = $item.file.path
-    let a_file = (get-diff-file $type $path $a_files.file)
+  let a_directory = (mktemp --directory)
+  let b_directory = (mktemp --directory)
 
-    let b_file = if $path in $b_files.file.path {
-      get-diff-file ($b_files.type | uniq | first) $path $a_files.file
+  let $a_files = (
+    get-diff-files $installed_environments $a $a_directory $remotes
+  )
+
+  let $b_files = (
+    get-diff-files $installed_environments $b $b_directory $remotes
+  )
+
+  try {
+    if (tput cols | into int) >= 160 {
+      (
+        delta
+          --diff-so-fancy
+          --paging never
+          --side-by-side
+          $a_directory $b_directory
+      )
     } else {
-      "/dev/null"
-    }
-
-    do --ignore-errors {
-      if (tput cols | into int) >= 160 {
-        (
-          delta
-            --diff-so-fancy
-            --paging never
-            --side-by-side
-            $a_file $b_file
-        )
-      } else {
-        (
-          delta
-            --diff-so-fancy
-            --paging never
-            $a_file $b_file
-        )
-      }
-    }
-
-    if $type == "remote" {
-      rm $a_file
+      (
+        delta
+          --diff-so-fancy
+          --paging never
+          $a_directory $b_directory
+      )
     }
   }
+
+  rm --force --recursive $a_directory $b_directory
 }
 
 # List environment files
@@ -1306,8 +1374,12 @@ def "main remove" [
   }
 }
 
+def "main update" [] {
+  nix flake update
+}
+
 # Upgrade environments to the latest available version
-export def "main upgrade" [
+def "main upgrade" [
   ...environments: string
 ] {
   let new_environment_command = (

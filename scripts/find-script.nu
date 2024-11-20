@@ -22,18 +22,19 @@ export def get-script [
 
   let $recipe = ($parts | last)
 
-
   let matching_scripts = (
     $scripts
     | filter {
         |script|
 
         let path = ($script | path parse)
-        let parent = ($path | get parent)
 
-        if ($environment | is-not-empty) and (
-          $parent != ($scripts_directory | path join $environment)
-        ) {
+        let environment_directory = match $environment {
+          "" => $scripts_directory
+          _ => ($scripts_directory | path join $environment)
+        }
+
+        if $path.parent != $environment_directory {
           return false
         }
 
@@ -57,6 +58,10 @@ export def get-script [
         | split row ":= "
         | last
       )
+
+      if ($recipe | is-empty) {
+        return
+      }
 
       return (get-script $recipe $scripts $scripts_directory)
     }

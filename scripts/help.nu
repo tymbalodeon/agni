@@ -4,8 +4,9 @@ use find-script.nu
 
 export def display-just-help [
   recipe?: string
-  justfile?: string
-  environment?: string
+  subcommands?: list<string>
+  --environment: string
+  --justfile: string
 ] {
   if ($recipe | is-empty) {
     return (
@@ -43,15 +44,24 @@ export def display-just-help [
   }
 
   if (rg "^def main --wrapped" $script | is-not-empty) {
-    nu $script "--self-help"
+    if ($subcommands | is-empty) {
+      nu $script "--self-help"
+    } else {
+      nu $script ...$subcommands "--self-help"
+    }
   } else {
-    nu $script --help
+    if ($subcommands | is-empty) {
+      nu $script --help
+    } else {
+      nu $script ...$subcommands --help
+    }
   }
 }
 
 # View help text
 def main [
   recipe?: string # View help text for recipe
+  ...subcommands: string  # View help for a recipe subcommand
 ] {
-  display-just-help $recipe
+  display-just-help $recipe $subcommands
 }
