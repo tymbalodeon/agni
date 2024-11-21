@@ -1,12 +1,11 @@
 [project]
 name = "agni"
-dynamic = ["version"]
+version = "0.1.0"
 description = """\
 Music compositional tools inspired by the techniques of Claude Vivier
 """
 authors = [{ name = "Ben Rosen", email = "benjamin.j.rosen@gmail.com" }]
 readme = "README.md"
-license = { text = "MIT" }
 keywords = ["claude vivier", "lilypond", "music notation", "music", "spectral"]
 requires-python = ">=3.11"
 dependencies = [
@@ -23,10 +22,6 @@ repository = "https://github.com/tymbalodeon/agni"
 [project.scripts]
 agni = "agni.main:agni"
 
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
@@ -36,15 +31,9 @@ exclude = [".git", ".ruff_cache", ".venv", "build", "dist"]
 line-length = 79
 indent-width = 4
 
-[tool.pdm.version]
-source = "file"
-path = "agni/__init__.py"
-
-[tool.pdm.dev-dependencies]
+[dependency-groups]
 dev = [
-  "bpython>=0.24",
-  "py-spy>=0.3.14",
-  "pre-commit>=3.5.0",
-  "coverage>=7.3.2",
-  "pytest>=7.4.3",
+    "bpython>=0.24",
+    "coverage>=7.6.7",
+    "pytest>=8.3.3",
 ]
