@@ -1,29 +1,18 @@
 #!/usr/bin/env nu
 
-use ./deps.nu list-dependencies
-
-def is-a-dependency [
-    dependency: string
-    --dev
-] {
-    let dependencies = if $dev {
-        list-dependencies --dev
-    } else {
-        list-dependencies
-    }
-
-    $dependency in $dependencies
-}
+use ./remove.nu get-dependencies
 
 # Remove dependencies
 def main [
-    ...dependencies: string # Dependencies to remove
+  ...dependencies: string # Dependencies to remove
 ] {
-    for $dependency in $dependencies {
-        if (is-a-dependency $dependency --dev) {
-            uv remove --dev $dependency
-        } else if (is-a-dependency $dependency) {
-            uv remove $dependency
-        }
+  let dependencies = (get-dependencies)
+
+  for $dependency in $dependencies {
+    if $dependency in $dependencies.dev {
+      uv remove --dev $dependency
+    } else if $dependency in $dependencies.prod {
+      uv remove $dependency
     }
+  }
 }

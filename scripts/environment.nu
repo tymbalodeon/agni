@@ -96,10 +96,9 @@ def get-environment-files [environment: string] {
 }
 
 def get-comment-character [extension: string] {
-  if $extension == "kdl" {
-    "//"
-  } else {
-    "#"
+  match $extension {
+    "kdl" => "//"
+    _ => "#"
   }
 }
 
@@ -175,22 +174,6 @@ def copy-files [
 
       if ($path | path parse | get extension) == "nu" {
         chmod +x $path
-      }
-
-      if $environment != "generic" and (
-        $path | path parse | get parent | is-empty
-      ) {
-        let extension = ($path | path parse | get extension)
-        let comment_character = (get-comment-character $extension)
-
-        let tagged_contents = (
-          open --raw $path
-          | prepend $"($comment_character) ($environment)\n"
-          | str join
-        )
-
-        $tagged_contents
-        | save --force $path
       }
 
       print $"Downloaded ($path)"
@@ -1182,7 +1165,7 @@ def get-installed-environments [] {
   list-nix-files
   | path parse
   | get stem
-  | filter {|environment| $environment in $available_environments}
+  | filter {$in in $available_environments}
 }
 
 def get-environments-to-process [
@@ -1272,12 +1255,15 @@ def remove-files [environment: string] {
   rm --force --recursive $"scripts/($environment)"
 }
 
-def remove-environment-from-justfile [environment: string] {
+export def remove-environment-from-justfile [
+  environment: string
+  justfile: string
+] {
   let filtered_justfile = try {
     let environment_mod = (
       "mod "
       | append (
-          open Justfile
+          $justfile
           | split row "mod"
           | str trim
           | filter {str starts-with $environment}
@@ -1287,7 +1273,7 @@ def remove-environment-from-justfile [environment: string] {
     )
 
     let filtered_justfile = (
-      open Justfile
+      $justfile
       | str replace $environment_mod ""
     )
 
@@ -1302,8 +1288,11 @@ def remove-environment-from-justfile [environment: string] {
   $filtered_justfile
 }
 
-def remove-environment-from-gitignore [environment: string] {
-  open .gitignore
+export def remove-environment-from-gitignore [
+  environment: string
+  gitignore: string
+] {
+  $gitignore
   | split row "# "
   | filter {
       |item|
@@ -1319,8 +1308,11 @@ def remove-environment-from-gitignore [environment: string] {
   | str join
 }
 
-def remove-environment-from-pre-commit-config [environment: string] {
-  open --raw .pre-commit-config.yaml
+export def remove-environment-from-pre-commit-config [
+  environment: string
+  pre_commit_config: string
+] {
+  $pre_commit_config
   | split row "# "
   | filter {
       |item|
@@ -1354,18 +1346,22 @@ def "main remove" [
 
     remove-files $environment
 
-    let filtered_justfile = (remove-environment-from-justfile $environment)
+    let filtered_justfile = (
+      remove-environment-from-justfile $environment (open Justfile)
+    )
 
     if $filtered_justfile != null {
       save-justfile $filtered_justfile
     }
 
     save-gitignore (
-      remove-environment-from-gitignore $environment
+      remove-environment-from-gitignore $environment (open .gitignore)
     )
 
     save-pre-commit-config (
-      remove-environment-from-pre-commit-config $environment
+      remove-environment-from-pre-commit-config 
+        $environment 
+        (open --raw .pre-commit-config.yaml)
     )
   }
 
@@ -1396,8 +1392,7 @@ def "main upgrade" [
   rm $new_environment_command
 }
 
-# TODO test me
-def find-environment-file [
+export def find-environment-file-url [
   environment: string
   file: string
   environment_files: table<
@@ -1420,7 +1415,7 @@ def find-environment-file [
     | path join
   )
 
-  let file_url = if $full_path in ($environment_files | get path) {
+  if $full_path in ($environment_files | get path) {
     let file_url = (
       $environment_files
       | where path == $full_path
@@ -1469,7 +1464,7 @@ def "main view" [
 
   try {
     let file_url = (
-      find-environment-file $environment $file $environment_files
+      find-environment-file-url $environment $file $environment_files
     )
 
     http-get $file_url

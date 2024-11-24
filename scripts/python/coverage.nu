@@ -9,17 +9,17 @@ def main [
   test out+err> /dev/null
 
   if ($fail_under | is-not-empty) {
-      (
-          uv run coverage report -m
-              --skip-covered
-              --sort "cover"
-              --fail-under $fail_under
-      )
+    (
+      uv run coverage report -m
+        --skip-covered
+        --sort cover
+        --fail-under $fail_under
+    )
   } else {
-      (
-          uv run coverage report -m
-              --skip-covered
-              --sort "cover"
-      )
+    (
+      uv run coverage report -m
+        --skip-covered
+        --sort cover
+    )
   }
 }

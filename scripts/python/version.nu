@@ -3,10 +3,5 @@
 use ./command.nu
 
 def main [] {
-  return (
-    open $"(command)/__init__.py"
-    | split row " "
-    | last
-    | str replace --all '"' ""
-  )
+  open pyproject.toml | get project.version
 }

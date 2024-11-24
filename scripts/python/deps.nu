@@ -1,127 +1,64 @@
 #!/usr/bin/env nu
 
-def list-dependencies [
-    --dev
-    --prod
-    --include-version
+use ../environment.nu get-project-path
+
+export def get-dependencies [
+  --dev
+  --prod
 ] {
-    let export = if $dev {
-        uv export --pyproject --no-default
-    } else if $prod {
-        uv export --pyproject --prod
-    } else {
-        uv export --pyproject
-    }
+  let pyproject_data = (open (get-project-path pyproject.toml))
 
-    mut dependencies = $export
-        | lines
-        | filter {
-            |line|
+  mut dependencies = {
+    dev: []
+    prod: []
+  }
 
-            (
-                ($line | is-not-empty)
-                and (not ($line | str starts-with "#"))
-            )
-        }
-
-    if not $include_version {
-        $dependencies = (
-            $dependencies
-            | each {
-                |dependency|
-
-                $dependency | split row ">=" | first
-            }
+  if $dev or not $prod {
+    $dependencies = (
+      $dependencies
+      | update dev (
+          ($pyproject_data | get dependency-groups.dev)
         )
-    }
+    )
+  }
 
-    $dependencies | str join "\n"
-}
+  if $prod or not $dev {
+    $dependencies = (
+      $dependencies
+      | update prod (
+          ($pyproject_data | get project.dependencies)
+        )
+    )
+  }
 
-def indent [text: string] {
-    $text
-    | lines
-    | each { |line| $"\t($line)" }
-    | str join "\n"
+  $dependencies
 }
 
 # Show application dependencies
-def show-dependencies [
-    --dev # Show only development dependencies
-    --prod # Show only production dependencies
-    --installed # Show installed dependencies (python dependencies only)
-    --tree # Show installed dependencies as a tree (python dependencies only)
-    --licenses # Show dependency licenses
-    --sort-by-license # [If --licenses] Sort by license
+def main [
+  --dev # Show only development dependencies
+  --prod # Show only production dependencies
+  --installed # Show installed dependencies (python dependencies only)
+  --tree # Show installed dependencies as a tree (python dependencies only)
 ] {
-    if $tree {
-        uv tree
-        exit
-    }
+  if $tree {
+    return (uv tree)
+  }
+  if $installed {
+    return (uv pip list)
+  }
 
-    if $installed {
-        uv pip list
+  let dependencies = (get-dependencies)
 
-        exit
-    }
+  let dependencies = if $dev {
+    $dependencies.dev
+  } else if $prod {
+    $dependencies.prod
+  } else {
+    $dependencies.dev
+    | append $dependencies.prod
+    | sort
+  }
 
-    if $licenses {
-        mut dependencies = (
-            if $dev {
-                uv pip list
-            } else if $prod {
-                uv pip list
-            } else {
-                uv pip list
-            }
-            | from json
-            | rename name license
-        )
-
-        $dependencies = if $sort_by_license {
-            $dependencies | sort-by license
-        } else {
-            $dependencies | sort-by name
-        }
-
-        print $dependencies
-        exit
-    }
-
-    let dependencies = if $dev {
-        list-dependencies --include-version --dev
-    } else if $prod {
-        (
-            (list-dependencies --include-version --prod)
-            + "\n\n"
-        )
-    } else {
-        let prod_dependencies = (
-            indent (list-dependencies --include-version --prod)
-        )
-
-        let dev_dependencies = (
-            indent (list-dependencies --include-version --dev)
-        )
-
-        (
-            [
-                Production:
-                $prod_dependencies
-                ""
-                Development:
-                $dev_dependencies
-            ]
-            | str join "\n"
-        )
-    }
-
-    if (command -v bat | is-empty) {
-        just install
-    }
-
-    let bat_command = (
-        "bat --language pip --plain --theme gruvbox-dark"
-    )
-    zsh -c $"print \"($dependencies)\" | ($bat_command)"
+  $dependencies | to text | bat --language env
 }
