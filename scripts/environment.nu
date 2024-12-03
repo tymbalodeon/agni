@@ -1141,7 +1141,7 @@ def "main list" [
   list-environment-directory $environment $path $files
 }
 
-def get-project-root [] {
+export def get-project-root [] {
   echo (git rev-parse --show-toplevel)
 }
 
@@ -1359,8 +1359,8 @@ def "main remove" [
     )
 
     save-pre-commit-config (
-      remove-environment-from-pre-commit-config 
-        $environment 
+      remove-environment-from-pre-commit-config
+        $environment
         (open --raw .pre-commit-config.yaml)
     )
   }

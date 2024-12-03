@@ -1,25 +1,51 @@
 #!/usr/bin/env nu
 
 use domain.nu
+use environment.nu get-project-root
+
+# Close issue
+def "main close" [issue_number: number] {
+  match (domain) {
+    "github" => (gh issue close $issue_number)
+    "gitlab" => (glab issue close $issue_number)
+  }
+}
+
+# Create issue
+def "main create" [] {
+  match (domain) {
+    "github" => (gh issue create --editor)
+    "gitlab" => (glab issue create)
+  }
+}
+
+# Create/open issue and development branch
+def "main develop" [issue_number: number] {
+  match (domain) {
+    "github" => (gh issue develop --checkout $issue_number)
+
+    "gitlab" => (
+      print "Feature not implemented for GitLab."
+
+      exit 1
+    )
+  }
+}
 
 # View issues
 def main [
   issue_number?: number # The number of the issue to view
-  --close # Close issue
-  --create # Create issue
-  --develop # Create development branch for issue
+  --domain: string
   --web # Open the remote repository website in the browser
 ] {
-  let domain = (domain)
-  match (domain) {
+  let domain = match $domain {
+    null => (domain)
+    _ => $domain
+  }
+
+  match $domain {
     "github" => {
-      if $close {
-        gh issue close $issue_number
-      } else if $create {
-        gh issue create --editor
-      } else if $develop {
-        gh issue develop --checkout $issue_number
-      } else if ($issue_number | is-empty) {
+      if ($issue_number | is-empty) {
         if $web {
           gh issue list --web
         } else {
@@ -33,15 +59,7 @@ def main [
     }
 
     "gitlab" => {
-      if $close {
-        glab issue close $issue_number
-      } else if $create {
-        glab issue create
-      } else if $develop {
-        print "Feature not implemented for GitLab."
-
-        exit 1
-      } else if ($issue_number | is-empty) {
+      if ($issue_number | is-empty) {
         if $web {
           print "`--web` not implemented for GitLab's `issue list`."
         }
@@ -55,30 +73,15 @@ def main [
     }
 
     _ => {
-      let repo_name = (pwd | path basename)
-
-      let todos = (
-        nb todo $repo_name
-        | lines
-        | each {
-            |line|
-
-            $line
-            | ansi strip
-            | split row --regex '[\[\]0-9]'
-            | last
-            | str trim
-        }
+      let repo_issues = (
+        nb todo (get-project-root | path basename)
       )
 
-      # FIXME
-      let new_todo = if ($repo_name in $todos) {
-
-      } else {
-
+      if ($issue_number | is-empty) {
+        $repo_issues
+      } else if ($repo_issues | find $issue_number | is-not-empty) {
+        nb todo $issue_number
       }
-
-      nb todo add --edit
     }
   }
 }
