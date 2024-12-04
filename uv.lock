@@ -24,7 +24,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/ba/7c/01a0bfb8b1fc28684
 [[package]]
 name = "agni"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "abjad" },
     { name = "abjad-ext-rmakers" },
