@@ -35,12 +35,36 @@ export def display-just-help [
 
   let script = (find-script $recipe)
 
-  if ($script | is-empty) {
-    try {
-      return (just --color always --list $recipe --quiet)
-    } catch {
-      return
+  mut recipe_is_module = false
+
+  let script = if ($script | is-empty) {
+    let args = ($recipe ++ $subcommands)
+
+    if ($args | length) > 1 {
+      $recipe_is_module = true
+
+      find-script (
+        $args
+        | window 2
+        | first
+        | str join "/"
+      )
+    } else {
+      try {
+        return (just --color always --list $recipe --quiet)
+      } catch {
+        return
+      }
     }
+  } else {
+    $script
+  }
+
+  let subcommands = if $recipe_is_module {
+    $subcommands
+    | drop nth 0
+  } else {
+    $subcommands
   }
 
   if (rg "^def main --wrapped" $script | is-not-empty) {

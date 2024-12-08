@@ -3,47 +3,150 @@
 use domain.nu
 use environment.nu get-project-root
 
-# Close issue
-def "main close" [issue_number: number] {
-  match (domain) {
-    "github" => (gh issue close $issue_number)
-    "gitlab" => (glab issue close $issue_number)
+def get-service [service?: string] {
+  if ($service | is-empty) {
+    domain
+  } else {
+    $service
   }
 }
 
+def get-branches [] {
+  git branch --remote
+  | lines
+  | each {|line| $line | split row "/" | last}
+  | append (
+      git for-each-ref --format='%(refname:short)' refs/heads/
+      | lines
+   )
+  | uniq
+  | sort
+}
+
+def get-issue-branch [issue_number: number] {
+  let branches = (
+    (get-branches)
+    | find $"($issue_number)-"
+  )
+
+  if ($branches | is-not-empty)  {
+    $branches
+    | last
+  }
+}
+
+# Close issue
+def "main close" [
+  issue_number: number # The id of the issue to view
+  --service: string # Which service to use (see `list-services`)
+  --merge # Merge development branch, if one exists, before closing issue
+] {
+  # if $merge {
+  #   git switch (get-issue-branch)
+
+  #   # TODO
+  # }
+
+  let service = (get-service $service)
+
+  match $service {
+    "github" => (gh issue close $issue_number)
+    "gitlab" => (glab issue close $issue_number)
+    _ => (nb do $issue_number)
+  }
+}
+
+def get-project-prefix [] {
+  $"(get-project-root | path basename)/"
+}
+
 # Create issue
-def "main create" [] {
-  match (domain) {
+def "main create" [
+  --service: string # Which service to use (see `list-services`)
+] {
+  let service = (get-service $service)
+
+  match $service {
     "github" => (gh issue create --editor)
     "gitlab" => (glab issue create)
+
+    _ => {
+      let title = (input "Enter title: ")
+
+      nb todo add --title $"(get-project-prefix)($title)"
+    }
   }
 }
 
 # Create/open issue and development branch
-def "main develop" [issue_number: number] {
-  match (domain) {
+def "main develop" [
+  issue_number: number # The id of the issue to view
+  --service: string # Which service to use (see `list-services`)
+] {
+  let service = (get-service $service)
+
+  match $service {
     "github" => (gh issue develop --checkout $issue_number)
 
-    "gitlab" => (
-      print "Feature not implemented for GitLab."
+    _ => {
+      let issues = (main $issue_number --service $service)
 
-      exit 1
-    )
+      try {
+        let issue = (
+          $issues
+          | ansi strip
+          | lines
+          | split column "[ ] "
+        )
+
+        let id = (
+          $issue
+          | get column1
+          | split row "["
+          | split row "]"
+          | get 1
+        )
+
+        let title = (
+            $issue
+            | get column2
+          | first
+          | str replace (get-project-prefix) ""
+        )
+
+        git switch --create $"($id)-($title)"
+      }
+    }
+  }
+}
+
+# List available services
+def "main list-services" [] {
+  print ([github gitlab nb] | str join "\n")
+}
+
+# View issues
+def "main view" [
+  issue_number?: number # The id of the issue to view
+  --service: string # Which service to use (see `list-services`)
+  --web # Open the remote repository website in the browser
+] {
+  if $web {
+    main $issue_number --service $service --web
+  } else {
+    main $issue_number --service $service
   }
 }
 
 # View issues
 def main [
-  issue_number?: number # The number of the issue to view
-  --domain: string
+  issue_number?: number # The id of the issue to view
+  --service: string # Which service to use (see `list-services`)
   --web # Open the remote repository website in the browser
 ] {
-  let domain = match $domain {
-    null => (domain)
-    _ => $domain
-  }
+  let service = (get-service $service)
 
-  match $domain {
+  match $service {
     "github" => {
       if ($issue_number | is-empty) {
         if $web {
@@ -74,12 +177,17 @@ def main [
 
     _ => {
       let repo_issues = (
-        nb todo (get-project-root | path basename)
+        nb todo $"(get-project-prefix)*"
       )
 
       if ($issue_number | is-empty) {
         $repo_issues
-      } else if ($repo_issues | find $issue_number | is-not-empty) {
+      } else if (
+          $repo_issues
+          | ansi strip
+          | find $"[($issue_number)]"
+          | is-not-empty
+      ) {
         nb todo $issue_number
       }
     }

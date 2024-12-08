@@ -32,10 +32,6 @@ alias deps := dependencies
 @history *args:
     ./scripts/history.nu {{ args }}
 
-# Initialize direnv environment
-@init *help:
-    ./scripts/init.nu {{ help }}
-
 # View issues
 @issue *args:
     ./scripts/issue.nu {{ args }}

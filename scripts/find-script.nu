@@ -29,18 +29,29 @@ export def get-script [
 
         let path = ($script | path parse)
 
+        $path.stem == $recipe and $path.extension == "nu"
+      }
+  )
+
+  let matching_scripts = if (
+    ($matching_scripts | length) > 1
+  ) {
+    $matching_scripts
+    | filter {
+        |script|
+
+        let path = ($script | path parse)
+
         let environment_directory = match $environment {
           "" => $scripts_directory
           _ => ($scripts_directory | path join $environment)
         }
 
-        if $path.parent != $environment_directory {
-          return false
-        }
-
-        $path.stem == $recipe and $path.extension == "nu"
-      }
-  )
+        $path.parent == $environment_directory
+    }
+  } else {
+    $matching_scripts
+  }
 
   let matching_scripts = if (
     ($matching_scripts | length) > 1
