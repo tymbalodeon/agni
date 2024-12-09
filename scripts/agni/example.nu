@@ -14,27 +14,12 @@ def get-example-path [path?: string] {
   get-project-path $path
 }
 
-def notate_reference_passage [] {
-  (
-  just run
-    passage (get-example-path lonely-child-notes.ily)
-    --no-display
-    --notate
-    --output-directory (get-example-path)
-    --save
-  )
-}
-
-def notate_ensemble_passage [] {
-  (
-  just run
-    passage (get-example-path lonely-child-notes.ily)
-    --full-score
-    --no-display
-    --notate
-    --output-directory (get-example-path)
-    --save
-  )
+def is-outdated [input_file: string output_file: string] {
+  try {
+    (ls $input_file | get modified) > (ls $output_file | get modified)
+  } catch {
+    true
+  }
 }
 
 def main [
@@ -60,32 +45,49 @@ def main [
   )
 
   let input_pdf = (get-example-path $"($input_file_name).pdf")
+
   mut pdf_files = []
 
   if $default or $input {
-    let input_ly = (get-example-path $"($input_file_name).ly")
+    let filename = $"($input_file_name).ly"
+    let input_ly = (get-example-path $filename)
 
-    lilypond -o (get-project-path examples) $input_ly
-    mv $"($input_file_name)-formatted.pdf" $input_pdf
+    if $force or (is-outdated $input_ly $input_pdf) {
+      lilypond -o (get-example-path) $input_ly
+    }
 
     $pdf_files = ($pdf_files | append $input_pdf)
   }
 
+  let notes_file = (get-example-path lonely-child-notes.ily)
+  let example_path = (get-example-path)
+
   if $default or $reference or $generated {
-    if $force {
-      notate_reference_passage
-    } else {
-      notate_reference_passage
+    if $force or (is-outdated $notes_file $reference_pdf) {
+      (
+        just run
+          passage $notes_file
+          --no-display
+          --notate
+          --output-directory $example_path
+          --save
+      )
     }
 
     $pdf_files = ($pdf_files | append $reference_pdf)
   }
 
   if $default or $ensemble or $generated {
-    if $force {
-      notate_ensemble_passage
-    } else {
-      notate_ensemble_passage
+    if $force or (is-outdated $notes_file $ensemble_pdf) {
+      (
+        just run
+          passage $notes_file
+          --full-score
+          --no-display
+          --notate
+          --output-directory $example_path
+          --save
+      )
     }
 
     $pdf_files = ($pdf_files | append $ensemble_pdf)
