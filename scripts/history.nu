@@ -30,6 +30,7 @@ def --wrapped cog-log [...args: string] {
 # View project history
 def main [
   filename?: string
+  --annotate-lines # Annotate $filename lines with commit information
   --author: string # Filter on commit author
   --breaking-change # Filter BREAKING CHANGE commits
   --no-error # Omit error on the commit log
@@ -54,6 +55,8 @@ def main [
           --type $type
       )
     }
+  } else if $annotate_lines {
+    git blame $filename
   } else {
     git log --patch $filename
   }

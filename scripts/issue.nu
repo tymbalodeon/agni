@@ -41,15 +41,35 @@ def "main close" [
   --service: string # Which service to use (see `list-services`)
   --merge # Merge development branch, if one exists, before closing issue
 ] {
-  # if $merge {
-  #   git switch (get-issue-branch)
+  if $merge {
+    let issue_branch = (get-issue-branch $issue_number)
 
-  #   # TODO
-  # }
+    mut has_stashed_changes = false
 
-  let service = (get-service $service)
+    if (git branch --show-current) == $issue_branch {
+      if (git status --short | is-not-empty) {
+        return $"($issue_branch) contains uncommitted changes."
+      }
 
-  match $service {
+      git switch trunk
+    } else {
+      $has_stashed_changes = (
+        (
+          git stash --message $issue_branch
+          | complete
+          | get stdout
+        ) != "No local changes to save"
+      )
+    }
+
+    git merge $issue_branch
+
+    if $has_stashed_changes {
+      git stash pop
+    }
+  }
+
+  match (get-service $service) {
     "github" => (gh issue close $issue_number)
     "gitlab" => (glab issue close $issue_number)
     _ => (nb do $issue_number)
@@ -64,9 +84,7 @@ def get-project-prefix [] {
 def "main create" [
   --service: string # Which service to use (see `list-services`)
 ] {
-  let service = (get-service $service)
-
-  match $service {
+  match (get-service $service) {
     "github" => (gh issue create --editor)
     "gitlab" => (glab issue create)
 
@@ -83,9 +101,7 @@ def "main develop" [
   issue_number: number # The id of the issue to view
   --service: string # Which service to use (see `list-services`)
 ] {
-  let service = (get-service $service)
-
-  match $service {
+  match (get-service $service) {
     "github" => (gh issue develop --checkout $issue_number)
 
     _ => {
@@ -144,9 +160,7 @@ def main [
   --service: string # Which service to use (see `list-services`)
   --web # Open the remote repository website in the browser
 ] {
-  let service = (get-service $service)
-
-  match $service {
+  match (get-service $service) {
     "github" => {
       if ($issue_number | is-empty) {
         if $web {
