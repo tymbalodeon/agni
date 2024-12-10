@@ -1,5 +1,5 @@
 # View help text
-@help *recipe:
+@_help *recipe:
     ../scripts/agni/help.nu {{ recipe }}
 
 # Run using an example score

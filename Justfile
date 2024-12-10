@@ -2,11 +2,6 @@
 @help *recipe:
     ./scripts/help.nu {{ recipe }}
 
-# View file annotated with version control information
-[no-cd]
-@annotate *filename:
-    ./scripts/annotate.nu {{ filename }}
-
 # Check flake and run pre-commit hooks
 @check *args:
     ./scripts/check.nu {{ args }}

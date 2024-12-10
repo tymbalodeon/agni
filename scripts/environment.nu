@@ -759,7 +759,9 @@ def copy-pre-commit-config [
 ] {
   initialize-generic-file .pre-commit-config.yaml
 
-  if (is-up-to-date $upgrade $environment (open --raw .pre-commit-config.yaml)) {
+  if (
+    is-up-to-date $upgrade $environment (open --raw .pre-commit-config.yaml)
+  ) {
     return false
   }
 
@@ -767,6 +769,14 @@ def copy-pre-commit-config [
 
   let environment_config = (
     get-environment-file $environment_files ".pre-commit-config.yaml"
+  )
+
+  if ($environment_config | is-empty) {
+    return false    
+  }
+
+  let environment_config = (
+    $environment_config
     | to yaml
     | yamlfmt -
   )
@@ -785,12 +795,11 @@ def copy-pre-commit-config [
   return true
 }
 
-def get-available-environments [] {
-  main list
-  | lines
+def display-available-environments [environments: list<string>] {
+  $environments
   | filter {$in != "generic"}
   | each {$"– ($in)"}
-  | to text
+  | str join "\n"
 }
 
 # Add environments to the project
@@ -799,11 +808,36 @@ def "main add" [
   --upgrade
   --reactivate
 ] {
+  let available_environments = (
+    main list
+    | lines
+    | append generic
+  )
+
   if ($environments | is-empty) {
     print "Please specify an environment to add. Available environments:\n"
 
-    return (get-available-environments)
+    return (display-available-environments $available_environments)
   }
+
+  mut unrecognized_environments = []
+  mut recognized_environments = []
+
+  for environment in $environments {
+    if ($environment not-in $available_environments) {
+      $unrecognized_environments = (
+        $unrecognized_environments
+        | append $environment
+      )
+    } else {
+      $recognized_environments = (
+        $recognized_environments
+        | append $environment
+      )
+    }
+  }
+
+  let environments = $recognized_environments
 
   mut should_reactivate = false
 
@@ -856,6 +890,18 @@ def "main add" [
 
   if $should_reactivate {
     main activate
+  }
+
+  for unrecognized_environment in $unrecognized_environments {
+    let environment = (color-yellow $unrecognized_environment)
+
+    print $"Unrecognized environment \"($environment)\""
+  }
+
+  if ($unrecognized_environments | is-not-empty) {
+    print "\nAvailable environments:"
+
+    display-available-environments $available_environments
   }
 }
 
@@ -1370,6 +1416,7 @@ def "main remove" [
   }
 }
 
+# Update environment dependencies
 def "main update" [] {
   nix flake update
 }
