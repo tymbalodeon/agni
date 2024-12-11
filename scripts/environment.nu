@@ -352,9 +352,9 @@ export def merge-justfiles [
 ] {
   if $environment == "generic" {
     return (
-      open $environment_justfile
+      open (get-project-path $environment_justfile)
       | append (
-          open $main_justfile
+          open (get-project-path $main_justfile)
           | split row "mod"
           | drop nth 0
           | each {prepend mod | str join}
@@ -772,7 +772,7 @@ def copy-pre-commit-config [
   )
 
   if ($environment_config | is-empty) {
-    return false    
+    return false
   }
 
   let environment_config = (
@@ -803,7 +803,7 @@ def display-available-environments [environments: list<string>] {
 }
 
 # Add environments to the project
-def "main add" [
+export def "main add" [
   ...environments: string
   --upgrade
   --reactivate
