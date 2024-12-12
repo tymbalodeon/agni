@@ -806,7 +806,7 @@ def display-available-environments [environments: list<string>] {
 export def "main add" [
   ...environments: string
   --upgrade
-  --reactivate
+  --activate
 ] {
   let available_environments = (
     main list
@@ -839,18 +839,18 @@ export def "main add" [
 
   let environments = $recognized_environments
 
-  mut should_reactivate = false
+  mut should_activate = false
 
   for environment in $environments {
     let environment_files = (get-environment-files $environment)
 
-    if $reactivate and (
+    if $activate and (
       $environment_files
       | filter {|file| ($file.name | path parse | get extension) == "nix"}
       | each {|file| not ($file.path | path exists)}
       | any {|status| $status}
     ) {
-      $should_reactivate = true
+      $should_activate = true
     }
 
     mut added = false
@@ -872,23 +872,15 @@ export def "main add" [
     }
   }
 
-  if (
-    git rev-parse
-    | complete
-    | get exit_code
-    | into bool
-  ) {
+  try {
+    git rev-parse --is-inside-work-tree out+err> /dev/null
+  } catch {
     git init
     git add .
-  } else if (
-    git ls-tree --full-tree --name-only -r HEAD
-    | rg '^flake.nix$'
-    | is-empty
-  ) {
-    git add flake.nix
   }
 
-  if $should_reactivate {
+  if $should_activate {
+    git add .
     main activate
   }
 
