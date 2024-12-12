@@ -102,6 +102,16 @@ def get-comment-character [extension: string] {
   }
 }
 
+def display-message [action: string message: string] {
+  mut action = $action
+
+  while (($action | split chars | length) < 12) {
+    $action = $" ($action)"
+  } 
+
+  print $"  (ansi green_bold)($action)(ansi reset) ($message)"
+}
+
 def copy-files [
   environment: string
   environment_files: table<
@@ -176,7 +186,7 @@ def copy-files [
         chmod +x $path
       }
 
-      print $"Downloaded ($path)"
+      display-message Downloaded $path
     }
 
   return true
@@ -413,7 +423,7 @@ export def save-file [contents: string filename: string] {
   $contents
   | save --force $filename
 
-  print $"($action) ($filename)"
+  display-message $action $filename
 }
 
 def save-justfile [justfile: string] {
@@ -865,10 +875,8 @@ export def "main add" [
       false => "Added"
     }
 
-    let message = $"($action) ($environment) environment"
-
     if $upgrade or $added {
-      print $message
+      display-message $action $"($environment) environment"
     }
   }
 
@@ -923,7 +931,7 @@ def list-environment-directory [
 }
 
 def color-yellow [text: string] {
-  $"(ansi y)($text)(ansi reset)"
+  $"(ansi yellow)($text)(ansi reset)"
 }
 
 def get-diff-files [
@@ -956,7 +964,7 @@ def get-diff-files [
 }
 
 def get-error-heading [] {
-  $"(ansi rb)error:(ansi reset)"
+  $"(ansi red_bold)error:(ansi reset)"
 }
 
 def diff-error-with-help [message: string] {
