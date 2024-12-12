@@ -102,7 +102,7 @@ def get-comment-character [extension: string] {
   }
 }
 
-def display-message [action: string message: string] {
+export def display-message [action: string message: string] {
   mut action = $action
 
   while (($action | split chars | length) < 12) {
