@@ -179,7 +179,7 @@ def copy-files [
 
       let path = $file.path
 
-      if ($path in [pyproject.toml README.md]) {
+      if ($path in [pyproject.toml README.md .python-version]) {
         if ($path | path exists) {
           return
         }
