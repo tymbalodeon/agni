@@ -2,5 +2,9 @@
 
 # Open an interactive python shell
 def main [] {
-  uv run bpython
+  try {
+    uv run bpython
+  } catch {
+    uv run python
+  }
 }

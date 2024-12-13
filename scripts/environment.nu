@@ -107,7 +107,7 @@ export def display-message [action: string message: string] {
 
   while (($action | split chars | length) < 12) {
     $action = $" ($action)"
-  } 
+  }
 
   print $"  (ansi green_bold)($action)(ansi reset) ($message)"
 }

@@ -6,21 +6,25 @@
 @check *args:
     ./scripts/check.nu {{ args }}
 
-alias deps := dependencies
-
 # List dependencies (alias: `deps`)
 @dependencies *args:
     ./scripts/dependencies.nu {{ args }}
 
+alias deps := dependencies
+
 # Manage environments
 @environment *args:
     ./scripts/environment.nu {{ args }}
+
+alias env := environment
 
 # Search available `just` recipes
 [no-cd]
 [no-exit-message]
 @find-recipe *search_term:
     ./scripts/find-recipe.nu {{ search_term }}
+
+alias find := find-recipe
 
 # View project history
 [no-cd]
@@ -52,6 +56,8 @@ alias deps := dependencies
 @view-source *recipe:
     ./scripts/view-source.nu {{ recipe }}
 
+alias src := view-source
+
 mod agni "just/agni.just"
 
 # Alias for `agni example`
@@ -60,6 +66,10 @@ mod agni "just/agni.just"
 
 mod python "just/python.just"
 
+# Alias for `python _help`
+@_help *args:
+    just python _help {{ args }}
+
 # Alias for `python add`
 @add *args:
     just python add {{ args }}
@@ -67,18 +77,6 @@ mod python "just/python.just"
 # Alias for `python build`
 @build *args:
     just python build {{ args }}
-
-# Alias for `python clean`
-@clean *args:
-    just python clean {{ args }}
-
-# Alias for `python coverage`
-@coverage *args:
-    just python coverage {{ args }}
-
-# Alias for `python install`
-@install *args:
-    just python install {{ args }}
 
 # Alias for `python profile`
 @profile *args:
