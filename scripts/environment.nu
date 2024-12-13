@@ -179,6 +179,12 @@ def copy-files [
 
       let path = $file.path
 
+      if ($path in [pyproject.toml README.md]) {
+        if ($path | path exists) {
+          return
+        }
+      }
+
       http-get $file.download_url
       | save --force $path
 
