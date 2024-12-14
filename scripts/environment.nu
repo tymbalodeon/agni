@@ -103,8 +103,8 @@ def get-comment-character [extension: string] {
 }
 
 export def display-message [
-  action: string 
-  message: string 
+  action: string
+  message: string
   style = "green_bold"
 ] {
   mut action = $action
@@ -117,7 +117,7 @@ export def display-message [
 }
 
 def get-project-name [] {
-  get-project-root 
+  get-project-root
   | path basename
 }
 
@@ -208,8 +208,8 @@ def copy-files [
         $path in [
           .python-version
           README.md
-          pyproject.toml 
-          $project_name
+          pyproject.toml
+          ($project_name | path join __init__.py)
         ]
       ) {
         if ($path | path exists) {
@@ -1349,7 +1349,7 @@ def remove-files [environment: string] {
 
     if ($project_name | path exists) {
       let init_py_file = ($project_name | path join "__init__.py")
-      
+
       if ($init_py_file | path exists) {
         rm --force --recursive $project_name
       }
@@ -1482,6 +1482,10 @@ def "main upgrade" [
   ...environments: string
   --use-existing-file # Skip fetching new source for `upgrade` command before running
 ] {
+  let environments = (
+    get-environments-to-process $environments (get-installed-environments)
+  )
+
   if $use_existing_file {
     return (main add --upgrade ...$environments)
   }
@@ -1490,10 +1494,6 @@ def "main upgrade" [
     download-environment-file
       (get-environment-files generic)
       scripts/environment.nu
-  )
-
-  let environments = (
-    get-environments-to-process $environments (get-installed-environments)
   )
 
   nu $new_environment_command add --upgrade ...$environments
