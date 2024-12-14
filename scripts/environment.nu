@@ -124,7 +124,7 @@ def get-project-name [] {
 def get-file-status [contents: string filename: string] {
   if ($filename | path exists) {
     let temporary_file = (
-      mktemp  --tmpdir --suffix $".($filename | path parse | get extension)"
+      get-temporary-file ($filename | path parse | get extension)
     )
 
     $contents
@@ -268,7 +268,7 @@ def copy-files [
       let action = (get-file-status $contents $path)
       let color = (get-action-color $action)
 
-      if ($action != Skipping) {
+      if $action != Skipped {
         $contents
         | save --force $path
 
@@ -513,7 +513,7 @@ export def merge-justfiles [
 export def save-file [contents: string filename: string] {
   let action = (get-file-status $contents $filename) 
 
-  if $action != "Skipped" {
+  if $action != Skipped {
     $contents
     | save --force $filename
   }
