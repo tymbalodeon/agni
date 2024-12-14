@@ -102,14 +102,23 @@ def get-comment-character [extension: string] {
   }
 }
 
-export def display-message [action: string message: string] {
+export def display-message [
+  action: string 
+  message: string 
+  style = "green_bold"
+] {
   mut action = $action
 
   while (($action | split chars | length) < 12) {
     $action = $" ($action)"
   }
 
-  print $"  (ansi green_bold)($action)(ansi reset) ($message)"
+  print $"  (ansi $style)($action)(ansi reset) ($message)"
+}
+
+def get-project-name [] {
+  get-project-root 
+  | path basename
 }
 
 def copy-files [
@@ -133,6 +142,22 @@ def copy-files [
   if $upgrade {
     rm --force --recursive ([scripts $environment] | path join)
   }
+
+  let project_name = (get-project-name)
+
+  let environment_files = (
+    $environment_files
+    | update path {
+        |row|
+
+        if (($row.path | path parse | get parent) == python) {
+          $project_name
+          | path join ($row.path | path basename)
+        } else {
+          $row.path
+        }
+    }
+  )
 
   let parent_directories = (
     $environment_files
@@ -179,7 +204,14 @@ def copy-files [
 
       let path = $file.path
 
-      if ($path in [pyproject.toml README.md .python-version]) {
+      if (
+        $path in [
+          .python-version
+          README.md
+          pyproject.toml 
+          $project_name
+        ]
+      ) {
         if ($path | path exists) {
           return
         }
@@ -187,6 +219,12 @@ def copy-files [
 
       http-get $file.download_url
       | save --force $path
+
+      if ($path == pyproject.toml) {
+        open $path
+        | update project.name $project_name
+        | save --force $path
+      }
 
       if ($path | path parse | get extension) == "nu" {
         chmod +x $path
@@ -1264,7 +1302,7 @@ def get-top-level-files [
 
 def remove-file [file: string] {
   rm --force $file
-  print $"Removed ($file)"
+  display-message Removed $file yellow_bold
 }
 
 def remove-files [environment: string] {
@@ -1305,6 +1343,18 @@ def remove-files [environment: string] {
   }
 
   rm --force --recursive $"scripts/($environment)"
+
+  if ($environment == python) {
+    let project_name = (get-project-name)
+
+    if ($project_name | path exists) {
+      let init_py_file = ($project_name | path join "__init__.py")
+      
+      if ($init_py_file | path exists) {
+        rm --force --recursive $project_name
+      }
+    }
+  }
 }
 
 export def remove-environment-from-justfile [
@@ -1394,8 +1444,6 @@ def "main remove" [
   )
 
   for environment in $environments {
-    print $"Removing ($environment)..."
-
     remove-files $environment
 
     let filtered_justfile = (
@@ -1415,6 +1463,8 @@ def "main remove" [
         $environment
         (open --raw .pre-commit-config.yaml)
     )
+
+    display-message Removed $"($environment) environment" yellow_bold
   }
 
   if $reactivate and ($environments | is-not-empty) {
@@ -1430,7 +1480,12 @@ def "main update" [] {
 # Upgrade environments to the latest available version
 def "main upgrade" [
   ...environments: string
+  --use-existing-file # Skip fetching new source for `upgrade` command before running
 ] {
+  if $use_existing_file {
+    return (main add --upgrade ...$environments)
+  }
+
   let new_environment_command = (
     download-environment-file
       (get-environment-files generic)
