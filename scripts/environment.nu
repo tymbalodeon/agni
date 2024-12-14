@@ -112,7 +112,7 @@ export def display-message [
       match $action {
         "Added" =>  "light_green_bold"
         "Removed" => "light_yellow_bold"
-        "Skipped" => "white_bold"
+        "Skipped" => "light_gray_bold"
         "Upgraded" =>  "light_cyan_bold"
         _ => "white"
       }
