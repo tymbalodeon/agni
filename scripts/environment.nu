@@ -137,7 +137,7 @@ def get-file-status [contents: string filename: string] {
       | complete 
       | get exit_code
     ) == 0 {
-      null
+      "Skipped"
     } else {
       "Upgraded"
     }
@@ -147,6 +147,15 @@ def get-file-status [contents: string filename: string] {
     $action
   } else {
     "Added"
+  }
+}
+
+def get-action-color [action: string] {
+  match $action {
+    "Upgraded" =>  "cyan_bold"
+    "Added" =>  "green_bold"
+    "Skipped" => "light_gray_dimmed"
+    _ => "white"
   }
 }
 
@@ -232,7 +241,7 @@ def copy-files [
   }
 
   if ($environment_files | is-empty) {
-    return false
+    return []
   }
 
   $environment_files
@@ -257,22 +266,7 @@ def copy-files [
 
       let contents = (http-get --raw $file.download_url)
       let action = (get-file-status $contents $path)
-
-      let action_data = {
-        action: (
-          match $action {
-            "Added" | "Upgraded" => $action
-            _ => "Skipping"
-          }
-        )
-        color: (
-          match $action {
-            "Upgraded" =>  "cyan_bold"
-            "Added" =>  "green_bold"
-            _ => "light_gray_dimmed"
-          }
-        )
-      }
+      let color = (get-action-color $action)
 
       if ($action != Skipping) {
         $contents
@@ -287,10 +281,11 @@ def copy-files [
         set-executable $path
       }
 
-      display-message $action_data.action $path $action_data.color
-    }
+      display-message $action $path $color
 
-  return true
+      $action
+    }
+  | uniq
 }
 
 def get-environment-file-url [
@@ -518,12 +513,14 @@ export def merge-justfiles [
 export def save-file [contents: string filename: string] {
   let action = (get-file-status $contents $filename) 
 
-  $contents
-  | save --force $filename
-
-  if ($action | is-not-empty) {
-    display-message $action $filename
+  if $action != "Skipped" {
+    $contents
+    | save --force $filename
   }
+
+  let color = (get-action-color $action)
+
+  display-message $action $filename $color
 }
 
 def save-justfile [justfile: string] {
@@ -563,7 +560,7 @@ def copy-justfile [
   initialize-generic-file Justfile
 
   if not $upgrade and $environment_identifier in (open Justfile) {
-    return false
+    return []
   }
 
   let environment_justfile_name = if $environment == "generic" {
@@ -598,7 +595,9 @@ def copy-justfile [
 
   rm $environment_justfile_file
 
-  return true
+  # TODO
+  # only save if merged is different from existing and return action
+  return []
 }
 
 def merge-generic [main: string generic: string] {
@@ -696,7 +695,7 @@ def copy-gitignore [
   initialize-generic-file .gitignore
 
   if (is-up-to-date $upgrade $environment (open .gitignore)) {
-    return false
+    return []
   }
 
   let environment_gitignore = (
@@ -718,7 +717,9 @@ def copy-gitignore [
     }
   }
 
-  return true
+  # TODO
+  # only save if merged is different from existing and return action
+  return []
 }
 
 def get-pre-commit-config-repos [config: string] {
@@ -872,7 +873,7 @@ def copy-pre-commit-config [
   if (
     is-up-to-date $upgrade $environment (open --raw .pre-commit-config.yaml)
   ) {
-    return false
+    return []
   }
 
   let new_environment_name = (get-environment-name $environment_files)
@@ -882,7 +883,7 @@ def copy-pre-commit-config [
   )
 
   if ($environment_config | is-empty) {
-    return false
+    return []
   }
 
   let environment_config = (
@@ -902,7 +903,9 @@ def copy-pre-commit-config [
     save-pre-commit-config $merged_pre_commit_config
   }
 
-  return true
+  # TODO
+  # only save if merged is different from existing and return action
+  return []
 }
 
 def display-available-environments [environments: list<string>] {
@@ -963,21 +966,24 @@ export def "main add" [
       $should_activate = true
     }
 
-    mut added = false
+    mut actions = []
 
-    $added = copy-files $environment $environment_files $upgrade
-    $added = copy-justfile $environment $environment_files $upgrade
-    $added = copy-gitignore $environment $environment_files $upgrade
-    $added = copy-pre-commit-config $environment $environment_files $upgrade
+    $actions = $actions | append (copy-files $environment $environment_files $upgrade)
+    $actions = $actions | append (copy-justfile $environment $environment_files $upgrade)
+    $actions = $actions | append (copy-gitignore $environment $environment_files $upgrade)
+    $actions = $actions | append (copy-pre-commit-config $environment $environment_files $upgrade)
 
-    let action = match $upgrade {
-      true => "Upgraded"
-      false => "Added"
+    let action = if not $upgrade {
+      "Added"
+    } else if ("Upgraded" in $actions) or ("Added" in $actions) {
+      "Upgraded"
+    } else {
+      "Skipped"
     }
 
-    if $upgrade or $added {
-      display-message $action $"($environment) environment"
-    }
+    let color = (get-action-color $action)
+
+    display-message $action $"($environment) environment" $color
   }
 
   try {
