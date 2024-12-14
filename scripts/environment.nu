@@ -521,6 +521,8 @@ export def save-file [contents: string filename: string] {
   let color = (get-action-color $action)
 
   display-message $action $filename $color
+
+  $action
 }
 
 def save-justfile [justfile: string] {
@@ -529,11 +531,8 @@ def save-justfile [justfile: string] {
 
 def initialize-generic-file [filename: string] {
   if not ($filename | path exists) {
-    let file = (
-      download-environment-file (get-environment-files generic) $filename
-    )
-
-    mv $file $filename
+    get-environment-file (get-environment-files generic) $filename
+    | save --force $filename
   }
 }
 
@@ -555,12 +554,12 @@ def copy-justfile [
   >
   upgrade: bool
 ] {
-  let environment_identifier = $"mod ($environment)"
-
   initialize-generic-file Justfile
 
-  if not $upgrade and $environment_identifier in (open Justfile) {
-    return []
+  let action = "Skipped"
+
+  if not $upgrade and $"mod ($environment)" in (open Justfile) {
+    return $action
   }
 
   let environment_justfile_name = if $environment == "generic" {
@@ -577,7 +576,7 @@ def copy-justfile [
 
   let environment_justfile = (open $environment_justfile_file)
 
-  if (
+  let action = if (
     $environment_justfile
     | is-not-empty
   ) {
@@ -588,16 +587,14 @@ def copy-justfile [
         $environment_justfile_file
     )
 
-    if ($merged_justfile | is-not-empty) {
-      save-justfile $merged_justfile
-    }
+    save-justfile $merged_justfile
+  } else {
+    $action
   }
 
   rm $environment_justfile_file
 
-  # TODO
-  # only save if merged is different from existing and return action
-  return []
+  return $action
 }
 
 def merge-generic [main: string generic: string] {
@@ -694,15 +691,17 @@ def copy-gitignore [
 ] {
   initialize-generic-file .gitignore
 
+  let action = "Skipped"
+
   if (is-up-to-date $upgrade $environment (open .gitignore)) {
-    return []
+    return $action
   }
 
   let environment_gitignore = (
     get-environment-file $environment_files ".gitignore"
   )
 
-  if ($environment_gitignore | is-not-empty) {
+  let action = if ($environment_gitignore | is-not-empty) {
     let new_environment_name = (get-environment-name $environment_files)
 
     let merged_gitignore = (
@@ -714,12 +713,14 @@ def copy-gitignore [
 
     if $merged_gitignore != null {
       save-gitignore $merged_gitignore
+    } else {
+      $action
     }
+  } else {
+    $action
   }
 
-  # TODO
-  # only save if merged is different from existing and return action
-  return []
+  return $action
 }
 
 def get-pre-commit-config-repos [config: string] {
@@ -870,10 +871,12 @@ def copy-pre-commit-config [
 ] {
   initialize-generic-file .pre-commit-config.yaml
 
+  let action = "Skipped"
+
   if (
     is-up-to-date $upgrade $environment (open --raw .pre-commit-config.yaml)
   ) {
-    return []
+    return $action
   }
 
   let new_environment_name = (get-environment-name $environment_files)
@@ -883,7 +886,7 @@ def copy-pre-commit-config [
   )
 
   if ($environment_config | is-empty) {
-    return []
+    return $action
   }
 
   let environment_config = (
@@ -899,13 +902,13 @@ def copy-pre-commit-config [
       $environment_config
   )
 
-  if $merged_pre_commit_config != null {
+  let action = if $merged_pre_commit_config != null {
     save-pre-commit-config $merged_pre_commit_config
+  } else {
+    $action
   }
 
-  # TODO
-  # only save if merged is different from existing and return action
-  return []
+  return $action
 }
 
 def display-available-environments [environments: list<string>] {
@@ -968,10 +971,14 @@ export def "main add" [
 
     mut actions = []
 
-    $actions = $actions | append (copy-files $environment $environment_files $upgrade)
-    $actions = $actions | append (copy-justfile $environment $environment_files $upgrade)
-    $actions = $actions | append (copy-gitignore $environment $environment_files $upgrade)
-    $actions = $actions | append (copy-pre-commit-config $environment $environment_files $upgrade)
+    for new_actions in [
+      (copy-files $environment $environment_files $upgrade)
+      (copy-justfile $environment $environment_files $upgrade)
+      (copy-gitignore $environment $environment_files $upgrade)
+      (copy-pre-commit-config $environment $environment_files $upgrade)
+    ] {
+      $actions = ($actions | append $new_actions | uniq)
+    }
 
     let action = if not $upgrade {
       "Added"
