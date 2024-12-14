@@ -640,8 +640,9 @@ export def merge-gitignores [
 ] {
   let environment_comment = (create-environment-comment $new_environment_name)
 
+  # FIXME
   if $environment_comment in $main_gitignore {
-    return ""
+    return $main_gitignore
   }
 
   let merged_gitignore = if $new_environment_name == "generic" {
@@ -786,6 +787,7 @@ export def merge-pre-commit-configs [
         create-environment-comment $new_environment_name
       )
 
+      # FIXME
       if $environment_comment in $main_config {
         return $main_config
       }
