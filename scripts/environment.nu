@@ -106,6 +106,7 @@ export def display-message [
   action: string
   message: string
   style = "green_bold"
+  --color-entire-message
 ] {
   mut action = $action
 
@@ -113,7 +114,13 @@ export def display-message [
     $action = $" ($action)"
   }
 
-  print $"  (ansi $style)($action)(ansi reset) ($message)"
+  let message = if $color_entire_message {
+    $"(ansi $style)($action) ($message)(ansi reset)"
+  } else {
+    $"(ansi $style)($action)(ansi reset) ($message)"
+  }
+
+  print $"  ($message)"
 }
 
 def get-project-name [] {
@@ -133,8 +140,8 @@ def get-file-status [contents: string filename: string] {
     set-executable $temporary_file
 
     let action = if (
-      delta $filename $temporary_file 
-      | complete 
+      delta $filename $temporary_file
+      | complete
       | get exit_code
     ) == 0 {
       "Skipped"
@@ -150,12 +157,27 @@ def get-file-status [contents: string filename: string] {
   }
 }
 
-def get-action-color [action: string] {
-  match $action {
-    "Upgraded" =>  "cyan_bold"
-    "Added" =>  "green_bold"
-    "Skipped" => "light_gray_dimmed"
-    _ => "white"
+def get-action-color [action: string --bright] {
+  match $bright {
+    true => (
+      match $action {
+        "Added" =>  "light_green_bold"
+        "Removed" => "light_yellow_bold"
+        "Skipped" => "white_bold"
+        "Upgraded" =>  "light_cyan_bold"
+        _ => "white"
+      }
+    )
+
+    false => (
+      match $action {
+        "Added" =>  "green_bold"
+        "Removed" => "yellow_bold"
+        "Skipped" => "light_gray_dimmed"
+        "Upgraded" =>  "cyan_bold"
+        _ => "white"
+      }
+    )
   }
 }
 
@@ -334,7 +356,7 @@ def get-environment-file [
   let url = (get-environment-file-url $environment_files $file)
 
   if ($url | is-empty) {
-    return ""
+    return
   }
 
   if $raw {
@@ -370,11 +392,15 @@ def download-environment-file [
   file: string
   extension?: string
 ] {
-  let temporary_file = (get-temporary-file $extension)
-
   let file_contents = (
     get-environment-file --raw $environment_files $file
   )
+
+  if ($file_contents | is-empty) {
+    return
+  }
+
+  let temporary_file = (get-temporary-file $extension)
 
   $file_contents
   | save --force $temporary_file
@@ -511,7 +537,7 @@ export def merge-justfiles [
 }
 
 export def save-file [contents: string filename: string] {
-  let action = (get-file-status $contents $filename) 
+  let action = (get-file-status $contents $filename)
 
   if $action != Skipped {
     $contents
@@ -574,23 +600,20 @@ def copy-justfile [
       $environment_justfile_name
   )
 
+  if ($environment_justfile_file | is-empty) {
+    return $action
+  }
+
   let environment_justfile = (open $environment_justfile_file)
 
-  let action = if (
-    $environment_justfile
-    | is-not-empty
-  ) {
-    let merged_justfile = (
-      merge-justfiles
-        $environment
-        Justfile
-        $environment_justfile_file
-    )
+  let merged_justfile = (
+    merge-justfiles
+      $environment
+      Justfile
+      $environment_justfile_file
+  )
 
-    save-justfile $merged_justfile
-  } else {
-    $action
-  }
+  let action = (save-justfile $merged_justfile)
 
   rm $environment_justfile_file
 
@@ -618,7 +641,7 @@ export def merge-gitignores [
   let environment_comment = (create-environment-comment $new_environment_name)
 
   if $environment_comment in $main_gitignore {
-    return null
+    return ""
   }
 
   let merged_gitignore = if $new_environment_name == "generic" {
@@ -701,26 +724,20 @@ def copy-gitignore [
     get-environment-file $environment_files ".gitignore"
   )
 
-  let action = if ($environment_gitignore | is-not-empty) {
-    let new_environment_name = (get-environment-name $environment_files)
-
-    let merged_gitignore = (
-      merge-gitignores
-        (open .gitignore)
-        $new_environment_name
-        $environment_gitignore
-    )
-
-    if $merged_gitignore != null {
-      save-gitignore $merged_gitignore
-    } else {
-      $action
-    }
-  } else {
-    $action
+  if ($environment_gitignore | is-empty) {
+    return $action
   }
 
-  return $action
+  let new_environment_name = (get-environment-name $environment_files)
+
+  let merged_gitignore = (
+    merge-gitignores
+      (open .gitignore)
+      $new_environment_name
+      $environment_gitignore
+  )
+
+  save-gitignore $merged_gitignore
 }
 
 def get-pre-commit-config-repos [config: string] {
@@ -770,7 +787,7 @@ export def merge-pre-commit-configs [
       )
 
       if $environment_comment in $main_config {
-        return null
+        return $main_config
       }
 
       $main_config
@@ -902,13 +919,7 @@ def copy-pre-commit-config [
       $environment_config
   )
 
-  let action = if $merged_pre_commit_config != null {
-    save-pre-commit-config $merged_pre_commit_config
-  } else {
-    $action
-  }
-
-  return $action
+  save-pre-commit-config $merged_pre_commit_config
 }
 
 def display-available-environments [environments: list<string>] {
@@ -990,7 +1001,13 @@ export def "main add" [
 
     let color = (get-action-color $action)
 
-    display-message $action $"($environment) environment" $color
+    (
+      display-message
+        --color-entire-message
+        $action
+        $"($environment) environment"
+        $color
+    )
   }
 
   try {
@@ -1371,7 +1388,11 @@ def get-top-level-files [
 
 def remove-file [file: string] {
   rm --force $file
-  display-message Removed $file yellow_bold
+
+  let action = "Removed"
+  let color = (get-action-color $action)
+
+  display-message $action $file $color
 }
 
 def remove-files [environment: string] {
@@ -1533,7 +1554,16 @@ def "main remove" [
         (open --raw .pre-commit-config.yaml)
     )
 
-    display-message Removed $"($environment) environment" yellow_bold
+    let action = "Removed"
+    let color = (get-action-color $action)
+
+    (
+      display-message
+        --color-entire-message
+        $action
+        $"($environment) environment"
+        $color
+    )
   }
 
   if $reactivate and ($environments | is-not-empty) {
