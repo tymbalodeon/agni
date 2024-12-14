@@ -2,7 +2,7 @@
 
 def main [] {
   try {
-    open pyproject.toml 
+    open pyproject.toml
     | get project.version
   }
 }

@@ -4,8 +4,8 @@ use dependencies.nu get-dependencies
 
 def remove-version []: string -> string {
   try {
-    $in 
-    | split row ">=" 
+    $in
+    | split row ">="
     | first
   }
 }

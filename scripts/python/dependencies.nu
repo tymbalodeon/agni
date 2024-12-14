@@ -60,7 +60,7 @@ def main [
     | sort
   }
 
-  $dependencies 
-  | to text 
+  $dependencies
+  | to text
   | bat --language env
 }
