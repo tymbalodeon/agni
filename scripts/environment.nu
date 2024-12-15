@@ -106,8 +106,11 @@ export def display-message [
   action: string
   message: string
   --color-entire-message
+  --color: string
 ] {
-  let color = match $color_entire_message {
+  let color = if ($color | is-not-empty) {
+    $color
+  } else match $color_entire_message {
     true => (
       match $action {
         "Added" =>  "light_green_bold"
