@@ -8,24 +8,23 @@ export def display-just-help [
   --environment: string
   --justfile: string
 ] {
-  if ($recipe | is-empty) {
-    return (
-      match $justfile {
-        null => (
-          just
-            --color always
-            --list
-            --list-submodules
-        )
+  let args = [
+    --color always
+    --list
+  ]
 
-        _ => (
-            just
-              --color always
-              --justfile $justfile
-              --list
+  if ($recipe | is-empty) {
+    let args = (
+      $args
+      | append (
+          match $justfile {
+            null => [--list-submodules]
+            _ => [--justfile $justfile]
+          }
         )
-      }
     )
+
+    return (^just ...$args)
   }
 
   let recipe = match $environment {
@@ -51,7 +50,7 @@ export def display-just-help [
       )
     } else {
       try {
-        return (just --color always --list $recipe --quiet)
+        return (^just ...$args $recipe --quiet)
       } catch {
         return
       }
@@ -86,6 +85,18 @@ export def display-just-help [
 def main [
   recipe?: string # View help text for recipe
   ...subcommands: string  # View help for a recipe subcommand
+  --no-aliases
 ] {
-  display-just-help $recipe $subcommands
+  let output = (display-just-help $recipe $subcommands)
+
+  let output = if $no_aliases {
+    $output
+    | lines
+    | filter {"alias for" not-in $in}
+    | str join "\n"
+  } else {
+    $output
+  }
+
+  print $output
 }

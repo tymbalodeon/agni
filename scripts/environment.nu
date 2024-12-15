@@ -436,7 +436,7 @@ def get-just-command-names [justfile: string] {
 }
 
 def create-environment-recipe [environment: string recipe: string] {
-  let documentation = $"# Alias for `($environment) ($recipe)`"
+  let documentation = $"# alias for `($environment) ($recipe)`"
   let declaration = $"@($recipe) *args:"
   let content = $"    just ($environment) ($recipe) {{ args }}"
 

@@ -66,34 +66,34 @@ mod agni "just/agni.just"
 
 mod python "just/python.just"
 
-# Alias for `python _help`
+# alias for `python _help`
 @_help *args:
     just python _help {{ args }}
 
-# Alias for `python add`
+# alias for `python add`
 @add *args:
     just python add {{ args }}
 
-# Alias for `python build`
+# alias for `python build`
 @build *args:
     just python build {{ args }}
 
-# Alias for `python profile`
+# alias for `python profile`
 @profile *args:
     just python profile {{ args }}
 
-# Alias for `python remove`
+# alias for `python remove`
 @remove *args:
     just python remove {{ args }}
 
-# Alias for `python run`
+# alias for `python run`
 @run *args:
     just python run {{ args }}
 
-# Alias for `python shell`
+# alias for `python shell`
 @shell *args:
     just python shell {{ args }}
 
-# Alias for `python update`
+# alias for `python update`
 @update *args:
     just python update {{ args }}
