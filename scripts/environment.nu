@@ -438,7 +438,7 @@ def get-just-command-names [justfile: string] {
   )
 }
 
-def create-environment-recipe [environment: string recipe: string] {
+def get-environment-recipe [environment: string recipe: string] {
   let documentation = $"# alias for `($environment) ($recipe)`"
   let declaration = $"@($recipe) *args:"
   let content = $"    just ($environment) ($recipe) {{ args }}"
@@ -526,7 +526,7 @@ export def merge-justfiles [
             | each {
                 |recipe|
 
-                create-environment-recipe $environment $recipe
+                get-environment-recipe $environment $recipe
               }
           )
         | str join "\n\n"
@@ -584,7 +584,7 @@ def copy-justfile [
 
   let action = "Skipped"
 
-  if not $upgrade and $"mod ($environment)" in (open Justfile) {
+  if (is-up-to-date $upgrade $environment Justfile) {
     return $action
   }
 
@@ -629,8 +629,11 @@ def merge-generic [main: string generic: string] {
     )
 }
 
-def create-environment-comment [environment: string] {
-  $"\n# ($environment)"
+def get-environment-comment [environment: string filename: string] {
+  match $filename {
+    "Justfile" => $"mod ($environment)"
+    _ => $"\n# ($environment)"
+  }
 }
 
 export def merge-gitignores [
@@ -638,7 +641,9 @@ export def merge-gitignores [
   new_environment_name: string
   environment_gitignore: string
 ] {
-  let environment_comment = (create-environment-comment $new_environment_name)
+  let environment_comment = (
+    get-environment-comment $new_environment_name .gitignore
+  )
 
   # FIXME
   if $environment_comment in $main_gitignore {
@@ -689,9 +694,16 @@ def save-gitignore [gitignore: string] {
   save-file $gitignore .gitignore
 }
 
-def is-up-to-date [upgrade: bool environment: string file: string] {
+def is-up-to-date [
+  upgrade: bool
+  environment: string
+  filename: string
+] {
   not $upgrade and (
-    (create-environment-comment $environment | str trim) in $file
+    (
+      get-environment-comment $environment $filename
+      | str trim
+    ) in (open --raw $filename)
   )
 }
 
@@ -717,7 +729,7 @@ def copy-gitignore [
 
   let action = "Skipped"
 
-  if (is-up-to-date $upgrade $environment (open .gitignore)) {
+  if (is-up-to-date $upgrade $environment .gitignore) {
     return $action
   }
 
@@ -784,7 +796,7 @@ export def merge-pre-commit-configs [
       merge-generic $main_config $environment_config
     } else {
       let environment_comment = (
-        create-environment-comment $new_environment_name
+        get-environment-comment $new_environment_name .pre-commit-config.yaml
       )
 
       # FIXME
@@ -893,7 +905,7 @@ def copy-pre-commit-config [
   let action = "Skipped"
 
   if (
-    is-up-to-date $upgrade $environment (open --raw .pre-commit-config.yaml)
+    is-up-to-date $upgrade $environment .pre-commit-config.yaml
   ) {
     return $action
   }
