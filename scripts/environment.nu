@@ -184,6 +184,14 @@ def set-executable [filename: string] {
   }
 }
 
+export def get-generated-filenames [] {
+  [
+    .gitignore
+    .pre-commit-config.yaml
+    Justfile
+  ]
+}
+
 def copy-files [
   environment: string
   environment_files: table<
@@ -243,12 +251,7 @@ def copy-files [
     | filter {
         |file|
 
-        $file.name not-in [
-          .gitignore
-          .pre-commit-config.yaml
-          Justfile
-          pre-commit-update.nu
-        ]
+        $file.name not-in (get-generated-filenames)
       }
   )
 
@@ -1384,7 +1387,7 @@ def remove-file [file: string] {
 
   let action = "Removed"
 
-  display-message $action $file 
+  display-message $action $file
 }
 
 def remove-files [environment: string] {
