@@ -134,7 +134,7 @@ export def display-message [
 
   mut action = $action
 
-  while (($action | split chars | length) < 12) {
+  while (($action | split chars | length) < 8) {
     $action = $" ($action)"
   }
 
