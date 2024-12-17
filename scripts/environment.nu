@@ -216,9 +216,25 @@ def copy-files [
   # TODO
   # Remove only files that aren't in the new list
 
-  # if $upgrade {
-  #   rm --force --recursive ([scripts $environment] | path join)
-  # }
+  if $upgrade {
+    let scripts_directory = "scripts"
+
+    let scripts_directory = if $environment != generic {
+      $scripts_directory
+      | path join $environment
+    } else {
+      $scripts_directory
+    }
+
+    for file in (
+      ls $scripts_directory
+      | where type == file
+      | get name
+      | filter {|filename| $filename not-in $environment_files.path}
+    ) {
+      rm --force --recursive $file
+    }
+  }
 
   let project_name = (get-project-name)
 
