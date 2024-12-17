@@ -35,6 +35,14 @@ def get-issue-branch [issue_number: number] {
   }
 }
 
+def --wrapped gh [...args] {
+  ^gh ...$args
+}
+
+def --wrapped glab [...args] {
+  ^gh ...$args
+}
+
 # Close issue
 def "main close" [
   issue_number: number # The id of the issue to view
@@ -69,9 +77,11 @@ def "main close" [
     }
   }
 
+  let args = [issue close $issue_number]
+
   match (get-service $service) {
-    "github" => (gh issue close $issue_number)
-    "gitlab" => (glab issue close $issue_number)
+    "github" => (gh ...$args)
+    "gitlab" => (glab ...$args)
     _ => (nb do $issue_number)
   }
 }
@@ -84,9 +94,11 @@ def get-project-prefix [] {
 def "main create" [
   --service: string # Which service to use (see `list-services`)
 ] {
+  let args = [issue create]
+
   match (get-service $service) {
-    "github" => (gh issue create --editor)
-    "gitlab" => (glab issue create)
+    "github" => (gh ...$args --editor)
+    "gitlab" => (glab ...$args)
 
     _ => {
       let title = (input "Enter title: ")
@@ -136,6 +148,41 @@ def "main develop" [
   }
 }
 
+def list [web: bool service?: string] {
+  mut args = [issue list]
+
+  let args = if $web and ($service == github) {
+    $args
+    | append "--web"
+  } else {
+    $args
+  }
+
+  match (get-service $service) {
+    "github" => (gh ...$args)
+
+    "gitlab" => {
+      if $web {
+        # TODO make warning color and print to stdout?
+        print "`--web` not implemented for GitLab's `issue list`."
+      }
+
+      glab ...$args
+    }
+
+    _ => {
+      nb todo $"(get-project-prefix)*"
+    }
+  }
+}
+
+def "main list" [
+  --service: string # Which service to use (see `list-services`)
+  --web # Open the remote repository website in the browser
+] {
+  list $web $service
+}
+
 # List available services
 def "main list-services" [] {
   print ([github gitlab nb] | str join "\n")
@@ -143,7 +190,7 @@ def "main list-services" [] {
 
 # View issues
 def "main view" [
-  issue_number?: number # The id of the issue to view
+  issue_number: number # The id of the issue to view
   --service: string # Which service to use (see `list-services`)
   --web # Open the remote repository website in the browser
 ] {
@@ -160,43 +207,31 @@ def main [
   --service: string # Which service to use (see `list-services`)
   --web # Open the remote repository website in the browser
 ] {
+  if ($issue_number | is-empty) {
+    list $web $service
+
+    return
+  }
+
+  mut args = [issue view $issue_number]
+
+  let args = if $web {
+    $args
+    | append "--web"
+  } else {
+    $args
+  }
+
   match (get-service $service) {
-    "github" => {
-      if ($issue_number | is-empty) {
-        if $web {
-          gh issue list --web
-        } else {
-          gh issue list
-        }
-      } else if $web {
-        gh issue view $issue_number --web
-      } else {
-        gh issue view $issue_number
-      }
-    }
-
-    "gitlab" => {
-      if ($issue_number | is-empty) {
-        if $web {
-          print "`--web` not implemented for GitLab's `issue list`."
-        }
-
-        glab issue list
-      } else if $web {
-        glab issue view $issue_number --web
-      } else {
-        glab issue view $issue_number
-      }
-    }
+    "github" => (gh ...$args)
+    "gitlab" => (glab ...$args)
 
     _ => {
       let repo_issues = (
         nb todo $"(get-project-prefix)*"
       )
 
-      if ($issue_number | is-empty) {
-        $repo_issues
-      } else if (
+      if (
           $repo_issues
           | ansi strip
           | find $"[($issue_number)]"
