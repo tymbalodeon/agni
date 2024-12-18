@@ -213,9 +213,6 @@ def copy-files [
   >
   upgrade: bool
 ] {
-  # TODO
-  # Remove only files that aren't in the new list
-
   if $upgrade {
     let scripts_directory = "scripts"
 
@@ -226,6 +223,8 @@ def copy-files [
       $scripts_directory
     }
 
+    # TODO
+    # what about nested dirs? what about non-scripts files?
     for file in (
       ls $scripts_directory
       | where type == file
@@ -233,6 +232,8 @@ def copy-files [
       | filter {|filename| $filename not-in $environment_files.path}
     ) {
       rm --force --recursive $file
+
+      display-message Removed $file
     }
   }
 
