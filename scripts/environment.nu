@@ -223,17 +223,45 @@ def copy-files [
       $scripts_directory
     }
 
-    # TODO
-    # what about nested dirs? what about non-scripts files?
-    for file in (
+    let files = (ls ($"($scripts_directory)/**/*" | into glob))
+
+    let files = if $environment == generic {
       ls $scripts_directory
       | where type == file
+    } else {
+      ls ($"($scripts_directory)/**/*" | into glob)
+    }
+
+    let obsolete_files = (
+      if $environment == generic {
+        $files
+      } else {
+        $files
+        | where type == file
+      }
+    ) | get name
+    | filter {|filename| $filename not-in $environment_files.path}
+
+    let directories = if $environment == generic {
+      []
+    } else {
+      $files
+      | where type == dir
       | get name
-      | filter {|filename| $filename not-in $environment_files.path}
-    ) {
-      rm --force --recursive $file
+    }
+
+    for file in $obsolete_files {
+      rm --force $file
 
       display-message Removed $file
+    }
+
+    for directory in $directories {
+      if (ls $directory | is-empty) {
+        rm $directory
+
+        display-message Removed $directory
+      }
     }
   }
 
