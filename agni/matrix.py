@@ -14,7 +14,6 @@ from supriya import Server
 from supriya.patterns import EventPattern, SequencePattern
 
 from .helpers import stylize
-
 from .matrix_pitch import (
     DisplayColor,
     DisplayFormat,

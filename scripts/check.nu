@@ -25,7 +25,7 @@ def "main update" [] {
 }
 
 # Check flake and run pre-commit hooks
-def main [
+export def main [
   ...hooks: string # The hooks to run
   --all # Run all checks
   --update # Update all pre-commit hooks

@@ -24,8 +24,9 @@ alias deps := dependencies
     ../scripts/python/remove.nu {{ dependencies }}
 
 # Run the application
+[no-cd]
 @run *args:
-    ../scripts/python/run.nu {{ args }}
+    ./scripts/python/run.nu {{ args }}
 
 # Open an interactive python shell
 @shell *help:

@@ -4,7 +4,6 @@ from pathlib import Path
 from abjad import Duration, Note, Staff, Tuplet
 
 from .helpers import InputPart
-
 from .matrix import DisplayFormat, Matrix
 from .matrix_leaf import MatrixLeaf
 from .matrix_pitch import PitchType, Tuning

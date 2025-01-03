@@ -41,7 +41,6 @@ from abjadext.rmakers import multiplied_duration
 from rich.progress import Progress, track
 
 from .helpers import get_staff_by_name, remove_none_values
-
 from .matrix import Matrix
 from .matrix_leaf import MatrixLeaf
 from .matrix_pitch import MatrixPitch, Tuning
