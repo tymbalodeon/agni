@@ -25,7 +25,7 @@ def main [
   dependency?: string # Search for a dependency
   --environment: string # List only dependencies for $environment
 ] {
-  let nix_files = "flake.nix" ++ (list-nix-files)
+  let nix_files = ["flake.nix"] ++ (list-nix-files)
 
   let nix_files = match $environment {
     null => $nix_files

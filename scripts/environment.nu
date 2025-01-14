@@ -144,7 +144,7 @@ export def display-message [
     $"(ansi $color)($action)(ansi reset) ($message)"
   }
 
-  print $"  ($message)"
+  print $"   ($message)"
 }
 
 def get-project-name [] {

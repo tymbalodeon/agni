@@ -1,109 +1,109 @@
 repos:
--   repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
+  - repo: https://gitlab.com/vojko.pribudic.foss/pre-commit-update
     rev: v0.6.1
     hooks:
-    -   id: pre-commit-update
--   repo: https://github.com/gitleaks/gitleaks
-    rev: v8.22.1
+      - id: pre-commit-update
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.23.0
     hooks:
-    -   id: gitleaks
--   repo: https://github.com/pre-commit/pre-commit-hooks
+      - id: gitleaks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-    -   id: check-merge-conflict
-    -   id: check-yaml
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
--   repo: https://github.com/DavidAnson/markdownlint-cli2
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.17.1
     hooks:
-    -   id: markdownlint-cli2
+      - id: markdownlint-cli2
         args:
-        -   --fix
--   repo: https://github.com/pre-commit/mirrors-prettier
+          - --fix
+  - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
-    -   id: prettier
+      - id: prettier
         types:
-        -   markdown
--   repo: https://github.com/kamadorueda/alejandra
+          - markdown
+  - repo: https://github.com/kamadorueda/alejandra
     rev: 3.1.0
     hooks:
-    -   id: alejandra-system
--   repo: https://github.com/astro/deadnix
-    rev: v1.2.1
+      - id: alejandra-system
+  - repo: https://github.com/astro/deadnix
+    rev: v1.3.0
     hooks:
-    -   id: deadnix
+      - id: deadnix
         args:
-        -   --edit
--   repo: local
+          - --edit
+  - repo: local
     hooks:
-    -   id: flake-checker
+      - id: flake-checker
         name: flake-checker
         entry: flake-checker
         language: system
         pass_filenames: false
-    -   id: justfile
+      - id: justfile
         name: justfile
         entry: just --fmt --unstable
         language: system
         pass_filenames: false
-    -   id: statix
+      - id: statix
         name: statix
         entry: statix fix
         language: system
         pass_filenames: false
-    -   id: yamlfmt
+      - id: yamlfmt
         name: yamlfmt
         entry: yamlfmt
         language: system
         pass_filenames: false
--   repo: https://github.com/lycheeverse/lychee.git
+  - repo: https://github.com/lycheeverse/lychee.git
     rev: v0.15.1
     hooks:
-    -   id: lychee
+      - id: lychee
         args:
-        -   --no-progress
-        -   .
+          - --no-progress
+          - .
         pass_filenames: false
--   repo: https://github.com/compilerla/conventional-pre-commit
+  - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.0.0
     hooks:
-    -   id: conventional-pre-commit
+      - id: conventional-pre-commit
         stages:
-        -   commit-msg
+          - commit-msg
   # python
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-    -   id: check-json
-    -   id: check-toml
-    -   id: pretty-format-json
+      - id: check-json
+      - id: check-toml
+      - id: pretty-format-json
         args:
-        -   --autofix
--   repo: https://github.com/pre-commit/mirrors-prettier
+          - --autofix
+  - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
-    -   id: prettier
+      - id: prettier
         types:
-        -   json
--   repo: local
+          - json
+  - repo: local
     hooks:
-    -   id: taplo
+      - id: taplo
         name: taplo
         entry: taplo format
         language: system
-    -   id: ruff format
+      - id: ruff format
         name: ruff format
         entry: ruff format
         language: system
         pass_filenames: false
-    -   id: ruff check
+      - id: ruff check
         name: ruff check
         entry: ruff check
         language: system
         pass_filenames: false
         args:
-        -   --fix
-        -   --select
-        -   I
+          - --fix
+          - --select
+          - I

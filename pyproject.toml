@@ -9,11 +9,11 @@ readme = "README.md"
 keywords = ["claude vivier", "lilypond", "music notation", "music", "spectral"]
 requires-python = ">=3.11"
 dependencies = [
-  "abjad>=3.19",
   "supriya==24.3b2",
   "abjad-ext-rmakers>=3.19",
-  "more-itertools>=10.3.0",
-  "cyclopts>=2.9.9",
+  "abjad>=3.19",
+  "cyclopts>=3.1.5",
+  "more-itertools>=10.5.0",
 ]
 
 [project.urls]

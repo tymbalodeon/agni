@@ -1,33 +1,71 @@
 version = 1
 requires-python = ">=3.11"
+resolution-markers = [
+    "python_full_version >= '3.12'",
+    "python_full_version < '3.12'",
+]
 
 [[package]]
 name = "abjad"
 version = "3.19"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.12'",
+]
 dependencies = [
-    { name = "ply" },
-    { name = "roman" },
-    { name = "uqbar" },
+    { name = "ply", marker = "python_full_version < '3.12'" },
+    { name = "roman", marker = "python_full_version < '3.12'" },
+    { name = "uqbar", marker = "python_full_version < '3.12'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/96/cf/eb4be5cfe36a9195a925ec77b2d21ca225809445c6ede954716dca16bab6/abjad-3.19.tar.gz", hash = "sha256:23db7739150a14594c7d726c0335e10b39750786bdfd9366bd25f6fd1e384cfb", size = 413649 }
+
+[[package]]
+name = "abjad"
+version = "3.20"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.12'",
+]
+dependencies = [
+    { name = "ply", marker = "python_full_version >= '3.12'" },
+    { name = "roman", marker = "python_full_version >= '3.12'" },
+    { name = "uqbar", marker = "python_full_version >= '3.12'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f0/7f/ae3b3ea2072319549d18e6745ce8ee0020582558a6cb2afc5411e9c0b96c/abjad-3.20.tar.gz", hash = "sha256:073bfe292622e0bb6ec0e877eeed3d28833519fd3e903c20bb2a645bef3096c3", size = 475862 }
 
 [[package]]
 name = "abjad-ext-rmakers"
 version = "3.19"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.12'",
+]
 dependencies = [
-    { name = "abjad" },
+    { name = "abjad", version = "3.19", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ba/7c/01a0bfb8b1fc28684d8e88b144de4cb0e6f19564ff082372f4407a80ff7c/abjad-ext-rmakers-3.19.tar.gz", hash = "sha256:84c3b2c7357cbfa9d8294503bf86adcf7ef08278dac60742dc8a1019f168f6aa", size = 42506 }
+
+[[package]]
+name = "abjad-ext-rmakers"
+version = "3.20"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.12'",
+]
+dependencies = [
+    { name = "abjad", version = "3.20", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/81/58/4a77d17409f27ec33a523177e21f886a94471eadfeaa250209e9d6727972/abjad_ext_rmakers-3.20.tar.gz", hash = "sha256:b16366cebb5cf28e933b25b61c0bc0cc53b8ab7bee85c705e9f8a9f464635f1b", size = 44207 }
 
 [[package]]
 name = "agni"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "abjad" },
-    { name = "abjad-ext-rmakers" },
+    { name = "abjad", version = "3.19", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "abjad", version = "3.20", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "abjad-ext-rmakers", version = "3.19", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "abjad-ext-rmakers", version = "3.20", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "cyclopts" },
     { name = "more-itertools" },
     { name = "supriya" },
@@ -44,8 +82,8 @@ dev = [
 requires-dist = [
     { name = "abjad", specifier = ">=3.19" },
     { name = "abjad-ext-rmakers", specifier = ">=3.19" },
-    { name = "cyclopts", specifier = ">=2.9.9" },
-    { name = "more-itertools", specifier = ">=10.3.0" },
+    { name = "cyclopts", specifier = ">=3.1.5" },
+    { name = "more-itertools", specifier = ">=10.5.0" },
     { name = "supriya", specifier = "==24.3b2" },
 ]
 
@@ -314,7 +352,7 @@ wheels = [
 
 [[package]]
 name = "cyclopts"
-version = "3.1.3"
+version = "3.1.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -322,9 +360,9 @@ dependencies = [
     { name = "rich" },
     { name = "rich-rst" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/84/8c/99b2fc4d6e21ec24a03d3ced4fc1736dde9cbcf1c44ba9a70e99b69755d1/cyclopts-3.1.3.tar.gz", hash = "sha256:beaaa90b622f1f6aac5cfd091269de161aa06ba72a70657f877bde938ebbaef0", size = 61229 }
+sdist = { url = "https://files.pythonhosted.org/packages/3a/bd/dfb30190921dfed99b97ec4b94f0896a477cfbe9beb6997b304bf6424603/cyclopts-3.1.5.tar.gz", hash = "sha256:a17200237c8e8b0a827ac81295ae79ee349edb6fb0b9629dc43160c4f541854e", size = 60437 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/61/fdbff924eb0a6db5ec4d7027478e6af5ed30aee8e0f5d6d4cb6ae9f6080c/cyclopts-3.1.3-py3-none-any.whl", hash = "sha256:91304a1a973f1478c7c26dead0b448bf05561c7d657ca67c5025bfd9d1c4dee1", size = 69290 },
+    { url = "https://files.pythonhosted.org/packages/f2/40/594c8facedbb459cb2362e03b18e30490f7017afed592edd56391638060f/cyclopts-3.1.5-py3-none-any.whl", hash = "sha256:4bc1bdf2c7b04fb19bffea163634f3a02cba9becb883be88e073bec0c4d1b0bc", size = 69495 },
 ]
 
 [[package]]
@@ -572,11 +610,11 @@ wheels = [
 
 [[package]]
 name = "pygments"
-version = "2.18.0"
+version = "2.19.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz", hash = "sha256:786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199", size = 4891905 }
+sdist = { url = "https://files.pythonhosted.org/packages/7c/2d/c3338d48ea6cc0feb8446d8e6937e1408088a72a39937982cc6111d17f84/pygments-2.19.1.tar.gz", hash = "sha256:61c16d2a8576dc0649d9f39e089b5f02bcd27fba10d8fb4dcc28173f7a45151f", size = 4968581 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f7/3f/01c8b82017c199075f8f788d0d906b9ffbbc5a47dc9918a945e13d5a2bda/pygments-2.18.0-py3-none-any.whl", hash = "sha256:b8e6aca0523f3ab76fee51799c488e38782ac06eafcf95e7ba832985c8e7b13a", size = 1205513 },
+    { url = "https://files.pythonhosted.org/packages/8a/0b/9fcc47d19c48b59121088dd6da2488a49d5f72dacf8262e2790a1d2c7d15/pygments-2.19.1-py3-none-any.whl", hash = "sha256:9ea1544ad55cecf4b8242fab6dd35a93bbce657034b0611ee383099054ab6d8c", size = 1225293 },
 ]
 
 [[package]]
