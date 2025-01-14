@@ -94,6 +94,8 @@ def main [
   }
 
   for file in $pdf_files {
-    ^open $file
+    # TODO
+    # linux: how to do this non-blocking
+    start $file
   }
 }
