@@ -78,6 +78,10 @@ mod python "just/python.just"
 @build *args:
     just python build {{ args }}
 
+# alias for `python pin`
+@pin *args:
+    just python pin {{ args }}
+
 # alias for `python profile`
 @profile *args:
     just python profile {{ args }}

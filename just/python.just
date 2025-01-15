@@ -15,6 +15,10 @@
 
 alias deps := dependencies
 
+# Manage python version
+@pin *version:
+    ../scripts/python/pin.nu {{ version }}
+
 # Profile a command and view results
 @profile *args:
     ../scripts/python/profile.nu {{ args }}
