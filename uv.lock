@@ -174,7 +174,7 @@ wheels = [
 
 [[package]]
 name = "bpython"
-version = "0.24"
+version = "0.25"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "curtsies" },
@@ -184,9 +184,9 @@ dependencies = [
     { name = "pyxdg" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cf/76/54e0964e2974becb673baca69417b6c6293e930d4ebcf2a2a68c1fe9704a/bpython-0.24.tar.gz", hash = "sha256:98736ffd7a8c48fd2bfb53d898a475f4241bde0b672125706af04d9d08fd3dbd", size = 222879 }
+sdist = { url = "https://files.pythonhosted.org/packages/ba/dd/cc02bf66f342a4673867fdf6c1f9fce90ec1e91e651b21bc4af4890101da/bpython-0.25.tar.gz", hash = "sha256:c246fc909ef6dcc26e9d8cb4615b0e6b1613f3543d12269b19ffd0782166c65b", size = 207610 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0c/d9/b42a98f329a61a1b0c7d335644025773b05837669f775851d7eaece7973d/bpython-0.24-py3-none-any.whl", hash = "sha256:0d196ae3d1ce3dcd559a3fb89ed2c468dfbd1504af0d680b906dd65a9c7a32eb", size = 194939 },
+    { url = "https://files.pythonhosted.org/packages/ba/74/5470df025854d5e213793b62cbea032fd66919562662955789fcc5dc17d6/bpython-0.25-py3-none-any.whl", hash = "sha256:28fd86008ca5ef6100ead407c9743aa60c51293a18ba5b18fcacea7f5b7f2257", size = 176131 },
 ]
 
 [[package]]
@@ -352,7 +352,7 @@ wheels = [
 
 [[package]]
 name = "cyclopts"
-version = "3.1.5"
+version = "3.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -360,9 +360,9 @@ dependencies = [
     { name = "rich" },
     { name = "rich-rst" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3a/bd/dfb30190921dfed99b97ec4b94f0896a477cfbe9beb6997b304bf6424603/cyclopts-3.1.5.tar.gz", hash = "sha256:a17200237c8e8b0a827ac81295ae79ee349edb6fb0b9629dc43160c4f541854e", size = 60437 }
+sdist = { url = "https://files.pythonhosted.org/packages/d3/be/69e618c5dacca756cedc2731e3a03ee3ea072537e108df8030d3cc991c23/cyclopts-3.3.0.tar.gz", hash = "sha256:f1179a1dbf0b619b2b672cbfdad816f571a6390ba01458f2ae029547a5af3bd2", size = 62921 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/40/594c8facedbb459cb2362e03b18e30490f7017afed592edd56391638060f/cyclopts-3.1.5-py3-none-any.whl", hash = "sha256:4bc1bdf2c7b04fb19bffea163634f3a02cba9becb883be88e073bec0c4d1b0bc", size = 69495 },
+    { url = "https://files.pythonhosted.org/packages/0f/a9/263b916137fff5175ce85f330eddbbe37de1fdc852749fdd8f27b30f4ad1/cyclopts-3.3.0-py3-none-any.whl", hash = "sha256:73f22f9ecbe6bda5fb0e194a0d90900374b6faa827ab54b9bf2c78c1bfb2aaf3", size = 72361 },
 ]
 
 [[package]]
@@ -547,11 +547,11 @@ wheels = [
 
 [[package]]
 name = "more-itertools"
-version = "10.5.0"
+version = "10.6.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/51/78/65922308c4248e0eb08ebcbe67c95d48615cc6f27854b6f2e57143e9178f/more-itertools-10.5.0.tar.gz", hash = "sha256:5482bfef7849c25dc3c6dd53a6173ae4795da2a41a80faea6700d9f5846c5da6", size = 121020 }
+sdist = { url = "https://files.pythonhosted.org/packages/88/3b/7fa1fe835e2e93fd6d7b52b2f95ae810cf5ba133e1845f726f5a992d62c2/more-itertools-10.6.0.tar.gz", hash = "sha256:2cd7fad1009c31cc9fb6a035108509e6547547a7a738374f10bd49a09eb3ee3b", size = 125009 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/7e/3a64597054a70f7c86eb0a7d4fc315b8c1ab932f64883a297bdffeb5f967/more_itertools-10.5.0-py3-none-any.whl", hash = "sha256:037b0d3203ce90cca8ab1defbbdac29d5f993fc20131f3664dc8d6acfa872aef", size = 60952 },
+    { url = "https://files.pythonhosted.org/packages/23/62/0fe302c6d1be1c777cab0616e6302478251dfbf9055ad426f5d0def75c89/more_itertools-10.6.0-py3-none-any.whl", hash = "sha256:6eb054cb4b6db1473f6e15fcc676a08e4732548acd47c708f0e179c2c7c01e89", size = 63038 },
 ]
 
 [[package]]
@@ -684,11 +684,11 @@ wheels = [
 
 [[package]]
 name = "roman"
-version = "4.2"
+version = "5.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2d/be/4fa4fbe13def6194e76270bd213d8924346e0a30be8e006d898359db1a00/roman-4.2.tar.gz", hash = "sha256:05f335a1b2b0824f827ed42fff84b35909aab9013799145ed4508bdd4fa3b385", size = 7339 }
+sdist = { url = "https://files.pythonhosted.org/packages/85/49/b01cf3c88006005613234cfc78b2e371adc3b55fe125641679bca46963f9/roman-5.0.tar.gz", hash = "sha256:cb35293c1c4046105fd899194f4f2985f78c955a8b05937f7ab93f3be1660697", size = 7664 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/87/e7/9206aa493875e116272aa71d152c6ea1570cad7395a904fea11050a47fbd/roman-4.2-py3-none-any.whl", hash = "sha256:dc3564330fba3cd06b108edc694500609830169e3479706eb1ee7f0c197e4b6c", size = 5479 },
+    { url = "https://files.pythonhosted.org/packages/a2/c0/34a98c0bdf3e5846ed5fea15c0a20fae0ad95478013f7582e807da0f7cb5/roman-5.0-py3-none-any.whl", hash = "sha256:6e1246c0aa9338aa5603e8bf4960f76d5047be1878d8d1ceb0d2c452b5b890e2", size = 5519 },
 ]
 
 [[package]]
