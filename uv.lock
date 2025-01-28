@@ -114,11 +114,11 @@ wheels = [
 
 [[package]]
 name = "attrs"
-version = "24.3.0"
+version = "25.1.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/48/c8/6260f8ccc11f0917360fc0da435c5c9c7504e3db174d5a12a1494887b045/attrs-24.3.0.tar.gz", hash = "sha256:8f5c07333d543103541ba7be0e2ce16eeee8130cb0b3f9238ab904ce1e85baff", size = 805984 }
+sdist = { url = "https://files.pythonhosted.org/packages/49/7c/fdf464bcc51d23881d110abd74b512a42b3d5d376a55a831b44c603ae17f/attrs-25.1.0.tar.gz", hash = "sha256:1c97078a80c814273a76b2a298a932eb681c87415c11dee0a6921de7f1b02c3e", size = 810562 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/89/aa/ab0f7891a01eeb2d2e338ae8fecbe57fcebea1a24dbb64d45801bfab481d/attrs-24.3.0-py3-none-any.whl", hash = "sha256:ac96cd038792094f438ad1f6ff80837353805ac950cd2aa0e0625ef19850c308", size = 63397 },
+    { url = "https://files.pythonhosted.org/packages/fc/30/d4986a882011f9df997a55e6becd864812ccfcd821d64aac8570ee39f719/attrs-25.1.0-py3-none-any.whl", hash = "sha256:c75a69e28a550a7e93789579c22aa26b0f5b83b75dc4e08fe092980051e1090a", size = 63152 },
 ]
 
 [[package]]
@@ -352,7 +352,7 @@ wheels = [
 
 [[package]]
 name = "cyclopts"
-version = "3.3.1"
+version = "3.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -360,9 +360,9 @@ dependencies = [
     { name = "rich" },
     { name = "rich-rst" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d1/be/adad7507c0a0cc96441cffd063d751cfa7c832e4e0046b3b01c36ec4eb32/cyclopts-3.3.1.tar.gz", hash = "sha256:5ca064d645321825da2c7b4a041221c0fb2706b97b2df57129f08fd5fa3ee95a", size = 62417 }
+sdist = { url = "https://files.pythonhosted.org/packages/9d/97/8dc859c4714bc6ef81de51f3916300bcc4baa1eb83bba4a0c68d56efac03/cyclopts-3.4.0.tar.gz", hash = "sha256:ac61a98b211affa991c545b42e2d3c6fabe55f40d903507d556259dd7fb7839b", size = 62791 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4e/d5/d5f92d1a351d900f6b4e35a0101d0359e336b8c61726e58f04cb365aa528/cyclopts-3.3.1-py3-none-any.whl", hash = "sha256:b612eb09fd4b54a9cce1e7c3983c80434f6b7e54822c217c82a7fab04e248680", size = 71834 },
+    { url = "https://files.pythonhosted.org/packages/0b/4b/493960ea601af54109b9145e12e09e96d898f86fe305a999b31d4cd30f84/cyclopts-3.4.0-py3-none-any.whl", hash = "sha256:e9faad3d1dd18e5948076b67d1f7ad0ba387edfbdd1410b14ba44a1c7b445d35", size = 72150 },
 ]
 
 [[package]]
