@@ -10,8 +10,8 @@ export def get-pre-commit-hook-names [config: record<repos: list<any>>] {
 }
 
 # Run `nix flake check`
-def "main flake" [] {
-  nix flake check
+def --wrapped "main flake" [...$args] {
+  nix flake check ...$args
 }
 
 # List hook ids

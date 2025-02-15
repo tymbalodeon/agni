@@ -50,6 +50,7 @@
               gh
               git
               glab
+              jujutsu
               just
               lychee
               markdown-oxide

@@ -152,8 +152,12 @@ def get-project-name [] {
   | path basename
 }
 
-def get-file-status [contents: string filename: string] {
+def get-file-status [filename: string contents?: string ] {
   if ($filename | path exists) {
+    if ($contents | is-empty) {
+      return "Skipped"
+    }
+
     let temporary_file = (
       get-temporary-file ($filename | path parse | get extension)
     )
@@ -335,7 +339,7 @@ def copy-files [
       }
 
       let contents = (http-get --raw $file.download_url)
-      let action = (get-file-status $contents $path)
+      let action = (get-file-status $path $contents)
 
       if $action != Skipped {
         $contents
@@ -456,15 +460,11 @@ def download-environment-file [
 }
 
 def get-recipe-or-alias-name []: [
-  record<
-    deps: record<
-      attributes: list<any>,
-      name: string,
-      target: string
-    >
-  >  -> list<string>
+  record -> list<string>
 ] {
-  $in | transpose | get column0
+  $in
+  | transpose
+  | get column0
 }
 
 def get-just-command-names [justfile: string] {
@@ -485,10 +485,11 @@ def get-just-command-names [justfile: string] {
 
 def get-environment-recipe [environment: string recipe: string] {
   let documentation = $"# alias for `($environment) ($recipe)`"
+  let group = "[group(\"aliases\")]"
   let declaration = $"@($recipe) *args:"
   let content = $"    just ($environment) ($recipe) {{ args }}"
 
-  [$documentation $declaration $content]
+  [$documentation $group $declaration $content]
   | str join "\n"
 }
 
@@ -583,8 +584,8 @@ export def merge-justfiles [
   sort-environment-sections $merged_justfile "mod"
 }
 
-export def save-file [contents: string filename: string] {
-  let action = (get-file-status $contents $filename)
+export def save-file [filename: string contents?: string] {
+  let action = (get-file-status $filename $contents)
 
   if $action != Skipped {
     $contents
@@ -596,8 +597,8 @@ export def save-file [contents: string filename: string] {
   $action
 }
 
-def save-justfile [justfile: string] {
-  save-file $justfile Justfile
+def save-justfile [justfile?: string] {
+  save-file Justfile $justfile
 }
 
 def initialize-generic-file [filename: string] {
@@ -736,7 +737,7 @@ def get-environment-name [
 }
 
 def save-gitignore [gitignore: string] {
-  save-file $gitignore .gitignore
+  save-file .gitignore $gitignore
 }
 
 def is-up-to-date [
@@ -924,7 +925,7 @@ export def merge-pre-commit-configs [
 }
 
 export def save-pre-commit-config [config: string] {
-  save-file $config .pre-commit-config.yaml
+  save-file .pre-commit-config.yaml $config
 }
 
 def copy-pre-commit-config [

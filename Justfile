@@ -1,12 +1,16 @@
-# View help text
-@help *recipe:
-    ./scripts/help.nu {{ recipe }}
+[private]
+@default:
+    just help --default
+
+# View full help text, or for a specific recipe
+@help *args:
+    ./scripts/help.nu {{ args }}
 
 # Check flake and run pre-commit hooks
 @check *args:
     ./scripts/check.nu {{ args }}
 
-# List dependencies (alias: `deps`)
+# List dependencies
 @dependencies *args:
     ./scripts/dependencies.nu {{ args }}
 
@@ -67,37 +71,46 @@ mod agni "just/agni.just"
 mod python "just/python.just"
 
 # alias for `python _help`
+[group("aliases")]
 @_help *args:
     just python _help {{ args }}
 
 # alias for `python add`
+[group("aliases")]
 @add *args:
     just python add {{ args }}
 
 # alias for `python build`
+[group("aliases")]
 @build *args:
     just python build {{ args }}
 
 # alias for `python pin`
+[group("aliases")]
 @pin *args:
     just python pin {{ args }}
 
 # alias for `python profile`
+[group("aliases")]
 @profile *args:
     just python profile {{ args }}
 
 # alias for `python remove`
+[group("aliases")]
 @remove *args:
     just python remove {{ args }}
 
 # alias for `python run`
+[group("aliases")]
 @run *args:
     just python run {{ args }}
 
 # alias for `python shell`
+[group("aliases")]
 @shell *args:
     just python shell {{ args }}
 
 # alias for `python update`
+[group("aliases")]
 @update *args:
     just python update {{ args }}

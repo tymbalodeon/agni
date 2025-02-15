@@ -37,7 +37,7 @@ export def display-just-help [
   mut recipe_is_module = false
 
   let script = if ($script | is-empty) {
-    let args = ($recipe ++ $subcommands)
+    let args = ([$recipe] ++ $subcommands)
 
     if ($args | length) > 1 {
       $recipe_is_module = true
@@ -85,18 +85,24 @@ export def display-just-help [
 def main [
   recipe?: string # View help text for recipe
   ...subcommands: string  # View help for a recipe subcommand
-  --no-aliases
+  --aliases # View module aliases
+  --default
 ] {
   let output = (display-just-help $recipe $subcommands)
 
-  let output = if $no_aliases {
-    $output
-    | lines
-    | filter {"alias for" not-in $in}
-    | str join "\n"
-  } else {
-    $output
+  if ($output | is-not-empty) {
+    if $aliases {
+      $output
+      | split row "\n\n"
+      | last
+    } else if $default {
+      $output
+      | split row "[aliases]"
+      | first
+      | split row "\n\n"
+      | first
+    } else {
+      $output
+    }
   }
-
-  print $output
 }
