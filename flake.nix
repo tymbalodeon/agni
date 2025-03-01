@@ -1,7 +1,18 @@
 {
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-  outputs = {nixpkgs, ...}: let
+    nutest = {
+      flake = false;
+      url = "github:vyadh/nutest";
+    };
+  };
+
+  outputs = {
+    nixpkgs,
+    nutest,
+    ...
+  }: let
     forEachSupportedSystem = f:
       nixpkgs.lib.genAttrs supportedSystems
       (system:
@@ -78,7 +89,10 @@
 
           shellHook = with pkgs;
             lib.concatLines (
-              ["pre-commit install --hook-type commit-msg"]
+              [
+                "pre-commit install --hook-type commit-msg"
+                "export NUTEST=${nutest}"
+              ]
               ++ mergeModuleAttrs {
                 attr = "shellHook";
                 nullValue = "";

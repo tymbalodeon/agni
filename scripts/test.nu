@@ -78,47 +78,26 @@ export def get-tests [
 
 # Run tests
 def main [
-  search_term?: string # Run tests matching $search_term only
-  --file: string  # Run tests for $file only
-  --function: string # Run tests for $function only
-  --module: string # Run tests for $module only
+  --match-suites: string # Regular expression to match against suite names (defaults to all)
+  --match-tests: string # Regular expression to match against test names (defaults to all)
 ] {
-  let tests = try {
-    ls **/tests/**/test-*.nu
-    | get name
-  } catch {
-    return
+  let command = "use nutest; nutest run-tests"
+
+  let command = if ($match_suites | is-not-empty) {
+    $"($command) --match-suites ($match_suites)"
+  } else {
+    $command
   }
 
-  let filters = {
-    file: $file
-    function: $function
-    module: $module
+  let command = if ($match_tests | is-not-empty) {
+    $"($command) --match-tests ($match_tests)"
+  } else {
+    $command
   }
 
-  let tests = (get-tests $tests $filters $search_term)
-
-  mut exit_error = false
-
-  for test in $tests {
-    print --no-newline $"($test)..."
-
-    let failed = try {
-      nu $test
-
-      print $"(ansi green_bold)OK(ansi reset)"
-
-      false
-    } catch {
-      true
-    }
-
-    if $failed and not $exit_error {
-      $exit_error = $failed
-    }
-  }
-
-  if $exit_error {
-    exit 1
-  }
+  (
+    nu
+      --commands $command
+      --include-path $env.NUTEST
+  )
 }

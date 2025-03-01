@@ -6,8 +6,9 @@
     ../scripts/python/add.nu {{ args }}
 
 # Build and install the application
+[no-cd]
 @build *help:
-    ../scripts/python/build.nu {{ help }}
+    ./scripts/python/build.nu {{ help }}
 
 # Show application dependencies
 @dependencies *args:

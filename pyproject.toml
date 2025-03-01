@@ -7,13 +7,13 @@ Music compositional tools inspired by the techniques of Claude Vivier
 authors = [{ name = "Ben Rosen", email = "benjamin.j.rosen@gmail.com" }]
 readme = "README.md"
 keywords = ["claude vivier", "lilypond", "music notation", "music", "spectral"]
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
-  "supriya==24.3b2",
-  "abjad-ext-rmakers>=3.19",
-  "abjad>=3.19",
-  "cyclopts>=3.1.5",
-  "more-itertools>=10.5.0",
+  "abjad-ext-rmakers>=3.21",
+  "abjad>=3.21",
+  "cyclopts>=3.9.0",
+  "more-itertools>=10.6.0",
+  "supriya>=24.3b2",
 ]
 
 [project.urls]
@@ -36,4 +36,4 @@ line-length = 79
 indent-width = 4
 
 [dependency-groups]
-dev = ["bpython>=0.24", "coverage>=7.6.7", "pytest>=8.3.3"]
+dev = ["bpython>=0.25", "pytest>=8.3.4"]
