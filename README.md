@@ -25,11 +25,11 @@ Claude Vivier’s Bouchara]".
 
 ## Installation, and Usage, and Development
 
-To install the app, run:
+Installation and development environment setup relies on [environments](https://github.com/tymbalodeon/environments) and assumes you have [Nix](https://nix.dev/), [direnv](https://direnv.net/), and [just](https://just.systems/man/en/) already installed. Once these are installed, run:
 
 ```sh
-./install-dependencies \
-&& just install --app
+just env activate
+just build
 ```
 
 Then run the app with:
@@ -136,14 +136,4 @@ To compile the input score, generate matrices and harmonized score, and open PDF
 ```sh
 # ./install-dependencies && \
 just example # --help
-```
-
-## Development
-
-_Justfile_ commands are provided for convenience. To see all available commands,
-run:
-
-```sh
-# ./install-dependencies && \
-just
 ```
