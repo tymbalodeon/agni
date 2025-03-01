@@ -141,6 +141,5 @@ Vivier's _[Lonely Child]_ is provided as an example.
 To compile the input score, generate matrices and harmonized score, and open PDFs:
 
 ```sh
-# ./install-dependencies && \
 just example # --help
 ```
