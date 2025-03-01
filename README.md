@@ -25,14 +25,21 @@ Claude Vivier’s Bouchara]".
 
 ## Installation, and Usage, and Development
 
-Installation and development environment setup relies on [environments](https://github.com/tymbalodeon/environments) and assumes you have [Nix](https://nix.dev/), [direnv](https://direnv.net/), and [just](https://just.systems/man/en/) already installed. Once these are installed, run:
+Installation and development environment setup relies on [environments](https://github.com/tymbalodeon/environments) and assumes you have [Nix](https://nix.dev/), [direnv](https://direnv.net/), and [just](https://just.systems/man/en/) already installed.
+
+Once these are installed, a development environment can be activated with:
 
 ```sh
 just env activate
+```
+
+The application can be built and installed with:
+
+```sh
 just build
 ```
 
-Then run the app with:
+Run the application with:
 
 ```sh
 agni
