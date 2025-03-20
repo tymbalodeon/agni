@@ -792,8 +792,14 @@ def get-pre-commit-config-repos [config: string] {
 }
 
 def format-yaml-comment []: string -> string {
-  $in
-  | yamlfmt -
+  let yaml = if (which yamlfmt | is-not-empty) {
+    $in
+    | yamlfmt -
+  } else {
+    $in
+  }
+
+  $yaml
   | str replace --all --regex " +#" "  #"
 }
 
@@ -872,16 +878,21 @@ export def merge-pre-commit-configs [
           | first
         }
 
-        let yaml = (
-          if ($first_line | is-empty) {
-            $config
-          } else {
-            $config
-            | lines
-            | drop nth 0
-            | to text
-          } | yamlfmt -
-        )
+        let yaml = if ($first_line | is-empty) {
+          $config
+        } else {
+          $config
+          | lines
+          | drop nth 0
+          | to text
+        }
+
+        let yaml = if (which yamlfmt | is-not-empty) {
+          $yaml
+          | yamlfmt -
+        } else {
+          $yaml
+        }
 
         if ($first_line | is-empty) {
           $yaml
@@ -956,8 +967,14 @@ def copy-pre-commit-config [
   let environment_config = (
     $environment_config
     | to yaml
-    | yamlfmt -
   )
+
+  let environment_config = if (which yamlfmt | is-not-empty) {
+    $environment_config
+    | yamlfmt -
+  } else {
+    $environment_config
+  }
 
   let merged_pre_commit_config = (
     merge-pre-commit-configs
