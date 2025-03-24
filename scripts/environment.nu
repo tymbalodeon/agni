@@ -139,9 +139,9 @@ def get-project-name [] {
   | path basename
 }
 
-def get-file-status [filename: string contents?: string ] {
+def get-file-status [filename: string force: bool contents?: string] {
   if ($filename | path exists) {
-    if ($contents | is-empty) {
+    if not $force and ($contents | is-empty) {
       return "Skipped"
     }
 
@@ -154,7 +154,7 @@ def get-file-status [filename: string contents?: string ] {
 
     set-executable $temporary_file
 
-    let action = if (
+    let action = if not $force and (
       delta $filename $temporary_file
       | complete
       | get exit_code
@@ -202,6 +202,7 @@ def copy-files [
     git: string,
     html: string
   >
+  force: bool
   upgrade: bool
 ] {
   if $upgrade {
@@ -294,11 +295,11 @@ def copy-files [
       }
   )
 
-  let $environment_files = if not $upgrade {
+  let $environment_files = if $force or $upgrade {
     $environment_files
-    | filter {|file| not ($file.path | path exists)}
   } else {
     $environment_files
+    | filter {|file| not ($file.path | path exists)}
   }
 
   if ($environment_files | is-empty) {
@@ -326,7 +327,7 @@ def copy-files [
       }
 
       let contents = (http-get --raw $file.download_url)
-      let action = (get-file-status $path $contents)
+      let action = (get-file-status $path $force $contents)
 
       if $action != Skipped {
         $contents
@@ -470,16 +471,6 @@ def get-just-command-names [justfile: string] {
   )
 }
 
-def get-environment-recipe [environment: string recipe: string] {
-  let documentation = $"# alias for `($environment) ($recipe)`"
-  let group = "[group(\"aliases\")]"
-  let declaration = $"@($recipe) *args:"
-  let content = $"    just ($environment) ($recipe) {{ args }}"
-
-  [$documentation $group $declaration $content]
-  | str join "\n"
-}
-
 def sort-environment-sections [
   sections: list
   indicator: string
@@ -553,16 +544,16 @@ export def merge-justfiles [
   let merged_justfile = (
     open $main_justfile_without_environment
     | append (
-        $"mod ($environment) \"just/($environment).just\""
+        $"mod ($environment) \"just/($environment).just\"\n"
         | append (
             $unique_environment_recipes
             | each {
                 |recipe|
 
-                get-environment-recipe $environment $recipe
+                $"alias ($recipe) := ($environment)::($recipe)"
               }
           )
-        | str join "\n\n"
+        | str join "\n"
       )
     | str replace --all "mod?" "mod"
   )
@@ -571,21 +562,27 @@ export def merge-justfiles [
   sort-environment-sections $merged_justfile "mod"
 }
 
-export def save-file [filename: string contents?: string] {
-  let action = (get-file-status $filename $contents)
+export def save-file [
+  filename: string
+  display_message: bool
+  contents?: string
+] {
+  let action = (get-file-status $filename false $contents)
 
   if $action != Skipped {
     $contents
     | save --force $filename
   }
 
-  display-message $action $filename
+  if $display_message {
+    display-message $action $filename
+  }
 
   $action
 }
 
 def save-justfile [justfile?: string] {
-  save-file Justfile $justfile
+  save-file Justfile false $justfile
 }
 
 def initialize-generic-file [filename: string] {
@@ -611,13 +608,30 @@ def copy-justfile [
     git: string,
     html: string
   >
+  force: bool
   upgrade: bool
 ] {
   initialize-generic-file Justfile
 
-  let action = "Skipped"
+  mut action = "Skipped"
+  let main_justfile_modified = (ls Justfile | first | get modified)
 
-  if (is-up-to-date $upgrade $environment Justfile) {
+  for justfile in (ls just | select name modified) {
+    if $force or ($justfile.modified > $main_justfile_modified) {
+      let environment = ($justfile.name | path parse | get stem)
+
+      let merged_justfile = (
+        merge-justfiles $environment Justfile $justfile.name
+      )
+
+      $merged_justfile
+      | save --force Justfile
+
+      $action = "Upgraded"
+    }
+  }
+
+  if not $force and (is-up-to-date $upgrade $environment Justfile) {
     return $action
   }
 
@@ -646,9 +660,17 @@ def copy-justfile [
       $environment_justfile_file
   )
 
-  let action = (save-justfile $merged_justfile)
+  let remote_upgrade_action = (save-justfile $merged_justfile)
 
   rm $environment_justfile_file
+
+  $action = if $action == "Upgraded" {
+    $action
+  } else {
+    $remote_upgrade_action
+  }
+
+  display-message $action Justfile
 
   return $action
 }
@@ -724,7 +746,7 @@ def get-environment-name [
 }
 
 def save-gitignore [gitignore: string] {
-  save-file .gitignore $gitignore
+  save-file .gitignore true $gitignore
 }
 
 def is-up-to-date [
@@ -756,13 +778,14 @@ def copy-gitignore [
     git: string,
     html: string
   >
+  force: bool
   upgrade: bool
 ] {
   initialize-generic-file .gitignore
 
   let action = "Skipped"
 
-  if (is-up-to-date $upgrade $environment .gitignore) {
+  if not $force and (is-up-to-date $upgrade $environment .gitignore) {
     return $action
   }
 
@@ -923,7 +946,7 @@ export def merge-pre-commit-configs [
 }
 
 export def save-pre-commit-config [config: string] {
-  save-file .pre-commit-config.yaml $config
+  save-file .pre-commit-config.yaml true $config
 }
 
 def copy-pre-commit-config [
@@ -942,13 +965,14 @@ def copy-pre-commit-config [
     git: string,
     html: string
   >
+  force: bool
   upgrade: bool
 ] {
   initialize-generic-file .pre-commit-config.yaml
 
   let action = "Skipped"
 
-  if (
+  if not $force and (
     is-up-to-date $upgrade $environment .pre-commit-config.yaml
   ) {
     return $action
@@ -996,8 +1020,9 @@ def display-available-environments [environments: list<string>] {
 # Add environments to the project
 export def "main add" [
   ...environments: string
-  --upgrade
-  --activate
+  --force # Force adding the environment, even if already added
+  --upgrade # Upgrade the environment
+  --activate # Activate the environment after adding
 ] {
   let available_environments = (
     main list
@@ -1047,10 +1072,10 @@ export def "main add" [
     mut actions = []
 
     for new_actions in [
-      (copy-files $environment $environment_files $upgrade)
-      (copy-justfile $environment $environment_files $upgrade)
-      (copy-gitignore $environment $environment_files $upgrade)
-      (copy-pre-commit-config $environment $environment_files $upgrade)
+      (copy-files $environment $environment_files $force $upgrade)
+      (copy-justfile $environment $environment_files $force $upgrade)
+      (copy-gitignore $environment $environment_files $force $upgrade)
+      (copy-pre-commit-config $environment $environment_files $force $upgrade)
     ] {
       $actions = ($actions | append $new_actions | uniq)
     }
@@ -1627,6 +1652,108 @@ def "main remove" [
   }
 }
 
+def filter-file [test: string file: string] {
+  try {
+    let name = (
+      $test
+      | split row "test-"
+      | last
+      | split row "--"
+      | first
+    )
+
+    $name =~ $file
+  } catch {
+    false
+  }
+}
+
+def filter-function [test: string function: string] {
+  try {
+    let name = (
+      $test
+      | split row "--"
+      | last
+    )
+
+    $name =~ $function
+  } catch {
+    false
+  }
+}
+
+def filter-module [test: string module: string] {
+  let parent = (
+    $test
+    | path parse
+    | get parent
+  )
+
+  $"src/($module)" in $parent or (
+    $"scripts/($module)" in $parent
+  )
+}
+
+export def get-tests [
+  tests: list<string>
+  filters: record<
+    file: any,
+    function: any,
+    module: any,
+  >
+  search_term?: string
+] {
+  let module = $filters.module
+  let file = $filters.file
+  let function = $filters.function
+
+  let tests = match $module {
+    null => $tests
+    _ => ($tests | filter {filter-module $in $module})
+  }
+
+  let $tests = match $file {
+    null => $tests
+    _ => ($tests | filter {filter-file $in $file})
+  }
+
+  let $tests = match $function {
+    null => $tests
+    _ => ($tests | filter {filter-function $in $function})
+  }
+
+  match $search_term {
+    null => $tests
+    _ => ($tests | filter {$in =~ $search_term})
+  }
+}
+
+# Run tests
+def "main test" [
+  --match-suites: string # Regular expression to match against suite names (defaults to all)
+  --match-tests: string # Regular expression to match against test names (defaults to all)
+] {
+  let command = "use nutest; nutest run-tests"
+
+  let command = if ($match_suites | is-not-empty) {
+    $"($command) --match-suites ($match_suites)"
+  } else {
+    $command
+  }
+
+  let command = if ($match_tests | is-not-empty) {
+    $"($command) --match-tests ($match_tests)"
+  } else {
+    $command
+  }
+
+  (
+    nu
+      --commands $command
+      --include-path $env.NUTEST
+  )
+}
+
 # Update environment dependencies
 def "main update" [] {
   nix flake update
@@ -1635,6 +1762,7 @@ def "main update" [] {
 # Upgrade environments to the latest available version
 def "main upgrade" [
   ...environments: string
+  --force # Force upgrading files even if already up to date
   --use-existing-file # Skip fetching new source for `upgrade` command before running
 ] {
   let environments = (
@@ -1642,7 +1770,11 @@ def "main upgrade" [
   )
 
   if $use_existing_file {
-    return (main add --upgrade ...$environments)
+    if $force {
+      return (main add --force --upgrade ...$environments)
+    } else {
+      return (main add --upgrade ...$environments)
+    }
   }
 
   let new_environment_command = (
@@ -1651,7 +1783,12 @@ def "main upgrade" [
       scripts/environment.nu
   )
 
-  nu $new_environment_command add --upgrade ...$environments
+  if $force {
+    nu $new_environment_command add --force --upgrade ...$environments
+  } else {
+    nu $new_environment_command add --upgrade ...$environments
+  }
+
   rm $new_environment_command
 }
 
