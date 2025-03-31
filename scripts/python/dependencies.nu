@@ -14,20 +14,28 @@ export def get-dependencies [
   }
 
   if $dev or not $prod {
+    let dev_dependencies = try {
+      ($pyproject_data | get dependency-groups.dev)
+    } catch {
+      []
+    }
+
     $dependencies = (
       $dependencies
-      | update dev (
-          ($pyproject_data | get dependency-groups.dev)
-        )
+      | update dev $dev_dependencies
     )
   }
 
   if $prod or not $dev {
+    let prod_dependencies = try {
+      ($pyproject_data | get project.dependencies)
+    } catch {
+      []
+    }
+
     $dependencies = (
       $dependencies
-      | update prod (
-          ($pyproject_data | get project.dependencies)
-        )
+      | update prod $prod_dependencies
     )
   }
 
@@ -41,9 +49,12 @@ def main [
   --installed # Show installed dependencies (python dependencies only)
   --tree # Show installed dependencies as a tree (python dependencies only)
 ] {
+  # TODO: make subcommands
   if $tree {
     return (uv tree)
   }
+
+  # TODO: make subcommands
   if $installed {
     return (uv pip list)
   }

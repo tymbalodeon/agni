@@ -1,9 +1,6 @@
-.config
 .direnv
 .env
 .envrc
-.pdm-python
-.venv
 
 # agni
 *.pdf

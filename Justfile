@@ -10,12 +10,6 @@
 @check *args:
     ./scripts/check.nu {{ args }}
 
-# List dependencies
-@dependencies *args:
-    ./scripts/dependencies.nu {{ args }}
-
-alias deps := dependencies
-
 # Manage environments
 @environment *args:
     ./scripts/environment.nu {{ args }}
@@ -51,10 +45,6 @@ alias find := find-recipe
 @stats *help:
     ./scripts/stats.nu {{ help }}
 
-# Run tests
-@test *args:
-    ./scripts/test.nu {{ args }}
-
 # View the source code for a recipe
 [no-cd]
 @view-source *recipe:
@@ -63,54 +53,16 @@ alias find := find-recipe
 alias src := view-source
 
 mod agni "just/agni.just"
-
-# Alias for `agni example`
-@example *args:
-    just agni example {{ args }}
-
 mod python "just/python.just"
 
-# alias for `python _help`
-[group("aliases")]
-@_help *args:
-    just python _help {{ args }}
-
-# alias for `python add`
-[group("aliases")]
-@add *args:
-    just python add {{ args }}
-
-# alias for `python build`
-[group("aliases")]
-@build *args:
-    just python build {{ args }}
-
-# alias for `python pin`
-[group("aliases")]
-@pin *args:
-    just python pin {{ args }}
-
-# alias for `python profile`
-[group("aliases")]
-@profile *args:
-    just python profile {{ args }}
-
-# alias for `python remove`
-[group("aliases")]
-@remove *args:
-    just python remove {{ args }}
-
-# alias for `python run`
-[group("aliases")]
-@run *args:
-    just python run {{ args }}
-
-# alias for `python shell`
-[group("aliases")]
-@shell *args:
-    just python shell {{ args }}
-
-# alias for `python update`
-[group("aliases")]
-@update *args:
-    just python update {{ args }}
+alias add := python::add
+alias build := python::build
+alias dependencies := python::dependencies
+alias example := agni::example
+alias pin := python::pin
+alias profile := python::profile
+alias remove := python::remove
+alias run := python::run
+alias shell := python::shell
+alias test := python::test
+alias update := python::update
