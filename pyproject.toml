@@ -1,13 +1,16 @@
 [project]
 name = "agni"
 version = "0.1.0"
+
 description = """\
 Music compositional tools inspired by the techniques of Claude Vivier
 """
+
 authors = [{ name = "Ben Rosen", email = "benjamin.j.rosen@gmail.com" }]
 readme = "README.md"
 keywords = ["claude vivier", "lilypond", "music notation", "music", "spectral"]
 requires-python = ">=3.13"
+
 dependencies = [
   "abjad==3.23",
   "abjad-ext-rmakers>=3.21",

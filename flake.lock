@@ -2,16 +2,18 @@
   "nodes": {
     "environments": {
       "inputs": {
-        "nixpkgs": ["nixpkgs"],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
         "rust-overlay": "rust-overlay"
       },
       "locked": {
         "dir": "src",
-        "lastModified": 1748545585,
-        "narHash": "sha256-ji9MpHXT3FzO7cPi8Zo7J6trGlXbEbH0sRwTMcWEnbM=",
+        "lastModified": 1748548636,
+        "narHash": "sha256-pjtv0a8Scw1U+7+V+o9J9VvYOzYM0FP5jSV4DWSofFc=",
         "owner": "tymbalodeon",
         "repo": "environments",
-        "rev": "180ec66c5ea49cb7d999ae9c8489e03fabf5e2bf",
+        "rev": "97d497a87f36977c8808c5c61b89091a20f91ee6",
         "type": "github"
       },
       "original": {
