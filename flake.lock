@@ -2,9 +2,7 @@
   "nodes": {
     "environments": {
       "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
+        "nixpkgs": ["nixpkgs"],
         "rust-overlay": "rust-overlay"
       },
       "locked": {

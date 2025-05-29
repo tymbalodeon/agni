@@ -8,3 +8,9 @@ formatter = { command = "just", args = ["--justfile", "/dev/stdin", "--dump"] }
 name = "nix"
 auto-format = true
 formatter = { command = "alejandra" }
+
+
+[[language]]
+name = "toml"
+auto-format = true
+formatter = { command = "taplo", args = ["format", "-"] }
