@@ -4,17 +4,14 @@ requires-python = ">=3.13"
 
 [[package]]
 name = "abjad"
-version = "3.24"
+version = "3.23"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ply" },
     { name = "roman" },
     { name = "uqbar" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/73/0f/8cdf2a180af4ef2f30bf547085a7913f2c4414c4410cd2faf86003789de6/abjad-3.24.tar.gz", hash = "sha256:f0d4912933ee728c31c661fea8f02bee788f3dac2f0d38182cefe6bef33a0d82", size = 473372, upload-time = "2025-05-02T18:19:43.032Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/51/f1922228df5a040c1cc8ea254b80d66ed1d9e9a254ebf3b48ae8f1f79384/abjad-3.24-py3-none-any.whl", hash = "sha256:035528717ac70cb6d7f3220a27666887e5dc416bef068cfc88893fb473646866", size = 442013, upload-time = "2025-05-02T18:19:41.387Z" },
-]
+sdist = { url = "https://files.pythonhosted.org/packages/91/3b/9cd0309ca7102cedba8220f0f38fb565b09ac01e190050ea50ce66b42471/abjad-3.23.tar.gz", hash = "sha256:751c05fadf7cf33fb0dcc79e96134d04958a309a49cc5520eb8430f4aafd32a4", size = 474566, upload-time = "2025-04-04T20:43:03.308Z" }
 
 [[package]]
 name = "abjad-ext-rmakers"
@@ -46,7 +43,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "abjad", specifier = ">=3.21" },
+    { name = "abjad", specifier = "==3.23" },
     { name = "abjad-ext-rmakers", specifier = ">=3.21" },
     { name = "cyclopts", specifier = ">=3.9.0" },
     { name = "more-itertools", specifier = ">=10.6.0" },

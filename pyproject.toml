@@ -9,8 +9,8 @@ readme = "README.md"
 keywords = ["claude vivier", "lilypond", "music notation", "music", "spectral"]
 requires-python = ">=3.13"
 dependencies = [
+  "abjad==3.23",
   "abjad-ext-rmakers>=3.21",
-  "abjad>=3.21",
   "cyclopts>=3.9.0",
   "more-itertools>=10.6.0",
   "supriya>=24.3b2",
