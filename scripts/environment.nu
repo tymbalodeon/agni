@@ -166,6 +166,15 @@ def "main test" [
 
 # Update environment dependencies
 def "main update" [] {
+  let remote_url = (
+    "https://raw.githubusercontent.com/tymbalodeon/environments/trunk"
+  )
+
+  let project_root = (git rev-parse --show-toplevel)
+
+  http get $"($remote_url)/src/generic/flake.nix"
+  | save --force $"($project_root)/flake.nix"
+
   nix flake update
 }
 
