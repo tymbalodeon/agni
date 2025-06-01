@@ -77,35 +77,34 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-    - id: check-json
-    - id: check-toml
-    - id: pretty-format-json
-      args:
-      - --autofix
+      - id: check-json
+      - id: check-toml
+      - id: pretty-format-json
+        args:
+          - --autofix
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
-    - id: prettier
-      types:
-      - json
+      - id: prettier
+        types:
+          - json
   - repo: local
     hooks:
-    - id: taplo
-      name: taplo
-      entry: taplo format
-      language: system
-    - id: ruff format
-      name: ruff format
-      entry: ruff format
-      language: system
-      pass_filenames: false
-    - id: ruff check
-      name: ruff check
-      entry: ruff check
-      language: system
-      pass_filenames: false
-      args:
-      - --fix
-      - --select
-      - I
-  
+      - id: taplo
+        name: taplo
+        entry: taplo format
+        language: system
+      - id: ruff format
+        name: ruff format
+        entry: ruff format
+        language: system
+        pass_filenames: false
+      - id: ruff check
+        name: ruff check
+        entry: ruff check
+        language: system
+        pass_filenames: false
+        args:
+          - --fix
+          - --select
+          - I

@@ -11,7 +11,7 @@ def "main clean" [] {
 # Run `nix flake check`
 def "main flake" [] {
   cd (get-project-root)
-  nix flake check --all-systems
+  nix flake check
 }
 
 export def get-pre-commit-hook-names [config: record<repos: list<any>>] {
@@ -55,6 +55,9 @@ export def main [
     main update
   }
 
-  main flake
+  if ($hooks | is-empty) {
+    main flake
+  }
+
   main pre-commit $hooks
 }

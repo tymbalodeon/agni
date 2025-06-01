@@ -176,6 +176,7 @@ def "main update" [] {
   | save --force $"($project_root)/flake.nix"
 
   nix flake update
+  main activate
 }
 
 def main [] {

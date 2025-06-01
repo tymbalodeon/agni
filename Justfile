@@ -45,6 +45,10 @@ alias find := find-recipe
 @stats *help:
     ./scripts/stats.nu {{ help }}
 
+# List TODO and other keywords
+@todo *help:
+    ./scripts/todo.nu {{ help }}
+
 # View the source code for a recipe
 [no-cd]
 @view-source *recipe:
