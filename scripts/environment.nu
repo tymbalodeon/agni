@@ -177,7 +177,9 @@ def "main test" [
 }
 
 # Update environment dependencies
-def "main update" [] {
+def "main update" [
+  --all # Update all flake inputs
+] {
   let remote_url = (
     "https://raw.githubusercontent.com/tymbalodeon/environments/trunk"
   )
@@ -187,7 +189,12 @@ def "main update" [] {
   http get $"($remote_url)/src/generic/flake.nix"
   | save --force $"($project_root)/flake.nix"
 
-  nix flake update
+  if $all {
+    nix flake update
+  } else {
+    nix flake update environments
+  }
+
   main activate
 }
 
