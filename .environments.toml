@@ -1,8 +1,1 @@
-environments = [
-    "generic",
-    "git",
-    "nix",
-    "python",
-    "toml",
-    "yaml",
-]
+environments = ["generic", "git", "nix", "python", "toml", "yaml"]

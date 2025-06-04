@@ -41,6 +41,18 @@ export def "main add" [
 ] {
   initialize
 
+  # TODO: add error message if any environments are invalid?
+  let environments = (
+    $environments
+    | where {
+        $in in (
+          ls --short-names $env.ENVIRONMENTS
+          | where type == dir
+          | get name
+        )
+      }
+  )
+
   open .environments.toml
   | update environments (
       (open .environments.toml).environments
