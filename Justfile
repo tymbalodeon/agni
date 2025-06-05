@@ -39,13 +39,17 @@ alias find := find-recipe
 @remote *web:
     ./scripts/remote.nu  {{ web }}
 
+# Find/replace
+@replace *help:
+    ./scripts/replace.nu  {{ help }}
+
 # View repository analytics
 @stats *help:
     ./scripts/stats.nu {{ help }}
 
 # List TODO-style comments
-@todo *help:
-    ./scripts/todo.nu {{ help }}
+@todo *args:
+    ./scripts/todo.nu {{ args }}
 
 alias todos := todo
 
