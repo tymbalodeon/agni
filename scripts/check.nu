@@ -30,7 +30,7 @@ def "main list" [] {
 }
 
 # Run pre-commit hooks
-def "main pre-commit" [hooks: list<string>] {
+def "main pre-commit" [hooks?: list<string>] {
   if ($hooks | is-empty) {
     pre-commit run --all-files
   } else {

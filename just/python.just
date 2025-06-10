@@ -1,16 +1,16 @@
 set working-directory := ".."
 
 # View help text
-@help:
-    just --list --justfile just/python.just
+@help *args:
+    ./scripts/python/help.nu {{ args }}
 
 # Add dependencies
 @add *args:
     ./scripts/python/add.nu {{ args }}
 
 # Build and install the application
-@build *help:
-    ./scripts/python/build.nu {{ help }}
+@build *args:
+    ./scripts/python/build.nu {{ args }}
 
 # Show application dependencies
 @dependencies *args:
@@ -19,29 +19,29 @@ set working-directory := ".."
 alias deps := dependencies
 
 # Manage python version
-@pin *version:
-    ./scripts/python/pin.nu {{ version }}
+@pin *args:
+    ./scripts/python/pin.nu {{ args }}
 
 # Profile a command and view results
 @profile *args:
     ./scripts/python/profile.nu {{ args }}
 
 # Remove dependencies
-@remove *dependencies:
-    ./scripts/python/remove.nu {{ dependencies }}
+@remove *args:
+    ./scripts/python/remove.nu {{ args }}
 
 # Run the application
 @run *args:
     ./scripts/python/run.nu {{ args }}
 
 # Open an interactive python shell
-@shell *help:
-    ./scripts/python/shell.nu {{ help }}
+@shell *args:
+    ./scripts/python/shell.nu {{ args }}
 
 # Run tests
-@test *help:
-    ./scripts/python/test.nu {{ help }}
+@test *args:
+    ./scripts/python/test.nu {{ args }}
 
 # Update dependencies
-@update *prod:
-    ./scripts/python/update.nu {{ prod }}
+@update *args:
+    ./scripts/python/update.nu {{ args }}

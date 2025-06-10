@@ -2,10 +2,6 @@
 .env
 .envrc
 
-# agni
-*.pdf
-examples/
-
 # python
 *.pyc
 .coverage
@@ -13,3 +9,7 @@ examples/
 __pycache__/
 build/
 dist/
+
+# agni
+*.pdf
+examples/

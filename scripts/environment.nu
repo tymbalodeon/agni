@@ -44,19 +44,28 @@ def initialize [] {
 export def "main add" [
   ...environments: string # Environments to add
 ] {
-  initialize
-
-  # TODO: add error message if any environments are invalid?
-  let environments = (
+  let unrecognized_environments = (
     $environments
     | where {
-        $in in (
+        $in not-in (
           ls --short-names $env.ENVIRONMENTS
           | where type == dir
           | get name
         )
       }
   )
+
+  if ($unrecognized_environments | is-not-empty) {
+    print $"Urecognized environments:\n(
+      $unrecognized_environments
+      | each {|environment| $'- ($environment)'}
+      | to text --no-newline
+    )"
+
+    exit 1
+  }
+
+  initialize
 
   open .environments.toml
   | update environments (
@@ -70,26 +79,35 @@ export def "main add" [
   main activate
 }
 
-# List environments and files
-def "main list" [
-  environment?: string # An environment whose files to lise
-  path?: string # An environment path whose files to list
-] {
+def list-environments [environment?: string path?: string] {
   if ($environment | is-empty) {
     ls --short-names $env.ENVIRONMENTS
     | where type == dir
     | get name
-    | str join "\n"
   } else if ($path | is-empty) {
     fd --type file "" $"($env.ENVIRONMENTS)/($environment)"
     | lines
     | each {|file| $file | split row $"src/($environment)/" | last}
-    | str join "\n"
   } else {
     ls --short-names $"($env.ENVIRONMENTS)/($environment)/($path)"
     | get name
-    | str join "\n"
   }
+}
+
+# List environments and files
+export def "main list" [
+  environment?: string # An environment whose files to lise
+  path?: string # An environment path whose files to list
+] {
+  list-environments $environment $path
+  | str join "\n"
+}
+
+def get-local-environment-name [directory: string] {
+  ls --short-names $directory
+  | get name
+  | path parse
+  | get stem
 }
 
 # List installed environments
@@ -98,24 +116,41 @@ def "main list installed" [
   --default # Show only default installed environments
   --user # Show only user installed environments [default]
 ] {
-  # TODO: show local environments
   let default_environments = (
     open $"($env.ENVIRONMENTS)/generic/.environments.toml"
   ).environments
 
   let environments = (open .environments.toml).environments
 
+  let local_environments = if $all or $user or not (
+    [$all $default $user]
+    | any {|item| $item}
+  ) {
+    get-local-environment-name just
+    | append (
+      get-local-environment-name nix
+    )
+    | uniq
+    | where {$in not-in (list-environments)}
+    | each {|environment| $"($environment) \(local\)"}
+  } else {
+    []
+  }
+
   let environments = if $all {
     $environments
+    | append $local_environments
   } else if $default {
     $environments
     | where {$in in $default_environments}
   } else {
     $environments
     | where {$in not-in $default_environments}
+    | append $local_environments
   }
 
   $environments
+  | sort
   | str join "\n"
 }
 
@@ -123,6 +158,23 @@ def "main list installed" [
 def "main remove" [
   ...environments: string # Environments to remove
 ] {
+  let recognized_environments = if ($environments | is-not-empty) {
+    $environments
+    | where {
+        $in in (
+          ls --short-names $env.ENVIRONMENTS
+          | where type == dir
+          | get name
+        )
+      }
+  } else {
+    []
+  }
+
+  if ($environments | is-not-empty) and ($recognized_environments | is-empty) {
+    return
+  }
+
   initialize
 
   if ($environments | is-empty) {

@@ -81,13 +81,18 @@ export def display-just-help [
   }
 }
 
-# FIXME: update `--aliases` to list aliases for environment recipes
+# View module aliases
+def "main aliases" [] {
+  open Justfile
+  | lines
+  | where {str starts-with  alias}
+  | to text
+}
+
 # View help text
 def main [
   recipe?: string # View help text for recipe
   ...subcommands: string  # View help for a recipe subcommand
-  # FIXME
-  # --aliases # View module aliases
   --default
 ] {
   display-just-help $recipe $subcommands

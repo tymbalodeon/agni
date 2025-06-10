@@ -22,31 +22,10 @@
   }: {
     devShells = nixpkgs.lib.genAttrs (import systems) (
       system: let
-        activeEnvironments =
-          if builtins.pathExists ./.environments.toml
-          then
-            (
-              builtins.fromTOML (builtins.readFile ./.environments.toml)
-            ).environments
-          else [];
-
         getFilenames = dir:
           if builtins.pathExists dir
           then builtins.attrNames (builtins.readDir dir)
           else [];
-
-        inactiveEnvironments =
-          builtins.filter
-          (environment: !(builtins.elem environment activeEnvironments))
-          (
-            let
-              srcDirectory = builtins.readDir environments;
-              srcDirectoryItems = builtins.attrNames srcDirectory;
-            in
-              builtins.filter
-              (item: srcDirectory.${item} == "directory")
-              srcDirectoryItems
-          );
 
         mergeModuleAttrs = {
           attr,
@@ -61,65 +40,46 @@
           (getFilenames ./nix);
 
         pkgs = import nixpkgs {
-          config.allowUnfree = true;
           inherit system;
+          config.allowUnfree = true;
         };
       in {
         default = pkgs.mkShellNoCC ({
             inputsFrom =
               builtins.map
               (environment: environments.devShells.${system}.${environment})
-              activeEnvironments;
+              (
+                if builtins.pathExists ./.environments.toml
+                then
+                  (
+                    builtins.fromTOML (builtins.readFile ./.environments.toml)
+                  ).environments
+                else []
+              );
 
             packages = mergeModuleAttrs {
               attr = "packages";
               nullValue = [];
             };
 
-            shellHook = let
-              getArgsOrNone = args:
-                if args == ""
-                then "none"
-                else args;
-            in
-              with pkgs;
-                lib.concatLines (
-                  [
-                    ''
-                      export NUTEST=${nutest}
-                      export ENVIRONMENTS=${environments}
+            shellHook = with pkgs;
+              lib.concatLines (
+                [
+                  ''
+                    export NUTEST=${nutest}
+                    export ENVIRONMENTS=${environments}
+                    ${nushell}/bin/nu ${environments}/shell-hook.nu
 
-                      ${pre-commit}/bin/pre-commit install \
-                        --hook-type commit-msg \
-                        --overwrite
-
-                      ${nushell}/bin/nu ${environments}/shell-hook.nu \
-                        --active-environments "${
-                        getArgsOrNone (lib.concatStringsSep " " activeEnvironments)
-                      }" \
-                        --environments-directory "${environments}" \
-                        --inactive-environments "${
-                        getArgsOrNone (lib.concatStringsSep " " inactiveEnvironments)
-                      }" \
-                        --local-justfiles "${
-                        getArgsOrNone (lib.concatStringsSep " " (
-                          map
-                          (filename:
-                            builtins.elemAt
-                            (lib.strings.splitString "." filename)
-                            0)
-                          (getFilenames ./just)
-                        ))
-                      }"
-
-                      ${yamlfmt}/bin/yamlfmt .pre-commit-conifg.yaml
-                    ''
-                  ]
-                  ++ mergeModuleAttrs {
-                    attr = "shellHook";
-                    nullValue = "";
-                  }
-                );
+                    ${pre-commit}/bin/pre-commit install \
+                      --hook-type commit-msg \
+                      --overwrite
+                  ''
+                ]
+                ++ mergeModuleAttrs {
+                  attr = "shellHook";
+                  nullValue = "";
+                }
+              );
           }
           // builtins.foldl'
           (a: b: a // b)
