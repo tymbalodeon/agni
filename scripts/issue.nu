@@ -46,7 +46,7 @@ def --wrapped glab [...args] {
 # Close issue
 def "main close" [
   issue_number: number # The id of the issue to view
-  --service: string # Which service to use (see `list-services`)
+  --service: string # Which service to use (see `services`)
   --merge # Merge development branch, if one exists, before closing issue
 ] {
   if $merge {
@@ -92,7 +92,7 @@ def get-project-prefix [] {
 
 # Create issue
 def "main create" [
-  --service: string # Which service to use (see `list-services`)
+  --service: string # Which service to use (see `services`)
 ] {
   let args = [issue create]
 
@@ -111,7 +111,7 @@ def "main create" [
 # Create/open issue and development branch
 def "main develop" [
   issue_number: number # The id of the issue to view
-  --service: string # Which service to use (see `list-services`)
+  --service: string # Which service to use (see `services`)
 ] {
   match (get-service $service) {
     "github" => (gh issue develop --checkout $issue_number)
@@ -148,6 +148,17 @@ def "main develop" [
   }
 }
 
+# Edit issue
+def "main edit" [
+  issue_number: number # The id of the issue to view
+  --service: string # Which service to use (see `services`)
+] {
+  match (get-service $service) {
+    "github" => (gh issue edit $issue_number)
+    "nb" => (nb edit $issue_number)
+  }
+}
+
 def list [web: bool service?: string] {
   mut args = [issue list]
 
@@ -177,21 +188,21 @@ def list [web: bool service?: string] {
 }
 
 def "main list" [
-  --service: string # Which service to use (see `list-services`)
+  --service: string # Which service to use (see `services`)
   --web # Open the remote repository website in the browser
 ] {
   list $web $service
 }
 
 # List available services
-def "main list-services" [] {
+def "main services" [] {
   print ([github gitlab nb] | str join "\n")
 }
 
 # View issues
 def "main view" [
   issue_number: number # The id of the issue to view
-  --service: string # Which service to use (see `list-services`)
+  --service: string # Which service to use (see `services`)
   --web # Open the remote repository website in the browser
 ] {
   if $web {
@@ -204,7 +215,7 @@ def "main view" [
 # View issues
 def main [
   issue_number?: number # The id of the issue to view
-  --service: string # Which service to use (see `list-services`)
+  --service: string # Which service to use (see `services`)
   --web # Open the remote repository website in the browser
 ] {
   if ($issue_number | is-empty) {

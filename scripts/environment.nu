@@ -44,6 +44,7 @@ def initialize [] {
 export def "main add" [
   ...environments: string # Environments to add
 ] {
+  # TODO: handle features (what to do about removing features?)
   let unrecognized_environments = (
     $environments
     | where {
@@ -79,6 +80,7 @@ export def "main add" [
   main activate
 }
 
+# TODO: add features
 def list-environments [environment?: string path?: string] {
   if ($environment | is-empty) {
     ls --short-names $env.ENVIRONMENTS
@@ -111,16 +113,17 @@ def get-local-environment-name [directory: string] {
 }
 
 # List installed environments
-def "main list installed" [
+def "main list active" [
   --all # Show all installed environments
   --default # Show only default installed environments
   --user # Show only user installed environments [default]
 ] {
+  # TODO: display features
   let default_environments = (
     open $"($env.ENVIRONMENTS)/generic/.environments.toml"
-  ).environments
+  ).environments.name
 
-  let environments = (open .environments.toml).environments
+  let environments = (open .environments.toml).environments.name
 
   let local_environments = if $all or $user or not (
     [$all $default $user]
@@ -128,8 +131,8 @@ def "main list installed" [
   ) {
     get-local-environment-name just
     | append (
-      get-local-environment-name nix
-    )
+        get-local-environment-name nix
+      )
     | uniq
     | where {$in not-in (list-environments)}
     | each {|environment| $"($environment) \(local\)"}

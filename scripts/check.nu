@@ -19,7 +19,6 @@ export def get-pre-commit-hook-names [config: record<repos: list<any>>] {
   | get repos.hooks
   | each {get id}
   | flatten
-  | append flake
   | sort
   | to text --no-newline
 }

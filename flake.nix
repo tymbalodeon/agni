@@ -48,14 +48,22 @@
             inputsFrom =
               builtins.map
               (environment: environments.devShells.${system}.${environment})
-              (
-                if builtins.pathExists ./.environments.toml
-                then
-                  (
-                    builtins.fromTOML (builtins.readFile ./.environments.toml)
-                  ).environments
-                else []
-              );
+              ((
+                  if builtins.pathExists ./.environments.toml
+                  then
+                    builtins.map (environment: environment.name)
+                    (
+                      builtins.fromTOML (builtins.readFile ./.environments.toml)
+                    ).environments
+                  else []
+                )
+                ++ [
+                  "generic"
+                  "git"
+                  "nix"
+                  "toml"
+                  "yaml"
+                ]);
 
             packages = mergeModuleAttrs {
               attr = "packages";

@@ -1,1 +1,2 @@
-environments = ["generic", "git", "nix", "python", "toml", "yaml"]
+[[environments]]
+name = "python"
