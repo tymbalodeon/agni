@@ -49,10 +49,14 @@ def get-todos [
 ] {
   let pattern = $"(get-comment-token-pattern ) \(FIXME|NOTE|TODO\)"
 
-  let matches = if ($path | is-empty) {
-    rg $pattern --json
-  } else {
-    rg $pattern --json $path
+  let matches = try {
+    if ($path | is-empty) {
+      rg $pattern --json
+    } else {
+      rg $pattern --json $path
+    }
+  } catch {
+    return []
   }
 
   let justfiles = (

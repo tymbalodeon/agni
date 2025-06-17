@@ -10,9 +10,7 @@ dependencies = [
   "more-itertools>=10.6.0",
   "supriya>=24.3b2",
 ]
-description = """
-Music compositional tools inspired by the techniques of Claude Vivier
-"""
+description = "Music compositional tools inspired by the techniques of Claude Vivier"
 keywords = ["claude vivier", "lilypond", "music notation", "music", "spectral"]
 
 [[project.authors]]
