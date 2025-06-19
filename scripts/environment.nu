@@ -31,8 +31,12 @@ def initialize [] {
   }
 }
 
-def print-error [message: string] {
+export def print-error [message: string] {
   print $"(ansi red_bold)error(ansi reset): ($message)"
+}
+
+export def print-warning [message: string] {
+  print $"(ansi yellow_bold)warning(ansi reset): ($message)"
 }
 
 def validate-environments [environments: list<string>] {

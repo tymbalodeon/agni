@@ -64,7 +64,6 @@ repos:
       - id: conventional-pre-commit
         stages:
           - commit-msg
-  # python
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:

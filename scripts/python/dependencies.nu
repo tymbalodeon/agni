@@ -42,23 +42,22 @@ export def get-dependencies [
   $dependencies
 }
 
+
+# Show installed dependencies as a tree (python dependencies only)
+def "main tree" [] {
+  uv tree
+}
+
+# Show installed dependencies (python dependencies only)
+def "main installed" [] {
+  uv pip list
+}
+
 # Show application dependencies
 def main [
   --dev # Show only development dependencies
   --prod # Show only production dependencies
-  --installed # Show installed dependencies (python dependencies only)
-  --tree # Show installed dependencies as a tree (python dependencies only)
 ] {
-  # TODO: make subcommands
-  if $tree {
-    return (uv tree)
-  }
-
-  # TODO: make subcommands
-  if $installed {
-    return (uv pip list)
-  }
-
   let dependencies = (get-dependencies)
 
   let dependencies = if $dev {

@@ -1,15 +1,11 @@
+*.pdf
+*.pyc
+.coverage
 .direnv
 .env
 .envrc
-
-# python
-*.pyc
-.coverage
 .venv
 __pycache__/
 build/
 dist/
-
-# agni
-*.pdf
 examples/

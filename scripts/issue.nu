@@ -2,6 +2,8 @@
 
 use domain.nu
 use environment.nu get-project-root
+use environment.nu print-error
+use environment.nu print-warning
 
 def get-service [service?: string] {
   if ($service | is-empty) {
@@ -160,6 +162,7 @@ def "main edit" [
 }
 
 def list [web: bool service?: string] {
+  let service = (get-service $service)
   mut args = [issue list]
 
   let args = if $web and ($service == github) {
@@ -169,13 +172,12 @@ def list [web: bool service?: string] {
     $args
   }
 
-  match (get-service $service) {
+  match $service {
     "github" => (gh ...$args)
 
     "gitlab" => {
       if $web {
-        # TODO make warning color and print to stdout?
-        print "`--web` not implemented for GitLab's `issue list`."
+        print-warning "`--web` not implemented for GitLab's `issue list`."
       }
 
       glab ...$args
