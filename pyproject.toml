@@ -1,9 +1,12 @@
 [project]
 name = "agni"
 version = "0.1.0"
-description = "Music compositional tools inspired by the techniques of Claude Vivier"
+description = """
+Music compositional tools inspired by the techniques of Claude Vivier
+"""
 readme = "README.md"
 requires-python = ">=3.13"
+keywords = ["claude vivier", "lilypond", "music notation", "music", "spectral"]
 dependencies = [
   "abjad==3.23",
   "abjad-ext-rmakers>=3.21",
@@ -11,7 +14,6 @@ dependencies = [
   "more-itertools>=10.6.0",
   "supriya>=24.3b2",
 ]
-keywords = ["claude vivier", "lilypond", "music notation", "music", "spectral"]
 
 [[project.authors]]
 name = "Ben Rosen"
@@ -24,7 +26,7 @@ repository = "https://github.com/tymbalodeon/agni"
 agni = "agni.main:agni"
 
 [dependency-groups]
-dev = ["bpython>=0.24", "pytest>=8.3.3"]
+dev = ["bpython>=0.25", "fawltydeps>=0.19.0", "pytest>=8.3.4"]
 
 [build-system]
 requires = ["hatchling"]
