@@ -8,10 +8,6 @@ set working-directory := ".."
 @add *args:
     ./scripts/python/add.nu {{ args }}
 
-# Build and install the application
-@build *args:
-    ./scripts/python/build.nu {{ args }}
-
 # Show application dependencies
 @dependencies *args:
     ./scripts/python/dependencies.nu {{ args }}
@@ -45,3 +41,7 @@ alias deps := dependencies
 # Update dependencies
 @update *args:
     ./scripts/python/update.nu {{ args }}
+
+# Build and install the application
+@build *args:
+    ./scripts/python/build.nu {{ args }}

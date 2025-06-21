@@ -198,7 +198,7 @@ def list-environments [
   path?: string
 ] {
   if ($environment | is-empty) {
-    get-available-environments 
+    get-available-environments
   } else if ($path | is-empty) {
     fd --type file "" $"($env.ENVIRONMENTS)/($environment)"
     | lines
