@@ -16,8 +16,18 @@ def "main open" [
       main --color never $path
     }
 
-    $todos
-    | fzf --tac
+    if ($todos | is-empty) {
+      return
+    }
+
+    let todo = if ($todos | lines | length) == 1 {
+      $todos
+    } else {
+      $todos
+      | fzf
+    }
+
+    $todo
     | split row " "
     | first
     | into int

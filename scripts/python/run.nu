@@ -7,5 +7,14 @@ def --wrapped main [...args: string] {
     return (help main)
   }
 
-  uv run (command) ...$args
+  let command = (command)
+
+  let args = if ($command | is-empty) {
+    $args
+  } else {
+    $args
+    | prepend $command
+  }
+
+  uv run ...$args
 }

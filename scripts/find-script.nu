@@ -24,7 +24,7 @@ export def get-script [
 
   let matching_scripts = (
     $scripts
-    | filter {
+    | where {
         |script|
 
         let path = ($script | path parse)
@@ -37,7 +37,7 @@ export def get-script [
     ($matching_scripts | length) > 1
   ) {
     $matching_scripts
-    | filter {
+    | where {
         |script|
 
         let path = ($script | path parse)
@@ -57,7 +57,7 @@ export def get-script [
     ($matching_scripts | length) > 1
   ) and ($environment | is-empty) {
     $matching_scripts
-    | filter {|script| ($script | path parse | get parent) == $scripts_directory}
+    | where {|script| ($script | path parse | get parent) == $scripts_directory}
   } else {
     $matching_scripts
   }

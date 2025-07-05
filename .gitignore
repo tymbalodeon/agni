@@ -5,6 +5,7 @@
 .direnv
 .env
 .envrc
+.helix/config.toml
 .venv
 __pycache__/
 build/

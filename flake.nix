@@ -50,16 +50,20 @@
               (environment: environments.devShells.${system}.${environment})
               ((
                   if builtins.pathExists ./.environments.toml
-                  then
-                    builtins.map (environment: environment.name)
-                    (
-                      builtins.fromTOML (builtins.readFile ./.environments.toml)
-                    ).environments
+                  then let
+                    environments = builtins.fromTOML (builtins.readFile ./.environments.toml);
+                  in
+                    if builtins.hasAttr "environments" environments
+                    then
+                      builtins.map (environment: environment.name)
+                      environments.environments
+                    else []
                   else []
                 )
                 ++ [
                   "generic"
                   "git"
+                  "markdown"
                   "nix"
                   "toml"
                   "yaml"
@@ -80,7 +84,8 @@
 
                     ${pre-commit}/bin/pre-commit install \
                       --hook-type commit-msg \
-                      --overwrite
+                      --overwrite \
+                      >/dev/null
                   ''
                 ]
                 ++ mergeModuleAttrs {

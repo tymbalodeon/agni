@@ -1,6 +1,6 @@
 [private]
 @default:
-    just help --default
+    just help
 
 # View full help text, or for a specific recipe
 @help *args:
@@ -49,6 +49,10 @@ alias find := find-recipe
 
 alias todos := todo
 
+# Set helix theme
+@theme *args:
+    ./scripts/theme.nu {{ args }}
+
 # View the source code for a recipe
 @view-source *args:
     ./scripts/view-source.nu {{ args }}
@@ -60,6 +64,7 @@ mod python "just/python.just"
 
 alias add := python::add
 alias build := python::build
+alias deps := python::dependencies
 alias dependencies := python::dependencies
 alias example := agni::example
 alias pin := python::pin
