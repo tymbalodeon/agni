@@ -1,8 +1,11 @@
 #!/usr/bin/env nu
 
-use ../environment.nu get-project-path
 use ../help.nu display-aliases
 use ../help.nu display-just-help
+
+def get-environment-justfile [ ] {
+  ".environments/just/python.just"
+}
 
 # View module aliases
 def "main aliases" [
@@ -17,7 +20,7 @@ def "main aliases" [
       $sort_by_environment
       $sort_by_recipe
       --color $color
-      --justfile .environments/just/python.just
+      --justfile (get-environment-justfile)
   )
 }
 
@@ -27,14 +30,12 @@ def main [
   ...subcommands: string  # View help for a recipe subcommand
   --color = "always" # When to use colored output
 ] {
-  let environment = "python"
-
   (
     display-just-help
       $recipe
       $subcommands
       --color $color
-      --environment $environment
-      --justfile (get-project-path $".environments/just/($environment).just")
+      --environment python
+      --justfile (get-environment-justfile)
   )
 }

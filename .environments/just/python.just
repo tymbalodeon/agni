@@ -44,4 +44,4 @@ alias deps := dependencies
 
 # Build and install the application
 @build *args:
-    ./scripts/python/build.nu {{ args }}
+    .environments/scripts/python/build.nu {{ args }}

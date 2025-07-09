@@ -304,11 +304,13 @@ def append-aliases [environment: record<name: string aliases: list<string>>] {
   if ($environment.aliases | is-empty) {
     $environment.name
   } else {
+    let aliases = (
+      $environment.aliases
+      | str join ", "
+    )
+    
     $environment.name
-    | append (
-        $environment.aliases
-        | each {$"[alias: ($in)]"}
-      )
+    | append $"[alias: ($aliases)]"
     | flatten
     | str join " "
   }
