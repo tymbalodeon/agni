@@ -17,7 +17,7 @@ def "main aliases" [
       $sort_by_environment
       $sort_by_recipe
       --color $color
-      --justfile just/python.just
+      --justfile .environments/just/python.just
   )
 }
 
@@ -35,6 +35,6 @@ def main [
       $subcommands
       --color $color
       --environment $environment
-      --justfile (get-project-path $"just/($environment).just")
+      --justfile (get-project-path $".environments/just/($environment).just")
   )
 }

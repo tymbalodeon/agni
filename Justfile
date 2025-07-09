@@ -4,63 +4,67 @@
 
 # View full help text, or for a specific recipe
 @help *args:
-    ./scripts/help.nu {{ args }}
+    .environments/scripts/help.nu {{ args }}
 
 # Check flake and run pre-commit hooks
 @check *args:
-    ./scripts/check.nu {{ args }}
+    .environments/scripts/check.nu {{ args }}
 
 # Manage environments
 @environment *args:
-    ./scripts/environment.nu {{ args }}
+    .environments/scripts/environment.nu {{ args }}
 
 alias env := environment
 
 # Search available `just` recipes
 [no-exit-message]
 @find-recipe *args:
-    ./scripts/find-recipe.nu {{ args }}
+    .environments/scripts/find-recipe.nu {{ args }}
 
 alias find := find-recipe
 
 # View project history
 @history *args:
-    ./scripts/history.nu {{ args }}
+    .environments/scripts/history.nu {{ args }}
 
 # View issues
 @issue *args:
-    ./scripts/issue.nu {{ args }}
+    .environments/scripts/issue.nu {{ args }}
 
 # View remote repository
 @remote *args:
-    ./scripts/remote.nu  {{ args }}
+    .environments/scripts/remote.nu  {{ args }}
 
 # Find/replace
 @replace *args:
-    ./scripts/replace.nu  {{ args }}
+    .environments/scripts/replace.nu  {{ args }}
 
 # View repository analytics
 @stats *args:
-    ./scripts/stats.nu {{ args }}
+    .environments/scripts/stats.nu {{ args }}
 
 # List TODO-style comments
 @todo *args:
-    ./scripts/todo.nu {{ args }}
+    .environments/scripts/todo.nu {{ args }}
 
 alias todos := todo
 
 # Set helix theme
 @theme *args:
-    ./scripts/theme.nu {{ args }}
+    .environments/scripts/theme.nu {{ args }}
 
 # View the source code for a recipe
 @view-source *args:
-    ./scripts/view-source.nu {{ args }}
+    .environments/scripts/view-source.nu {{ args }}
 
 alias src := view-source
 
-mod agni "just/agni.just"
-mod python "just/python.just"
+[private]
+@py *args:
+    just python {{ args }}
+
+mod agni ".environments/just/agni.just"
+mod python ".environments/just/python.just"
 
 alias add := python::add
 alias build := python::build

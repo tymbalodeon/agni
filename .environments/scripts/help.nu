@@ -1,6 +1,7 @@
 #!/usr/bin/env nu
 
 use color.nu use-colors
+use environment.nu get-environment-path
 use find-script.nu
 
 def append-main-aliases [
@@ -42,7 +43,72 @@ def append-main-aliases [
     }
   }
 
-  $help_text.item
+  let environment_aliases = if (".environments/just" | path exists) {
+    ls .environments/just
+    | get name
+    | each {
+        |file|
+
+        let environment = (
+          $file
+          | path basename
+          | path parse
+          | get stem
+        )
+
+        let alias_file = (get-environment-path $"($environment)/alias")
+
+        if ($alias_file | path exists)  {
+          open $alias_file
+          | lines
+          | uniq
+          | sort
+          | each {
+              {
+                alias: $in
+                environment: $environment
+              }
+            }
+        }
+      }
+    | flatten
+  }
+
+
+  let lines = (
+    $help_text.item
+    | each {
+        |line|
+
+        mut matching_environment = null
+
+        for environment in $environment_aliases.environment {
+          if (
+            $line
+            | str trim
+            | str starts-with $"($environment):"
+          ) {
+            $matching_environment = $environment
+            break
+          }
+        }
+
+        if ($matching_environment | is-not-empty) {
+          let aliases = (
+            $environment_aliases
+            | where environment == $matching_environment
+            | get alias
+            | str join ", "
+          )
+
+          $"($line) (ansi magenta)[alias: ($aliases)](ansi reset)"
+        } else {
+          $line
+        }
+    }
+  )
+
+  $lines
   | to text --no-newline
 }
 
@@ -185,7 +251,7 @@ def get-aliases [
 
   let aliases = if $no_submodule_aliases {
     $aliases
-    | where {$in.environment == • or $in.alias == $in.recipe}
+    | where {($in.environment | is-empty) or $in.alias == $in.recipe}
   } else {
     $aliases
   }
@@ -194,9 +260,10 @@ def get-aliases [
     $aliases
     | where {
         if $environment == default {
-          $in.environment | is-empty
+          $in.environment
+          | is-empty
         } else {
-          $in.environment =~ $environment
+          ($in.environment | is-not-empty) and $in.environment =~ $environment
         }
       }
   } else {

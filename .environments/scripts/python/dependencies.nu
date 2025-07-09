@@ -1,12 +1,14 @@
 #!/usr/bin/env nu
 
-use ../environment.nu get-project-path
+use cd-to-root.nu
 
 export def get-dependencies [
   --dev
   --prod
 ] {
-  let pyproject_data = (open (get-project-path pyproject.toml))
+  cd-to-root
+
+  let pyproject_data = (open pyproject.toml)
 
   mut dependencies = {
     dev: []

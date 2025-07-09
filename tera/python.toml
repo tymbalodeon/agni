@@ -1,5 +1,0 @@
-[project]
-name = "agni"
-version = "0.1.0"
-description = "Music compositional tools inspired by the techniques of Claude Vivier"
-requires_python = "3.13"

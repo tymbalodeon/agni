@@ -36,8 +36,8 @@
 
         modules =
           map
-          (module: (import ./nix/${module} {inherit pkgs;}))
-          (getFilenames ./nix);
+          (module: (import ./.environments/nix/${module} {inherit pkgs;}))
+          (getFilenames ./.environments/nix);
 
         pkgs = import nixpkgs {
           inherit system;
@@ -49,9 +49,11 @@
               builtins.map
               (environment: environments.devShells.${system}.${environment})
               ((
-                  if builtins.pathExists ./.environments.toml
+                  if builtins.pathExists ./.environments/environments.toml
                   then let
-                    environments = builtins.fromTOML (builtins.readFile ./.environments.toml);
+                    environments =
+                      builtins.fromTOML
+                      (builtins.readFile ./.environments/environments.toml);
                   in
                     if builtins.hasAttr "environments" environments
                     then

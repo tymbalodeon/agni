@@ -1,11 +1,14 @@
 #!/usr/bin/env nu
 
+use cd-to-root.nu
 use command.nu
 
 # Profile a command and view results
 def main [
   ...args: string # Arguments to the command being profiled
 ] {
+  cd-to-root
+
   let output_directory = "profiles"
 
   mkdir $output_directory
