@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-use ../environment.nu get-project-path
+use ../../generic/scripts/environment.nu get-project-path
 
 def get-example-path [path?: string] {
   let base_path = "examples"

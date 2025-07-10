@@ -1,0 +1,47 @@
+set working-directory := "../.."
+
+# View help text
+@help *args:
+    .environments/python/scripts/help.nu {{ args }}
+
+# Add dependencies
+@add *args:
+    .environments/python/scripts/add.nu {{ args }}
+
+# Show application dependencies
+@dependencies *args:
+    .environments/python/scripts/dependencies.nu {{ args }}
+
+alias deps := dependencies
+
+# Manage python version
+@pin *args:
+    .environments/python/scripts/pin.nu {{ args }}
+
+# Profile a command and view results
+@profile *args:
+    .environments/python/scripts/profile.nu {{ args }}
+
+# Remove dependencies
+@remove *args:
+    .environments/python/scripts/remove.nu {{ args }}
+
+# Run the application
+@run *args:
+    .environments/python/scripts/run.nu {{ args }}
+
+# Open an interactive python shell
+@shell *args:
+    .environments/python/scripts/shell.nu {{ args }}
+
+# Run tests
+@test *args:
+    .environments/python/scripts/test.nu {{ args }}
+
+# Update dependencies
+@update *args:
+    .environments/python/scripts/update.nu {{ args }}
+
+# Build and install the application
+@build *args:
+    .environments/python/scripts/build.nu {{ args }}

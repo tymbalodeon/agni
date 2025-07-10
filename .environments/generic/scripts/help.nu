@@ -43,23 +43,43 @@ def append-main-aliases [
     }
   }
 
-  let environment_aliases = if (".environments/just" | path exists) {
-    ls .environments/just
-    | get name
+  let environment_aliases = (
+    fd Justfile .environments
+    | lines
     | each {
         |file|
 
         let environment = (
           $file
+          | path dirname
           | path basename
-          | path parse
-          | get stem
         )
 
-        let alias_file = (get-environment-path $"($environment)/alias")
+        let alias_file = (get-environment-path $"($environment)/aliases")
 
-        if ($alias_file | path exists)  {
-          open $alias_file
+        let path = if (
+          $alias_file 
+          | path exists
+        ) {
+          $alias_file
+        } else {
+          let alias_file = (
+            ".environments"
+            | path join (
+                $alias_file
+                | path dirname
+                | path basename
+              )
+            | path join aliases
+          ) 
+
+          if ($alias_file | path exists) {
+            $alias_file
+          }
+        }
+
+        if ($path | is-not-empty)  {
+          open $path
           | lines
           | uniq
           | sort
@@ -72,8 +92,7 @@ def append-main-aliases [
         }
       }
     | flatten
-  }
-
+  )
 
   let lines = (
     $help_text.item

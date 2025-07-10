@@ -1,0 +1,9 @@
+set working-directory := "../.."
+
+# View help text
+@_help *recipe:
+    .environments/agni/scripts/help.nu {{ recipe }}
+
+# Run using an example score
+@example *args:
+    .environments/agni/scripts/example.nu {{ args }}

@@ -22,11 +22,6 @@
   }: {
     devShells = nixpkgs.lib.genAttrs (import systems) (
       system: let
-        getFilenames = dir:
-          if builtins.pathExists dir
-          then builtins.attrNames (builtins.readDir dir)
-          else [];
-
         mergeModuleAttrs = {
           attr,
           nullValue,
@@ -36,8 +31,14 @@
 
         modules =
           map
-          (module: (import ./.environments/nix/${module} {inherit pkgs;}))
-          (getFilenames ./.environments/nix);
+          (module: (import module {inherit pkgs;}))
+          (builtins.filter
+            (path: builtins.pathExists path)
+            (map
+              (item: ./.environments/${item.name}/shell.nix)
+              (builtins.filter
+                (item: item.value == "directory")
+                (nixpkgs.lib.attrsets.attrsToList (builtins.readDir ./.environments)))));
 
         pkgs = import nixpkgs {
           inherit system;

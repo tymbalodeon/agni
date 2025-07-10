@@ -1,10 +1,10 @@
 #!/usr/bin/env nu
 
-use ../help.nu display-aliases
-use ../help.nu display-just-help
+use ../../generic/scripts/help.nu display-aliases
+use ../../generic/scripts/help.nu display-just-help
 
 def get-environment-justfile [ ] {
-  ".environments/just/python.just"
+  ".environments/agni/Justfile"
 }
 
 # View module aliases
@@ -35,7 +35,7 @@ def main [
       $recipe
       $subcommands
       --color $color
-      --environment python
+      --environment agni
       --justfile (get-environment-justfile)
   )
 }

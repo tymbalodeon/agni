@@ -70,9 +70,9 @@ def get-todos [
   }
 
   let justfiles = (
-    ls --short-names ./environments/just
-    | get name
-    | where {($in | path parse | get stem) not-in (just env list)}
+    fd Justfile .environments
+    | lines
+    | where {($in | path dirname | path basename) not-in (just env list)}
   )
 
   let todos = (

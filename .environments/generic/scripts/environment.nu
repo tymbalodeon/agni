@@ -284,7 +284,7 @@ def get-available-environments [] {
   | each {
       |environment|
 
-      let alias_file = (get-environment-path $"($environment)/alias")
+      let alias_file = (get-environment-path $"($environment)/aliases")
 
       let aliases = if ($alias_file | path exists) {
         open $alias_file
@@ -308,7 +308,7 @@ def append-aliases [environment: record<name: string aliases: list<string>>] {
       $environment.aliases
       | str join ", "
     )
-    
+
     $environment.name
     | append $"[alias: ($aliases)]"
     | flatten
