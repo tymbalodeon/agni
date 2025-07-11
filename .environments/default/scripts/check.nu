@@ -1,16 +1,12 @@
 #!/usr/bin/env nu
 
-use environment.nu get-project-root
-
 # Clean pre-commit cache
 def "main clean" [] {
-  cd (get-project-root)
   pre-commit clean
 }
 
 # Run `nix flake check`
 def "main flake" [] {
-  cd (get-project-root)
   nix flake check
 }
 

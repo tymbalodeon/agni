@@ -58,7 +58,7 @@ def append-main-aliases [
         let alias_file = (get-environment-path $"($environment)/aliases")
 
         let path = if (
-          $alias_file 
+          $alias_file
           | path exists
         ) {
           $alias_file
@@ -71,7 +71,7 @@ def append-main-aliases [
                 | path basename
               )
             | path join aliases
-          ) 
+          )
 
           if ($alias_file | path exists) {
             $alias_file

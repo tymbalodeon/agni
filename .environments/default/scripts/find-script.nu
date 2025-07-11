@@ -1,7 +1,5 @@
 #!/usr/bin/env nu
 
-use environment.nu get-project-path
-
 export def get-script [
   recipe: string
   scripts: list<string>
@@ -57,7 +55,7 @@ export def get-script [
     ($matching_scripts | length) > 1
   ) and ($environment | is-empty) {
     $matching_scripts
-    | where {|script| ($script | path parse | get parent) == $scripts_directory}
+    | where {($in | path parse | get parent) == $scripts_directory}
   } else {
     $matching_scripts
   }
@@ -65,7 +63,7 @@ export def get-script [
   let matching_scripts = match $matching_scripts {
     [] => {
       let recipe = (
-        rg $"alias ($recipe)" (get-project-path Justfile)
+        rg $"alias ($recipe)" Justfile
         | split row ":= "
         | last
       )
@@ -86,12 +84,10 @@ export def get-script [
 }
 
 export def main [recipe: string] {
-  let scripts_directory = (get-project-path scripts)
-
   let scripts = (
-    fd --exclude tests --type file "" $scripts_directory
+    fd --exclude tests --extension nu "" .environments
     | lines
   )
 
-  get-script $recipe $scripts $scripts_directory
+  get-script $recipe $scripts .environments
 }

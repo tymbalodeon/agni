@@ -64,7 +64,7 @@
                   else []
                 )
                 ++ [
-                  "generic"
+                  "default"
                   "git"
                   "markdown"
                   "nix"

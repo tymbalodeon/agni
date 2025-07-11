@@ -1,7 +1,6 @@
 #!/usr/bin/env nu
 
 use domain.nu
-use environment.nu get-project-root
 use environment.nu print-error
 use environment.nu print-warning
 
@@ -89,7 +88,7 @@ def "main close" [
 }
 
 def get-project-prefix [] {
-  $"(get-project-root | path basename)/"
+  $"(pwd | path basename)/"
 }
 
 # Create issue

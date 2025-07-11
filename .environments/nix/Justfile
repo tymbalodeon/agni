@@ -1,0 +1,9 @@
+set working-directory := "../.."
+
+# View help text
+@help *args:
+    .environments/nix/scripts/help.nu {{ args }}
+
+# Open an interactive nix shell
+@shell *args:
+    .environments/nix/scripts/shell.nu {{ args }}
