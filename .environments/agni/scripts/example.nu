@@ -1,7 +1,5 @@
 #!/usr/bin/env nu
 
-use ../../generic/scripts/environment.nu get-project-path
-
 def get-example-path [path?: string] {
   let base_path = "examples"
 
@@ -11,7 +9,8 @@ def get-example-path [path?: string] {
     $base_path | path join $path
   }
 
-  get-project-path $path
+  pwd
+  | path join $path
 }
 
 def is-outdated [input_file: string output_file: string] {

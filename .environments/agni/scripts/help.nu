@@ -1,11 +1,7 @@
 #!/usr/bin/env nu
 
-use ../../generic/scripts/help.nu display-aliases
-use ../../generic/scripts/help.nu display-just-help
-
-def get-environment-justfile [ ] {
-  ".environments/agni/Justfile"
-}
+use ../../default/scripts/help.nu display-aliases
+use ../../default/scripts/help.nu display-just-help
 
 # View module aliases
 def "main aliases" [
@@ -20,7 +16,7 @@ def "main aliases" [
       $sort_by_environment
       $sort_by_recipe
       --color $color
-      --justfile (get-environment-justfile)
+      --justfile .environments/agni/Justfile
   )
 }
 
@@ -36,6 +32,6 @@ def main [
       $subcommands
       --color $color
       --environment agni
-      --justfile (get-environment-justfile)
+      --justfile .environments/agni/Justfile
   )
 }
