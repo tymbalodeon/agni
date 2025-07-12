@@ -1,5 +1,52 @@
 #!/usr/bin/env nu
 
+use environment.nu print-warning
+
+# View active theme
+def "main active" [] {
+  if (".helix/config.toml" | path exists) {
+    let config = (open .helix/config.toml)
+
+    if theme in $config {
+      $config.theme
+    }
+  }
+}
+
+def get-themes [] {
+  let ref = (
+    hx --version
+    | parse "helix {version} ({ref})"
+    | first
+    | get ref
+  )
+
+  let base_url = "api.github.com/repos/helix-editor/helix/contents"
+
+  http get $"($base_url)/runtime/themes?ref=($ref)"
+  | where type == file
+  | get name
+  | where {($in | path parse | get extension) == toml}
+  | each {path parse | get stem}
+}
+
+# List available themes
+def "main list" [
+  --paging = "auto" # When to use pager {always|auto|never}
+] {
+  let themes = (
+    get-themes
+    | to text --no-newline
+  )
+
+  match $paging {
+    "always" => ($themes | less),
+    "auto" => ($themes | less --quit-if-one-screen),
+    _ => $themes
+  }
+}
+
+# Remove active theme
 def "main reset" [] {
   rm --force .helix/config.toml
 
@@ -8,19 +55,24 @@ def "main reset" [] {
   }
 }
 
+# Set active theme
 def main [theme?: string] {
-  if ($theme | is-empty) {
-    if (".helix/config.toml" | path exists) {
-      let config = (open .helix/config.toml)
+  let themes = (get-themes)
 
-      if theme in $config {
-        $config.theme
-      }
-    }
+  let theme = if ($theme | is-empty) {
+    $themes
+    | fzf
   } else {
-    mkdir .helix
-
-    {theme: $theme}
-    | save --force .helix/config.toml
+    $theme
   }
+
+  if $theme not-in $themes {
+    print-warning $"unrecognized theme \"($theme)\""
+    return
+  }
+
+  mkdir .helix
+
+  {theme: $theme}
+  | save --force .helix/config.toml
 }

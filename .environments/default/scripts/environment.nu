@@ -1,5 +1,7 @@
 #!/usr/bin/env nu
 
+use color.nu use-colors
+
 # Activate installed environments
 def "main activate" [] {
   if (which direnv | is-empty) {
@@ -313,49 +315,88 @@ def append-aliases [environment: record<name: string aliases: list<string>>] {
   }
 }
 
+def highlight-text [
+  line: string
+  regex: string
+  color: string
+] {
+  let alias = try {
+    $line
+    | rg --only-matching $regex
+  }
+
+  if ($alias | is-empty) {
+    $line
+  } else {
+    let highlighted_text = $"(ansi $color)($alias)(ansi reset)"
+
+    $line
+    | str replace $alias $highlighted_text
+  }
+}
+
+def highlight-alias []: string -> string {
+  highlight-text $in '\[alias: [a-zA-Z, ]+\]' magenta
+}
+
+def highlight-feature []: string -> string {
+  highlight-text $in '\+[a-zA-Z]+\b' cyan
+}
+
 # List environments and files
 export def "main list" [
   environment?: string # An environment whose files to lise
   path?: string # An environment path whose files to list
   --aliases # Show environment aliases
+  --color = "auto" # When to use colored output {always|auto|never}
   --feature: string # List files for $feature only (requires $environment)
   --features # Show features
 ] {
   let environments = if ($environment | is-empty) {
     let environments = (get-available-environments)
 
-    if $features {
-      $environments
-      | each {
-        |environment|
+    let text = if $features {
+      let text = (
+        $environments
+        | each {
+          |environment|
 
-        let features_path = (
-          get-environment-path $"($environment.name)/features"
-        )
+          let features_path = (
+            get-environment-path $"($environment.name)/features"
+          )
 
-        let features = if ($features_path | path exists) {
-          ls --short-names $features_path
-          | get name
-          | each {$"+($in)"}
-          | str join " • "
-        } else {
-          ""
+          let features = if ($features_path | path exists) {
+            ls --short-names $features_path
+            | get name
+            | each {$"+($in)"}
+            | str join " • "
+          } else {
+            ""
+          }
+
+          let environment = if $aliases and (
+            $environment.aliases
+            | is-not-empty
+          ) {
+            append-aliases $environment
+          } else {
+            $environment.name
+          }
+
+          [$environment • $features "\n"]
+          | str join " "
         }
+        | to text
+        | column -t -s •
+        | lines
+      )
 
-        let environment = if $aliases and (
-          $environment.aliases
-          | is-not-empty
-        ) {
-          append-aliases $environment
-        } else {
-          $environment.name
-        }
-
-        [$environment • $features "\n"]
-        | str join " "
+      if (use-colors $color) {
+        $text
+        | each {highlight-feature}
+      } else {
+        $text
       }
-      | to text
-      | column -t -s •
     } else {
       if $aliases {
         $environments
@@ -364,7 +405,23 @@ export def "main list" [
         $environments.name
       }
     }
+
+    if $aliases and (use-colors $color) {
+      $text
+      | each {highlight-alias}
+      | to text
+    } else {
+      $text
+    }
   } else if ($path | is-empty) {
+    let environment = (parse-environments [$environment])
+
+    if ($environment | is-empty) {
+      return
+    }
+
+    let environment = ($environment | first | get name)
+
     let files = if ($feature | is-not-empty) {
       fd --hidden --type file "" (
         get-environment-path $"($environment)/features/($feature)"
@@ -382,7 +439,7 @@ export def "main list" [
     let files = (
       $files
       | lines
-      | each {|file| $file | split row $remove_path | last}
+      | each {split row $remove_path | last}
     )
 
     if ($feature | is-not-empty) or $features {
@@ -429,6 +486,7 @@ def get-default-environments [] {
 def "main list active" [
   --aliases # Show environment aliases
   --all # Show all installed environments
+  --color = "auto" # When to use colored output {always|auto|never}
   --default # Show only default installed environments
   --features # Show active features
   --local # Show local environments
@@ -553,30 +611,50 @@ def "main list active" [
       }
     }
 
-    $unique_environments
-    | each {
-        |environment|
+    let text = (
+      $unique_environments
+      | each {
+          |environment|
 
-        let features = (
-          $environment.features
-          | each {$"+($in)"}
+          let features = (
+            $environment.features
+            | each {$"+($in)"}
+            | str join " "
+          )
+
+          $environment.name
+          | append •
+          | append $features
           | str join " "
-        )
+        }
+    )
 
-        $environment.name
-        | append •
-        | append $features
-        | str join " "
-      }
+    if (use-colors $color) {
+      $text
+      | each {highlight-feature}
+    } else {
+      $text
+    }
   } else {
     $environments
   }
 
-  $environments
-  | uniq
-  | sort
-  | to text
-  | column -t -s •
+  let text = (
+    $environments
+    | uniq
+    | sort
+    | to text
+    | column -t -s •
+  )
+
+  if $aliases and (use-colors $color) {
+    $text
+    | lines
+    | each {highlight-alias}
+    | to text
+  } else {
+    $text
+  }
 }
 
 def get-environment-files [
