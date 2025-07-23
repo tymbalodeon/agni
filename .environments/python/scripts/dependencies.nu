@@ -1,12 +1,12 @@
 #!/usr/bin/env nu
 
-use cd-to-root.nu
+use ../../default/scripts/cd-to-root.nu
 
 export def get-dependencies [
   --dev
   --prod
 ] {
-  cd-to-root
+  cd-to-root python
 
   let pyproject_data = (open pyproject.toml)
 

@@ -2,8 +2,17 @@
 
 use environment.nu print-warning
 
-# View active theme
-def "main active" [] {
+# Remove current project theme
+def "main clear" [] {
+  rm --force .helix/config.toml
+
+  if (ls .helix | is-empty) {
+    rm .helix
+  }
+}
+
+# View current project theme
+def "main current" [] {
   if (".helix/config.toml" | path exists) {
     let config = (open .helix/config.toml)
 
@@ -46,21 +55,13 @@ def "main list" [
   }
 }
 
-# Remove active theme
-def "main reset" [] {
-  rm --force .helix/config.toml
-
-  if (ls .helix | is-empty) {
-    rm .helix
-  }
-}
-
-# Set active theme
+# Set current project theme
 def main [theme?: string] {
   let themes = (get-themes)
 
   let theme = if ($theme | is-empty) {
     $themes
+    | to text
     | fzf
   } else {
     $theme

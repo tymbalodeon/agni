@@ -28,10 +28,9 @@ def main [
 ] {
   (
     display-just-help
+      python
       $recipe
       $subcommands
       --color $color
-      --environment python
-      --justfile .environments/python/Justfile
   )
 }

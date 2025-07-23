@@ -1,16 +1,16 @@
 #!/usr/bin/env nu
 
-export def --env main [] {
+export def --env main [environment: string] {
   if (".environments/environments.toml" | path exists) {
-    let python = (
+    let environment = (
       open .environments/environments.toml
       | get environments
-      | where name == python
+      | where name == $environment
     )
 
-    if root in ($python | columns ) {
+    if root in ($environment | columns ) {
       cd (
-        $python
+        $environment
         | get root
         | first
       )

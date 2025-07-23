@@ -7,3 +7,5 @@ set working-directory := "../.."
 # Open an interactive nix shell
 @shell *args:
     .environments/nix/scripts/shell.nu {{ args }}
+
+alias sh := shell

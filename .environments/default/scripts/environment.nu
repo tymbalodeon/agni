@@ -1,28 +1,31 @@
 #!/usr/bin/env nu
 
-use color.nu use-colors
+export def use-colors [color: string] {
+  $color == "always" or (
+    $color != "never"
+  ) and (
+    is-terminal --stdout
+  )
+}
 
 # Activate installed environments
 def "main activate" [] {
   if (which direnv | is-empty) {
-    print "Direnv (https://direnv.net/) is not installed."
-    print "Please install and try again."
+    nix develop
+  } else {
+    "use flake"
+    | save --force .envrc
 
-    exit 1
+    direnv allow
   }
-
-  "use flake"
-  | save --force .envrc
-
-  direnv allow
 }
 
 export def print-error [message: string] {
-  print $"(ansi red_bold)error(ansi reset): ($message)"
+  print --stderr $"(ansi red_bold)error(ansi reset): ($message)"
 }
 
 export def print-warning [message: string] {
-  print $"(ansi yellow_bold)warning(ansi reset): ($message)"
+  print --stderr $"(ansi yellow_bold)warning(ansi reset): ($message)"
 }
 
 def get-features [
@@ -51,6 +54,7 @@ export def get-environment-path [path?: string] {
 
 def validate-environments [
   environments: list<record<name: string, features: list<string>>>
+  quiet: bool
 ] {
   let valid_environments = (get-available-environments)
   mut invalid_environments = []
@@ -67,7 +71,9 @@ def validate-environments [
         | update valid-name false
       )
 
-      print-warning $"unrecognized environment: ($environment.name)"
+      if not $quiet {
+        print-warning $"unrecognized environment: ($environment.name)"
+      }
     }
 
     mut invalid_features = []
@@ -141,7 +147,7 @@ def validate-environments [
     }
 }
 
-def parse-environments [environments: list<string>] {
+export def parse-environments [environments: list<string> quiet = false] {
   let environments = (
     $environments
     | str downcase
@@ -182,7 +188,7 @@ def parse-environments [environments: list<string>] {
     }
   }
 
-  validate-environments $unique_environments
+  validate-environments $unique_environments $quiet
 }
 
 def convert-to-toml [environments: list<record>] {
@@ -256,10 +262,29 @@ export def "main add" [
     }
   }
 
+  mkdir .environments
+
   convert-to-toml $environments
   | save --force .environments/environments.toml
 
   main activate
+}
+
+# Open local shell(s) in $EDITOR
+def "main edit shell" [] {
+  let shells = (fd --extension nix shell .environments | lines)
+
+  let shell = if ($shells | length) > 1 {
+    $shells
+    | to text
+    | fzf
+  } else {
+    $shells
+    | first
+  }
+
+
+  ^$env.EDITOR $shell
 }
 
 # Open .environments/environments.toml file
@@ -276,24 +301,57 @@ def "main inputs" [] {
   | to text --no-newline
 }
 
-def get-available-environments [] {
-  ls --short-names (get-environment-path)
-  | where type == dir
-  | get name
+export def get-aliases-files [environment: string] {
+  let aliases_file = $"($environment)/aliases"
+
+  [
+    (get-environment-path $aliases_file)
+    $".environments/($aliases_file)"
+  ]
   | each {
-      |environment|
+      |file|
 
-      let alias_file = (get-environment-path $"($environment)/aliases")
-
-      let aliases = if ($alias_file | path exists) {
-        open $alias_file
+      if ($file | path exists) {
+        open $file
         | lines
       } else {
         []
       }
+    }
+  | flatten
+  | uniq
+  | sort
+}
+
+export def get-available-environments [--exclude-local] {
+  let environments = (
+    ls --short-names (get-environment-path)
+    | where type == dir
+    | get name
+  )
+
+  let environments = if $exclude_local {
+    $environments
+  } else {
+    $environments
+    | append (
+        if (".environments" | path exists) {
+          ls --short-names .environments
+          | where type == dir
+          | get name
+        } else {
+          []
+        }
+      )
+  }
+
+  $environments
+  | uniq
+  | each {
+      |environment|
 
       {
-        aliases: $aliases
+        aliases: (get-aliases-files $environment)
         name: $environment
       }
   }
@@ -482,22 +540,23 @@ def get-default-environments [] {
   }
 }
 
-# List installed environments
+# List active environments
 def "main list active" [
   --aliases # Show environment aliases
-  --all # Show all installed environments
   --color = "auto" # When to use colored output {always|auto|never}
-  --default # Show only default installed environments
+  --default # Show only default active environments
   --features # Show active features
   --local # Show local environments
-  --user # Show only user installed environments [default]
+  --user # Show only user active environments
 ] {
   if not (".environments/environments.toml" | path exists) {
     return
   }
 
   let environments = (open .environments/environments.toml).environments
-  let valid_environments = (get-available-environments)
+  let valid_environments = (get-available-environments --exclude-local)
+
+  let all = [$default $local $user] | all {not $in}
 
   let local_environments = if $all or $user or not (
     [$all $default $user]
@@ -655,6 +714,13 @@ def "main list active" [
   } else {
     $text
   }
+}
+
+
+# List default environments
+def "main list default" [] {
+  (get-default-environments).name
+  | to text --no-newline
 }
 
 def get-environment-files [
@@ -868,6 +934,8 @@ def "main remove" [
   }
 }
 
+alias "main rm" = main remove
+
 def list-short-names [directory: string file?: string] {
   let search = if ($file | is-not-empty) {
     $file
@@ -1002,8 +1070,8 @@ def "main test" [
   nu --commands $command --include-path $env.NUTEST
 }
 
-# Update environment dependencies
-def "main update" [
+# Update environment inputs (see `environment inputs`)
+export def "main update" [
   ...inputs: string # The name of the input(s) to update (leave blank to update all)
 ] {
   let update_environments = [environments env] | any {$in in $inputs}

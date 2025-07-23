@@ -28,10 +28,9 @@ def main [
 ] {
   (
     display-just-help
+      nix
       $recipe
       $subcommands
       --color $color
-      --environment nix
-      --justfile .environments/nix/Justfile
   )
 }

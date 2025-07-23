@@ -16,13 +16,6 @@
 
 alias env := environment
 
-# Search available `just` recipes
-[no-exit-message]
-@find-recipe *args:
-    .environments/default/scripts/find-recipe.nu {{ args }}
-
-alias find := find-recipe
-
 # View project history
 @history *args:
     .environments/default/scripts/history.nu {{ args }}
@@ -30,6 +23,14 @@ alias find := find-recipe
 # View issues
 @issue *args:
     .environments/default/scripts/issue.nu {{ args }}
+
+# View README file
+@readme *args:
+    .environments/default/scripts/readme.nu  {{ args }}
+
+# View or open recipes
+@recipe *args:
+    .environments/default/scripts/recipe.nu  {{ args }}
 
 # View remote repository
 @remote *args:
@@ -53,12 +54,6 @@ alias todos := todo
 @theme *args:
     .environments/default/scripts/theme.nu {{ args }}
 
-# View the source code for a recipe
-@view-source *args:
-    .environments/default/scripts/view-source.nu {{ args }}
-
-alias src := view-source
-
 [private]
 @py *args:
     just python {{ args }}
@@ -74,7 +69,9 @@ alias dependencies := python::dependencies
 alias example := agni::example
 alias pin := python::pin
 alias profile := python::profile
+alias rm := python::remove
 alias remove := python::remove
 alias run := python::run
 alias test := python::test
+alias up := python::update
 alias update := python::update

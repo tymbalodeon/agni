@@ -26,6 +26,8 @@ alias deps := dependencies
 @remove *args:
     .environments/python/scripts/remove.nu {{ args }}
 
+alias rm := remove
+
 # Run the application
 @run *args:
     .environments/python/scripts/run.nu {{ args }}
@@ -34,6 +36,8 @@ alias deps := dependencies
 @shell *args:
     .environments/python/scripts/shell.nu {{ args }}
 
+alias sh := shell
+
 # Run tests
 @test *args:
     .environments/python/scripts/test.nu {{ args }}
@@ -41,6 +45,8 @@ alias deps := dependencies
 # Update dependencies
 @update *args:
     .environments/python/scripts/update.nu {{ args }}
+
+alias up := update
 
 # Build and install the application
 @build *args:

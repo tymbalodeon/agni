@@ -1,9 +1,9 @@
 #!/usr/bin/env nu
 
-use cd-to-root.nu
+use ../../default/scripts/cd-to-root.nu
 
 def main [] {
-  cd-to-root
+  cd-to-root python
 
   try {
     open pyproject.toml
