@@ -209,6 +209,24 @@ export def display-just-help [
     $environment_or_recipe
   } else if ($environment_or_recipe | is-empty) {
     return (main-help --color $color)
+  } else {
+    if $environment_or_recipe == default and (
+      $recipe_or_subcommand
+      | is-empty
+    ) {
+      return (
+        just --list --color $color
+        | lines
+        | where {not ($in | str ends-with ...)}
+        | to text --no-newline
+      )
+    }
+  }
+
+  let environment_or_recipe = if $environment_or_recipe == default {
+    $recipe_or_subcommand
+  } else {
+    $environment_or_recipe
   }
 
   let recipe_or_script = if ($recipe_or_subcommand | is-not-empty) and (
@@ -533,6 +551,20 @@ def "main aliases default" [
   )
 }
 
+# View help text
+def "main default" [
+  recipe_or_subcommand?: string # View help text for recipe
+  ...subcommands: string  # View help for a recipe subcommand
+  --color = "always" # When to use colored output {always|auto|never}
+] {
+  (
+    display-just-help
+      default
+      $recipe_or_subcommand
+      $subcommands
+      --color $color
+  )
+}
 
 # View help text
 def main [

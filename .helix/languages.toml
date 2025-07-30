@@ -7,6 +7,14 @@ command = "just"
 args = ["--justfile", "/dev/stdin", "--dump"]
 
 [[language]]
+name = "markdown"
+auto-format = true
+
+[language.formatter]
+command = "prettierd"
+args = [".md"]
+
+[[language]]
 name = "nix"
 auto-format = true
 

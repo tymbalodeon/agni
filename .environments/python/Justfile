@@ -14,6 +14,14 @@ set working-directory := "../.."
 
 alias deps := dependencies
 
+# Format python files
+@format *args:
+    .environments/python/scripts/format.nu {{ args }}
+
+# Lint python files
+@lint *args:
+    .environments/python/scripts/lint.nu {{ args }}
+
 # Manage python version
 @pin *args:
     .environments/python/scripts/pin.nu {{ args }}
