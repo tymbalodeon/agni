@@ -6,5 +6,5 @@ use ../../default/scripts/paths.nu get-paths
 def main [
   ...paths: string # Files or directories to format
 ] {
-  ruff format ...(get-paths $paths)
+  ruff check --fix ...(get-paths $paths)
 }

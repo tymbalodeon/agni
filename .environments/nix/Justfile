@@ -4,9 +4,15 @@ set working-directory := "../.."
 @help *args:
     .environments/nix/scripts/help.nu {{ args }}
 
+# Check flake.lock
+@check *args:
+    .environments/nix/scripts/check.nu {{ args }}
+
 # Format nix files
 @format *args:
     .environments/nix/scripts/format.nu {{ args }}
+
+alias fmt := format
 
 # Lint nix files
 @lint *args:

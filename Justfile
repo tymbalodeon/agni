@@ -1,5 +1,5 @@
 [private]
-@default: help
+@_: help
 
 # View full help text, or for a specific recipe
 @help *args:
@@ -19,6 +19,8 @@ alias env := environment
 @format *args:
     .environments/default/scripts/format.nu {{ args }}
 
+alias fmt := format
+
 # View project history
 @history *args:
     .environments/default/scripts/history.nu {{ args }}
@@ -26,6 +28,10 @@ alias env := environment
 # View issues
 @issue *args:
     .environments/default/scripts/issue.nu {{ args }}
+
+# Lint files
+@lint *args:
+    .environments/default/scripts/lint.nu {{ args }}
 
 # View README file
 @readme *args:
@@ -58,18 +64,31 @@ alias todos := todo
     .environments/default/scripts/theme.nu {{ args }}
 
 [private]
+@md *args:
+    just markdown {{ args }}
+
+[private]
 @py *args:
     just python {{ args }}
 
+[private]
+@yml *args:
+    just yaml {{ args }}
+
 mod agni ".environments/agni/Justfile"
+mod git ".environments/git/Justfile"
+mod just ".environments/just/Justfile"
+mod markdown ".environments/markdown/Justfile"
 mod nix ".environments/nix/Justfile"
 mod python ".environments/python/Justfile"
+mod yaml ".environments/yaml/Justfile"
 
 alias add := python::add
 alias build := python::build
 alias deps := python::dependencies
 alias dependencies := python::dependencies
 alias example := agni::example
+alias leaks := git::leaks
 alias pin := python::pin
 alias profile := python::profile
 alias rm := python::remove

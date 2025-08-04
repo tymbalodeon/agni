@@ -270,12 +270,12 @@ export def "main add" [
   main activate
 }
 
-# TODO: is it possible to alias this as "main edit languages"?
-
-# Open local helix configuration in $EDITOR
+# Open local helix configuration in $EDITOR [alias: `edit languages`]
 def "main edit helix languages" [] {
   ^$env.EDITOR .helix/languages.toml
 }
+
+export alias "main edit languages" = main edit helix languages
 
 # Open local helix configuration in $EDITOR
 def "main edit helix" [] {
@@ -332,12 +332,20 @@ def "main edit recipe" [recipe?: string] {
 def "main edit shell" [] {
   let shells = (fd --extension nix shell .environments | lines)
 
-  if ($shells | is-empty) {
-    # TODO: should this create the file instead of returning?
-    return
-  }
+  let shell = if ($shells | is-empty) {
+    let local_environment = $".environments/(pwd | path split | last)"
+    mkdir $local_environment
+    let shell = $"($local_environment)/shell.nix"
 
-  let shell = if ($shells | length) > 1 {
+    "{pkgs,...}: {
+  packages = with pkgs; [
+    
+  ];
+}"
+    | save $shell
+
+    $shell
+  } else if ($shells | length) > 1 {
     $shells
     | to text
     | fzf
@@ -349,10 +357,101 @@ def "main edit shell" [] {
   ^$env.EDITOR $shell
 }
 
+def get-environments-file-with-features [] {
+  open .environments/environments.toml
+  | get environments
+  | each {
+    if features in ($in | columns) {
+      $in
+    } else {
+      $in
+      | insert features null
+    }
+  }
+}
+
 # Open .environments/environments.toml file
 def "main edit" [] {
+  let existing_file = (get-environments-file-with-features)
   ^$env.EDITOR .environments/environments.toml
-  main activate
+  let new_file = (get-environments-file-with-features)
+
+  if $new_file.name != $existing_file.name or (
+    $new_file.features != $existing_file.features
+  ) {
+    main activate
+  }
+}
+
+def update-hide [environments: list<string> value: bool] {
+  let environments = (parse-environments $environments).name
+  let configuration = (open .environments/environments.toml)
+
+  let configuration = (
+    $configuration
+    | update environments (
+        $configuration.environments
+        | each {
+            |environment|
+
+            if $environment.name in $environments {
+              $environment
+              | upsert hide $value
+            } else {
+              $environment
+            }
+          }
+      )
+  )
+
+  let configuration = if default in $environments {
+    if $value {
+      $configuration
+      | upsert hide_default true
+    } else {
+      $configuration
+      | reject hide_default
+    }
+  } else {
+    $configuration
+  }
+
+  $configuration
+  | save --force .environments/environments.toml
+}
+
+# Hide environments in help text
+def "main hide" [...environments: string] {
+  update-hide $environments true
+}
+
+# Show environments in help text
+def "main show" [...environments: string] {
+  update-hide $environments false
+}
+
+# Hide default environments in help text
+def "main hide default" [] {
+  update-hide [default] true
+}
+
+# Show default environments in help text
+def "main show default" [] {
+  update-hide [default] false
+}
+
+# Hide help recipes help text
+def "main hide help" [] {
+  open .environments/environments.toml
+  | upsert hide_help true
+  | save --force .environments/environments.toml
+}
+
+# Show help recipes in help text
+def "main show help" [] {
+  open .environments/environments.toml
+  | reject hide_help
+  | save --force .environments/environments.toml
 }
 
 # List flake inputs
@@ -585,7 +684,7 @@ export def "main list" [
   | str join "\n"
 }
 
-def get-default-environments [] {
+export def get-default-environments [] {
   [
     default
     git
@@ -891,14 +990,19 @@ def "main remove" [
         get-environment-files $environment languages.toml
       )
 
-      # TODO: keep if there are extra fields not in the environment definition
       let language = if language in ($local_languages | columns) {
         $local_languages.language
-        | where name != $environment.name
+        | where name not-in (
+            $environment_languages.language
+            | first
+            | get name
+          )
       }
 
-      # TODO: keep if there are extra fields not in the environment definition
-      let language_server = if language-server in ($local_languages | columns) {
+      let language_server = if language-server in (
+        $local_languages
+        | columns
+      ) {
         if language-server not-in ($environment_languages | columns) {
           $local_languages.language-server
         } else {
@@ -907,7 +1011,9 @@ def "main remove" [
             let columns = (
               $local_languages.language-server
               | columns
-              | where {$in not-in ($environment_languages.language-server | columns)}
+              | where {
+                  $in not-in ($environment_languages.language-server | columns)
+                }
             )
 
             for column in $columns {

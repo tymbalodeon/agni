@@ -1,3 +1,6 @@
+hide_help = true
+hide_default = true
+
 [[environments]]
 name = "python"
 features = ["build"]

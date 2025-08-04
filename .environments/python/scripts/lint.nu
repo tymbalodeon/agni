@@ -1,15 +1,10 @@
 #!/usr/bin/env nu
 
+use ../../default/scripts/paths.nu get-paths
+
 # Lint python files
 def main [
   ...paths: string # Files or directories to format
 ] {
-  let paths = if ($paths | is-empty) {
-    ["."]
-  } else {
-    $paths
-  }
-
-  # TODO: add option for --fix
-  ruff check ...$paths
+  ruff check --fix ...(get-paths $paths)
 }

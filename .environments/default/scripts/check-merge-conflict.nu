@@ -1,8 +1,11 @@
 #!/usr/bin/env nu
 
+use ../../default/scripts/environment.nu use-colors
+
 # Check for merge conflicts
-def main [] {
-  # TODO: add color to file/indices and --color option
+def main [
+  --color = "auto" # When to use colored output {always|auto|never}
+] {
   let git_dir = (git rev-parse --git-dir | str trim)
 
   if not (
@@ -21,6 +24,8 @@ def main [] {
     "=======\n",
     ">>>>>>> ",
   ]
+
+  let use_colors = (use-colors $color)
 
   let conflict_lines = (
     jj file list
@@ -57,7 +62,23 @@ def main [] {
         |file|
 
         $file.indices
-        | each {$"($file.file):($in)"}
+        | each {
+            |index|
+
+            let file = if $use_colors {
+              $"(ansi magenta)($file.file)(ansi reset)"
+            } else {
+              $file.file
+            }
+
+            let index = if $use_colors {
+              $"(ansi green)($index)(ansi reset)"
+            } else {
+              $index
+            }
+
+            $"($file):($index)"
+          }
       }
     | flatten
     | to text --no-newline

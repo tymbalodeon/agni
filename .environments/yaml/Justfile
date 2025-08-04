@@ -1,0 +1,11 @@
+set working-directory := "../.."
+
+# View help text
+@help *args:
+    .environments/yaml/scripts/help.nu {{ args }}
+
+# Format yaml files
+@format *args:
+    .environments/yaml/scripts/format.nu {{ args }}
+
+alias fmt := format

@@ -1,13 +1,13 @@
 #!/usr/bin/env nu
 
+use ../../default/scripts/paths.nu get-paths
+
 def main [
   ...paths: string # Files or directories to format
 ] {
-  let paths = if ($paths | is-empty) {
-    ["."]
-  } else {
-    $paths
-  }
+  let result = (alejandra --check ...(get-paths $paths) | complete)
 
-  alejandra --check ...$paths
+  if $result.exit_code != 0 {
+    print $result.stderr
+  }
 }

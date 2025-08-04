@@ -1,0 +1,15 @@
+set working-directory := "../.."
+
+# View help text
+@help *args:
+    .environments/markdown/scripts/help.nu {{ args }}
+
+# Format markdown files
+@format *args:
+    .environments/markdown/scripts/format.nu {{ args }}
+
+alias fmt := format
+
+# Lint markdown files
+@lint *args:
+    .environments/markdown/scripts/lint.nu {{ args }}

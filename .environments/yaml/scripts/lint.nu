@@ -2,9 +2,9 @@
 
 use ../../default/scripts/paths.nu get-paths
 
-# Format python files
+# Lint yaml files
 def main [
   ...paths: string # Files or directories to format
 ] {
-  ruff format ...(get-paths $paths)
+  yamllint ...(get-paths $paths)
 }

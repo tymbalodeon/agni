@@ -8,6 +8,10 @@ set working-directory := "../.."
 @add *args:
     .environments/python/scripts/add.nu {{ args }}
 
+# Check python files
+@check *args:
+    .environments/python/scripts/check.nu {{ args }}
+
 # Show application dependencies
 @dependencies *args:
     .environments/python/scripts/dependencies.nu {{ args }}
@@ -17,6 +21,8 @@ alias deps := dependencies
 # Format python files
 @format *args:
     .environments/python/scripts/format.nu {{ args }}
+
+alias fmt := format
 
 # Lint python files
 @lint *args:

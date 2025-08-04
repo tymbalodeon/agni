@@ -1,0 +1,11 @@
+set working-directory := "../.."
+
+# View help text
+@help *args:
+    .environments/just/scripts/help.nu {{ args }}
+
+# Format just files
+@format *args:
+    .environments/just/scripts/format.nu {{ args }}
+
+alias fmt := format

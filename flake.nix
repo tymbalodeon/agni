@@ -72,6 +72,7 @@
                 ++ [
                   "default"
                   "git"
+                  "just"
                   "markdown"
                   "nix"
                   "toml"
