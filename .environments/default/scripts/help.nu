@@ -165,16 +165,21 @@ def main-help [environment?: string --color: string] {
       )
   )
 
-  let environments = (open .environments/environments.toml)
+  let environments = if (".environments/environments.toml" | path exists) {
+    open .environments/environments.toml
+  }
 
-  let hidden_submodules = (
+  let hidden_submodules = if ($environments | is-not-empty) {
     $environments
     | get environments
     | where {"hide" in ($in | columns) and $in.hide}
     | get name
-  )
+  }
 
-  let hidden_submodules = if hide_default in ($environments | columns) and (
+  let hidden_submodules = if (
+    $environments
+    | is-not-empty
+  ) and hide_default in ($environments | columns) and (
     $environments.hide_default
   ) {
     $hidden_submodules
@@ -220,7 +225,9 @@ def main-help [environment?: string --color: string] {
     | to text --no-newline
   }
 
-  let text = if hide_help in ($environments | columns) and (
+  let text = if ($environments | is-not-empty) and (
+    "hide_help" in ($environments | columns)
+  ) and (
     $environments.hide_help
   ) {
     $text
