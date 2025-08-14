@@ -24,7 +24,12 @@ def append-main-aliases [
 
   for alias in $aliases {
     for line in $help_text {
-      let words = ($line.item | split words)
+      let words = (
+        $line.item
+        | ansi strip
+        | split row " "
+        | where {is-not-empty}
+      )
 
       if ($words | is-not-empty) and ($words | first) == $alias.alias {
         $help_text = (
@@ -150,12 +155,40 @@ def append-main-aliases [
   | to text --no-newline
 }
 
-def main-help [environment?: string --color: string] {
-  let args = (
-    [
+def main-help [all: bool environment?: string --color: string] {
+  let environments = if not $all and (
+    ".environments/environments.toml"
+    | path exists
+  ) {
+    open .environments/environments.toml
+  }
+
+  let hide_help = ($environments | is-not-empty) and (
+    "hide_help" in ($environments | columns)
+  ) and (
+    $environments.hide_help
+  )
+
+  let args = [
       --color $color
       --list
     ]
+
+  let args = if not $hide_help {
+    $args
+    | append [
+      --list-heading $"(
+        ansi default_bold
+      )use `just help` for more options \(see `just help --help`\)(
+        ansi reset
+      )\n\nAvailable recipes:\n"
+    ]
+  } else {
+    $args
+  }
+
+  let args = (
+    $args
     | append (
         if ($environment | is-not-empty) {
           [--justfile $".environments/($environment)/Justfile"]
@@ -165,11 +198,9 @@ def main-help [environment?: string --color: string] {
       )
   )
 
-  let environments = if (".environments/environments.toml" | path exists) {
-    open .environments/environments.toml
-  }
-
-  let hidden_submodules = if ($environments | is-not-empty) {
+  let hidden_submodules = if ($environments | is-not-empty) and (
+    "environemnts" in ($environments | columns)
+  ) {
     $environments
     | get environments
     | where {"hide" in ($in | columns) and $in.hide}
@@ -200,7 +231,7 @@ def main-help [environment?: string --color: string] {
     for line in $text {
       if ($line.item | str starts-with "    ") and (
         $line.item
-        | find --regex "    [a-z]+:"
+        | find --regex "    [a-z-]+:"
         | is-not-empty
       ) {
         if (
@@ -225,11 +256,7 @@ def main-help [environment?: string --color: string] {
     | to text --no-newline
   }
 
-  let text = if ($environments | is-not-empty) and (
-    "hide_help" in ($environments | columns)
-  ) and (
-    $environments.hide_help
-  ) {
+  let text = if $hide_help {
     $text
     | lines
     | where {$in | ansi strip | find --regex ' +help \*args' | is-empty}
@@ -242,6 +269,7 @@ def main-help [environment?: string --color: string] {
 }
 
 def get-help-text [
+  all: bool
   environment_or_recipe?: string
   recipe_or_subcommand?: string
   subcommands?: list<string>
@@ -282,7 +310,7 @@ def get-help-text [
   let environment = if ($environment_or_recipe in $environments) {
     $environment_or_recipe
   } else if ($environment_or_recipe | is-empty) {
-    return (main-help --color $color)
+    return (main-help $all --color $color)
   } else {
     if $environment_or_recipe == default and (
       $recipe_or_subcommand
@@ -376,7 +404,7 @@ def get-help-text [
       }
     }
   } else if ($environments | is-not-empty) {
-    return (main-help $environment --color $color)
+    return (main-help $all $environment --color $color)
   }
 
   if ($environment | is-not-empty) and (
@@ -425,11 +453,13 @@ export def display-just-help [
   environment_or_recipe?: string
   recipe_or_subcommand?: string
   subcommands?: list<string>
+  all = true
   --color: string
-  --paging = "auto" # When to use pager {always|auto|never}
+  --paging = "auto"
 ] {
   let help_text = (
     get-help-text
+      $all
       $environment_or_recipe
       $recipe_or_subcommand
       $subcommands
@@ -646,6 +676,7 @@ def "main aliases default" [
 def "main default" [
   recipe_or_subcommand?: string # View help text for recipe
   ...subcommands: string  # View help for a recipe subcommand
+  --all # Display all help text, including hidden environments and recipes
   --color = "always" # When to use colored output {always|auto|never}
 ] {
   (
@@ -653,6 +684,7 @@ def "main default" [
       default
       $recipe_or_subcommand
       $subcommands
+      $all
       --color $color
   )
 }
@@ -662,6 +694,7 @@ def main [
   environment_or_recipe?: string # View help text for recipe
   recipe_or_subcommand?: string # View help text for recipe
   ...subcommands: string  # View help for a recipe subcommand
+  --all # Display all help text, including hidden environments and recipes
   --color = "always" # When to use colored output {always|auto|never}
   --paging = "auto" # When to use pager {always|auto|never}
 ] {
@@ -670,6 +703,7 @@ def main [
       $environment_or_recipe
       $recipe_or_subcommand
       $subcommands
+      $all
       --color $color
       --paging $paging
   )

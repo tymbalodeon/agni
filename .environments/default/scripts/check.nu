@@ -1,22 +1,54 @@
 #!/usr/bin/env nu
 
 use ../../git/scripts/leaks.nu
+use environment.nu use-colors
 
-export def run-check [name: string paths: list<string>] {
-  let justfiles = (
-    open Justfile
+export def get-files [paths: list<string>] {
+  if ($paths | is-empty) {
+    jj file list
     | lines
-    | where {str starts-with mod}
-    | each {
-        let environment = (
-          split row "mod "
-          | last
-          | split row " "
-          | first
-        )
-
-        $".environments/($environment)/Justfile"
+    | where {
+        (
+          $in
+          | path parse
+          | get extension
+        ) not-in [
+          jpeg
+          png
+        ]
       }
+  } else {
+    let directories = (
+      $paths
+      | where {($in | path type) == dir}
+    )
+
+    $paths
+    | where {($in | path type) == file}
+    | append (
+        $directories
+        | each {ls ($"($in)/**/*" | into glob) | get name}
+      )
+    | flatten
+  }
+}
+
+def get-submodules [] {
+  open Justfile
+  | lines
+  | where {str starts-with mod}
+  | each {
+      split row "mod "
+      | last
+      | split row " "
+      | first
+    }
+}
+
+export def run-check [type: string paths: list<string>] {
+  let justfiles = (
+    get-submodules
+    | each {$".environments/($in)/Justfile"}
     | where {path exists}
     | each {
         |environment|
@@ -26,7 +58,7 @@ export def run-check [name: string paths: list<string>] {
           | split row " "
         )
 
-        if $name in $recipes {
+        if $type in $recipes {
           $environment
         }
       }
@@ -35,17 +67,89 @@ export def run-check [name: string paths: list<string>] {
 
   for justfile in $justfiles {
     let environment = ($justfile | path split | get 1)
-    print $"($name | str capitalize)ing ($environment) files..."
-    just --justfile $justfile $name ...$paths
+    print $"($type | str capitalize)ing ($environment) files..."
+    just --justfile $justfile $type ...$paths
   }
 }
 
-# Run checks
-export def main [] {
-  leaks
-  nix flake check
+def get-default-checks [] {
+  ls .environments/default/scripts/check-*
+  | get name
+  | each {
+      {
+        file: $in
+        name: ($in | path parse | get stem | str replace check- "")
+      }
+    }
+}
 
-  let checks = (
+def append-comment [check_name: string comment: string color: string] {
+  let comment = if (use-colors $color) {
+    $"(ansi blue)# ($comment)(ansi reset)"
+  } else {
+    $"# ($comment)"
+  }
+
+  $"($check_name) • ($comment)"
+}
+
+def list-default-checks [color: string] {
+  get-default-checks
+  | each {
+      let comment = (
+        nu $in.file --help
+        | split row "\n\n"
+        | first
+      )
+
+      append-comment $in.name $comment $color
+    }
+}
+
+# List default checks
+def "main list default" [
+  --color = "auto" # When to use colored output {always|auto|never}
+] {
+  list-default-checks $color
+  | to text
+  | column -t -s •
+}
+
+# List checks
+def "main list" [
+  --color = "auto" # When to use colored output {always|auto|never}
+] {
+  # TODO: add cyan note next to default checks?
+  list-default-checks $color
+  | append (
+      [
+        {
+          name: default
+          comment: "Run default checks (see `check list default`)"
+        }
+
+        {
+          name: leaks
+          comment: "Scan code for secrets"
+        }
+      ]
+      | each {append-comment $in.name $in.comment $color}
+    )
+  | sort
+  | to text
+  | column -t -s •
+}
+
+# Run checks
+export def main [...checks: string] {
+  let checks = ($checks | str downcase)
+  let all = ($checks | is-empty)
+
+  if $all or ("leaks" in $checks) {
+    leaks
+  }
+
+  for check in (
     just --summary
     | split row " "
     | where {
@@ -57,9 +161,29 @@ export def main [] {
           | str starts-with lint
         )
       }
-  )
+  ) {
+    if $all or $check in $checks {
+      just $check
+    }
+  }
 
-  for check in $checks {
-    just $check
+  let default_checks = (get-default-checks)
+
+  let checks = if $all or ("default" in $checks) {
+    $default_checks.name
+  } else {
+    $checks
+  }
+
+  let submodules = (get-submodules)
+
+  for check_name in $checks {
+    if $check_name in $default_checks.name {
+      for check in ($default_checks | where name == $check_name) {
+        nu $check.file
+      }
+    } else if $check_name in $submodules {
+      just $check_name check
+    }
   }
 }

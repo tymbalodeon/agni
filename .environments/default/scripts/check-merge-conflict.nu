@@ -1,9 +1,11 @@
 #!/usr/bin/env nu
 
 use ../../default/scripts/environment.nu use-colors
+use check.nu get-files
 
 # Check for merge conflicts
 def main [
+  ...paths: string # Files or directories to fix
   --color = "auto" # When to use colored output {always|auto|never}
 ] {
   let git_dir = (git rev-parse --git-dir | str trim)
@@ -28,8 +30,7 @@ def main [
   let use_colors = (use-colors $color)
 
   let conflict_lines = (
-    jj file list
-    | lines
+    get-files $paths
     | each {
         |file|
 

@@ -5,7 +5,7 @@
 @help *args:
     .environments/default/scripts/help.nu {{ args }}
 
-# Check flake
+# Run checks
 @check *args:
     .environments/default/scripts/check.nu {{ args }}
 

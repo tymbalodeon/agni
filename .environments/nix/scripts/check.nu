@@ -2,5 +2,6 @@
 
 # Check flake.lock
 def main [] {
+  nix flake check
   nix run github:DeterminateSystems/flake-checker
 }

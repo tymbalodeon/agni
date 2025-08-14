@@ -6,5 +6,5 @@ use ../../default/scripts/paths.nu get-paths
 def main [
   ...paths: string # Files or directories to format
 ] {
-  markdownlint-cli2 ...(get-paths $paths) out> /dev/null
+  markdownlint-cli2 ...(get-paths $paths --extension md) out> /dev/null
 }

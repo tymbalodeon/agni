@@ -5,9 +5,14 @@ export def parse-git-origin [origin: string --quiet] {
     $origin
     | parse "git@{domain}:{owner}/{repo}.git"
   } else if ($origin | str starts-with "http") {
-    $origin
-    | str replace --regex "https?://" ""
-    | parse "{domain}:{owner}/{repo}.git"
+    let origin = ($origin | str replace --regex "https?://" "")
+    if : in $origin {
+      $origin
+      | parse "{domain}:{owner}/{repo}.git"
+    } else {
+      $origin
+      | parse "{domain}/{owner}/{repo}.git"
+    }
   } else if ($origin | str starts-with "ssh://") {
     $origin
     | parse "ssh://git@{domain}/{owner}/{repo}.git"
