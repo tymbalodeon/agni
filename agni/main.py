@@ -9,7 +9,7 @@ from .matrix_pitch import DisplayFormat, PitchType, Tuning
 from .notation import Notation
 from .passage import Passage
 
-agni = App(
+app = App(
     help="agni: Compositional tools inspired by the techniques of Claude Vivier."
 )
 
@@ -68,7 +68,7 @@ play: False
 """
 
 
-@agni.command()
+@app.command()
 def matrix(
     bass: str,
     melody: str,
@@ -110,7 +110,7 @@ def matrix(
 matrix.__doc__ = docstring
 
 
-@agni.command()
+@app.command()
 def passage(
     input_file: Path,
     multiples=Matrix.DEFAULT_MULTIPLES,
