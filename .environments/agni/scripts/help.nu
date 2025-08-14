@@ -28,10 +28,9 @@ def main [
 ] {
   (
     display-just-help
+      agni
       $recipe
       $subcommands
       --color $color
-      --environment agni
-      --justfile .environments/agni/Justfile
   )
 }
