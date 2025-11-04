@@ -541,7 +541,7 @@ def "main show help" [] {
 
 # List flake inputs
 def "main inputs" [] {
-  nix flake info --json err> /dev/null
+  nix flake metadata --json err> /dev/null
   | from json
   | get locks.nodes.root.inputs
   | columns

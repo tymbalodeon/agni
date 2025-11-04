@@ -10,9 +10,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.theme import Theme
-from supriya import Server
-from supriya.patterns import EventPattern, SequencePattern
 
+# from supriya import Server
+# from supriya.patterns import EventPattern, SequencePattern
 from .helpers import stylize
 from .matrix_pitch import (
     DisplayColor,
@@ -222,8 +222,9 @@ class Matrix:
         else:
             self._display_table()
 
-    def play(self):
-        EventPattern(frequency=SequencePattern(self.sorted_frequencies)).play(
-            Server().boot()
-        )
-        sleep(5)
+    # FIXME
+    # def play(self):
+    #     EventPattern(frequency=SequencePattern(self.sorted_frequencies)).play(
+    #         Server().boot()
+    #     )
+    #     sleep(5)

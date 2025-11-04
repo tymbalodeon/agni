@@ -11,6 +11,8 @@
       flake = false;
       url = "github:vyadh/nutest";
     };
+
+    systems.url = "github:nix-systems/default";
   };
 
   outputs = {

@@ -12,7 +12,7 @@ dependencies = [
   "abjad-ext-rmakers>=3.21",
   "cyclopts>=3.9.0",
   "more-itertools>=10.6.0",
-  "supriya>=24.3b2",
+  "supriya>=25.9b1",
 ]
 
 [[project.authors]]
