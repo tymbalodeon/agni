@@ -91,6 +91,7 @@ mod yaml ".environments/yaml/Justfile"
 
 alias add := python::add
 alias build := python::build
+alias clean := nix::clean
 alias deps := python::dependencies
 alias dependencies := python::dependencies
 alias example := agni::example

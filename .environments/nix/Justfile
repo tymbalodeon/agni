@@ -8,6 +8,10 @@ set working-directory := "../.."
 @check *args:
     .environments/nix/scripts/check.nu {{ args }}
 
+# Remove results
+@clean *args:
+    .environments/nix/scripts/clean.nu {{ args }}
+
 # Format nix files
 @format *args:
     .environments/nix/scripts/format.nu {{ args }}
