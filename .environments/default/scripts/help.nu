@@ -1,10 +1,11 @@
 #!/usr/bin/env nu
 
-use environment.nu get-aliases-files
-use environment.nu get-default-environments
-use environment.nu parse-environments
-use environment.nu print-warning
-use environment.nu use-colors
+use environment-common.nu get-aliases-files
+use environment-common.nu get-default-environments
+use environment-common.nu open-configuration-file
+use environment-common.nu parse-environments
+use print.nu print-warning
+use color.nu use-colors
 use find-script.nu
 
 def append-main-aliases [
@@ -156,6 +157,7 @@ def append-main-aliases [
 }
 
 def main-help [all: bool environment?: string --color: string] {
+
   let environments = if not $all and (
     ".environments/environments.toml"
     | path exists
@@ -263,6 +265,14 @@ def main-help [all: bool environment?: string --color: string] {
     | str join "\n"
   } else {
     $text
+  }
+
+  if not $all and (
+    (get-settings-bool hide_default) or (get-settings-bool hide_help)
+  ) {
+    print $"(
+      ansi default_bold
+    )use `just help --all` for more recipes(ansi reset)\n"
   }
 
   append-main-aliases $text --color $color
@@ -412,10 +422,12 @@ def get-help-text [
     | is-empty
   ) {
     return (
-      just
-        --color always
-        --justfile $".environments/($environment)/Justfile"
-        --list
+      append-main-aliases (
+        just
+          --color $color
+          --justfile $".environments/($environment)/Justfile"
+          --list
+      ) --color $color
     )
   }
 
@@ -687,6 +699,17 @@ def "main default" [
       $all
       --color $color
   )
+}
+
+def get-settings-bool [column: string] {
+  let settings = (open-configuration-file)
+
+  try {
+    $settings
+    | get $column
+  } catch {
+    false
+  }
 }
 
 # View help text

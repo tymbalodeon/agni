@@ -1,8 +1,8 @@
 #!/usr/bin/env nu
 
 use domain.nu
-use environment.nu print-error
-use environment.nu print-warning
+use print.nu print-error
+use print.nu print-warning
 
 def get-service [service?: string] {
   if ($service | is-empty) {

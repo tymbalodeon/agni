@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 
 use check.nu get-files
-use environment.nu print-error
+use print.nu print-error
 
 # Check that files are valid
 def main [

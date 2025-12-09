@@ -50,7 +50,17 @@ def "main open" [
   }
 }
 
-# View remote repository
-def main [] {
-  jj git remote list
+# View remote origin
+def main [
+  --url # Show url only
+] {
+  let remotes = (jj git remote list)
+
+  if $url {
+    $remotes
+    | split row " "
+    | last
+  } else {
+    $remotes
+  }
 }

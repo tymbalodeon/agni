@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-use environment.nu print-error
+use print.nu print-error
 
 def get-revision-names [type: string] {
   jj $type list --template "name ++ '\n'"
@@ -50,9 +50,10 @@ def "main new" [
 
   let confirmed = (input --numchar 1 $prompt)
 
-  if ($confirmed | str downcase) in [yes y] {
+  if ($confirmed | str downcase) in [y yes] {
     jj new $revision
     jj bookmark create $bookmark --revision @
+    jj describe --message $"chore: init ($bookmark)"
   }
 }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-use environment.nu print-warning
+use print.nu print-warning
 
 # Remove current project theme
 def "main clear" [] {

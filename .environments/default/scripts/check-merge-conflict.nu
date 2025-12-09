@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-use ../../default/scripts/environment.nu use-colors
+use ../../default/scripts/color.nu use-colors
 use check.nu get-files
 
 # Check for merge conflicts

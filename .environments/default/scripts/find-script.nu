@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-use environment.nu parse-environments
+use environment-common.nu parse-environments
 
 export def choose-recipe [environment?: string] {
   let recipes = (just --summary | split row " ")
