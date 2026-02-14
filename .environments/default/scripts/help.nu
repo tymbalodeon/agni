@@ -467,7 +467,7 @@ export def display-just-help [
   subcommands?: list<string>
   all = true
   --color: string
-  --paging = "auto"
+  --paging = "never"
 ] {
   let help_text = (
     get-help-text
@@ -719,7 +719,7 @@ def main [
   ...subcommands: string  # View help for a recipe subcommand
   --all # Display all help text, including hidden environments and recipes
   --color = "always" # When to use colored output {always|auto|never}
-  --paging = "auto" # When to use pager {always|auto|never}
+  --paging = "never" # When to use pager {always|auto|never}
 ] {
   (
     display-just-help

@@ -50,11 +50,11 @@ export def "revision set" [
           err> /dev/null
       )
       | from json
-      | get --optional commit.tree.sha
+      | get commit.tree.sha
       | append (
           gh api repos/tymbalodeon/environments/tags
           | from json
-          | get --optional name
+          | get name
         )
   } catch {
     print-error $"invalid revision: \"($revision)\""

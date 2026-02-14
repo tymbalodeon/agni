@@ -50,17 +50,19 @@ def "main open" [
   }
 }
 
-# View remote origin
-def main [
-  --url # Show url only
-] {
-  let remotes = (jj git remote list)
+def "main name" [] {
+  jj git remote list
+  | split row " "
+  | first
+}
 
-  if $url {
-    $remotes
-    | split row " "
-    | last
-  } else {
-    $remotes
-  }
+def "main url" [] {
+  jj git remote list
+  | split row " "
+  | last
+}
+
+# View remote origin
+def main [] {
+  jj git remote list
 }

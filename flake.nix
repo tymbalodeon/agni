@@ -35,7 +35,7 @@
           map
           (module: (import module {inherit pkgs;}))
           (builtins.filter
-            (path: builtins.pathExists path)
+            (module: builtins.pathExists module)
             (map
               (item: ./.environments/${item.name}/shell.nix)
               (builtins.filter
@@ -55,18 +55,18 @@
       in {
         default = pkgs.mkShellNoCC ({
             inputsFrom =
-              builtins.map
+              map
               (environment: environments.devShells.${system}.${environment})
               ((
                   if builtins.pathExists ./.environments/environments.toml
                   then let
                     environments =
-                      builtins.fromTOML
+                      fromTOML
                       (builtins.readFile ./.environments/environments.toml);
                   in
                     if builtins.hasAttr "environments" environments
                     then
-                      builtins.map (environment: environment.name)
+                      map (environment: environment.name)
                       environments.environments
                     else []
                   else []
@@ -105,7 +105,7 @@
           (a: b: a // b)
           {}
           (map
-            (module: builtins.removeAttrs module ["packages" "shellHook"])
+            (module: removeAttrs module ["packages" "shellHook"])
             modules));
       }
     );

@@ -14,7 +14,7 @@ def main [
   }
 
   let files = if ($path | path type) == dir {
-    fd --exclude *.lock --type file "" $path
+    fd --exclude "*.lock" --type file "" $path
     | lines
   } else {
     [$path]

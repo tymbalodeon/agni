@@ -1,5 +1,5 @@
 #!/usr/bin/env nu
 
 def main [] {
-  rm --force --recursive results
+  rm --force --recursive result
 }

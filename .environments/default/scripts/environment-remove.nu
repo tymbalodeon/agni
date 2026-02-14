@@ -1,3 +1,6 @@
+use environment-common.nu open-configuration-file
+use environment-common.nu update-configuration-environments
+
 def get-environment-files [
   environment: record<name: string, features: list<string>>
   filename: string
