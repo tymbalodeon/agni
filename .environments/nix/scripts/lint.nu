@@ -6,5 +6,7 @@ use ../../default/scripts/paths.nu get-paths
 def main [
   ...paths: string # Files or directories to format
 ] {
-  statix fix ...(get-paths $paths --extension nix)
+  for path in (get-paths $paths --extension nix) {
+    statix fix $path
+  }
 }

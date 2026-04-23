@@ -3,6 +3,7 @@ use environment-revision.nu
 
 export def main [
   inputs: list<string>
+  --no-flake
 ] {
   let current_revision = (environment-revision revision get)
 
@@ -23,8 +24,10 @@ export def main [
 
     let project_root = (git rev-parse --show-toplevel)
 
-    http get $"($remote_url)/src/default/flake.nix"
-    | save --force $"($project_root)/flake.nix"
+    if not $no_flake {
+      http get $"($remote_url)/src/default/flake.nix"
+      | save --force $"($project_root)/flake.nix"
+    }
   }
 
   if ($inputs | is-empty) {

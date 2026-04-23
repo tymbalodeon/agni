@@ -89,6 +89,8 @@ def get-local-bookmarks [] {
 def get-remote-bookmarks [] {
   get-remote-revision-names bookmark
   | append (get-remote-revision-names tag)
+  | each {$"($in)@origin"}
+  | where $it != trunk@origin
 }
 
 def get-all-bookmarks [] {

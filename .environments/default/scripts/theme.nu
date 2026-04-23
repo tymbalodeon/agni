@@ -23,20 +23,17 @@ def "main current" [] {
 }
 
 def get-themes [] {
-  let ref = (
-    hx --version
-    | parse "helix {version} ({ref})"
-    | first
-    | get ref
-  )
-
-  let base_url = "api.github.com/repos/helix-editor/helix/contents"
-
-  http get $"($base_url)/runtime/themes?ref=($ref)"
-  | where type == file
+  ls --short-names ~/.config/helix/themes
   | get name
-  | where {($in | path parse | get extension) == toml}
-  | each {path parse | get stem}
+  | path parse
+  | get stem
+  | append (
+      http get "api.github.com/repos/helix-editor/helix/contents/runtime/themes"
+      | where type == file
+      | get name
+      | where {($in | path parse | get extension) == toml}
+      | each {path parse | get stem}
+    )
 }
 
 # List available themes

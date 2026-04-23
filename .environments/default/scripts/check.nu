@@ -205,9 +205,9 @@ export def main [...checks: string] {
         }
       }
     } else if $check_name in $submodules {
-      let results = (just --color always $check_name check out+err>| complete)
+      let results = (just $check_name check out+err>| complete)
 
-      print $results.stdout
+      print ($results.stdout | str trim --right)
 
       if ($results.exit_code) != 0 {
           $failed = true

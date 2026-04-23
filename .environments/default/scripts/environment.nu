@@ -198,8 +198,14 @@ def "main test" [
 # Update environment inputs (see `environment inputs`)
 def "main update" [
   ...inputs: string # The name of the input(s) to update (leave blank to update all)
+  --no-flake # Don't update the flake.nix file
 ] {
-  environment-update $inputs
+  if $no_flake {
+    environment-update --no-flake $inputs
+  } else { 
+    environment-update $inputs
+  }
+  
 }
 
 def main [] {
